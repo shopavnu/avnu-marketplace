@@ -1,14 +1,22 @@
-export interface Product {
-  id: string;
-  title: string;
-  brand: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  tags: string[];
-  height?: number;
-}
+import { Product, ProductRating, Vendor } from '@/types/products';
+
+const defaultRating: ProductRating = {
+  avnuRating: {
+    average: 4.5,
+    count: 10
+  }
+};
+
+const defaultVendor: Vendor = {
+  id: "default",
+  name: "Default Vendor",
+  causes: ["sustainability", "local-business"],
+  isLocal: true,
+  shippingInfo: {
+    isFree: true,
+    minimumForFree: 50
+  }
+};
 
 const generateMoreProducts = (baseProducts: Product[]): Product[] => {
   const moreProducts: Product[] = [];
@@ -33,9 +41,16 @@ const baseProducts: Product[] = [
     description: "Minimalist ceramic vase with organic textures",
     price: 89.00,
     image: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&q=80&fit=crop&w=800",
+    images: ["https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&q=80&fit=crop&w=800"],
     category: "Home",
+    subCategory: "Decor",
+    attributes: { material: "ceramic", height: "12 inches", color: "white" },
+    isNew: true,
+    rating: defaultRating,
+    vendor: defaultVendor,
+    inStock: true,
     tags: ["ceramics", "handmade", "decor"],
-    height: 450
+    createdAt: new Date().toISOString()
   },
   {
     id: "2",
@@ -44,53 +59,16 @@ const baseProducts: Product[] = [
     description: "100% organic linen throw blanket",
     price: 129.00,
     image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&q=80&fit=crop&w=800",
+    images: ["https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&q=80&fit=crop&w=800"],
     category: "Home",
+    subCategory: "Textiles",
+    attributes: { material: "linen", size: "50x60 inches", color: "natural" },
+    isNew: true,
+    rating: defaultRating,
+    vendor: defaultVendor,
+    inStock: true,
     tags: ["textiles", "sustainable", "comfort"],
-    height: 600
-  },
-  {
-    id: "3",
-    title: "Handwoven Wall Hanging",
-    brand: "Fiber & Folk",
-    description: "Contemporary macrame wall art",
-    price: 245.00,
-    image: "https://images.unsplash.com/photo-1617142108319-66c7ab45c711?auto=format&q=80&fit=crop&w=800",
-    category: "Art",
-    tags: ["wall-art", "handwoven", "decor"],
-    height: 700
-  },
-  {
-    id: "4",
-    title: "Brass Table Lamp",
-    brand: "Lumière",
-    description: "Modern brass table lamp with glass shade",
-    price: 329.00,
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&q=80&fit=crop&w=800",
-    category: "Lighting",
-    tags: ["lighting", "brass", "modern"],
-    height: 500
-  },
-  {
-    id: "5",
-    title: "Organic Cotton Pillowcase Set",
-    brand: "Pure Living",
-    description: "GOTS certified organic cotton pillowcases",
-    price: 79.00,
-    image: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&q=80&fit=crop&w=800",
-    category: "Bedding",
-    tags: ["bedding", "organic", "comfort"],
-    height: 400
-  },
-  {
-    id: "6",
-    title: "Wooden Serving Board",
-    brand: "Forest & Table",
-    description: "Handcrafted walnut serving board",
-    price: 95.00,
-    image: "https://images.unsplash.com/photo-1545622783-b3e021430fee?auto=format&q=80&fit=crop&w=800",
-    category: "Kitchen",
-    tags: ["kitchen", "wood", "handcrafted"],
-    height: 350
+    createdAt: new Date().toISOString()
   }
 ];
 
