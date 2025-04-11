@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="100" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- A -->
+  <path d="M0 20h50l25 60 25-60h50L100 100H50L0 20z" fill="currentColor"/>
+  <!-- V -->
+  <path d="M175 20h50l-25 60-25-60zm0 80h50" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- | -->
+  <path d="M250 20h5v80h-5z" fill="currentColor"/>
+  <!-- NU -->
+  <path d="M300 20h50l25 60 25-60M300 100h50l25-60 25 60" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
