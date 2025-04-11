@@ -1,3 +1,14 @@
+/**
+ * @fileoverview ProductCard component for displaying product information in a grid layout.
+ * Features:
+ * - Responsive image with hover effects
+ * - Dynamic badges for new and local products
+ * - Favorite button with animation
+ * - Vendor information with cause icons
+ * - Rating display with dynamic calculation
+ * - Price and shipping information
+ */
+
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5,10 +16,23 @@ import { motion } from 'framer-motion';
 import { Product } from '@/types/products';
 import { causes } from '@/components/search/FilterPanel';
 
+/**
+ * Props for the ProductCard component
+ * @interface ProductCardProps
+ * @property {Product} product - The product data to display
+ */
 interface ProductCardProps {
   product: Product;
 }
 
+/**
+ * A card component that displays product information in a consistent and attractive format.
+ * Includes hover animations, dynamic rating calculations, and interactive elements.
+ *
+ * @component
+ * @param {ProductCardProps} props - The component props
+ * @returns {JSX.Element} A product card with image, details, and interactive elements
+ */
 export default function ProductCard({ product }: ProductCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isClient, setIsClient] = useState(false);
