@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST="{\"../components/layout/Header.tsx -> @/components/layout/Navigation\":{\"id\":\"../components/layout/Header.tsx -> @/components/layout/Navigation\",\"files\":[\"static/chunks/src_components_layout_Navigation_tsx.js\"]}}"

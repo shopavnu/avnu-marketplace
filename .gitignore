@@ -8,8 +8,11 @@ node_modules
 /coverage
 
 # next.js
-/.next/
-/out/
+.next
+.next/
+out/
+/frontend/.next/
+/frontend/out/
 
 # production
 /build
