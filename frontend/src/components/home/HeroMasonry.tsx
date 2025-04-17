@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 import { MasonryItem } from '@/types/home';
@@ -87,7 +88,7 @@ export default function HeroMasonry() {
       {/* Floating Text */}
       {mounted ? (
         <motion.div
-          className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
+          className="absolute inset-0 flex items-center justify-center z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
@@ -115,20 +116,26 @@ export default function HeroMasonry() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <motion.button
-                className="bg-sage text-warm-white px-8 py-3 rounded-full font-montserrat hover:bg-opacity-90 transition-all"
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(90, 111, 87, 0.2)" }}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Start Exploring
-              </motion.button>
-              <motion.button
-                className="border-2 border-sage text-sage px-8 py-3 rounded-full font-montserrat hover:bg-sage hover:text-warm-white transition-all"
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(90, 111, 87, 0.1)" }}
+                <Link href="/shop" className="inline-block">
+                  <span className="bg-sage text-warm-white px-8 py-3 rounded-full font-montserrat hover:bg-opacity-90 transition-all inline-block cursor-pointer shadow-md hover:shadow-lg">
+                    Start Exploring
+                  </span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                For Brands
-              </motion.button>
+                <Link href="/for-brands" className="inline-block">
+                  <span className="border-2 border-sage text-sage px-8 py-3 rounded-full font-montserrat hover:bg-sage hover:text-warm-white transition-all inline-block cursor-pointer">
+                    For Brands
+                  </span>
+                </Link>
+              </motion.div>
             </motion.div>
           </div>
         </motion.div>

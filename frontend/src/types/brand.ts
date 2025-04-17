@@ -1,3 +1,7 @@
+/**
+ * Central Brand interface definition for the entire application
+ * Used by brand cards, brand pages, and product listings
+ */
 export interface Brand {
   id: string;
   name: string;
@@ -6,4 +10,5 @@ export interface Brand {
   coverImage: string;
   values: string[];
   location: string;
+  rating?: { average: number; count: number };
 }

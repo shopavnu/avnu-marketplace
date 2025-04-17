@@ -75,11 +75,32 @@ const categories: Category[] = [
 ];
 
 export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [animatingCategories, setAnimatingCategories] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const updateFilters = (updates: Partial<SearchFilters>) => {
     onChange({ ...filters, ...updates });
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    // Prevent multiple clicks during animation
+    if (animatingCategories.includes(categoryId)) return;
+    
+    // Mark this category as animating
+    setAnimatingCategories(prev => [...prev, categoryId]);
+    
+    setExpandedCategories(prev => {
+      const isExpanded = prev.includes(categoryId);
+      return isExpanded
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId];
+    });
+    
+    // Remove from animating list after animation completes
+    setTimeout(() => {
+      setAnimatingCategories(prev => prev.filter(id => id !== categoryId));
+    }, 300); // Match this with your animation duration
   };
 
   const FilterSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -153,35 +174,35 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
           {categories.map((category) => (
             <div key={category.id}>
               <button
-                onClick={() => setExpandedCategory(
-                  expandedCategory === category.id ? null : category.id
-                )}
+                onClick={() => toggleCategory(category.id)}
                 className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors duration-200 hover:bg-sage/5 ${filters.category === category.id ? 'text-sage' : 'text-charcoal'}`}
               >
                 <span>{category.name}</span>
-                <svg
+                <motion.svg
                   xmlns="http://www.w3.org/2000/svg"
+                  animate={{ rotate: expandedCategories.includes(category.id) ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={2}
                   stroke="currentColor"
-                  className={`w-4 h-4 transition-transform duration-200 ${expandedCategory === category.id ? 'rotate-180' : ''}`}
+                  strokeWidth={2}
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     d="M19 9l-7 7-7-7"
                   />
-                </svg>
+                </motion.svg>
               </button>
-              <AnimatePresence>
-                {expandedCategory === category.id && (
+              <AnimatePresence initial={false}>
+                {expandedCategories.includes(category.id) && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden pl-6 pt-2 pb-1"
                   >
                     <div className="pl-4 py-2 space-y-1">
                       {category.subCategories.map((sub: string) => (
