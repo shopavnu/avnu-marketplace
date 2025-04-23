@@ -105,6 +105,114 @@ Performs an enhanced search across all entity types with entity boosting.
 
 ### GraphQL API
 
+#### Schema Structure
+
+The GraphQL schema follows a schema-first approach and includes:
+
+- **Search Response Types**: `SearchResponseType`, `SearchResponse`, `CursorSearchResponseType`
+- **Entity Result Types**: `ProductResultType`, `MerchantResultType`, `BrandResultType`
+- **Search Input Types**: `SearchOptionsInput`, `EnhancedSearchInput`, `EntitySpecificFilters`
+- **Facet Types**: `FacetType`, `FacetValueType`, `PriceFacetType`
+- **Dashboard Types**: `PerformanceMetricsType`, `RelevanceMetricsType`, `PopularSearchType`
+- **Personalization Types**: `UserPreferences`, `UserBehavior`, `BehaviorType`
+
+#### Search Queries
+
+```graphql
+# Multi-entity search with advanced options
+query {
+  multiEntitySearch(input: {
+    query: "sustainable fashion",
+    enableNlp: true,
+    personalized: true,
+    page: 0,
+    limit: 20,
+    productFilters: {
+      categories: ["clothing"],
+      minPrice: 50,
+      maxPrice: 200,
+      inStock: true
+    },
+    entityBoosting: {
+      productBoost: 1.2,
+      merchantBoost: 0.8,
+      brandBoost: 1.0
+    },
+    sortOptions: [{
+      field: "relevance",
+      order: DESC
+    }],
+    enableHighlighting: true
+  }) {
+    query
+    pagination {
+      page
+      limit
+      total
+      pages
+      hasNext
+      hasPrevious
+    }
+    results {
+      ... on ProductResultType {
+        id
+        name
+        description
+        price
+        images
+        categories
+        values
+        score
+      }
+      ... on MerchantResultType {
+        id
+        name
+        description
+        logo
+        categories
+        values
+        score
+      }
+      ... on BrandResultType {
+        id
+        name
+        description
+        logo
+        categories
+        values
+        score
+      }
+    }
+    facets {
+      name
+      values {
+        value
+        count
+      }
+    }
+    isNlpEnabled
+    isPersonalized
+    # Entity-specific result arrays
+    products {
+      id
+      name
+      description
+      price
+    }
+    merchants {
+      id
+      name
+      description
+    }
+    brands {
+      id
+      name
+      description
+    }
+  }
+}
+```
+
 #### Search Dashboard
 
 ```graphql
@@ -175,30 +283,71 @@ query {
 }
 ```
 
-#### Enhanced Search
+#### Cursor-Based Search
 
 ```graphql
 query {
-  enhancedSearch(options: {
+  cursorSearch(
     query: "sustainable fashion",
-    enableNlp: true,
-    personalized: true,
-    productFilters: {
-      categories: ["clothing"],
-      minPrice: 50,
-      maxPrice: 200
-    },
-    entityBoosting: {
-      productBoost: 1.2,
-      merchantBoost: 0.8,
-      brandBoost: 1.0
+    cursor: "eyJwYWdlIjoxfQ==",
+    limit: 20,
+    sessionId: "user-session-123"
+  ) {
+    query
+    cursor
+    nextCursor
+    hasMore
+    totalCount
+    results {
+      ... on ProductResultType {
+        id
+        name
+        price
+      }
+      ... on MerchantResultType {
+        id
+        name
+      }
+      ... on BrandResultType {
+        id
+        name
+      }
     }
-  }) {
+  }
+}
+```
+
+#### Personalization
+
+```graphql
+query {
+  getUserPreferences {
+    favoriteCategories
+    favoriteBrands
+    favoriteValues
+    preferredSizes
+    preferredColors
+    preferSustainable
+    preferEthical
+    preferLocalBrands
+  }
+  
+  getPersonalizedRecommendations(limit: 10) {
     query
     pagination {
-      page
-      limit
       total
+      limit
+    }
+    products {
+      id
+      name
+      description
+      price
+      images
+      score
+    }
+  }
+}
       totalPages
     }
     results {
