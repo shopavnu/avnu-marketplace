@@ -1,0 +1,81 @@
+# Input type for user preferences survey
+input UserPreferencesSurveyInput {
+  # Preferred product categories
+  preferredCategories: [String!]!
+  
+  # Preferred brands
+  preferredBrands: [String!]!
+  
+  # Minimum price range preference
+  priceRangeMin: Float!
+  
+  # Maximum price range preference
+  priceRangeMax: Float!
+  
+  # Shopping frequency
+  shoppingFrequency: String!
+  
+  # Price sensitivity
+  priceSensitivity: String!
+  
+  # Preferred product attributes/features
+  preferredAttributes: [String!]
+  
+  # Importance of reviews (1-10)
+  reviewImportance: Int
+  
+  # Additional user preferences as key-value pairs
+  additionalPreferences: JSON
+}
+
+type Mutation {
+  # Track a search query for a user
+  trackSearch(query: String!, filters: JSON, resultCount: Int): Boolean!
+  
+  # Track a product view for a user
+  trackProductView(productId: String!, referrer: String): Boolean!
+  
+  # Track a product added to cart for a user
+  trackAddToCart(productId: String!, quantity: Int): Boolean!
+  
+  # Track a product purchase for a user
+  trackPurchase(productId: String!, quantity: Int): Boolean!
+  
+  # Track filter application for a user
+  trackFilterApply(filters: JSON!): Boolean!
+  
+  # Track category click for a user
+  trackCategoryClick(category: String!): Boolean!
+  
+  # Track brand click for a user
+  trackBrandClick(brand: String!): Boolean!
+  
+  # Submit initial preferences survey
+  submitPreferencesSurvey(surveyData: UserPreferencesSurveyInput!): Boolean!
+  
+  # Clear user preferences cache
+  clearPreferencesCache: Boolean!
+  
+  # Apply time-based decay to a user's preferences
+  applyPreferenceDecay: Boolean!
+  
+  # Apply immediate decay to a specific preference type
+  # Useful when a user explicitly changes their interests
+  applyImmediateDecay(
+    # The type of preference to decay
+    preferenceType: PreferenceType!, 
+    # The decay factor to apply (0-1)
+    decayFactor: Float = 0.5
+  ): Boolean!
+}
+
+# Enum for preference types
+enum PreferenceType {
+  CATEGORIES
+  BRANDS
+  VALUES
+  PRICE_RANGES
+}
+
+# JSON scalar for complex objects
+scalar JSON

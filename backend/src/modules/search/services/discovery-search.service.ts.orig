@@ -1,0 +1,862 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ElasticsearchService } from './elasticsearch.service';
+import { NaturalLanguageSearchService } from '../../nlp/services/natural-language-search.service';
+import { PersonalizationService } from '../../personalization/services/personalization.service';
+import { AbTestingService } from '../../ab-testing/services/ab-testing.service';
+import { ExperimentType } from '../../ab-testing/entities/experiment.entity';
+import { SearchAnalyticsService } from '../../analytics/services/search-analytics.service';
+import { SearchOptionsInput } from '../dto/search-options.dto';
+import {
+  SearchResponseType,
+  PaginationType,
+  FacetType,
+  ProductResultType,
+  MerchantResultType,
+  BrandResultType,
+  SearchResultUnion,
+} from '../graphql/search-response.type';
+
+// Helper defined outside the class for broader scope
+const transformFiltersForElastic = (filters: any): { [key: string]: any } => {
+  const elasticFilters: { [key: string]: any } = {};
+  if (filters?.categories) elasticFilters.categories = filters.categories;
+  if (filters?.priceMin) elasticFilters.priceMin = filters.priceMin;
+  if (filters?.priceMax) elasticFilters.priceMax = filters.priceMax;
+  if (filters?.merchantId) elasticFilters.merchantId = filters.merchantId;
+  if (filters?.inStock) elasticFilters.inStock = filters.inStock;
+  if (filters?.values && Array.isArray(filters.values)) {
+    elasticFilters.values = filters.values.map(v => (typeof v === 'string' ? v : String(v)));
+  }
+  if (filters?.brandName) elasticFilters.brandName = filters.brandName;
+  return elasticFilters;
+};
+
+@Injectable()
+export class DiscoverySearchService {
+  private readonly logger = new Logger(DiscoverySearchService.name);
+
+  constructor(
+    private readonly elasticsearchService: ElasticsearchService,
+    private readonly naturalLanguageSearchService: NaturalLanguageSearchService,
+    private readonly personalizationService: PersonalizationService,
+    private readonly abTestingService: AbTestingService,
+    private readonly searchAnalyticsService: SearchAnalyticsService,
+  ) {}
+
+  /**
+   * Performs a discovery-focused search that combines multiple result types
+   * to create a rich, diverse, and personalized discovery experience
+   *
+   * @param query Search query (can be empty for pure discovery)
+   * @param userId User ID for personalization (optional)
+   * @param sessionId Session ID (required if userId not provided)
+   * @param options Search options and filters
+   */
+  async discoverySearch(
+    query: string,
+    userId?: string,
+    sessionId?: string,
+    options?: SearchOptionsInput,
+  ): Promise<SearchResponseType> {
+    try {
+      const elasticFilters = transformFiltersForElastic(options?.filters);
+      const page = options?.page || 1;
+      const limit = options?.limit || 20;
+      // Start tracking search performance
+      const searchStartTime = Date.now();
+      const searchId = `search_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+
+      // Get A/B testing configuration for search algorithms
+      const experimentConfig = await this.abTestingService.getVariantConfiguration(
+        ExperimentType.SEARCH_ALGORITHM,
+        userId,
+        sessionId,
+      );
+
+      // Default search parameters
+      let discoveryParams = {
+        queryWeight: 1.0,
+        trendingWeight: 0.5,
+        newProductsWeight: 0.5,
+        personalizedWeight: 1.0,
+        diversityFactor: 0.7,
+        emergingBrandsBoost: 1.2,
+        valueAlignmentBoost: 1.5,
+        randomizationFactor: 0.3,
+        includeAds: true,
+        adRatio: 0.1, // 10% of results can be ads
+        maxAdCount: 2, // Maximum 2 ads per page
+      };
+
+      // Override with A/B test configuration if available
+      if (experimentConfig && Object.keys(experimentConfig).length > 0) {
+        // Find the first active search algorithm experiment
+        const experimentId = Object.keys(experimentConfig)[0];
+        if (experimentId) {
+          const variantConfig = experimentConfig[experimentId];
+          if (variantConfig && variantConfig.configuration) {
+            // Merge the variant configuration with default params
+            discoveryParams = {
+              ...discoveryParams,
+              ...variantConfig.configuration,
+            };
+
+            // Track experiment impression
+            await this.abTestingService.trackImpression(variantConfig.assignmentId);
+          }
+        }
+      }
+
+      // Step 1: Process the natural language query if provided
+      let processedQuery = {
+        originalQuery: query,
+        processedQuery: query,
+        tokens: [],
+        stems: [],
+        entities: [],
+        intent: 'search',
+        filters: {},
+      };
+
+      if (query && query.trim()) {
+        try {
+          // Get NLP processing from the NLP service
+          const nlpResult = await this.naturalLanguageSearchService.searchProducts(query, {
+            page: 1,
+            limit: 10,
+          });
+          processedQuery = {
+            originalQuery: query,
+            processedQuery: nlpResult.enhancedQuery,
+            tokens: query.split(' ').filter(t => t.length > 0),
+            stems: [],
+            entities: [],
+            intent: 'search',
+            filters: nlpResult.detectedFilters,
+          };
+
+          // Track the processed query for analytics
+          try {
+            // Simple analytics tracking - just log the query
+            this.logger.log(`Processing query: ${query} -> ${processedQuery.processedQuery}`);
+          } catch (error) {
+            this.logger.error(`Failed to track query processing: ${error.message}`);
+          }
+        } catch (error) {
+          this.logger.error(`Failed to process query with NLP: ${error.message}`);
+        }
+      }
+
+      // Step 2: Get user preferences and personalization data
+      let userPreferences = null;
+      let valueAlignment: string[] = [];
+
+      if (userId) {
+        try {
+          // Get personalized filters which contain user preferences
+          const personalizedFilters =
+            await this.personalizationService.generatePersonalizedFilters(userId);
+          userPreferences = {
+            favoriteCategories: personalizedFilters.categories || [],
+            favoriteValues: personalizedFilters.values || [],
+            favoriteBrands: personalizedFilters.brands || [],
+          };
+
+          valueAlignment = userPreferences.favoriteValues || [];
+        } catch (error) {
+          this.logger.error(`Failed to get personalization data: ${error.message}`);
+        }
+      }
+
+      // Step 3: Prepare the combined search
+      const mergedFilters = {
+        ...(options?.filters || {}),
+        ...processedQuery.filters,
+      };
+
+      // Step 4: Execute parallel searches for different result types
+      const [queryResults, trendingResults, newProducts, emergingBrands] = await Promise.all([
+        // 1. Direct query results
+        query && query.trim()
+          ? this.elasticsearchService.searchProducts(
+              processedQuery.processedQuery,
+              elasticFilters, // Use transformed filters
+              1,
+              Math.ceil(limit * 0.4), // 40% of results from direct query
+              { field: 'relevance', order: 'desc' }, // Sort by relevance
+            )
+          : Promise.resolve({ items: [], total: 0, facets: [] }), // Match expected return shape
+
+        // 2. Trending products
+        this.elasticsearchService.getTrendingProducts(Math.ceil(limit * 0.2)),
+
+        // 3. New products (assuming no specific filters apply here, or adjust if needed)
+        this.elasticsearchService.searchProducts(
+          '', // No query for newest
+          elasticFilters, // Apply base filters if needed
+          1,
+          Math.ceil(limit * 0.2),
+          { field: 'createdAt', order: 'desc' }, // Sort by creation date
+        ),
+
+        // 4. Emerging brands (assuming no specific filters apply here, or adjust if needed)
+        this.getEmergingBrandsProducts(Math.ceil(limit * 0.1), elasticFilters),
+      ]);
+
+      // Step 5: Get personalized recommendations if user is identified
+      // Get personalized recommendations separately
+      let personalizedRecommendationItems = [];
+      if (userId && discoveryParams.personalizedWeight > 0) {
+        const personalizedProductIds =
+          await this.personalizationService.generatePersonalizedRecommendations(
+            userId,
+            Math.ceil(limit * discoveryParams.personalizedWeight),
+          );
+
+        if (personalizedProductIds.length > 0) {
+          // Get products by IDs
+          const personalizedSearchResults = await this.elasticsearchService.searchProducts(
+            '',
+            elasticFilters, // Use transformed filters
+            1,
+            personalizedProductIds.length * 2,
+          );
+
+          // Filter to only include products with IDs in the productIds array
+          personalizedRecommendationItems = personalizedSearchResults.items
+            .filter(product => personalizedProductIds.includes(product.id))
+            .slice(0, Math.ceil(limit * discoveryParams.personalizedWeight));
+        }
+      }
+
+      // Step 6: Get value-aligned products based on user preferences
+      let valueAlignedItems = [];
+      if (valueAlignment.length > 0) {
+        const valueResults = await this.elasticsearchService.searchProducts(
+          '',
+          { ...elasticFilters, values: valueAlignment }, // Use transformed base filters
+          1,
+          Math.ceil(limit * discoveryParams.valueAlignmentBoost),
+        );
+        valueAlignedItems = valueResults.items;
+      }
+
+      // Step 7: Get sponsored products (ads) if enabled
+      let sponsoredItems = [];
+      if (discoveryParams.includeAds) {
+        sponsoredItems = await this.getSponsoredProducts(
+          elasticFilters, // Use transformed filters
+          Math.min(Math.ceil(limit * discoveryParams.adRatio), discoveryParams.maxAdCount),
+          valueAlignment,
+        );
+      }
+
+      // Step 8: Combine all results with deduplication and diversity balancing
+      const combinedResults = this.combineResults(
+        queryResults.items,
+        trendingResults,
+        newProducts.items,
+        personalizedRecommendationItems,
+        emergingBrands,
+        valueAlignedItems,
+        sponsoredItems,
+        discoveryParams,
+        limit,
+      );
+
+      // Step 9: Track search analytics
+      const searchEndTime = Date.now();
+      const searchDuration = searchEndTime - searchStartTime;
+
+      try {
+        // Simple analytics tracking - just log the search
+        this.logger.log(
+          `Search completed: ${searchId} - query: ${query} - results: ${combinedResults.items.length} - duration: ${searchDuration}ms`,
+        );
+      } catch (error) {
+        this.logger.error(`Failed to track search: ${error.message}`);
+      }
+
+      // If this is part of an A/B test, track interaction
+      if (experimentConfig && Object.keys(experimentConfig).length > 0) {
+        const experimentId = Object.keys(experimentConfig)[0];
+        if (experimentId) {
+          const variantConfig = experimentConfig[experimentId];
+          if (variantConfig) {
+            await this.abTestingService.trackInteraction(
+              variantConfig.assignmentId,
+              'search_results_viewed',
+              {
+                query,
+                resultCount: combinedResults.items.length,
+                searchDuration,
+              },
+            );
+          }
+        }
+      }
+
+      // Return the combined results
+      const finalResults = combinedResults.items.map(item => {
+        // Determine __typename based on item properties (example logic)
+        if (item.title && item.price !== undefined)
+          return { ...item, __typename: 'ProductResultType' };
+        if (item.foundedYear) return { ...item, __typename: 'BrandResultType' };
+        if (item.merchantName) return { ...item, __typename: 'MerchantResultType' }; // Adjust property check as needed
+        // Default or throw error if type cannot be determined
+        return { ...item, __typename: 'ProductResultType' }; // Defaulting to Product for safety, review this logic
+      });
+
+      const totalPages = Math.ceil(combinedResults.total / limit);
+      const response: SearchResponseType = {
+        query: processedQuery.processedQuery,
+        pagination: {
+          page,
+          limit,
+          total: combinedResults.total,
+          totalPages,
+        },
+        results: finalResults,
+        facets: [], // Placeholder for facets, generate properly if needed
+        isNlpEnabled: !!(query && query.trim()), // Example logic
+        highlightsEnabled: false,
+        isPersonalized: !!userId, // Example logic
+        experimentId: experimentConfig ? Object.keys(experimentConfig)[0] : undefined, // Example logic
+        // appliedFilters: ??? // Determine how to represent applied filters
+      };
+
+      return response;
+    } catch (error) {
+      this.logger.error(`Discovery search failed: ${error.message}`, error.stack);
+
+      // Fallback to basic search (ensure 5 args, sort object, correct return type)
+      try {
+        const fallbackPage = options?.page || 1;
+        const fallbackLimit = options?.limit || 20;
+
+        // Determine fallback sort field and order from options.sort array
+        let fallbackSortField = 'relevance';
+        let fallbackSortOrder: 'asc' | 'desc' = 'desc';
+
+        if (Array.isArray(options?.sort) && options.sort.length > 0 && options.sort[0].field) {
+          fallbackSortField = options.sort[0].field;
+          // Use the order from the first sort option, or default to 'desc'
+          fallbackSortOrder = options.sort[0].order || 'desc';
+        }
+
+        const fallbackResult = await this.elasticsearchService.searchProducts(
+          query,
+          transformFiltersForElastic(options?.filters), // Use the helper here
+          fallbackPage,
+          fallbackLimit,
+          // Pass the correctly structured sort object
+          { field: fallbackSortField, order: fallbackSortOrder },
+        );
+
+        // Format fallback result into SearchResponseType
+        const response: SearchResponseType = {
+          query: query,
+          pagination: {
+            page: fallbackPage,
+            limit: fallbackLimit,
+            total: fallbackResult.total,
+            totalPages: Math.ceil(fallbackResult.total / fallbackLimit),
+          },
+          // Assuming fallback returns ProductResultType compatible items
+          results: fallbackResult.items.map(item => ({ ...item, __typename: 'ProductResultType' })),
+          highlightsEnabled: false,
+          isPersonalized: false,
+          isNlpEnabled: false,
+        };
+        return response;
+      } catch (fallbackError: any) {
+        this.logger.error(
+          `Fallback search also failed: ${fallbackError?.message ?? 'Unknown error'}`,
+  /**
+   * Get products from emerging brands
+   *
+   * @param limit Number of products to return
+   * @param filters Filters to apply
+   */
+  private async getEmergingBrandsProducts(limit: number, filters: any = {}): Promise<any[]> {
+    try {
+      // In a real implementation, this would use data about brand age, growth, etc.
+      // For now, we'll simulate with a random score function
+      const response = await this.elasticsearchService.searchProducts(
+        '',
+        filters,
+        1,
+        limit,
+        { field: 'createdAt', order: 'desc' }, // Sort by newest as a proxy for "emerging"
+      );
+
+      return response.items.map(item => ({
+        ...item,
+        discoverySource: 'emerging_brand',
+      }));
+    } catch (error) {
+      this.logger.error(`Failed to get emerging brands products: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Get sponsored products (ads) relevant to the search
+   *
+   * @param filters Filters to apply
+   * @param limit Maximum number of ads to return
+   * @param values Value alignment for better targeting
+   */
+  private async getSponsoredProducts(
+    filters: any = {},
+    limit: number,
+    values: string[] = [],
+  ): Promise<any[]> {
+    try {
+      // In a real implementation, this would call an ad service
+      // For now, we'll simulate with a search that prioritizes sponsored products
+
+      // Create a copy of filters without price constraints for ads
+      const adFilters = { ...filters };
+      delete adFilters.priceMin;
+      delete adFilters.priceMax;
+
+      // Add value alignment if available for better targeting
+      if (values.length > 0) {
+        adFilters.values = values;
+      }
+
+      const response = await this.elasticsearchService.searchProducts('', adFilters, 1, limit, {
+        field: '_score',
+        order: 'desc',
+      });
+
+      return response.items.map(item => ({
+        ...item,
+        discoverySource: 'sponsored',
+        isSponsored: true,
+      }));
+    } catch (error) {
+      this.logger.error(`Failed to get sponsored products: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Combine results from different sources with deduplication and diversity balancing
+   */
+  private combineResults(
+    queryResults: any[],
+    trendingResults: any[],
+    newProducts: any[],
+    personalizedResults: any[],
+    emergingBrandsProducts: any[],
+    valueAlignedProducts: any[],
+    sponsoredProducts: any[],
+    params: any,
+    limit: number,
+  ): any {
+    // Track seen product IDs to avoid duplicates
+    const seenIds = new Set<string>();
+    const combinedItems = [];
+
+    // Track metadata about the sources of results
+    const metadata = {
+      queryResults: 0,
+      trendingResults: 0,
+      newProducts: 0,
+      personalizedResults: 0,
+      emergingBrandsProducts: 0,
+      valueAlignedProducts: 0,
+      sponsoredProducts: 0,
+    };
+
+    // Helper function to add items without duplicates
+    const addItemsNoDuplicates = (items: any[], source: string, maxToAdd: number = Infinity) => {
+      let added = 0;
+      for (const item of items) {
+        if (!seenIds.has(item.id) && added < maxToAdd) {
+          seenIds.add(item.id);
+          combinedItems.push({
+            ...item,
+            discoverySource: item.discoverySource || source,
+          });
+          metadata[source]++;
+          added++;
+        }
+      }
+      return added;
+    };
+
+    // Add sponsored products first (always show ads at top positions)
+    addItemsNoDuplicates(sponsoredProducts, 'sponsoredProducts', params.maxAdCount);
+
+    // Initialize slots for different result types based on weights
+    const totalNonAdSlots = limit - metadata.sponsoredProducts;
+    const querySlots = Math.round(totalNonAdSlots * 0.4); // 40% for query results if query provided
+    const personalizedSlots = Math.round(totalNonAdSlots * 0.2); // 20% for personalized
+    const trendingSlots = Math.round(totalNonAdSlots * 0.15); // 15% for trending
+    const newProductsSlots = Math.round(totalNonAdSlots * 0.1); // 10% for new products
+    const emergingBrandsSlots = Math.round(totalNonAdSlots * 0.1); // 10% for emerging brands
+    const valueAlignedSlots = Math.round(totalNonAdSlots * 0.05); // 5% for value-aligned products
+
+    // Add query results if query was provided (most relevant)
+    if (queryResults.length > 0) {
+      addItemsNoDuplicates(queryResults, 'queryResults', querySlots);
+    }
+
+    // Add personalized results
+    addItemsNoDuplicates(personalizedResults, 'personalizedResults', personalizedSlots);
+
+    // Add trending products
+    addItemsNoDuplicates(trendingResults, 'trendingResults', trendingSlots);
+
+    // Add new products
+    addItemsNoDuplicates(newProducts, 'newProducts', newProductsSlots);
+
+    // Add emerging brands products
+    addItemsNoDuplicates(emergingBrandsProducts, 'emergingBrandsProducts', emergingBrandsSlots);
+
+    // Add value-aligned products
+    addItemsNoDuplicates(valueAlignedProducts, 'valueAlignedProducts', valueAlignedSlots);
+
+    // If we still have space, fill with remaining products from any source
+    const remainingSlots = limit - combinedItems.length;
+    if (remainingSlots > 0) {
+      // Collect all remaining unseen products
+      const allRemaining = [
+        ...queryResults,
+        ...personalizedResults,
+        ...trendingResults,
+        ...newProducts,
+        ...emergingBrandsProducts,
+        ...valueAlignedProducts,
+      ].filter(item => !seenIds.has(item.id));
+
+      // Add randomization factor
+      if (params.randomizationFactor > 0) {
+        allRemaining.sort(() => Math.random() - 0.5);
+      }
+
+      // Add remaining items
+      addItemsNoDuplicates(allRemaining, 'mixed', remainingSlots);
+    }
+
+    // Apply randomization to final results if configured
+    // This helps with discovery by not always showing the same patterns
+    if (params.randomizationFactor > 0) {
+      // Only randomize non-sponsored products
+      const sponsoredItems = combinedItems.filter(item => item.isSponsored);
+      const nonSponsoredItems = combinedItems.filter(item => !item.isSponsored);
+
+      // Apply randomization
+      nonSponsoredItems.sort(
+        () => Math.random() * params.randomizationFactor - params.randomizationFactor / 2,
+      );
+
+      // Recombine with sponsored items at their original positions
+      combinedItems.length = 0;
+
+      // Reinsert sponsored items at their original positions
+      let sponsoredIndex = 0;
+      for (let i = 0; i < sponsoredItems.length + nonSponsoredItems.length; i++) {
+        if (
+          sponsoredIndex < sponsoredItems.length &&
+          sponsoredItems[sponsoredIndex].originalIndex === i
+        ) {
+          combinedItems.push(sponsoredItems[sponsoredIndex]);
+          sponsoredIndex++;
+        } else {
+          combinedItems.push(nonSponsoredItems.shift());
+        }
+      }
+    }
+
+    return {
+      items: combinedItems,
+      total: combinedItems.length,
+      metadata,
+    };
+  }
+
+  /**
+   * Get discovery-focused search suggestions that include trending terms,
+   * popular categories, and personalized suggestions
+   *
+   * @param query Partial query to get suggestions for
+   * @param userId User ID for personalization
+   * @param limit Number of suggestions to return
+   */
+  async getDiscoverySuggestions(query: string, userId?: string, limit = 10): Promise<any> {
+    try {
+      // Get basic product suggestions
+      const basicSuggestions = await this.elasticsearchService.getProductSuggestions(query, limit);
+
+      // Use hardcoded trending terms since analytics service may not have this method
+      const trendingTerms = [
+        'sustainable fashion',
+        'eco-friendly',
+        'handmade jewelry',
+        'organic skincare',
+        'vegan leather',
+      ].slice(0, Math.floor(limit / 2));
+
+      // Get personalized suggestions if user ID is provided
+      const personalizedSuggestions = [];
+      if (userId) {
+        try {
+          // Use user preferences to generate personalized suggestions
+          const userPreferences =
+            await this.personalizationService.generatePersonalizedFilters(userId);
+
+          // Create suggestions based on user preferences
+          if (userPreferences.categories && userPreferences.categories.length > 0) {
+            personalizedSuggestions.push(
+              ...userPreferences.categories.map(cat => (query ? `${query} in ${cat}` : cat)),
+            );
+          }
+
+          if (userPreferences.values && userPreferences.values.length > 0) {
+            personalizedSuggestions.push(
+              ...userPreferences.values.map(val => (query ? `${val} ${query}` : val)),
+            );
+          }
+        } catch (error) {
+          this.logger.error(`Failed to get personalized suggestions: ${error.message}`);
+        }
+      }
+
+      // Combine all suggestions with deduplication
+      const allSuggestions = new Set([
+        ...basicSuggestions,
+        ...trendingTerms,
+        ...personalizedSuggestions,
+      ]);
+
+      // Convert to array and limit
+      const suggestions = Array.from(allSuggestions).slice(0, limit);
+
+      return {
+        suggestions,
+        metadata: {
+          productSuggestions: basicSuggestions.length,
+          trendingTerms: trendingTerms.length,
+          personalizedSuggestions: personalizedSuggestions.length,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get discovery suggestions: ${error.message}`);
+
+      // Fallback to basic product suggestions
+      const suggestions = await this.elasticsearchService.getProductSuggestions(query, limit);
+      return { suggestions };
+    }
+  }
+
+  /**
+   * Get a curated discovery homepage feed with mixed content types
+   *
+   * @param userId User ID for personalization
+   * @param sessionId Session ID
+   * @param options Options for the feed
+   */
+  async getDiscoveryHomepage(userId?: string, sessionId?: string, options: any = {}): Promise<any> {
+    try {
+      const limit = options.limit || 40;
+
+      // Get user preferences if available
+      let userPreferences = null;
+      let valueAlignment: string[] = [];
+
+      if (userId) {
+        try {
+          // Get personalized filters which contain user preferences
+          const personalizedFilters =
+            await this.personalizationService.generatePersonalizedFilters(userId);
+          userPreferences = {
+            favoriteCategories: personalizedFilters.categories || [],
+            favoriteValues: personalizedFilters.values || [],
+            favoriteBrands: personalizedFilters.brands || [],
+          };
+
+          valueAlignment = userPreferences.favoriteValues || [];
+        } catch (error) {
+          this.logger.error(`Failed to get user preferences: ${error.message}`);
+        }
+      }
+
+      // Execute parallel requests for different content types
+      const [
+        personalizedProducts,
+        trendingProducts,
+        newArrivals,
+        valueBasedProducts,
+        emergingBrands,
+        sponsoredProducts,
+      ] = await Promise.all([
+        // 1. Personalized recommendations
+        userId
+          ? this.personalizationService
+              .generatePersonalizedRecommendations(
+                userId,
+                Math.ceil(limit * 0.3), // 30% personalized
+              )
+              .then(async productIds => {
+                if (productIds.length === 0) {
+                  return { items: [], total: 0 };
+                }
+
+                // Get products by IDs
+                const searchResults = await this.elasticsearchService.searchProducts(
+                  '',
+                  {},
+                  1,
+                  productIds.length * 2,
+                );
+
+                // Filter to only include products with IDs in the productIds array
+                const filteredItems = searchResults.items
+                  .filter(product => productIds.includes(product.id))
+                  .slice(0, Math.ceil(limit * 0.3));
+
+                return { items: filteredItems, total: filteredItems.length };
+              })
+          : { items: [], total: 0 },
+
+        // 2. Trending products
+        this.elasticsearchService.getTrendingProducts(Math.ceil(limit * 0.2)),
+
+        // 3. New arrivals
+        this.elasticsearchService.searchProducts('', {}, 1, Math.ceil(limit * 0.15), {
+          field: 'createdAt',
+          order: 'desc',
+        }),
+
+        // 4. Value-based products
+        valueAlignment.length > 0
+          ? this.elasticsearchService.searchProducts(
+              '',
+              { values: valueAlignment },
+              1,
+              Math.ceil(limit * 0.15),
+            )
+          : this.elasticsearchService.searchProducts(
+              '',
+              { values: ['sustainable', 'ethical', 'handmade'] }, // Default values
+              1,
+              Math.ceil(limit * 0.15),
+            ),
+
+        // 5. Emerging brands products
+        this.getEmergingBrandsProducts(Math.ceil(limit * 0.1)),
+
+        // 6. Sponsored products
+        this.getSponsoredProducts({}, Math.min(3, Math.ceil(limit * 0.1)), valueAlignment),
+      ]);
+
+      // Organize results into sections
+      const sections = [
+        {
+          id: 'for_you',
+          title: userId ? 'For You' : 'Recommended',
+          description: 'Products selected just for you',
+          items: personalizedProducts.items.map(item => ({
+            ...item,
+            discoverySource: 'personalized',
+          })),
+          type: 'personalized',
+        },
+        {
+          id: 'trending',
+          title: 'Trending Now',
+          description: 'What everyone is loving',
+          items: trendingProducts.map(item => ({
+            ...item,
+            discoverySource: 'trending',
+          })),
+          type: 'trending',
+        },
+        {
+          id: 'new_arrivals',
+          title: 'Just Arrived',
+          description: 'The latest additions to our marketplace',
+          items: newArrivals.items.map(item => ({
+            ...item,
+            discoverySource: 'new',
+          })),
+          type: 'new',
+        },
+        {
+          id: 'value_based',
+          title:
+            valueAlignment.length > 0
+              ? `${valueAlignment[0].charAt(0).toUpperCase() + valueAlignment[0].slice(1)} Products`
+              : 'Sustainable Picks',
+          description: 'Products aligned with your values',
+          items: valueBasedProducts.items.map(item => ({
+            ...item,
+            discoverySource: 'value_aligned',
+          })),
+          type: 'value_aligned',
+        },
+        {
+          id: 'emerging_brands',
+          title: 'Emerging Brands',
+          description: 'Discover up-and-coming creators',
+          items: emergingBrands.map(item => ({
+            ...item,
+            discoverySource: 'emerging_brand',
+          })),
+          type: 'emerging_brands',
+        },
+      ];
+
+      // Add sponsored section if we have sponsored products
+      if (sponsoredProducts.length > 0) {
+        sections.push({
+          id: 'sponsored',
+          title: 'Featured Products',
+          description: 'Sponsored products you might like',
+          items: sponsoredProducts.map(item => ({
+            ...item,
+            discoverySource: 'sponsored',
+            isSponsored: true,
+          })),
+          type: 'sponsored',
+        });
+      }
+
+      // Filter out empty sections
+      const nonEmptySections = sections.filter(section => section.items.length > 0);
+
+      return {
+        sections: nonEmptySections,
+        metadata: {
+          personalizedCount: personalizedProducts.items.length,
+          trendingCount: trendingProducts.length,
+          newArrivalsCount: newArrivals.items.length,
+          valueBasedCount: valueBasedProducts.items.length,
+          emergingBrandsCount: emergingBrands.length,
+          sponsoredCount: sponsoredProducts.length,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get discovery homepage: ${error.message}`);
+
+      // Fallback to basic trending products
+      const trendingProducts = await this.elasticsearchService.getTrendingProducts(20);
+
+      return {
+        sections: [
+          {
+            id: 'trending',
+            title: 'Trending Now',
+            description: 'What everyone is loving',
+            items: trendingProducts,
+            type: 'trending',
+          },
+        ],
+      };
+    }
+  }
+}
