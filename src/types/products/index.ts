@@ -60,3 +60,27 @@ export interface Product {
 export interface ProductGridProps {
   products: Product[];
 }
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+/**
+ * Represents a brand in the marketplace
+ */
+export interface Brand {
+  id: string;
+  name: string;
+  description: string;
+  logo: string;
+  coverImage: string;
+  values: string[];
+  location: string;
+  categories: Category[];
+  primaryCategory: Category;
+  rating: ProductRating;
+  isVerified: boolean;
+  foundedYear: number;
+  productCount: number;
+}

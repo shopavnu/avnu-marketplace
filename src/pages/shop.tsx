@@ -83,12 +83,25 @@ export default function ShopPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [filters, setFilters] = useState<SearchFilters>({
+    categories: [],
+    causes: [],
+    attributes: {},
+    isLocal: false,
+    isNew: false
+  });
   const [searchResults, setSearchResults] = useState<SearchResult>({
     query: '',
-    filters: {},
+    filters: {
+      categories: [],
+      causes: [],
+      attributes: {},
+      isLocal: false,
+      isNew: false
+    },
     totalResults: mockProducts.length,
     products: mockProducts,
+    brands: [],
     suggestedFilters: []
   });
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -147,6 +160,7 @@ export default function ShopPage() {
       filters: newFilters,
       totalResults: mockProducts.length,
       products: mockProducts,
+      brands: [],
       suggestedFilters: []
     });
     
@@ -191,9 +205,10 @@ export default function ShopPage() {
           <div className="w-full md:w-64 shrink-0">
             <FilterPanel
               filters={filters}
-              onChange={(newFilters: SearchFilters) => {
-                setFilters(newFilters);
-                handleSearch(searchQuery, newFilters);
+              onChange={(newFilters: Partial<SearchFilters>) => {
+                const updatedFilters = { ...filters, ...newFilters };
+                setFilters(updatedFilters);
+                handleSearch(searchQuery, updatedFilters);
               }}
             />
           </div>

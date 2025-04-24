@@ -9,6 +9,7 @@ export default function Document() {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
         <link rel="apple-touch-icon" href="/icon.png" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
       </Head>
       <body>
         <Main />

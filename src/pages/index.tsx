@@ -3,12 +3,13 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { Logo } from '@/components/layout';
 import { ProductGrid } from '@/components/products';
-import { products } from '@/data/products';
-import { brands } from '@/data/brands';
+import { products as dataProducts } from '@/data/products';
+import { brands as dataBrands } from '@/data/brands';
 import { BrandCard } from '@/components/brands';
 import { HeroMasonry } from '@/components/home';
 import { SearchSection } from '@/components/search';
 import ClientOnly from '@/components/common/ClientOnly';
+import { adaptProduct, adaptBrand } from '@/utils/type-adapters';
 
 export default function Home() {
   return (
@@ -16,7 +17,6 @@ export default function Home() {
       <Head>
         <title>av | nu - Curated Independent Brands</title>
         <meta name="description" content="Discover curated independent brands on av | nu marketplace" />
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
       </Head>
 
 
@@ -39,14 +39,14 @@ export default function Home() {
             </h2>
             <ClientOnly>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {brands.slice(0, 4).map((brand) => (
+                {dataBrands.slice(0, 4).map((brand) => (
                   <motion.div
                     key={brand.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <BrandCard brand={brand} />
+                    <BrandCard brand={adaptBrand(brand)} />
                   </motion.div>
                 ))}
               </div>
@@ -73,7 +73,7 @@ export default function Home() {
               </div>
             </div>
             <ClientOnly>
-              <ProductGrid products={products} />
+              <ProductGrid products={dataProducts.map(adaptProduct)} />
             </ClientOnly>
           </div>
         </section>

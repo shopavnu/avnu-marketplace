@@ -1,7 +1,7 @@
 import { Product, ProductGridProps } from '@/types/products';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 
 
@@ -18,6 +18,19 @@ export default function ProductGrid({ products }: ProductGridProps) {
     setDisplayedProducts(products.slice(0, ITEMS_PER_PAGE));
   }, [products]);
 
+  const loadMore = useCallback(() => {
+    setLoading(true);
+    setTimeout(() => {
+      const nextProducts = products.slice(
+        displayedProducts.length,
+        displayedProducts.length + ITEMS_PER_PAGE
+      );
+      setDisplayedProducts((prev: Product[]) => [...prev, ...nextProducts]);
+      setPage((prev: number) => prev + 1);
+      setLoading(false);
+    }, 500);
+  }, [displayedProducts.length, products, setDisplayedProducts, setPage, setLoading]);
+
   useEffect(() => {
     if (!mounted) return;
 
@@ -31,20 +44,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [displayedProducts, loading, products, mounted]);
-
-  const loadMore = () => {
-    setLoading(true);
-    setTimeout(() => {
-      const nextProducts = products.slice(
-        displayedProducts.length,
-        displayedProducts.length + ITEMS_PER_PAGE
-      );
-      setDisplayedProducts((prev: Product[]) => [...prev, ...nextProducts]);
-      setPage((prev: number) => prev + 1);
-      setLoading(false);
-    }, 500);
-  };
+  }, [displayedProducts, loading, products, mounted, loadMore]);
 
   if (!mounted) {
     return null;

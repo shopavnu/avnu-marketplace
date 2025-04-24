@@ -1,19 +1,12 @@
 import { Product } from '../products';
+import { Brand } from '../brand';
 
 export interface SearchFilters {
-  isNew?: boolean;
-  isLocal?: boolean;
+  categories?: string[];
   causes?: string[];
-  category?: string;
-  subCategory?: string;
-  size?: string;
-  priceRange?: {
-    min: number;
-    max: number;
-  };
-  freeShipping?: boolean;
-  rating?: number;
-  sortBy?: 'relevance' | 'price_low' | 'price_high' | 'rating' | 'newest';
+  attributes?: Record<string, Record<string, string[]>>;
+  isLocal?: boolean;
+  isNew?: boolean;
 }
 
 export interface Cause {
@@ -34,7 +27,7 @@ export interface SubCategory {
   id: string;
   name: string;
   parentId: string;
-  attributes?: ProductAttribute[];
+  attributes: ProductAttribute[];
 }
 
 export interface ProductAttribute {
@@ -48,5 +41,6 @@ export interface SearchResult {
   filters: SearchFilters;
   totalResults: number;
   products: Product[];
+  brands: Brand[];
   suggestedFilters: SearchFilters[];
 }
