@@ -1,5 +1,7 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import SearchBarWithSuggestions from './SearchBarWithSuggestions';
+import { useRouter } from 'next/router';
 
 const popularSearches = [
   { id: 1, term: 'Handmade Ceramics', category: 'Home' },
@@ -11,8 +13,35 @@ const popularSearches = [
 ];
 
 export default function SearchSection() {
-  const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const router = useRouter();
+
+  // Load recent searches from localStorage on component mount
+  useEffect(() => {
+    const savedSearches = localStorage.getItem('recentSearches');
+    if (savedSearches) {
+      try {
+        const parsedSearches = JSON.parse(savedSearches);
+        setRecentSearches(Array.isArray(parsedSearches) ? parsedSearches : []);
+      } catch (error) {
+        console.error('Failed to parse recent searches:', error);
+        setRecentSearches([]);
+      }
+    }
+  }, []);
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) return;
+    
+    // Save to recent searches
+    const updatedSearches = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+    setRecentSearches(updatedSearches);
+    localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+    
+    // Navigate to search results page
+    router.push(`/search?q=${encodeURIComponent(query)}`);
+  };
 
   return (
     <section className="relative py-16 bg-warm-white">
@@ -23,68 +52,16 @@ export default function SearchSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          {/* Search Input */}
+          {/* Search Input with Suggestions */}
           <div className="relative">
-            <motion.div
-              className={`relative bg-white rounded-full shadow-lg transition-all duration-300 ${
-                isFocused ? 'shadow-xl ring-2 ring-sage/20' : ''
-              }`}
-              whileHover={{ scale: 1.01 }}
-            >
-              <input
-                type="text"
-                placeholder="Search for products, brands, or styles..."
-                className="w-full px-8 py-6 rounded-full text-lg font-inter text-charcoal placeholder:text-neutral-gray/60 focus:outline-none"
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <motion.button
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-sage text-white p-4 rounded-full hover:bg-opacity-90 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-              </motion.button>
-            </motion.div>
-
-            {/* Popular Searches */}
-            <AnimatePresence>
-              {isFocused && (
-                <motion.div
-                  className="absolute top-full left-0 right-0 bg-white mt-4 rounded-2xl shadow-xl p-6 z-20"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                >
-                  <h3 className="font-montserrat text-sm font-medium text-neutral-gray mb-4">
-                    Popular Searches
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {popularSearches.map((item) => (
-                      <motion.button
-                        key={item.id}
-                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-warm-white text-left transition-colors group"
-                        whileHover={{ x: 5 }}
-                      >
-                        <div className="p-2 rounded-lg bg-warm-white group-hover:bg-white transition-colors">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-sage">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="font-medium text-charcoal mb-1">{item.term}</p>
-                          <p className="text-sm text-neutral-gray">{item.category}</p>
-                        </div>
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <SearchBarWithSuggestions
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSearch={handleSearch}
+              recentSearches={recentSearches}
+              placeholder="Search for products, brands, or styles..."
+              className="shadow-lg hover:shadow-xl transition-all duration-300"
+            />
           </div>
 
           {/* Search Tags */}

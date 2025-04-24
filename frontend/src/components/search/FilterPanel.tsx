@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SearchFilters } from '@/types/search';
+import { analyticsService } from '@/services/analytics.service';
+import { useRouter } from 'next/router';
 
 interface FilterPanelProps {
   filters: SearchFilters;
@@ -75,11 +77,34 @@ const categories: Category[] = [
 ];
 
 export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [animatingCategories, setAnimatingCategories] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [prevFilters, setPrevFilters] = useState<SearchFilters>(filters);
+  const router = useRouter();
+  const { query } = router.query;
+  const searchQuery = Array.isArray(query) ? query[0] : query;
 
   const updateFilters = (updates: Partial<SearchFilters>) => {
     onChange({ ...filters, ...updates });
+    setPrevFilters({ ...filters, ...updates });
+
+    // Track filter changes
+    Object.entries(updates).forEach(([filterType, value]) => {
+      // Skip tracking if the value is the same as before
+      const prevValue = prevFilters[filterType as keyof SearchFilters];
+      if (JSON.stringify(prevValue) !== JSON.stringify(value)) {
+        analyticsService.trackFilterApply(filterType, value, searchQuery);
+      }
+    });
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    // Track category click when selecting a category
+    analyticsService.trackCategoryClick(categoryId, searchQuery);
+    
+    // Update the category filter
+    updateFilters({ category: categoryId });
   };
 
   const FilterSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -129,20 +154,29 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
       <FilterSection title="Supported Causes">
         <div className="grid grid-cols-2 gap-2">
           {causes.map((cause) => (
-            <button
+            <div
               key={cause.id}
               onClick={() => {
                 const currentCauses = filters.causes || [];
-                const newCauses = currentCauses.includes(cause.id)
-                  ? currentCauses.filter(c => c !== cause.id)
-                  : [...currentCauses, cause.id];
+                let newCauses;
+                const isAdding = !currentCauses.includes(cause.id);
+
+                if (!isAdding) {
+                  newCauses = currentCauses.filter(id => id !== cause.id);
+                } else {
+                  newCauses = [...currentCauses, cause.id];
+                  
+                  // Track cause click
+                  analyticsService.trackCauseClick(cause.id, searchQuery);
+                }
+
                 updateFilters({ causes: newCauses });
               }}
               className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 ${(filters.causes || []).includes(cause.id) ? 'bg-sage/10 text-sage' : 'hover:bg-sage/5 text-charcoal'}`}
             >
               <div className="text-current">{cause.icon}</div>
               <span className="text-sm">{cause.name}</span>
-            </button>
+            </div>
           ))}
         </div>
       </FilterSection>
@@ -153,35 +187,35 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
           {categories.map((category) => (
             <div key={category.id}>
               <button
-                onClick={() => setExpandedCategory(
-                  expandedCategory === category.id ? null : category.id
-                )}
+                onClick={() => toggleCategory(category.id)}
                 className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors duration-200 hover:bg-sage/5 ${filters.category === category.id ? 'text-sage' : 'text-charcoal'}`}
               >
                 <span>{category.name}</span>
-                <svg
+                <motion.svg
                   xmlns="http://www.w3.org/2000/svg"
+                  animate={{ rotate: expandedCategories.includes(category.id) ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={2}
                   stroke="currentColor"
-                  className={`w-4 h-4 transition-transform duration-200 ${expandedCategory === category.id ? 'rotate-180' : ''}`}
+                  strokeWidth={2}
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     d="M19 9l-7 7-7-7"
                   />
-                </svg>
+                </motion.svg>
               </button>
-              <AnimatePresence>
-                {expandedCategory === category.id && (
+              <AnimatePresence initial={false}>
+                {expandedCategories.includes(category.id) && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden pl-6 pt-2 pb-1"
                   >
                     <div className="pl-4 py-2 space-y-1">
                       {category.subCategories.map((sub: string) => (

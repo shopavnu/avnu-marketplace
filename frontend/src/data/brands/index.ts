@@ -1,12 +1,4 @@
-export interface Brand {
-  id: string;
-  name: string;
-  description: string;
-  logo: string;
-  coverImage: string;
-  values: string[];
-  location: string;
-}
+import { Brand } from '@/types/brand';
 
 export const brands: Brand[] = [
   {
@@ -16,7 +8,8 @@ export const brands: Brand[] = [
     logo: "https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?auto=format&q=80&fit=crop&w=400",
     coverImage: "https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?auto=format&q=80&fit=crop&w=1200",
     values: ["handmade", "sustainable", "local"],
-    location: "Portland, OR"
+    location: "Portland, OR",
+    rating: { average: 4.8, count: 150 } 
   },
   {
     id: "pure-living",
@@ -25,7 +18,8 @@ export const brands: Brand[] = [
     logo: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&q=80&fit=crop&w=400",
     coverImage: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&q=80&fit=crop&w=1200",
     values: ["organic", "sustainable", "ethical"],
-    location: "Austin, TX"
+    location: "Austin, TX",
+    rating: { average: 4.5, count: 210 } 
   },
   {
     id: "fiber-folk",
@@ -34,7 +28,8 @@ export const brands: Brand[] = [
     logo: "https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&q=80&fit=crop&w=400",
     coverImage: "https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&q=80&fit=crop&w=1200",
     values: ["handmade", "artisanal", "traditional"],
-    location: "Santa Fe, NM"
+    location: "Santa Fe, NM",
+    rating: { average: 4.9, count: 95 } 
   },
   {
     id: "lumiere",
@@ -43,6 +38,6 @@ export const brands: Brand[] = [
     logo: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&q=80&fit=crop&w=400",
     coverImage: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&q=80&fit=crop&w=1200",
     values: ["modern", "sustainable", "luxury"],
-    location: "Brooklyn, NY"
+    location: "Brooklyn, NY" 
   }
 ];

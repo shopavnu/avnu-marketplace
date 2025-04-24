@@ -8,6 +8,7 @@ import { brands } from '@/data/brands';
 import { BrandCard } from '@/components/brands';
 import { HeroMasonry } from '@/components/home';
 import { SearchSection } from '@/components/search';
+import { DiscoveryFeed } from '@/components/discovery';
 import ClientOnly from '@/components/common/ClientOnly';
 
 export default function Home() {
@@ -16,7 +17,6 @@ export default function Home() {
       <Head>
         <title>av | nu - Curated Independent Brands</title>
         <meta name="description" content="Discover curated independent brands on av | nu marketplace" />
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
       </Head>
 
 
@@ -54,10 +54,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Product Discovery Feed */}
+        {/* Personalized Discovery Feed */}
         <section className="mb-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="px-4 mb-8 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="mb-8 flex items-center justify-between">
               <h2 className="font-montserrat text-2xl text-charcoal">
                 Discover Products
               </h2>
@@ -73,7 +73,7 @@ export default function Home() {
               </div>
             </div>
             <ClientOnly>
-              <ProductGrid products={products} />
+              <DiscoveryFeed limit={24} showTitle={true} />
             </ClientOnly>
           </div>
         </section>

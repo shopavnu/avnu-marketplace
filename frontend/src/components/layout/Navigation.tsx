@@ -30,7 +30,8 @@ export default function Navigation() {
     <nav className="hidden md:flex items-center space-x-1">
       <NavLink href="/">Home</NavLink>
       <NavLink href="/shop">Shop</NavLink>
-      <NavLink href="/brands">Brands</NavLink>
+      <NavLink href="/brand">Brands</NavLink>
+      <NavLink href="/interests">Interests</NavLink>
       <NavLink href="/about">About</NavLink>
     </nav>
   );
