@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { format, subDays, parseISO } from 'date-fns';
-import { ArrowUpIcon, ArrowDownIcon, ChartBarIcon, CurrencyDollarIcon, EyeIcon, CursorClickIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
+import { ArrowUpIcon, ArrowDownIcon, ChartBarIcon, CurrencyDollarIcon, EyeIcon, CursorArrowRaysIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
 import Head from 'next/head';
 import Link from 'next/link';
 
@@ -204,7 +204,7 @@ const AnalyticsPage = () => {
                     title="Clicks"
                     value={analyticsData.totalClicks.toLocaleString()}
                     change={getPerformanceChange(analyticsData.totalClicks, analyticsData.previousPeriod.totalClicks)}
-                    icon={<CursorClickIcon className="h-6 w-6 text-white" />}
+                    icon={<CursorArrowRaysIcon className="h-6 w-6 text-white" />}
                     iconBgColor="bg-green-500"
                   />
                   <PerformanceMetricCard

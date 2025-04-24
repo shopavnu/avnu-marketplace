@@ -325,6 +325,7 @@ export class IndicesConfigService {
           settings: {
             number_of_shards: 1,
             number_of_replicas: 1,
+            'index.max_ngram_diff': 18,
             analysis: {
               analyzer: {
                 suggestion_analyzer: {
