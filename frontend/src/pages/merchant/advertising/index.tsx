@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -129,7 +129,7 @@ const AdvertisingPage = () => {
   });
 
   // Filter and sort campaigns based on selected criteria
-  const filterCampaigns = () => {
+  const filterCampaigns = useCallback(() => {
     if (!campaigns.length) return [];
     
     let filtered = [...campaigns];
@@ -241,7 +241,7 @@ const AdvertisingPage = () => {
     });
 
     return filtered;
-  };
+  }, [campaigns, searchTerm, selectedStatus, selectedType, selectedDateRange, sortBy, sortDirection]);
 
   // Apply filters and update filtered campaigns whenever dependencies change
   useEffect(() => {
