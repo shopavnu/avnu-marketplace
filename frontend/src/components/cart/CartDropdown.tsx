@@ -3,7 +3,27 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { XMarkIcon, MinusIcon, PlusIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
-import { Product } from '@/types/products';
+// Define a local ProductComplete interface to avoid type conflicts
+interface ProductComplete {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image: string;
+  images: string[];
+  brand: string;
+  category: string;
+  subCategory: string;
+  attributes: Record<string, string>;
+  isNew: boolean;
+  rating: any;
+  vendor: any;
+  inStock: boolean;
+  createdAt: string;
+  slug: string;
+  categories: string[];
+  tags: string[];
+}
 import { brands as allBrands } from '@/data/brands';
 
 // Add custom CSS for scrollbar styling
@@ -46,7 +66,7 @@ const getBrandIdFromName = (brandName: string): string => {
 
 // Cart item type
 export interface CartItem {
-  product: Product;
+  product: ProductComplete;
   quantity: number;
 }
 
@@ -138,7 +158,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
           brand: 'Terra & Clay',
           category: 'Home',
           subCategory: 'Decor',
-          attributes: { color: 'Blue', material: 'Ceramic' },
+          attributes: { color: 'Blue', material: 'Ceramic', size: 'Medium', weight: '2.5 lbs', dimensions: '8 x 5 x 5 inches' },
           isNew: true,
           rating: {
             avnuRating: { average: 4.8, count: 24 },
@@ -156,8 +176,10 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
             }
           },
           inStock: true,
-          tags: ['featured'],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          slug: 'ceramic-vase',
+          categories: ['Home', 'Decor'],
+          tags: ['featured', 'handmade']
         },
         quantity: 1
       },
@@ -172,7 +194,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
           brand: 'Pure Living',
           category: 'Home',
           subCategory: 'Textiles',
-          attributes: { color: 'Natural', material: 'Cotton' },
+          attributes: { color: 'Natural', material: 'Cotton', size: 'Large', weight: '1.2 lbs', dimensions: '20 x 20 inches' },
           isNew: false,
           rating: {
             avnuRating: { average: 4.5, count: 18 }
@@ -189,8 +211,10 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
             }
           },
           inStock: true,
-          tags: ['bestseller'],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          slug: 'organic-cotton-throw',
+          categories: ['Home', 'Textiles'],
+          tags: ['bestseller', 'organic']
         },
         quantity: 2
       }
