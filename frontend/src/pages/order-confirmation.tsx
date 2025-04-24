@@ -143,13 +143,13 @@ const OrderConfirmation = () => {
           
           {/* Next Steps */}
           <div className="border-t border-gray-100 pt-6 mb-8">
-            <h2 className="text-lg font-medium text-charcoal mb-4">What's Next?</h2>
+            <h2 className="text-lg font-medium text-charcoal mb-4">What&apos;s Next?</h2>
             <div className="space-y-4">
               <div className="flex">
                 <div className="flex-shrink-0 w-8 h-8 bg-sage/10 rounded-full flex items-center justify-center text-sage font-medium">1</div>
                 <div className="ml-4">
                   <h3 className="text-sm font-medium text-charcoal">Order Processing</h3>
-                  <p className="text-sm text-gray-600">We're preparing your items for shipment.</p>
+                  <p className="text-sm text-gray-600">We&apos;re preparing your items for shipment.</p>
                 </div>
               </div>
               
@@ -165,7 +165,7 @@ const OrderConfirmation = () => {
                 <div className="flex-shrink-0 w-8 h-8 bg-sage/10 rounded-full flex items-center justify-center text-sage font-medium">3</div>
                 <div className="ml-4">
                   <h3 className="text-sm font-medium text-charcoal">Delivery</h3>
-                  <p className="text-sm text-gray-600">You'll receive tracking information via email once your order ships.</p>
+                  <p className="text-sm text-gray-600">You&apos;ll receive tracking information via email once your order ships.</p>
                 </div>
               </div>
             </div>

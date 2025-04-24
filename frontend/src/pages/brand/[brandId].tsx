@@ -29,7 +29,7 @@ const FreeShippingProgressBar: React.FC<FreeShippingProgressBarProps> = ({ brand
       <p className="text-sm text-gray-700 font-medium mb-1">
         {amountNeeded > 0
           ? <>Spend <span className="font-semibold text-teal-700">${amountNeeded.toFixed(2)}</span> more for FREE shipping from {brandName}!</>
-          : <span className="font-semibold text-green-600">You've earned free shipping from {brandName}! 🎉</span>
+          : <span className="font-semibold text-green-600">You&apos;ve earned free shipping from {brandName}! 🎉</span>
         }
       </p>
       <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
@@ -356,7 +356,7 @@ const BrandDetailPage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <p className="mt-3 font-medium">No Products Found</p>
-                <p className="text-sm mt-1">We couldn't find any products for {brand.name} at the moment.</p>
+                <p className="text-sm mt-1">We couldn&apos;t find any products for {brand.name} at the moment.</p>
               </motion.div>
             )}
           </motion.div>

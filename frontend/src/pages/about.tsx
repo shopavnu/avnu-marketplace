@@ -84,13 +84,13 @@ export default function AboutPage() {
 
                 <motion.div variants={fadeIn}>
                   <p className="text-lg leading-relaxed text-gray-700 mb-8">
-                    The big marketplaces are crowded and overwhelming, making it tough for authentic brands to stand out and even tougher for customers to find products they'll truly love. We're changing that.
+                    The big marketplaces are crowded and overwhelming, making it tough for authentic brands to stand out and even tougher for customers to find products they&apos;ll truly love. We&apos;re changing that.
                   </p>
                 </motion.div>
 
                 <motion.div variants={fadeIn}>
                   <p className="text-lg leading-relaxed text-gray-700">
-                    Every brand featured on <span className="font-semibold">av | nu</span> is handpicked, thoughtfully curated, and genuinely independent—so every purchase you make supports real people, not faceless corporations or endless resellers. Whether you're a shopper looking for something unique, or a creator eager to share your craft, we're here to make the experience simple, meaningful, and fun.
+                    Every brand featured on <span className="font-semibold">av | nu</span> is handpicked, thoughtfully curated, and genuinely independent—so every purchase you make supports real people, not faceless corporations or endless resellers. Whether you&apos;re a shopper looking for something unique, or a creator eager to share your craft, we&apos;re here to make the experience simple, meaningful, and fun.
                   </p>
                 </motion.div>
 
@@ -255,7 +255,7 @@ export default function AboutPage() {
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="text-lg text-gray-700 mb-8"
               >
-                Whether you're a shopper or a brand, we'd love to have you as part of the av | nu family.
+                Whether you&apos;re a shopper or a brand, we&apos;d love to have you as part of the av | nu family.
               </motion.p>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}

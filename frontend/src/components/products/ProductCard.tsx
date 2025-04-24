@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Product } from '@/types/products';
 import { causes } from '@/components/search/FilterPanel';
+import { analyticsService } from '@/services/analytics.service';
+import { useRouter } from 'next/router';
 
 interface ProductCardProps {
   product: Product;
@@ -12,6 +14,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
+  const { query } = router.query;
 
   useEffect(() => {
     setIsClient(true);
@@ -37,7 +41,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                 transition-all duration-300"
       whileHover={{ y: -4 }}
     >
-      <Link href={`/product/${product.id}`} className="block">
+      <Link 
+        href={`/product/${product.id}`} 
+        className="block" 
+        onClick={() => {
+          // Track product click (position will be determined by the backend)
+          const searchQuery = Array.isArray(query) ? query[0] : query;
+          
+          if (searchQuery) {
+            analyticsService.trackSearchResultClick(
+              product.id,
+              0, // We don't know the position, backend will handle this
+              searchQuery
+            );
+          }
+        }}
+      >
         <div className="relative aspect-[3/4] overflow-hidden">
           <Image
             src={product.image}

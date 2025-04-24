@@ -14,7 +14,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Product } from '@/types/products';
-import { causes } from '@/components/search/FilterPanel';
+import { causes } from '@/data/causes';
 
 /**
  * Props for the ProductCard component

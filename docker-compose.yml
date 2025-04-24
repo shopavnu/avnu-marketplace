@@ -23,17 +23,27 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - ENV=development
+      - NODE_ENV=development
       - PORT=8080
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=avnu
       - DB_PASSWORD=avnu_password
       - DB_NAME=avnu_db
-      - REDIS_URL=redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ELASTICSEARCH_NODE=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - SEARCH_CACHE_ENABLED=true
+      - SEARCH_CACHE_TTL=300
+      - SEARCH_EXPERIMENTS_ENABLED=true
+      - SEARCH_MONITORING_ENABLED=true
+      - LOG_LEVEL=debug
     depends_on:
       - postgres
       - redis
+      - elasticsearch
 
   postgres:
     image: postgres:15-alpine
@@ -52,7 +62,24 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+      
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
 
 volumes:
   postgres_data:
   redis_data:
+  elasticsearch_data:

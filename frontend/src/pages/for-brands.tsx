@@ -209,7 +209,7 @@ export default function ForBrands() {
               </div>
               <h3 className="text-2xl font-bold text-charcoal mb-4">Application Submitted!</h3>
               <p className="text-gray-600 mb-6">
-                Thank you for your interest in joining av | nu. We've received your application and will review it shortly. 
+                Thank you for your interest in joining av | nu. We&apos;ve received your application and will review it shortly. 
                 You can expect to hear back from us within 5 business days.
               </p>
               <button 
@@ -514,7 +514,7 @@ export default function ForBrands() {
                 <h3 className="font-montserrat text-xl font-medium text-charcoal mb-2">How long does the application process take?</h3>
                 <p className="text-gray-600">
                   After you submit your application, our team will review it within 5 business days. 
-                  If approved, we'll schedule an onboarding call to discuss next steps and begin the integration process.
+                  If approved, we&apos;ll schedule an onboarding call to discuss next steps and begin the integration process.
                 </p>
               </div>
             </div>

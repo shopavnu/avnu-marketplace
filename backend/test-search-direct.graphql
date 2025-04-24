@@ -1,0 +1,56 @@
+query SearchForShirts {
+  searchProducts(input: { query: "shirt" }) {
+    query
+    products {
+      id
+      title
+      description
+      price
+      brandName
+      categories
+    }
+    pagination {
+      total
+      hasNext
+      hasPrevious
+    }
+  }
+}
+
+query SearchClothingCategory {
+  searchProducts(input: { query: "", filters: { categories: ["clothing"] } }) {
+    query
+    products {
+      id
+      title
+      description
+      price
+      brandName
+      categories
+    }
+    pagination {
+      total
+      hasNext
+      hasPrevious
+    }
+  }
+}
+
+query SearchPriceRange {
+  searchProducts(input: { query: "", filters: { priceMin: 50, priceMax: 200 } }) {
+    query
+    products {
+      id
+      title
+      description
+      price
+      brandName
+      categories
+    }
+    pagination {
+      total
+      hasNext
+      hasPrevious
+    }
+  }
+}

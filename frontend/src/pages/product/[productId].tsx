@@ -11,6 +11,8 @@ import { Product } from '@/types/products';
 import ProductCard from '@/components/products/ProductCard';
 import { causes } from '@/components/search/FilterPanel';
 import { brands as allBrands } from '@/data/brands';
+import { analyticsService } from '@/services/analytics.service';
+import useDwellTimeTracking from '@/hooks/useDwellTimeTracking';
 
 /**
  * Helper function to get brand ID from name
@@ -48,7 +50,7 @@ const FreeShippingProgressBar: React.FC<FreeShippingProgressBarProps> = ({ brand
       <p className="text-sm text-gray-700 font-medium mb-1">
         {amountNeeded > 0
           ? <>Spend <span className="font-semibold text-teal-700">${amountNeeded.toFixed(2)}</span> more for FREE shipping from {brandName}!</>
-          : <span className="font-semibold text-green-600">You've earned free shipping from {brandName}! 🎉</span>
+          : <span className="font-semibold text-green-600">You&apos;ve earned free shipping from {brandName}! 🎉</span>
         }
       </p>
       <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
@@ -196,13 +198,42 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export default function ProductPage({ product, relatedProducts, brandProducts }: ProductPageProps) {
+  const router = useRouter();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
+  
+  // Track dwell time for this product
+  const searchQuery = router.query.q as string || '';
+  const position = parseInt(router.query.pos as string) || undefined;
+  
+  // Track product view when the page loads
+  useEffect(() => {
+    if (product) {
+      // Get the referrer from the router query or document.referrer
+      const referrer = router.query.ref as string || 
+                      (typeof document !== 'undefined' ? document.referrer : '');
+      
+      analyticsService.trackProductView(product, referrer);
+    }
+  }, [product, router.query]);
+  
+  // Use the dwell time tracking hook
+  useDwellTimeTracking({
+    resultId: product?.id || '',
+    query: searchQuery,
+    position: position
+  });
+  
   // Handle case where product is null (from error handling)
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-warm-white">
         <div className="text-center p-8">
           <h1 className="text-2xl font-semibold text-charcoal mb-4">Product Not Found</h1>
-          <p className="text-gray-600 mb-6">We couldn't find the product you're looking for.</p>
+          <p className="text-gray-600 mb-6">We couldn&apos;t find the product you&apos;re looking for.</p>
           <Link href="/shop" className="inline-block px-6 py-3 bg-sage text-white rounded-full hover:bg-sage/90 transition-colors">
             Continue Shopping
           </Link>
@@ -210,12 +241,6 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
       </div>
     );
   }
-  const router = useRouter();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
-  const [isAddedToCart, setIsAddedToCart] = useState(false);
 
   // Calculate combined rating
   const combinedRating = {
@@ -231,6 +256,9 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
       ...selectedAttributes,
       [key]: value,
     });
+    
+    // Track attribute selection
+    analyticsService.trackProductAttributeSelect(product.id, key, value);
   };
 
   // Handle add to cart
@@ -241,6 +269,13 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
       quantity,
       selectedAttributes,
     });
+    
+    // Track add to cart event
+    analyticsService.trackAddToCart(
+      product,
+      quantity,
+      selectedAttributes
+    );
     
     setIsAddedToCart(true);
     setTimeout(() => setIsAddedToCart(false), 2000);
@@ -430,11 +465,11 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
                         <>
                           <div 
                             className="w-5 h-5 rounded-full ring-1 ring-gray-200 flex-shrink-0"
-                            style={{ backgroundColor: value.toLowerCase() }}
+                            style={{ backgroundColor: value?.toLowerCase() || '#ffffff' }}
                           />
                           <div>
                             <span className="text-xs text-gray-500 block">Color</span>
-                            <span className="text-sm text-charcoal">{value}</span>
+                            <span className="text-sm text-charcoal">{value || ''}</span>
                           </div>
                         </>
                       ) : (
@@ -673,8 +708,8 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
                 </Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {brandProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {brandProducts.map((brandProduct) => (
+                  <ProductCard key={brandProduct.id} product={brandProduct} />
                 ))}
               </div>
             </section>
@@ -695,8 +730,8 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
                 </Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {relatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {relatedProducts.map((relatedProduct) => (
+                  <ProductCard key={relatedProduct.id} product={relatedProduct} />
                 ))}
               </div>
             </section>

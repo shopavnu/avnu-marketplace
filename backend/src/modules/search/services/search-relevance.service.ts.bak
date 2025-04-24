@@ -1,0 +1,1078 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { UserPreferenceService, UserPreferences } from './user-preference.service';
+import { CollaborativeFilteringService } from './collaborative-filtering.service';
+import { PreferenceDecayService } from './preference-decay.service';
+import { User } from '../../users/entities/user.entity';
+
+/**
+ * Types of search relevance algorithms that can be tested
+ */
+export enum RelevanceAlgorithm {
+  STANDARD = 'standard', // Default Elasticsearch BM25 algorithm
+  INTENT_BOOSTED = 'intent', // Intent-based boosting
+  USER_PREFERENCE = 'preference', // User preference-based boosting
+  HYBRID = 'hybrid', // Combination of multiple approaches
+  SEMANTIC = 'semantic', // Semantic similarity-based
+}
+
+/**
+ * Scoring profile for search relevance
+ */
+export interface ScoringProfile {
+  name: string;
+  boostFactors: {
+    [field: string]: number;
+  };
+  functions: Array<{
+    type: 'field_value_factor' | 'decay' | 'script_score';
+    field?: string;
+    factor?: number;
+    modifier?:
+      | 'none'
+      | 'log'
+      | 'log1p'
+      | 'log2p'
+      | 'ln'
+      | 'ln1p'
+      | 'ln2p'
+      | 'square'
+      | 'sqrt'
+      | 'reciprocal';
+    weight?: number;
+    params?: Record<string, any>;
+    script?: string;
+  }>;
+  scoreMode: 'multiply' | 'sum' | 'avg' | 'first' | 'max' | 'min';
+  boostMode: 'multiply' | 'replace' | 'sum' | 'avg' | 'max' | 'min';
+}
+
+// UserPreferences interface is now imported from user-preference.service
+
+/**
+ * A/B test configuration
+ */
+export interface ABTestConfig {
+  id: string;
+  name: string;
+  description: string;
+  variants: {
+    id: string;
+    algorithm: RelevanceAlgorithm;
+    weight: number; // Percentage of traffic (0-100)
+    params?: Record<string, any>;
+  }[];
+  startDate: Date;
+  endDate?: Date;
+  isActive: boolean;
+  analyticsEventName: string;
+}
+
+/**
+ * Service for enhancing search relevance with advanced scoring,
+ * user preference-based boosting, and A/B testing capabilities
+ */
+@Injectable()
+export class SearchRelevanceService {
+  private readonly logger = new Logger(SearchRelevanceService.name);
+  private readonly scoringProfiles: Map<string, ScoringProfile> = new Map();
+  private readonly activeABTests: ABTestConfig[] = [];
+  private readonly userPreferencesCache: Map<string, UserPreferences> = new Map();
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userPreferenceService: UserPreferenceService,
+    private readonly collaborativeFilteringService: CollaborativeFilteringService,
+    private readonly preferenceDecayService: PreferenceDecayService,
+  ) {
+    this.initializeScoringProfiles();
+    this.loadActiveABTests();
+  }
+
+  /**
+   * Initialize default scoring profiles
+   */
+  private initializeScoringProfiles(): void {
+    // Standard profile - basic BM25 with field boosts
+    this.scoringProfiles.set('standard', {
+      name: 'standard',
+      boostFactors: {
+        name: 3.0,
+        description: 1.0,
+        categories: 2.0,
+        brand: 1.5,
+        tags: 1.2,
+      },
+      functions: [],
+      scoreMode: 'multiply',
+      boostMode: 'multiply',
+    });
+
+    // Popularity profile - incorporates view count and rating
+    this.scoringProfiles.set('popularity', {
+      name: 'popularity',
+      boostFactors: {
+        name: 2.0,
+        description: 0.8,
+        categories: 1.5,
+        brand: 1.2,
+      },
+      functions: [
+        {
+          type: 'field_value_factor',
+          field: 'viewCount',
+          factor: 0.1,
+          modifier: 'log1p',
+          weight: 1.0,
+        },
+        {
+          type: 'field_value_factor',
+          field: 'rating',
+          factor: 1.0,
+          modifier: 'sqrt',
+          weight: 2.0,
+        },
+      ],
+      scoreMode: 'sum',
+      boostMode: 'multiply',
+    });
+
+    // Recency profile - boosts newer products
+    this.scoringProfiles.set('recency', {
+      name: 'recency',
+      boostFactors: {
+        name: 2.0,
+        description: 1.0,
+        categories: 1.5,
+      },
+      functions: [
+        {
+          type: 'decay',
+          field: 'createdAt',
+          factor: 0.5,
+          modifier: 'none',
+          weight: 2.0,
+          params: {
+            scale: '30d',
+            offset: '0d',
+            decay: 0.5,
+          },
+        },
+      ],
+      scoreMode: 'multiply',
+      boostMode: 'multiply',
+    });
+
+    // Intent-based profile - dynamically adjusted based on detected intent
+    this.scoringProfiles.set('intent', {
+      name: 'intent',
+      boostFactors: {
+        name: 2.0,
+        description: 1.0,
+        categories: 1.5,
+        brand: 1.2,
+        values: 1.0,
+      },
+      functions: [],
+      scoreMode: 'multiply',
+      boostMode: 'multiply',
+    });
+
+    this.logger.log(`Initialized ${this.scoringProfiles.size} scoring profiles`);
+  }
+
+  /**
+   * Load active A/B tests from configuration
+   */
+  private loadActiveABTests(): void {
+    // In a real implementation, these would be loaded from a database or configuration service
+    const currentDate = new Date();
+
+    this.activeABTests.push({
+      id: 'search-relevance-test-001',
+      name: 'Basic vs. Intent-Based Relevance',
+      description: 'Testing standard BM25 algorithm against intent-based boosting',
+      variants: [
+        {
+          id: 'control',
+          algorithm: RelevanceAlgorithm.STANDARD,
+          weight: 50,
+        },
+        {
+          id: 'intent-boosted',
+          algorithm: RelevanceAlgorithm.INTENT_BOOSTED,
+          weight: 50,
+        },
+      ],
+      startDate: new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+      endDate: new Date(currentDate.getTime() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
+      isActive: true,
+      analyticsEventName: 'search_relevance_test_001',
+    });
+
+    this.activeABTests.push({
+      id: 'user-preference-test-001',
+      name: 'User Preference Boosting',
+      description: 'Testing effectiveness of user preference-based boosting',
+      variants: [
+        {
+          id: 'control',
+          algorithm: RelevanceAlgorithm.STANDARD,
+          weight: 33,
+        },
+        {
+          id: 'preference-light',
+          algorithm: RelevanceAlgorithm.USER_PREFERENCE,
+          weight: 33,
+          params: {
+            preferenceWeight: 0.5,
+          },
+        },
+        {
+          id: 'preference-heavy',
+          algorithm: RelevanceAlgorithm.USER_PREFERENCE,
+          weight: 34,
+          params: {
+            preferenceWeight: 1.5,
+          },
+        },
+      ],
+      startDate: new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      endDate: new Date(currentDate.getTime() + 27 * 24 * 60 * 60 * 1000), // 27 days from now
+      isActive: true,
+      analyticsEventName: 'user_preference_test_001',
+    });
+
+    this.logger.log(`Loaded ${this.activeABTests.length} active A/B tests`);
+  }
+
+  /**
+   * Get user preferences for personalization
+   * In a real implementation, this would fetch from a database or user service
+   */
+  private async getUserPreferences(userId: string): Promise<UserPreferences | null> {
+    // Check cache first
+    if (this.userPreferencesCache.has(userId)) {
+      return this.userPreferencesCache.get(userId);
+    }
+
+    try {
+      // Get user preferences from service
+      const preferences = await this.userPreferenceService.getUserPreferences(userId);
+
+      if (preferences) {
+        // Check if preferences need decay based on last decay timestamp
+        const shouldApplyDecay = this.shouldApplyDecay(preferences);
+
+        if (shouldApplyDecay && this.preferenceDecayService.isDecayEnabled()) {
+          // Apply just-in-time decay before using preferences
+          await this.preferenceDecayService.applyDecayToUser(userId);
+
+          // Get updated preferences after decay
+          const decayedPreferences = await this.userPreferenceService.getUserPreferences(userId);
+          if (decayedPreferences) {
+            // Cache decayed preferences
+            this.userPreferencesCache.set(userId, decayedPreferences);
+            return decayedPreferences;
+          }
+        } else {
+          // Cache preferences
+          this.userPreferencesCache.set(userId, preferences);
+          return preferences;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.error(`Error fetching user preferences: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Determine if preferences need decay based on last decay timestamp
+   *
+   * @param preferences The user preferences
+   * @returns True if preferences should be decayed
+   */
+  private shouldApplyDecay(preferences: UserPreferences): boolean {
+    // Default to true if no last decay timestamp is available
+    if (!preferences.additionalData || !preferences.additionalData.lastDecay) {
+      return true;
+    }
+
+    const now = Date.now();
+    const lastDecayTimestamp = preferences.additionalData.lastDecay.timestamp;
+
+    // Apply decay if more than 24 hours have passed since last decay
+    const dayInMs = 24 * 60 * 60 * 1000;
+    return now - lastDecayTimestamp > dayInMs;
+  }
+
+  /**
+   * Apply scoring profile to Elasticsearch query
+   */
+  applyScoringProfile(
+    query: any,
+    profileName: string,
+    user?: User,
+    intent?: string,
+    entities?: Array<{ type: string; value: string; confidence: number }>,
+  ): any {
+    const scoredQuery = { ...query };
+    const profile = this.scoringProfiles.get(profileName);
+    if (!profile) {
+      this.logger.warn(`Scoring profile '${profileName}' not found, using standard`);
+      return query;
+    }
+
+    // Create a function score query
+    const functionScoreQuery = {
+      function_score: {
+        query: scoredQuery.query,
+        functions: [],
+        score_mode: profile.scoreMode,
+        boost_mode: profile.boostMode,
+      },
+    };
+
+    // Add function score components from profile
+    for (const func of profile.functions) {
+      functionScoreQuery.function_score.functions.push(func);
+    }
+
+    // Add field-specific boost functions
+    for (const [field, boost] of Object.entries(profile.boostFactors)) {
+      functionScoreQuery.function_score.functions.push({
+        // Using any type to bypass TypeScript error for Elasticsearch query structure
+        ...({ filter: { exists: { field } } } as any),
+        weight: boost,
+      });
+    }
+
+    // Apply user preference boosting if user is provided
+    if (user && profileName === 'preference') {
+      this.applyUserPreferenceBoosts(functionScoreQuery, user);
+    }
+
+    // Apply intent-based boosting if intent is provided
+    if (intent && profileName === 'intent') {
+      this.applyIntentBasedBoosts(functionScoreQuery, intent, entities);
+    }
+
+    scoredQuery.query = functionScoreQuery;
+    return scoredQuery;
+  }
+
+  /**
+   * Apply user preference-based boosts to the query
+   */
+  private async applyUserPreferenceBoosts(query: any, user: User): Promise<void> {
+    try {
+      // Get user preferences
+      let preferences = await this.getUserPreferences(user.id);
+
+      if (!preferences) {
+        this.logger.log(`No preferences found for user ${user.id}`);
+        return;
+      }
+
+      // Check if preferences need decay
+      if (this.shouldApplyDecay(preferences)) {
+        this.logger.log(`Applying preference decay for user ${user.id}`);
+        // Use applyDecayToUser instead of the non-existent applyDecay method
+        const decayApplied = await this.preferenceDecayService.applyDecayToUser(user.id);
+        if (decayApplied) {
+          // Reload preferences after decay
+          preferences = await this.userPreferenceService.getUserPreferences(user.id);
+        }
+      }
+
+      const functions = query.function_score.functions;
+
+      // Get top categories and brands for enhanced boosting
+      const topCategories = this.getTopItems(preferences.categories, 5);
+      const topBrands = this.getTopItems(preferences.brands, 5);
+      
+      // Add progressive category boosts (higher boost for top categories)
+      if (topCategories.length > 0) {
+        this.logger.log(`Applying category boosting for user ${user.id}`);
+        
+        // Apply higher boosts to top categories (progressive boosting)
+        topCategories.forEach(([category, weight], index) => {
+          // Calculate a boost factor that decreases with position
+          // First item gets highest boost, last gets lowest
+          const positionBoost = 1 + ((topCategories.length - index) / topCategories.length);
+          
+          functions.push({
+            filter: {
+              match: {
+                categories: category,
+              },
+            },
+            weight: Number(weight) * 2.0 * positionBoost, // Enhanced category boost with position factor
+          });
+          
+          // Also boost related categories if available through collaborative filtering
+          this.addRelatedCategoryBoosts(functions, category, Number(weight));
+        });
+      }
+
+      // Add progressive brand boosts (higher boost for top brands)
+      if (topBrands.length > 0) {
+        this.logger.log(`Applying brand boosting for user ${user.id}`);
+        
+        // Apply higher boosts to top brands (progressive boosting)
+        topBrands.forEach(([brand, weight], index) => {
+          // Calculate a boost factor that decreases with position
+          const positionBoost = 1 + ((topBrands.length - index) / topBrands.length);
+          
+          functions.push({
+            filter: {
+              match: {
+                brand: brand,
+              },
+            },
+            weight: Number(weight) * 1.8 * positionBoost, // Enhanced brand boost with position factor
+          });
+        });
+      }
+
+      // Add value boosts
+      if (preferences.values && Object.keys(preferences.values).length > 0) {
+        for (const [value, weight] of Object.entries(preferences.values)) {
+          if (Number(weight) > 0) {
+            functions.push({
+              filter: {
+                match: {
+                  values: value,
+                },
+              },
+              weight: Number(weight) * 1.2, // Slightly increased boost for values
+            });
+          }
+        }
+      }
+
+      // Add price range boosts
+      if (preferences.priceRanges && preferences.priceRanges.length > 0) {
+        for (const range of preferences.priceRanges.slice(0, 3)) {
+          functions.push({
+            filter: {
+              range: {
+                price: {
+                  gte: range.min,
+                  lte: range.max,
+                },
+              },
+            },
+            weight: range.weight * 1.3, // Increased boost for price ranges
+          });
+        }
+      }
+      
+      // Add recency boost for recently viewed products
+      if (preferences.recentlyViewedProducts && preferences.recentlyViewedProducts.length > 0) {
+        // Check if recentlyViewedProducts is an array of objects with productId or just an array of IDs
+        const recentProductIds = Array.isArray(preferences.recentlyViewedProducts) ? 
+          (typeof preferences.recentlyViewedProducts[0] === 'object' ? 
+            preferences.recentlyViewedProducts.slice(0, 10).map(item => item.productId) : 
+            preferences.recentlyViewedProducts.slice(0, 10)) : 
+          [];
+          
+        if (recentProductIds.length > 0) {
+          // Apply higher boost to more recently viewed products
+          recentProductIds.forEach((productId, index) => {
+            // Calculate recency boost - more recent = higher boost
+            const recencyBoost = 1 + ((recentProductIds.length - index) / recentProductIds.length);
+            
+            functions.push({
+              filter: {
+                term: {
+                  _id: productId,
+                },
+              },
+              weight: 2.0 * recencyBoost, // High boost for recently viewed products
+            });
+          });
+        }
+      }
+
+      this.logger.log(`Applied enhanced user preference boosts for user ${user.id}`);
+    } catch (error) {
+      this.logger.error(`Error applying user preference boosts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Add boosts for related categories based on collaborative filtering
+   */
+  private addRelatedCategoryBoosts(functions: any[], category: string, weight: number): void {
+    try {
+      const relatedCategories = this.collaborativeFilteringService.getRelatedCategories(category);
+      if (relatedCategories && relatedCategories.length > 0) {
+        // Add boosts for related categories with reduced weight
+        relatedCategories.forEach(relatedCategory => {
+          functions.push({
+            filter: {
+              match: {
+                categories: relatedCategory.category,
+              },
+            },
+            weight: weight * 0.5 * relatedCategory.similarity, // Reduced weight based on similarity
+          });
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Error adding related category boosts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get top N items from a preference map, sorted by weight
+   */
+  private getTopItems(preferenceMap: Record<string, number>, count: number): [string, number][] {
+    if (!preferenceMap) return [];
+    
+    return Object.entries(preferenceMap)
+      .filter(([_, weight]) => Number(weight) > 0)
+      .sort(([_, weightA], [__, weightB]) => Number(weightB) - Number(weightA))
+      .slice(0, count);
+  }
+    try {
+      const relatedCategories = this.collaborativeFilteringService.getRelatedCategories(category);
+      if (relatedCategories && relatedCategories.length > 0) {
+        // Add boosts for related categories with reduced weight
+        relatedCategories.forEach(relatedCategory => {
+          functions.push({
+            filter: {
+              match: {
+                categories: relatedCategory.category,
+              },
+            },
+            weight: weight * 0.5 * relatedCategory.similarity, // Reduced weight based on similarity
+          });
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Error adding related category boosts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Apply intent-based boosts to the query
+   */
+  private applyIntentBasedBoosts(
+    query: any,
+    intent: string,
+    entities?: Array<{ type: string; value: string; confidence: number }>,
+  ): void {
+    const functions = query.function_score.functions;
+
+    // Adjust boosts based on intent
+    switch (intent) {
+      case 'product_search':
+        // Standard product search - already covered by default boosts
+        break;
+
+      case 'category_browse':
+        // Boost category matches
+        functions.push({
+          filter: { exists: { field: 'categories' } },
+          weight: 3.0,
+        });
+        break;
+
+      case 'brand_specific':
+        // Boost brand matches
+        functions.push({
+          filter: { exists: { field: 'brand' } },
+          weight: 3.0,
+        });
+        break;
+
+      case 'value_driven':
+        // Boost value-related fields
+        functions.push({
+          filter: { exists: { field: 'values' } },
+          weight: 3.0,
+        });
+        break;
+
+      case 'comparison':
+        // For comparison, ensure both items appear
+        // This is handled at the query level, not in scoring
+        break;
+
+      case 'recommendation':
+        // Sort by rating for recommendations
+        functions.push({
+          field_value_factor: {
+            field: 'rating',
+            factor: 2.0,
+            modifier: 'sqrt',
+            missing: 1,
+          },
+        });
+        functions.push({
+          field_value_factor: {
+            field: 'reviewCount',
+            factor: 0.1,
+            modifier: 'log1p',
+            missing: 1,
+          },
+        });
+        break;
+
+      case 'sort':
+        // Sorting is handled separately, not in scoring
+        break;
+    }
+
+    // Apply entity-specific boosts
+    if (entities) {
+      for (const entity of entities) {
+        if (entity.confidence < 0.5) continue; // Skip low confidence entities
+
+        switch (entity.type) {
+          case 'category':
+            functions.push({
+              filter: {
+                match: {
+                  categories: entity.value,
+                },
+              },
+              weight: entity.confidence * 2.0,
+            });
+            break;
+
+          case 'brand':
+            functions.push({
+              filter: {
+                match: {
+                  brand: entity.value,
+                },
+              },
+              weight: entity.confidence * 2.0,
+            });
+            break;
+
+          case 'value':
+            functions.push({
+              filter: {
+                match: {
+                  values: entity.value,
+                },
+              },
+              weight: entity.confidence * 1.5,
+            });
+            break;
+
+          case 'color':
+            functions.push({
+              filter: {
+                match: {
+                  'attributes.color': entity.value,
+                },
+              },
+              weight: entity.confidence * 1.5,
+            });
+            break;
+
+          case 'material':
+            functions.push({
+              filter: {
+                match: {
+                  'attributes.material': entity.value,
+                },
+              },
+              weight: entity.confidence * 1.3,
+            });
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Apply user preference-based boosts to the query
+   */
+  private async applyUserPreferenceBoosts(query: any, user: User): Promise<void> {
+    try {
+      // Get user preferences
+      let preferences = await this.getUserPreferences(user.id);
+
+      if (!preferences) {
+        this.logger.log(`No preferences found for user ${user.id}`);
+        return;
+      }
+
+      // Check if preferences need decay
+      if (this.shouldApplyDecay(preferences)) {
+        this.logger.log(`Applying preference decay for user ${user.id}`);
+        // Use applyDecayToUser instead of the non-existent applyDecay method
+        const decayApplied = await this.preferenceDecayService.applyDecayToUser(user.id);
+        if (decayApplied) {
+          // Reload preferences after decay
+          preferences = await this.userPreferenceService.getUserPreferences(user.id);
+        }
+      }
+
+      const functions = query.function_score.functions;
+
+      // Get top categories and brands for enhanced boosting
+      const topCategories = this.getTopItems(preferences.categories, 5);
+      const topBrands = this.getTopItems(preferences.brands, 5);
+      
+      // Add progressive category boosts (higher boost for top categories)
+      if (topCategories.length > 0) {
+        this.logger.log(`Applying category boosting for user ${user.id}`);
+        
+        // Apply higher boosts to top categories (progressive boosting)
+        topCategories.forEach(([category, weight], index) => {
+          // Calculate a boost factor that decreases with position
+          // First item gets highest boost, last gets lowest
+          const positionBoost = 1 + ((topCategories.length - index) / topCategories.length);
+          
+          functions.push({
+            filter: {
+              match: {
+                categories: category,
+              },
+            },
+            weight: Number(weight) * 2.0 * positionBoost, // Enhanced category boost with position factor
+          });
+        });
+      }
+
+      // Add progressive brand boosts (higher boost for top brands)
+      if (topBrands.length > 0) {
+        this.logger.log(`Applying brand boosting for user ${user.id}`);
+        
+        // Apply higher boosts to top brands (progressive boosting)
+        topBrands.forEach(([brand, weight], index) => {
+          // Calculate a boost factor that decreases with position
+          const positionBoost = 1 + ((topBrands.length - index) / topBrands.length);
+          
+          functions.push({
+            filter: {
+              match: {
+                brand: brand,
+              },
+            },
+            weight: Number(weight) * 1.8 * positionBoost, // Enhanced brand boost with position factor
+          });
+        });
+      }
+
+      // Add value boosts
+      if (preferences.values && Object.keys(preferences.values).length > 0) {
+        for (const [value, weight] of Object.entries(preferences.values)) {
+          if (Number(weight) > 0) {
+            functions.push({
+              filter: {
+                match: {
+                  values: value,
+                },
+              },
+              weight: Number(weight) * 1.2, // Slightly increased boost for values
+            });
+          }
+        }
+      }
+
+      // Add price range boosts
+      if (preferences.priceRanges && preferences.priceRanges.length > 0) {
+        for (const range of preferences.priceRanges.slice(0, 3)) {
+          functions.push({
+            filter: {
+              range: {
+                price: {
+                  gte: range.min,
+                  lte: range.max,
+                },
+              },
+            },
+            weight: range.weight * 1.3, // Increased boost for price ranges
+          });
+        }
+      }
+      
+      // Add recency boost for recently viewed products
+      if (preferences.recentlyViewedProducts && preferences.recentlyViewedProducts.length > 0) {
+        // Check if recentlyViewedProducts is an array of objects with productId or just an array of IDs
+        const recentProductIds = Array.isArray(preferences.recentlyViewedProducts) ? 
+          (typeof preferences.recentlyViewedProducts[0] === 'object' ? 
+            preferences.recentlyViewedProducts.slice(0, 10).map(item => item.productId) : 
+            preferences.recentlyViewedProducts.slice(0, 10)) : 
+          [];
+          
+        if (recentProductIds.length > 0) {
+          // Apply higher boost to more recently viewed products
+          recentProductIds.forEach((productId, index) => {
+            // Calculate recency boost - more recent = higher boost
+            const recencyBoost = 1 + ((recentProductIds.length - index) / recentProductIds.length);
+            
+            functions.push({
+              filter: {
+                term: {
+                  _id: productId,
+                },
+              },
+              weight: 2.0 * recencyBoost, // High boost for recently viewed products
+            });
+          });
+        }
+      }
+
+      this.logger.log(`Applied enhanced user preference boosts for user ${user.id}`);
+    } catch (error) {
+      this.logger.error(`Error applying user preference boosts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get top N items from a preference map, sorted by weight
+   */
+  private getTopItems(preferenceMap: Record<string, number>, count: number): [string, number][] {
+    if (!preferenceMap) return [];
+    
+    return Object.entries(preferenceMap)
+      .filter(([_, weight]) => Number(weight) > 0)
+      .sort(([_, weightA], [__, weightB]) => Number(weightB) - Number(weightA))
+      .slice(0, count);
+  }
+
+  /**
+   * Apply intent-based boosts to the query
+   */
+  private applyIntentBasedBoosts(
+    query: any,
+    intent: string,
+    entities?: Array<{ type: string; value: string; confidence: number }>,
+  ): void {
+    const functions = query.function_score.functions;
+
+    // Adjust boosts based on intent
+    switch (intent) {
+      case 'product_search':
+        // Standard product search - already covered by default boosts
+        break;
+
+      case 'category_browse':
+        // Boost category matches
+        functions.push({
+          filter: { exists: { field: 'categories' } },
+          weight: 3.0,
+        });
+        break;
+
+      case 'brand_specific':
+        // Boost brand matches
+        functions.push({
+          filter: { exists: { field: 'brand' } },
+          weight: 3.0,
+        });
+        break;
+
+      case 'value_driven':
+        // Boost value-related fields
+        functions.push({
+          filter: { exists: { field: 'values' } },
+          weight: 3.0,
+        });
+        break;
+
+      case 'comparison':
+        // For comparison, ensure both items appear
+        // This is handled at the query level, not in scoring
+        break;
+
+      case 'recommendation':
+        // Sort by rating for recommendations
+        functions.push({
+          field_value_factor: {
+            field: 'rating',
+            factor: 2.0,
+            modifier: 'sqrt',
+            missing: 1,
+          },
+        });
+        functions.push({
+          field_value_factor: {
+            field: 'reviewCount',
+            factor: 0.1,
+            modifier: 'log1p',
+            missing: 1,
+          },
+        });
+        break;
+
+      case 'sort':
+        // Sorting is handled separately, not in scoring
+        break;
+    }
+
+    // Apply entity-specific boosts
+    if (entities) {
+      for (const entity of entities) {
+        if (entity.confidence < 0.5) continue; // Skip low confidence entities
+
+        switch (entity.type) {
+          case 'category':
+            functions.push({
+              filter: {
+                match: {
+                  categories: entity.value,
+                },
+              },
+              weight: entity.confidence * 2.0,
+            });
+            break;
+
+          case 'brand':
+            functions.push({
+              filter: {
+                match: {
+                  brand: entity.value,
+                },
+              },
+              weight: entity.confidence * 2.0,
+            });
+            break;
+
+          case 'value':
+            functions.push({
+              filter: {
+                match: {
+                  values: entity.value,
+                },
+              },
+              weight: entity.confidence * 1.5,
+            });
+            break;
+
+          case 'color':
+            functions.push({
+              filter: {
+                match: {
+                  'attributes.color': entity.value,
+                },
+              },
+              weight: entity.confidence * 1.5,
+            });
+            break;
+
+          case 'material':
+            functions.push({
+              filter: {
+                match: {
+                  'attributes.material': entity.value,
+                },
+              },
+              weight: entity.confidence * 1.3,
+            });
+            break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Select an A/B test variant for a user
+   * @param testId The A/B test ID
+   * @param userId The user ID (for consistent variant assignment)
+   * @returns The selected variant or null if test not found
+   */
+  selectABTestVariant(
+    testId: string,
+    userId: string,
+  ): {
+    testId: string;
+    variantId: string;
+    algorithm: RelevanceAlgorithm;
+    params?: Record<string, any>;
+    analyticsEventName: string;
+  } | null {
+    const test = this.activeABTests.find(t => t.id === testId && t.isActive);
+    if (!test) return null;
+
+    // Use a hash of the user ID and test ID to consistently assign the same variant
+    // to the same user for the duration of the test
+    const hash = this.hashString(`${userId}-${testId}`);
+    const normalizedHash = hash % 100; // 0-99
+
+    let cumulativeWeight = 0;
+    for (const variant of test.variants) {
+      cumulativeWeight += variant.weight;
+      if (normalizedHash < cumulativeWeight) {
+        return {
+          testId: test.id,
+          variantId: variant.id,
+          algorithm: variant.algorithm,
+          params: variant.params,
+          analyticsEventName: test.analyticsEventName,
+        };
+      }
+    }
+
+    // Fallback to first variant if weights don't add up to 100
+    return {
+      testId: test.id,
+      variantId: test.variants[0].id,
+      algorithm: test.variants[0].algorithm,
+      params: test.variants[0].params,
+      analyticsEventName: test.analyticsEventName,
+    };
+  }
+
+  /**
+   * Generate Google Analytics event data for A/B test tracking
+   */
+  generateAnalyticsData(
+    testInfo: {
+      testId: string;
+      variantId: string;
+      analyticsEventName: string;
+    },
+    searchQuery: string,
+    resultCount: number,
+  ): Record<string, any> {
+    return {
+      event: testInfo.analyticsEventName,
+      event_category: 'search',
+      event_label: searchQuery,
+      ab_test_id: testInfo.testId,
+      variant_id: testInfo.variantId,
+      result_count: resultCount,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Simple string hash function for consistent variant assignment
+   */
+  private hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  /**
+   * Get all available scoring profiles
+   */
+  getScoringProfiles(): string[] {
+    return Array.from(this.scoringProfiles.keys());
+  }
+
+  /**
+   * Get all active A/B tests
+   */
+  getActiveABTests(): ABTestConfig[] {
+    return this.activeABTests.filter(test => test.isActive);
+  }
+}

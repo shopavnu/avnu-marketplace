@@ -1,0 +1,21 @@
+scalar JSON
+
+type Query {
+  # Get dashboard overview with key metrics
+  dashboardOverview(period: Int = 30): JSON!
+  
+  # Get search performance overview
+  searchPerformance(period: Int = 30): JSON!
+  
+  # Get entity search performance
+  entitySearchPerformance(period: Int = 30): JSON!
+  
+  # Get user preference analytics
+  userPreferenceAnalytics(limit: Int = 10): JSON!
+  
+  # Get A/B testing analytics
+  abTestingAnalytics: JSON!
+  
+  # Get personalization effectiveness metrics
+  personalizationEffectiveness(period: Int = 30): JSON!
+}

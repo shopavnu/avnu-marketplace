@@ -1,0 +1,1896 @@
+scalar DateTime
+scalar JSON
+scalar JSONObject
+
+enum TimeGranularity {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+type Query {
+  merchants: [Merchant!]!
+  merchant(id: ID!): Merchant
+  myMerchants: [Merchant!]!
+  profile: User
+  merchantDashboardAnalytics(merchantId: ID!): MerchantDashboardAnalytics
+  
+  # Experiment queries
+  experiments(status: String): [Experiment!]!
+  experiment(id: ID!): Experiment!
+  experimentResults(id: ID!): ExperimentResultsType!
+  experimentSignificance(id: ID!): StatisticalSignificanceType!
+  experimentTimeToCompletion(id: ID!, dailyTraffic: Int!): TimeToCompletionType!
+  experimentMetricsOverTime(id: ID!, interval: String): MetricsOverTimeType!
+  requiredSampleSize(baselineConversionRate: Float!, minimumDetectableEffect: Float!, significanceLevel: Float, power: Float): Int!
+  searchExperiments: VariantConfigurationType
+  personalizationExperiments: VariantConfigurationType
+  recommendationExperiments: VariantConfigurationType
+  uiExperiments: VariantConfigurationType
+  experimentVariants(experimentType: String!): VariantConfigurationType
+  userAssignments: [UserExperimentAssignment!]!
+  
+  # User queries
+  users: [User!]!
+  user(id: ID!): User
+  
+  # Merchant queries
+  merchantBrand(merchantId: ID!): MerchantBrand
+  merchantProducts(merchantId: ID!): [MerchantProduct!]!
+  merchantShipping(merchantId: ID!): MerchantShipping
+  merchantAdCampaigns(merchantId: ID!): [MerchantAdCampaign!]!
+  merchantAdCampaign(id: ID!, merchantId: ID!): MerchantAdCampaign!
+  activeMerchantAdCampaigns(merchantId: ID!): [MerchantAdCampaign!]!
+  merchantAdCampaignsByType(merchantId: ID!, type: CampaignType!): [MerchantAdCampaign!]!
+  merchantAdCampaignsForProduct(merchantId: ID!, productId: ID!): [MerchantAdCampaign!]!
+  
+  # Ad budget management queries
+  merchantBudgetUtilization(merchantId: ID!): BudgetUtilizationReport!
+  campaignBudgetForecast(campaignId: ID!, merchantId: ID!): CampaignForecast!
+  campaignDailyBudget(campaignId: ID!, merchantId: ID!): Float!
+  
+  # Ad placement queries
+  getAdsForDiscoveryFeed(options: AdPlacementOptionsInput): [AdPlacement!]!
+  getRecommendedAdPlacements(merchantId: ID!): [ProductAdRecommendation!]!
+  
+  # Merchant Analytics queries
+  merchantAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime, productId: ID, categoryId: ID): [MerchantAnalytics!]!
+  merchantProductAnalytics(merchantId: ID!, productId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
+  merchantCategoryAnalytics(merchantId: ID!, categoryId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
+  merchantOverallAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
+  merchantDemographicData(merchantId: ID!, timeFrame: String = "monthly"): JSON!
+  merchantTopProducts(merchantId: ID!, limit: Int = 10, timeFrame: String = "monthly"): [JSON!]!
+  merchantFilteredAnalytics(merchantId: ID!, filters: [AnalyticsFilterInput!]!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
+  merchantTopPerformingProducts(merchantId: ID!, metric: String!, limit: Int = 10, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [TopProduct!]!
+  merchantCategoryPerformance(metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
+  merchantCategoryPerformanceOverTime(categoryId: String!, metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
+  merchantProductPerformanceOverTime(productId: String!, metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
+  merchantCompareProducts(productIds: [String!]!, metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
+  
+  # Merchant Dashboard Analytics queries
+  merchantPeriodComparison(currentPeriodStart: DateTime!, currentPeriodEnd: DateTime!, previousPeriodStart: DateTime!, previousPeriodEnd: DateTime!, productIds: [String], categoryIds: [String]): PeriodComparisonData!
+  merchantPerformanceOverTime(metricName: String!, timeFrame: String, startDate: DateTime, endDate: DateTime): [TimeSeriesDataPoint!]!
+  merchantConversionFunnel(timeFrame: String, startDate: DateTime, endDate: DateTime): ConversionFunnel!
+  merchantOrganicVsPaidPerformance(timeFrame: String, startDate: DateTime, endDate: DateTime): OrganicVsPaidPerformance!
+  merchantMetricAggregation(metricName: String!, timeFrame: String, startDate: DateTime, endDate: DateTime, productId: String, categoryId: String): Float!
+  merchantCompareTimePeriods(metricName: String!, currentStartDate: DateTime!, currentEndDate: DateTime!, previousStartDate: DateTime!, previousEndDate: DateTime!, productId: String, categoryId: String): JSON!
+  merchantTimeSeriesData(metricName: String!, timeFrame: String, startDate: DateTime, endDate: DateTime, productId: String, categoryId: String): [TimeSeriesDataPoint!]!
+  merchantTopSellingProducts(timeFrame: String, startDate: DateTime, endDate: DateTime, limit: Int = 10): [TopProduct!]!
+  merchantRevenueAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime): RevenueAnalytics!
+  merchantConversionAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime): ConversionAnalytics!
+  merchantImpressionAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime): ImpressionAnalytics!
+  merchantDemographicAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime, filters: [DemographicFilterInput]): DemographicAnalytics!
+  merchantEnhancedDashboardAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime, demographicFilters: [DemographicFilterInput]): MerchantDashboardAnalytics!
+  merchantRollingAverages(merchantId: ID!, metricName: String!, days: Int = 7, timeFrame: String, startDate: DateTime, endDate: DateTime): [TimeSeriesDataPoint!]!
+  
+  # Analytics queries
+  dashboardAnalytics(period: Int = 30): DashboardAnalyticsDto!
+  searchAnalytics(period: Int = 30): SearchAnalyticsSummaryDto!
+  topSearchQueries(limit: Int = 10, period: Int = 30): [QueryCountDto!]!
+  zeroResultQueries(limit: Int = 10, period: Int = 30): [QueryCountDto!]!
+  nlpVsRegularSearchAnalytics(period: Int = 30): JSON!
+  personalizedVsRegularSearchAnalytics(period: Int = 30): JSON!
+  userEngagementAnalytics(period: Int = 30): UserEngagementSummaryDto!
+  getUserEngagementByTypeQuery(period: Int = 30): [EngagementTypeCount!]!
+  topViewedProducts(limit: Int = 10, period: Int = 30): [ProductInteractionCount!]!
+  userEngagementFunnel(period: Int = 30): JSON!
+  businessMetricsAnalytics(period: Int = 30): JSON!
+  businessMetricsSummary(period: Int = 30): JSON!
+  revenueMetrics(period: Int = 30, granularity: TimeGranularity = DAILY): [BusinessMetrics!]!
+  
+  # Product queries
+  products(pagination: PaginationDto): ProductPaginatedResponse!
+  product(id: ID!): Product!
+  searchProducts(query: String, pagination: PaginationDto, categories: [String], priceMin: Int, priceMax: Int, merchantId: String, inStock: Boolean, values: [String]): ProductPaginatedResponse!
+  recommendedProducts(userId: ID!, limit: Int): [Product!]!
+  discoveryProducts(limit: Int): [Product!]!
+  merchantProductsPaginated(merchantId: ID!, pagination: PaginationDto): ProductPaginatedResponse!
+  
+  # Search queries
+  productSuggestions(query: String!, limit: Int): [String!]!
+  relatedProducts(productId: ID!, limit: Int): [ProductSearchResult!]!
+  trendingProducts(limit: Int): [ProductSearchResult!]!
+  discoveryProductsAdvanced(userId: String, limit: Int, values: [String]): [ProductSearchResult!]!
+  naturalLanguageSearch(query: String!, pagination: PaginationDto): ProductPaginatedResponse!
+  searchAll(query: String!, pagination: PaginationDto): AllSearchResults!
+  reindexAllProducts: Boolean!
+  
+  # Search API queries
+  search(input: SearchOptionsInput!): SearchResponseDto!
+  searchProductsAdvanced(input: SearchOptionsInput!): SearchResponseDto!
+  searchMerchants(input: SearchOptionsInput!): SearchResponseDto!
+  searchBrands(input: SearchOptionsInput!): SearchResponseDto!
+  searchAllEntities(input: SearchOptionsInput!): SearchResponseDto!
+  processQuery(query: String!): SearchResponseDto!
+  
+  # Multi-entity search query
+  multiEntitySearch(input: EnhancedSearchInput!): SearchResponseType!
+  
+  # Personalized search queries
+  personalizedSearch(query: String!, options: SearchOptionsInput): SearchResponseType!
+  personalizedRecommendations(limit: Int): SearchResponseType!
+  discoveryFeed(limit: Int): SearchResponseType!
+  personalizedSimilarProducts(productId: ID!, limit: Int): SearchResponseType!
+  
+  # User preferences queries
+  getUserPreferences: UserPreferences!
+  getPersonalizedRecommendations(limit: Int): [String!]!
+  getMostViewedProducts: [UserBehavior!]!
+  getFavoriteProducts: [UserBehavior!]!
+  getRecentSearches: [UserBehavior!]!
+  
+  # Discovery search queries
+  discoverySearch(query: String = "", options: SearchOptionsInput): SearchResponseType!
+  discoverySuggestions(query: String!, limit: Int): DiscoverySuggestionsType!
+  discoveryHomepage(options: SearchOptionsInput): DiscoveryHomepageType!
+  
+  # Autocomplete queries
+  autocompleteSuggestions(query: String!, options: AutocompleteOptionsInput): AutocompleteSuggestionsType!
+  
+  # Related products queries
+  complementaryProducts(productId: String!, limit: Int): SearchResponseType!
+  frequentlyBoughtTogether(productId: String!, limit: Int): SearchResponseType!
+  
+  # Indexing queries
+  getReindexingStatus(entityType: String): String!
+  
+  # Cursor-based search queries
+  cursorSearch(query: String, cursor: String, limit: Int = 20, sessionId: String): CursorSearchResponseType!
+  
+  # Search dashboard queries
+  searchPerformanceMetrics(timeframe: String): PerformanceMetricsType!
+  searchRelevanceMetrics(timeframe: String): RelevanceMetricsType!
+  popularSearches(limit: Int = 10, timeframe: String): [PopularSearchType!]!
+  zeroResultSearches(limit: Int = 10): [ZeroResultSearchType!]!
+  searchEntityDistribution(timeframe: String): DashboardEntityDistributionType!
+  searchConversionRate(timeframe: String = "day"): ConversionRateType!
+  searchDashboardExperiments: [ExperimentType!]!
+  searchExperimentById(id: String!): ExperimentType
+  searchExperimentResults(id: String!): ExperimentResultType
+  searchHealthStatus: HealthStatusType!
+  
+  # NLP queries
+  nlpSearch(query: String!, pagination: PaginationDto): NlpSearchResult!
+  analyzeQuery(query: String!): ProcessedQueryResult!
+  searchSuggestions(query: String!, limit: Int): [String!]!
+  classifyQuery(query: String!): ClassificationResult!
+}
+
+type Mutation {
+  login(loginInput: LoginInput!): AuthResponse!
+  register(registerInput: RegisterInput!): AuthResponse!
+  refreshToken: AuthResponse!
+  merchantRegister(merchantRegisterInput: MerchantRegisterInput!): AuthResponse!
+  merchantLogin(loginInput: LoginInput!): AuthResponse!
+  merchantRefreshToken: AuthResponse!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(id: ID!, updateUserInput: UpdateUserInput!): User!
+  removeUser(id: ID!): Boolean!
+  updateUserInterests(userId: ID!, interests: [String!]!): User!
+  verifyUserEmail(token: String!): Boolean!
+  createMerchant(input: CreateMerchantInput!): Merchant!
+  updateMerchant(id: ID!, input: UpdateMerchantInput!): Merchant!
+  removeMerchant(id: ID!): Boolean!
+  createOrUpdateMerchantBrand(merchantId: ID!, input: CreateMerchantBrandInput!): MerchantBrand!
+  updateProductVisibility(merchantId: ID!, productId: ID!, isVisible: Boolean!): MerchantProduct!
+  updateProductPromotion(merchantId: ID!, productId: ID!, isPromoted: Boolean!, monthlyAdBudget: Float): MerchantProduct!
+  updateMerchantShipping(merchantId: ID!, input: UpdateMerchantShippingInput!): MerchantShipping!
+  # Ad campaign mutations
+  createMerchantAdCampaign(merchantId: ID!, input: CreateMerchantAdCampaignInput!): MerchantAdCampaign!
+  updateMerchantAdCampaign(id: ID!, merchantId: ID!, input: UpdateMerchantAdCampaignInput!): MerchantAdCampaign!
+  updateMerchantAdCampaignStatus(id: ID!, merchantId: ID!, status: CampaignStatus!): MerchantAdCampaign!
+  deleteMerchantAdCampaign(id: ID!, merchantId: ID!): Boolean!
+  createRetargetingCampaign(merchantId: ID!, productIds: [ID!]!, budget: Float!): MerchantAdCampaign!
+  
+  # Ad budget management mutations
+  allocateBudgetAcrossCampaigns(merchantId: ID!, totalBudget: Float!, campaignIds: [ID!]!, strategy: BudgetAllocationStrategy = EQUAL): [BudgetAllocation!]!
+  
+  # Ad placement mutations
+  recordAdClick(campaignId: ID!): Boolean!
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  removeProduct(id: ID!): Boolean!
+  updateProductStock(id: ID!, quantity: Int!): Product!
+  bulkCreateProducts(inputs: [CreateProductInput!]!): [Product!]!
+  bulkUpdateProducts(updates: [BulkProductUpdateInput!]!): [Product!]!
+  trackSuggestionSelection(suggestionId: ID!, userId: ID, sessionId: ID): Boolean!
+  reindexAll(entityType: String = "all"): Boolean!
+  bulkIndexProducts(productIds: [String!]!): Boolean!
+  bulkIndexMerchants(merchantIds: [String!]!): Boolean!
+  bulkIndexBrands(brandIds: [String!]!): Boolean!
+  
+  # Personalization mutations
+  createUserPreferences(input: CreateUserPreferencesDto!): UserPreferences!
+  updateUserPreferences(input: UpdateUserPreferencesDto!): UserPreferences!
+  trackEntityView(entityType: String!, entityId: ID!): Boolean!
+  trackEntityFavorite(entityType: String!, entityId: ID!): Boolean!
+  trackSearch(query: String!): Boolean!
+  trackAddToCart(productId: ID!, quantity: Int): Boolean!
+  trackPurchase(productId: ID!, quantity: Int, price: Float): Boolean!
+  
+  # Analytics mutations
+  trackSearchAnalytics(data: TrackSearchInput!): SearchAnalytics!
+  trackEngagement(data: TrackEngagementInput!): UserEngagement!
+  trackPageView(userId: ID, sessionId: ID!, pagePath: String!, referrer: String, deviceType: String, platform: String): UserEngagement!
+  analyticsTrackProductView(userId: ID, sessionId: ID!, productId: ID!, pagePath: String!, referrer: String, deviceType: String, platform: String): UserEngagement!
+  trackAnalyticsAddToCart(userId: ID, sessionId: ID!, productId: ID!, quantity: Int!, pagePath: String!, deviceType: String, platform: String): UserEngagement!
+  trackCheckoutComplete(userId: ID, sessionId: ID!, orderId: ID!, items: [OrderItemInput!]!, total: Float!, pagePath: String!, deviceType: String, platform: String, merchantId: ID): Boolean!
+  createAlert(input: CreateAlertInput!): AlertEntity!
+  trackSearchEvent(event: SearchEventInput!): TrackSearchEventResponse!
+  createExperiment(input: CreateExperimentInput!): Experiment!
+  updateExperiment(id: ID!, input: UpdateExperimentInput!): Experiment!
+  removeExperiment(id: ID!): Boolean!
+  startExperiment(id: ID!): Experiment!
+  pauseExperiment(id: ID!): Experiment!
+  completeExperiment(id: ID!): Experiment!
+  archiveExperiment(id: ID!): Experiment!
+  declareWinner(experimentId: ID!, variantId: ID!): Experiment!
+  trackImpression(assignmentId: ID!): Boolean!
+  trackInteraction(assignmentId: ID!, context: String, metadata: String): Boolean!
+  trackConversion(assignmentId: ID!, value: Float, context: String, metadata: String): Boolean!
+  trackCustomEvent(assignmentId: ID!, eventType: String!, value: Float, context: String, metadata: String): Boolean!
+  
+  # NLP mutations
+  getRecommendationsFromDescription(description: String!, limit: Int): [Product!]!
+  getPersonalizedSearchResults(query: String!, userPreferences: UserPreferencesInput!, pagination: PaginationDto): NlpSearchResult!
+  extractKeywords(text: String!, maxKeywords: Int): KeywordsResult!
+  calculateSimilarity(text1: String!, text2: String!): SimilarityResult!
+}
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  fullName: String!
+  profileImage: String
+  isEmailVerified: Boolean!
+  isMerchant: Boolean!
+  role: String!
+}
+
+type AuthResponse {
+  accessToken: String!
+  user: User!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input RegisterInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+input MerchantRegisterInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  merchantName: String!
+  merchantDescription: String
+  website: String
+  categories: [String!]
+  values: [String!]
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  role: String
+  isMerchant: Boolean
+  profileImage: String
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  role: String
+  isMerchant: Boolean
+  profileImage: String
+  isEmailVerified: Boolean
+}
+
+input CreateMerchantInput {
+  name: String!
+  description: String
+  website: String
+  categories: [String!]
+  values: [String!]
+  isActive: Boolean
+}
+
+input UpdateMerchantInput {
+  name: String
+  description: String
+  website: String
+  categories: [String!]
+  values: [String!]
+  isActive: Boolean
+}
+
+input CreateMerchantBrandInput {
+  name: String!
+  logo: String
+  colors: [String!]
+  bannerImage: String
+  description: String
+}
+
+input UpdateMerchantShippingInput {
+  domesticShippingPrice: Float
+  internationalShippingPrice: Float
+  freeShippingThreshold: Float
+  processingTime: Int
+  shippingPolicy: String
+}
+
+# Analytics types
+type DashboardAnalyticsDto {
+  totalSearches: Int!
+  totalImpressions: Int!
+  totalClicks: Int!
+  totalConversions: Int!
+  conversionRate: Float!
+  searchesToClickRate: Float!
+  averageOrderValue: Float!
+  revenue: Float!
+}
+
+type SearchAnalyticsSummaryDto {
+  totalSearches: Int!
+  uniqueSearches: Int!
+  zeroResultRate: Float!
+  averageResultsPerSearch: Float!
+  searchToClickRate: Float!
+  topQueries: [QueryCountDto!]!
+}
+
+type QueryCountDto {
+  query: String!
+  count: Int!
+}
+
+type UserEngagementSummaryDto {
+  totalPageViews: Int!
+  totalProductViews: Int!
+  totalAddToCarts: Int!
+  totalPurchases: Int!
+  viewToCartRate: Float!
+  cartToPurchaseRate: Float!
+  overallConversionRate: Float!
+}
+
+type EngagementTypeCount {
+  type: String!
+  count: Int!
+}
+
+type ProductInteractionCount {
+  productId: ID!
+  count: Int!
+}
+
+type BusinessMetrics {
+  id: ID!
+  date: DateTime!
+  revenue: Float!
+  orders: Int!
+  averageOrderValue: Float!
+  customersCount: Int!
+  newCustomersCount: Int!
+  returningCustomersCount: Int!
+  granularity: TimeGranularity!
+}
+
+# Merchant analytics types
+type MerchantAnalytics {
+  id: ID!
+  merchantId: ID!
+  productId: ID
+  categoryId: ID
+  revenue: Float!
+  impressions: Int!
+  clicks: Int!
+  conversions: Int!
+  date: DateTime!
+  ageGroup: String
+  gender: String
+  location: String
+  device: String
+  interests: [String]
+  isOrganic: Boolean
+}
+
+type TimeSeriesDataPoint {
+  date: DateTime!
+  value: Float!
+  label: String
+}
+
+type ConversionFunnel {
+  impressions: Int!
+  clicks: Int!
+  addToCarts: Int!
+  checkouts: Int!
+  purchases: Int!
+  impressionToClickRate: Float!
+  clickToCartRate: Float!
+  cartToCheckoutRate: Float!
+  checkoutToPurchaseRate: Float!
+  overallConversionRate: Float!
+}
+
+type OrganicVsPaidPerformance {
+  organic: ChannelMetrics!
+  paid: ChannelMetrics!
+}
+
+type ChannelMetrics {
+  impressions: Int!
+  clicks: Int!
+  conversions: Int!
+  revenue: Float!
+  conversionRate: Float!
+  ctr: Float!
+  cpc: Float
+  roas: Float
+}
+
+type PeriodComparisonData {
+  currentPeriod: PeriodMetrics!
+  previousPeriod: PeriodMetrics!
+  changes: MetricChanges!
+}
+
+type PeriodMetrics {
+  revenue: Float!
+  orders: Int!
+  averageOrderValue: Float!
+  impressions: Int!
+  clicks: Int!
+  conversions: Int!
+  conversionRate: Float!
+}
+
+type MetricChanges {
+  revenueChange: Float!
+  ordersChange: Float!
+  aovChange: Float!
+  impressionsChange: Float!
+  clicksChange: Float!
+  conversionsChange: Float!
+  conversionRateChange: Float!
+}
+
+type TopProduct {
+  productId: ID!
+  name: String!
+  revenue: Float!
+  units: Int!
+  averagePrice: Float!
+}
+
+type RevenueAnalytics {
+  weekly: [TimeSeriesDataPoint!]!
+  monthly: [TimeSeriesDataPoint!]!
+  quarterly: [TimeSeriesDataPoint!]!
+  yearly: [TimeSeriesDataPoint!]!
+}
+
+type ConversionAnalytics {
+  conversionRateOverTime: [TimeSeriesDataPoint!]!
+  clickThroughRateOverTime: [TimeSeriesDataPoint!]!
+  cartAbandonmentRateOverTime: [TimeSeriesDataPoint!]!
+}
+
+type ImpressionAnalytics {
+  impressionsOverTime: [TimeSeriesDataPoint!]!
+}
+
+type DemographicAnalytics {
+  ageDistribution: JSON!
+  genderDistribution: JSON!
+  locationDistribution: JSON!
+  deviceDistribution: JSON!
+  interestDistribution: JSON!
+}
+
+input DemographicFilterInput {
+  type: String!
+  value: String!
+}
+
+input AnalyticsFilterInput {
+  field: String!
+  value: String!
+  operator: String
+}
+
+# Product related types
+
+type PageInfo {
+  totalItems: Int!
+  itemCount: Int!
+  itemsPerPage: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
+type ProductPaginatedResponse {
+  items: [Product!]
+  pageInfo: PageInfo!
+}
+
+input PaginationDto {
+  page: Int = 1
+  limit: Int = 10
+}
+
+type MerchantDashboardAnalytics {
+  summaryMetrics: SummaryMetrics!
+  topProducts: [TopProduct!]!
+  timeSeriesData: [TimeSeriesDataPoint!]!
+  conversionFunnel: ConversionFunnel!
+  organicVsPaidPerformance: OrganicVsPaidPerformance!
+  revenueAnalytics: RevenueAnalytics
+  conversionAnalytics: ConversionAnalytics
+  impressionAnalytics: ImpressionAnalytics
+  demographicAnalytics: DemographicAnalytics
+}
+
+type SummaryMetrics {
+  revenue: Float!
+  orders: Int!
+  averageOrderValue: Float!
+  impressions: Int!
+  clicks: Int!
+  conversions: Int!
+  conversionRate: Float!
+}
+
+input CreateMerchantAdCampaignInput {
+  name: String!
+  description: String
+  type: CampaignType = PRODUCT_PROMOTION
+  productIds: [ID!]!
+  budget: Float!
+  targetAudience: TargetAudience = ALL
+  targetDemographics: [String!]
+  targetLocations: [String!]
+  targetInterests: [String!]
+  startDate: DateTime!
+  endDate: DateTime
+}
+
+input UpdateMerchantAdCampaignInput {
+  name: String
+  description: String
+  type: CampaignType
+  productIds: [ID!]
+  budget: Float
+  targetAudience: TargetAudience
+  targetDemographics: [String!]
+  targetLocations: [String!]
+  targetInterests: [String!]
+  startDate: DateTime
+  endDate: DateTime
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  price: Float!
+  salePrice: Float
+  sku: String
+  categoryId: ID
+  brandId: ID
+  images: [String!]
+  attributes: JSON
+  tags: [String!]
+  isActive: Boolean
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  price: Float
+  salePrice: Float
+  sku: String
+  categoryId: ID
+  brandId: ID
+  images: [String!]
+  attributes: JSON
+  tags: [String!]
+  isActive: Boolean
+}
+
+input BulkProductUpdateInput {
+  id: ID!
+  update: UpdateProductInput!
+}
+
+type Merchant {
+  id: ID!
+  name: String!
+  description: String
+  website: String
+  isActive: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MerchantBrand {
+  id: ID!
+  merchantId: ID!
+  name: String!
+  logo: String
+  colors: [String!]
+  bannerImage: String
+  description: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MerchantProduct {
+  id: ID!
+  merchantId: ID!
+  productId: ID!
+  isVisible: Boolean!
+  isPromoted: Boolean!
+  monthlyAdBudget: Float
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MerchantShipping {
+  id: ID!
+  merchantId: ID!
+  domesticShippingPrice: Float
+  internationalShippingPrice: Float
+  freeShippingThreshold: Float
+  processingTime: Int
+  shippingPolicy: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MerchantAdCampaign {
+  id: ID!
+  merchantId: ID!
+  merchant: Merchant!
+  name: String!
+  description: String
+  type: CampaignType!
+  status: CampaignStatus!
+  productIds: [ID!]!
+  budget: Float!
+  spent: Float
+  targetAudience: TargetAudience!
+  targetDemographics: [String!]
+  targetLocations: [String!]
+  targetInterests: [String!]
+  startDate: DateTime!
+  endDate: DateTime
+  impressions: Int
+  clicks: Int
+  clickThroughRate: Float
+  conversions: Int
+  conversionRate: Float
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastUpdatedByMerchantAt: DateTime
+}
+
+scalar JSON
+
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  price: Float!
+  salePrice: Float
+  sku: String
+  categoryId: ID
+  brandId: ID
+  images: [String!]
+  attributes: JSON
+  tags: [String!]
+  isActive: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+# Personalization types
+type UserPreferences {
+  id: ID!
+  userId: ID!
+  favoriteCategories: [String!]
+  favoriteValues: [String!]
+  favoriteBrands: [String!]
+  priceSensitivity: String
+  preferSustainable: Boolean!
+  preferEthical: Boolean!
+  preferLocalBrands: Boolean!
+  preferredSizes: [String!]
+  preferredColors: [String!]
+  preferredMaterials: [String!]
+  createdAt: String!
+  updatedAt: String!
+}
+
+type UserBehavior {
+  id: ID!
+  userId: ID!
+  entityId: String!
+  entityType: String!
+  behaviorType: String!
+  count: Int!
+  metadata: String
+  createdAt: String!
+  lastInteractionAt: String!
+}
+
+# Analytics types
+type SearchAnalytics {
+  id: ID!
+  userId: ID
+  sessionId: ID!
+  query: String!
+  filters: JSON
+  resultsCount: Int!
+  categoryId: ID
+  page: Int
+  deviceType: String
+  platform: String
+  createdAt: String!
+}
+
+type UserEngagement {
+  id: ID!
+  userId: ID
+  sessionId: ID!
+  type: String!
+  entityId: ID!
+  pagePath: String!
+  metadata: JSON
+  deviceType: String
+  platform: String
+  createdAt: String!
+}
+
+type AlertEntity {
+  id: ID!
+  title: String!
+  message: String!
+  type: String!
+  entityId: ID
+  entityType: String
+  status: String!
+  priority: String!
+  createdAt: String!
+  updatedAt: String
+}
+
+# NLP types
+type QueryEntity {
+  type: String!
+  value: String!
+}
+
+type QueryFilters {
+  categories: [String!]
+  priceMin: Int
+  priceMax: Int
+  brandName: String
+  inStock: Boolean
+  values: [String!]
+}
+
+type ProcessedQueryResult {
+  originalQuery: String!
+  processedQuery: String!
+  tokens: [String!]!
+  stems: [String!]!
+  entities: [QueryEntity!]!
+  intent: String!
+  filters: QueryFilters!
+}
+
+type NlpSearchResult {
+  items: [Product!]!
+  total: Int!
+  enhancedQuery: String!
+  detectedFilters: QueryFilters!
+}
+
+type KeywordsResult {
+  keywords: [String!]!
+}
+
+type SimilarityResult {
+  similarity: Float!
+}
+
+type ClassificationResult {
+  category: String!
+}
+
+type TrackSearchEventResponse {
+  id: ID!
+  success: Boolean!
+  timestamp: String!
+}
+
+type Experiment {
+  id: ID!
+  name: String!
+  description: String
+  status: String!
+  variants: [ExperimentVariant!]!
+  startDate: String
+  endDate: String
+  createdAt: String!
+  updatedAt: String
+  type: String
+  winningVariantId: ID
+}
+
+type UserExperimentAssignment {
+  id: ID!
+  userId: ID
+  sessionId: ID
+  experimentId: ID!
+  variantId: ID!
+  experiment: Experiment
+  variant: ExperimentVariant
+  impressions: Int!
+  interactions: Int!
+  conversions: Int!
+  createdAt: String!
+  updatedAt: String
+}
+
+type VariantConfigurationType {
+  experimentId: ID
+  variantId: ID
+  assignmentId: ID
+  configuration: JSON
+}
+
+type ExperimentResultsType {
+  experiment: Experiment!
+  variants: [VariantResultsType!]!
+  totalImpressions: Int!
+  totalInteractions: Int!
+  totalConversions: Int!
+  interactionRate: Float!
+  conversionRate: Float!
+}
+
+type VariantResultsType {
+  variant: ExperimentVariant!
+  impressions: Int!
+  interactions: Int!
+  conversions: Int!
+  interactionRate: Float!
+  conversionRate: Float!
+  improvement: Float
+  confidenceInterval: [Float!]
+}
+
+type StatisticalSignificanceType {
+  isSignificant: Boolean!
+  pValue: Float!
+  confidenceLevel: Float!
+  winningVariantId: ID
+}
+
+type TimeToCompletionType {
+  daysToCompletion: Int!
+  requiredSampleSize: Int!
+  currentSampleSize: Int!
+  estimatedCompletionDate: String
+}
+
+type MetricsOverTimeType {
+  dates: [String!]!
+  metrics: [VariantMetricsType!]!
+}
+
+type VariantMetricsType {
+  variantId: ID!
+  name: String!
+  impressions: [Int!]!
+  interactions: [Int!]!
+  conversions: [Int!]!
+  interactionRates: [Float!]!
+  conversionRates: [Float!]!
+}
+
+type ExperimentVariant {
+  id: ID!
+  name: String!
+  description: String
+  trafficAllocation: Float!
+  isControl: Boolean!
+  experimentId: ID!
+  createdAt: String!
+  updatedAt: String
+}
+
+input CreateUserPreferencesDto {
+  userId: ID
+  categories: [String!]
+  brands: [String!]
+  priceRange: [Float!]
+  interests: [String!]
+}
+
+input UpdateUserPreferencesDto {
+  categories: [String!]
+  brands: [String!]
+  priceRange: [Float!]
+  interests: [String!]
+}
+
+# Analytics input types
+input TrackSearchInput {
+  userId: ID
+  sessionId: ID!
+  query: String!
+  filters: JSON
+  resultsCount: Int!
+  categoryId: ID
+  page: Int
+  deviceType: String
+  platform: String
+}
+
+input TrackEngagementInput {
+  userId: ID
+  sessionId: ID!
+  type: String!
+  entityId: ID!
+  pagePath: String!
+  metadata: JSON
+  deviceType: String
+  platform: String
+}
+
+input OrderItemInput {
+  productId: ID!
+  quantity: Int!
+  price: Float!
+  merchantId: ID
+}
+
+input CreateAlertInput {
+  title: String!
+  message: String!
+  type: String!
+  entityId: ID
+  entityType: String
+  status: String
+  priority: String
+}
+
+# NLP input types
+input UserPreferencesInput {
+  favoriteCategories: [String!]
+  favoriteValues: [String!]
+  priceSensitivity: String
+}
+
+input PaginationDto {
+  page: Int
+  limit: Int
+}
+
+input SearchEventInput {
+  userId: ID
+  sessionId: ID!
+  query: String!
+  filters: JSON
+  resultsCount: Int!
+  page: Int
+  deviceType: String
+  platform: String
+}
+
+input CreateExperimentInput {
+  name: String!
+  description: String
+  status: String
+  variants: [CreateExperimentVariantInput!]!
+  startDate: String
+  endDate: String
+}
+
+input CreateExperimentVariantInput {
+  name: String!
+  description: String
+  trafficAllocation: Float!
+  isControl: Boolean!
+}
+
+input UpdateExperimentInput {
+  name: String
+  description: String
+  status: String
+  variants: [UpdateExperimentVariantInput!]
+  startDate: String
+  endDate: String
+}
+
+input UpdateExperimentVariantInput {
+  id: ID
+  name: String
+  description: String
+  trafficAllocation: Float
+  isControl: Boolean
+}
+
+type MerchantDashboardAnalytics {
+  summary: AnalyticsSummary
+  timeSeries: AnalyticsTimeSeries
+  conversionFunnel: ConversionFunnel
+  organicVsPaid: OrganicVsPaidAnalytics
+  demographics: DemographicAnalytics
+}
+
+type AnalyticsSummary {
+  totalRevenue: Float!
+  totalOrders: Int!
+  totalCustomers: Int!
+  averageOrderValue: Float!
+  conversionRate: Float!
+}
+
+type AnalyticsTimeSeries {
+  revenue: [TimeSeriesPoint!]!
+  orders: [TimeSeriesPoint!]!
+  customers: [TimeSeriesPoint!]!
+  impressions: [TimeSeriesPoint!]!
+}
+
+type TimeSeriesPoint {
+  date: String!
+  value: Float!
+}
+
+type ConversionFunnel {
+  stages: [FunnelStage!]!
+  conversionRate: Float!
+}
+
+type FunnelStage {
+  name: String!
+  count: Int!
+  rate: Float!
+}
+
+type OrganicVsPaidAnalytics {
+  organic: ChannelMetrics!
+  paid: ChannelMetrics!
+}
+
+type ChannelMetrics {
+  impressions: Int!
+  clicks: Int!
+  conversions: Int!
+  revenue: Float!
+}
+
+type DemographicAnalytics {
+  age: [DemographicSegment!]!
+  gender: [DemographicSegment!]!
+  location: [DemographicSegment!]!
+  device: [DemographicSegment!]!
+  interests: [DemographicSegment!]!
+}
+
+type DemographicSegment {
+  segment: String!
+  count: Int!
+  percentage: Float!
+}
+
+# Search types
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+enum SearchEntityType {
+  PRODUCT
+  MERCHANT
+  BRAND
+  ALL
+}
+
+input SortOptionInput {
+  field: String!
+  order: SortOrder = desc
+}
+
+input FilterOptionInput {
+  field: String!
+  values: [String!]!
+  exact: Boolean = false
+}
+
+input RangeFilterOptionInput {
+  field: String!
+  min: Float
+  max: Float
+}
+
+input SearchOptionsInput {
+  query: String
+  entityType: SearchEntityType = PRODUCT
+  page: Int = 1
+  limit: Int = 20
+  sort: [SortOptionInput]
+  filters: [FilterOptionInput]
+  rangeFilters: [RangeFilterOptionInput]
+  personalized: Boolean = true
+  enablePersonalization: Boolean = false
+  personalizationStrength: Float = 1.0
+  enableNlp: Boolean = false
+  nlpData: JSON
+  boostByValues: Boolean = true
+  includeSponsoredContent: Boolean = true
+  experimentId: String
+  enableABTesting: Boolean = false
+  enableAnalytics: Boolean = false
+  clientId: String
+  metadata: JSON
+  enableHighlighting: Boolean = false
+  highlightFields: [String]
+  highlightPreTag: String
+  highlightPostTag: String
+  highlightFragmentSize: Int
+}
+type ProductSearchResult {
+  id: ID!
+  highlights: HighlightResult
+  title: String!
+  description: String!
+  price: Float!
+  compareAtPrice: Float
+  images: [String!]!
+  thumbnail: String
+  categories: [String!]!
+  tags: [String!]
+  merchantId: String!
+  brandName: String!
+  isActive: Boolean!
+  inStock: Boolean!
+  quantity: Int
+  values: [String!]
+  isSponsored: Boolean!
+  score: Float!
+}
+
+type MerchantSearchResult {
+  id: ID!
+  highlights: HighlightResult
+  name: String!
+  description: String!
+  logo: String!
+  heroImage: String!
+  location: String!
+  categories: [String!]!
+  values: [String!]!
+  isSponsored: Boolean!
+  score: Float!
+}
+
+type BrandSearchResult {
+  id: ID!
+  highlights: HighlightResult
+  name: String!
+  description: String!
+  logo: String!
+  heroImage: String!
+  location: String!
+  categories: [String!]!
+  values: [String!]!
+  foundedYear: Int!
+  isSponsored: Boolean!
+  score: Float!
+}
+
+type MerchantPaginatedResponse {
+  items: [MerchantSearchResult!]!
+  total: Int!
+}
+
+type BrandPaginatedResponse {
+  items: [BrandSearchResult!]!
+  total: Int!
+}
+
+type HighlightResult {
+  title: String
+  description: String
+  categories: [String!]
+  tags: [String!]
+  values: [String!]
+}
+
+type PriceRange {
+  min: Float!
+  max: Float!
+  count: Int!
+}
+
+type PriceFacet {
+  min: Float!
+  max: Float!
+  ranges: [PriceRange!]!
+}
+
+type CategoryFacet {
+  name: String!
+  count: Int!
+}
+
+type ValueFacet {
+  name: String!
+  count: Int!
+}
+
+type TermFacet {
+  name: String!
+  count: Int!
+}
+
+type SearchFacets {
+  categories: [CategoryFacet!]!
+  values: [ValueFacet!]!
+  price: PriceFacet!
+  brands: [TermFacet!]
+  merchants: [TermFacet!]
+  sizes: [TermFacet!]
+  colors: [TermFacet!]
+  materials: [TermFacet!]
+  inStock: [TermFacet!]
+}
+
+type SearchMetadata {
+  searchDuration: Int!
+  algorithm: String!
+  testId: String
+  variantId: String
+  personalized: Boolean
+  personalizationStrength: Float
+}
+
+type PaginationInfo {
+  total: Int!
+  page: Int!
+  limit: Int!
+  pages: Int!
+  totalPages: Int!
+  hasNext: Boolean!
+  hasPrevious: Boolean!
+}
+
+type PaginationType {
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+type FacetValueType {
+  value: String!
+  count: Int!
+  selected: Boolean
+}
+
+type FacetType {
+  name: String!
+  displayName: String!
+  values: [FacetValueType!]!
+}
+
+type HighlightFieldType {
+  field: String!
+  snippets: [String!]!
+}
+
+type HighlightResultType {
+  fields: [HighlightFieldType!]!
+  matchedTerms: [String!]
+}
+
+type ProductResultType {
+  id: String!
+  title: String!
+  description: String
+  highlights: HighlightResultType
+  price: Float!
+  salePrice: Float
+  inStock: Boolean!
+  onSale: Boolean
+  rating: Float
+  reviewCount: Int
+  images: [String!]
+  thumbnailImage: String
+  categories: [String!]
+  tags: [String!]
+  values: [String!]
+  brandId: String
+  brandName: String
+  merchantId: String
+  merchantName: String
+  colors: [String!]
+  sizes: [String!]
+  materials: [String!]
+  relevanceScore: Float
+  sponsored: Boolean
+}
+
+type MerchantResultType {
+  id: String!
+  name: String!
+  description: String
+  highlights: HighlightResultType
+  logo: String
+  coverImage: String
+  images: [String!]
+  categories: [String!]
+  values: [String!]
+  location: String
+  rating: Float
+  reviewCount: Int
+  verified: Boolean
+  active: Boolean
+  productCount: Int
+  relevanceScore: Float
+  sponsored: Boolean
+}
+
+type BrandResultType {
+  id: String!
+  name: String!
+  description: String
+  highlights: HighlightResultType
+  logo: String
+  coverImage: String
+  images: [String!]
+  categories: [String!]
+  values: [String!]
+  location: String
+  foundedYear: Int
+  story: String
+  verified: Boolean
+  active: Boolean
+  productCount: Int
+  relevanceScore: Float
+  sponsored: Boolean
+}
+
+union SearchResult = ProductResultType | MerchantResultType | BrandResultType
+
+type EntityRelevanceScoresType {
+  products: Float!
+  merchants: Float!
+  brands: Float!
+}
+
+type EntityDistributionType {
+  products: Float!
+  merchants: Float!
+  brands: Float!
+}
+
+type SearchResponseType {
+  query: String
+  pagination: PaginationType!
+  results: [SearchResult!]!
+  highlightsEnabled: Boolean!
+  facets: [FacetType!]
+  relevanceScores: EntityRelevanceScoresType
+  entityDistribution: EntityDistributionType
+  isNlpEnabled: Boolean
+  isPersonalized: Boolean
+  experimentId: String
+  appliedFilters: [String!]
+}
+
+# SearchResponse has the same fields as SearchResponseType plus entity-specific result arrays
+type SearchResponse {
+  query: String
+  pagination: PaginationType!
+  results: [SearchResult!]!
+  highlightsEnabled: Boolean!
+  facets: [FacetType!]
+  relevanceScores: EntityRelevanceScoresType
+  entityDistribution: EntityDistributionType
+  isNlpEnabled: Boolean
+  isPersonalized: Boolean
+  experimentId: String
+  appliedFilters: [String!]
+  # Entity-specific result arrays
+  products: [ProductResultType!]
+  merchants: [MerchantResultType!]
+  brands: [BrandResultType!]
+}
+
+type DiscoverySuggestionsType {
+  suggestions: [String!]!
+  metadata: JSON
+}
+
+type DiscoverySectionType {
+  id: String!
+  title: String!
+  description: String
+  items: [Product!]!
+  type: String!
+}
+
+type DiscoveryHomepageType {
+  sections: [DiscoverySectionType!]!
+  metadata: JSON
+}
+
+type SuggestionType {
+  text: String!
+  type: String!
+  prefix: String
+  highlighted: String
+}
+
+type AutocompleteSuggestionsType {
+  suggestions: [SuggestionType!]!
+  metadata: JSON
+}
+
+type CursorPaginationType {
+  total: Int!
+  nextCursor: String
+  hasMore: Boolean!
+}
+
+input CursorPaginationInput {
+  cursor: String
+  limit: Int = 20
+}
+
+type CursorSearchResponseType {
+  query: String
+  pagination: CursorPaginationType!
+  results: [SearchResult!]!
+  highlightsEnabled: Boolean!
+  facets: [FacetType!]
+  isPersonalized: Boolean
+  experimentId: String
+  appliedFilters: [String!]
+}
+
+type SearchResponseDto {
+  pagination: PaginationInfo!
+  highlightsEnabled: Boolean
+  facets: SearchFacets!
+  products: [ProductSearchResult!]
+  merchants: [MerchantSearchResult!]
+  brands: [BrandSearchResult!]
+  query: String!
+  usedNlp: Boolean!
+  processedQuery: String
+  experimentVariant: String
+  relevanceScores: JSON
+  entityDistribution: JSON
+  experimentId: String
+  metadata: SearchMetadata
+}
+
+type PaginationInfo {
+  total: Int!
+  page: Int!
+  limit: Int!
+  pages: Int!
+  totalPages: Int!
+  hasNext: Boolean!
+  hasPrevious: Boolean!
+}
+
+type CategoryFacet {
+  name: String!
+  count: Int!
+}
+
+type ValueFacet {
+  name: String!
+  count: Int!
+}
+
+type PriceFacet {
+  min: Float!
+  max: Float!
+  ranges: [PriceRange!]!
+}
+
+type PriceRange {
+  min: Float!
+  max: Float!
+  count: Int!
+}
+
+type SearchMetadata {
+  searchDuration: Int!
+  algorithm: String!
+  testId: String
+  variantId: String
+  personalized: Boolean
+  personalizationStrength: Float
+}
+
+type TermFacet {
+  name: String!
+  count: Int!
+}
+
+type SearchFacets {
+  categories: [CategoryFacet!]!
+  values: [ValueFacet!]!
+  price: PriceFacet
+  brands: [TermFacet!]
+  merchants: [TermFacet!]
+  colors: [TermFacet!]
+  sizes: [TermFacet!]
+  materials: [TermFacet!]
+  inStock: [TermFacet!]
+}
+
+input AutocompleteOptionsInput {
+  limit: Int
+  includeCategories: Boolean
+  includeBrands: Boolean
+  includeValues: Boolean
+  includeTrending: Boolean
+  highlightMatches: Boolean
+}
+
+input ProductFilterInput {
+  categories: [String!]
+  tags: [String!]
+  values: [String!]
+  brandIds: [String!]
+  merchantIds: [String!]
+  minPrice: Float
+  maxPrice: Float
+  minRating: Float
+  inStock: Boolean
+  onSale: Boolean
+  colors: [String!]
+  sizes: [String!]
+  materials: [String!]
+}
+
+input MerchantFilterInput {
+  categories: [String!]
+  values: [String!]
+  locations: [String!]
+  minRating: Float
+  verifiedOnly: Boolean
+  activeOnly: Boolean
+  minProductCount: Int
+}
+
+input BrandFilterInput {
+  categories: [String!]
+  values: [String!]
+  locations: [String!]
+  verifiedOnly: Boolean
+  activeOnly: Boolean
+  minFoundedYear: Int
+  maxFoundedYear: Int
+  minProductCount: Int
+}
+
+input EntitySortOptionInput {
+  field: String!
+  order: SortOrder = DESC
+}
+
+input EntityBoostingInput {
+  productBoost: Float = 1.0
+  merchantBoost: Float = 1.0
+  brandBoost: Float = 1.0
+}
+
+input EnhancedSearchInput {
+  query: String
+  page: Int = 0
+  limit: Int = 20
+  enableNlp: Boolean = false
+  personalized: Boolean = true
+  productFilters: ProductFilterInput
+  merchantFilters: MerchantFilterInput
+  brandFilters: BrandFilterInput
+  entityBoosting: EntityBoostingInput
+  sortOptions: [EntitySortOptionInput!]
+  boostByValues: Boolean = false
+  includeSponsoredContent: Boolean = true
+  experimentId: String
+  enableHighlighting: Boolean = false
+  highlightFields: [String!]
+  highlightPreTag: String
+  highlightPostTag: String
+  highlightFragmentSize: Int = 150
+}
+
+# Search dashboard types
+type PerformanceMetricsType {
+  averageResponseTime: Float!
+  totalSearches: Int!
+  slowSearches: Int!
+  responseTimeDistribution: [TimeSeriesDataPoint!]!
+  searchVolumeByHour: [TimeSeriesDataPoint!]!
+  p95ResponseTime: Float!
+  p99ResponseTime: Float!
+}
+
+type RelevanceMetricsType {
+  averageRelevanceScore: Float!
+  clickThroughRate: Float!
+  zeroResultRate: Float!
+  entityRelevanceScores: [EntityRelevanceScore!]!
+  relevanceScoreByDay: [TimeSeriesDataPoint!]!
+  averageResultCount: Float!
+}
+
+type EntityRelevanceScore {
+  entityType: String!
+  averageScore: Float!
+}
+
+type TimeSeriesDataPoint {
+  timestamp: String!
+  value: Float!
+}
+
+type PopularSearchType {
+  query: String!
+  count: Int!
+  conversionRate: Float!
+  clickThroughRate: Float
+  averageResultCount: Float
+}
+
+type ZeroResultSearchType {
+  query: String!
+  count: Int!
+  suggestedAlternatives: [String!]
+  lastSearched: DateTime!
+}
+
+type DashboardEntityDistributionType {
+  products: Int!
+  merchants: Int!
+  brands: Int!
+  byPopularQueries: [EntityDistributionByQuery!]
+}
+
+type EntityDistributionByQuery {
+  query: String!
+  products: Int!
+  merchants: Int!
+  brands: Int!
+}
+
+type ConversionRateType {
+  overall: Float!
+  fromProductSearch: Float!
+  fromMerchantSearch: Float!
+  fromBrandSearch: Float!
+  byDay: [TimeSeriesDataPoint!]!
+}
+
+type DashboardExperimentVariant {
+  id: ID!
+  name: String!
+  description: String!
+  trafficPercentage: Float!
+}
+
+type ExperimentType {
+  id: ID!
+  name: String!
+  description: String!
+  status: ExperimentStatus!
+  startDate: DateTime!
+  endDate: DateTime
+  variants: [DashboardExperimentVariant!]!
+  targetAudience: String
+  metadata: String
+}
+
+type VariantResult {
+  variantId: ID!
+  variantName: String!
+  impressions: Int!
+  clicks: Int!
+  conversions: Int!
+  clickThroughRate: Float!
+  conversionRate: Float!
+  averageRelevanceScore: Float
+  averageResponseTime: Float
+}
+
+type ExperimentResultType {
+  experimentId: ID!
+  experimentName: String!
+  results: [VariantResult!]!
+  winningVariantId: String
+  confidenceLevel: Float
+  hasStatisticalSignificance: Boolean!
+}
+
+type HealthStatusType {
+  isHealthy: Boolean!
+  alerts: [SystemAlert!]
+  uptime: Float!
+  activeConnections: Int!
+  cacheHitRate: Float!
+  indexingLatency: Float!
+}
+
+type SystemAlert {
+  type: String!
+  message: String!
+  severity: String!
+  timestamp: DateTime!
+}
+
+# Merchant ad campaign types
+enum CampaignType {
+  PRODUCT_PROMOTION
+  RETARGETING
+  BRAND_AWARENESS
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum TargetAudience {
+  ALL
+  PREVIOUS_VISITORS
+  CART_ABANDONERS
+  PREVIOUS_CUSTOMERS
+}
+
+enum BudgetAllocationStrategy {
+  EQUAL
+  PERFORMANCE_BASED
+  TIME_BASED
+}
+
+type BudgetUtilizationReport {
+  totalBudget: Float!
+  totalSpent: Float!
+  utilizationRate: Float!
+  campaignUtilization: [CampaignUtilization!]!
+}
+
+type CampaignUtilization {
+  campaignId: ID!
+  name: String!
+  budget: Float!
+  spent: Float!
+  utilizationRate: Float!
+}
+
+type CampaignForecast {
+  campaignId: ID!
+  remainingBudget: Float!
+  dailySpendRate: Float!
+  estimatedDaysRemaining: Float!
+  estimatedEndDate: DateTime!
+}
+
+type BudgetAllocation {
+  campaignId: ID!
+  allocatedBudget: Float!
+}
+
+type AdPlacement {
+  campaignId: ID!
+  merchantId: ID!
+  productIds: [ID!]!
+  type: String!
+  relevanceScore: Float!
+  isSponsored: Boolean!
+  impressionCost: Float!
+}
+
+type ProductAdRecommendation {
+  productId: ID!
+  recommendedBudget: Float!
+  estimatedImpressions: Int!
+  estimatedClicks: Int!
+  estimatedConversions: Int!
+}
+
+input AdPlacementOptionsInput {
+  location: String
+  interests: [String!]
+  demographics: [String!]
+  previouslyViewedProductIds: [ID!]
+  cartProductIds: [ID!]
+  purchasedProductIds: [ID!]
+  maxAds: Int = 2
+}
+
+type AllSearchResults {
+  products: ProductPaginatedResponse!
+  merchants: MerchantPaginatedResponse!
+  brands: BrandPaginatedResponse!
+  adPlacements: [AdPlacement!]!
+}
+
+enum ExperimentStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum BehaviorType {
+  view
+  search
+  favorite
+  add_to_cart
+  purchase
+}
+
+type Query {
+  # ... existing queries ...
+  getBudgetUtilizationReport(campaignId: ID!): BudgetUtilizationReport!
+  getCampaignForecast(campaignId: ID!): CampaignForecast!
+  getAdPlacements(options: AdPlacementOptionsInput!): [AdPlacement!]!
+  getProductAdRecommendations(productId: ID!): ProductAdRecommendation!
+}

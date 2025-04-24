@@ -106,7 +106,7 @@ export default function InterestsPage() {
               transition={{ delay: 0.2 }}
               className="text-lg text-gray-600 max-w-2xl mx-auto"
             >
-              Tell us what you're interested in and we'll personalize your shopping experience.
+              Tell us what you&apos;re interested in and we&apos;ll personalize your shopping experience.
             </motion.p>
           </div>
 

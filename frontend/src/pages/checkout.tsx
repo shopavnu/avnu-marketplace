@@ -723,7 +723,7 @@ const CheckoutPage = () => {
                           <p className="text-xs text-gray-700 font-medium mb-1">
                             {amountNeeded > 0
                               ? <>Spend <span className="font-semibold text-teal-700">${amountNeeded.toFixed(2)}</span> more for FREE shipping from {brandName}!</>
-                              : <span className="font-semibold text-green-600">You've earned free shipping from {brandName}! 🎉</span>
+                              : <span className="font-semibold text-green-600">You&apos;ve earned free shipping from {brandName}! 🎉</span>
                             }
                           </p>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">

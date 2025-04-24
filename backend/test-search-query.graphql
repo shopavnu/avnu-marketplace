@@ -1,0 +1,21 @@
+query TestSearch {
+  search(query: "shirt", limit: 5) {
+    items {
+      ... on Product {
+        id
+        title
+        description
+        price
+        brandName
+      }
+    }
+    totalCount
+    facets {
+      name
+      values {
+        value
+        count
+      }
+    }
+  }
+}

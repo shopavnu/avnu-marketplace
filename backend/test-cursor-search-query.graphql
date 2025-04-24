@@ -1,0 +1,29 @@
+query TestCursorSearch {
+  cursorSearch(query: "shirt", limit: 5) {
+    query
+    pagination {
+      total
+      nextCursor
+      hasMore
+    }
+    results {
+      id
+      type
+      name
+      description
+      price
+      inStock
+      score
+    }
+    facets {
+      name
+      displayName
+      values {
+        value
+        count
+      }
+    }
+    isPersonalized
+    highlightsEnabled
+  }
+}
