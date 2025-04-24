@@ -1,0 +1,83 @@
+
+# Test basic search for "shirt"
+query SearchForShirt {
+  searchProducts(input: { query: "shirt", limit: 10, page: 1 }) {
+    query
+    products {
+      id
+      title
+      description
+      price
+      brandName
+    }
+    pagination {
+      total
+      hasNext
+      hasPrevious
+    }
+  }
+}
+
+# Test search with filters
+query SearchWithFilters {
+  searchProducts(
+    input: { 
+      query: "shirt", 
+      limit: 10, 
+      page: 1,
+      filters: {
+        priceMin: 30,
+        priceMax: 60,
+        categories: ["Clothing"]
+      }
+    }
+  ) {
+    query
+    products {
+      id
+      title
+      description
+      price
+      brandName
+      categories
+    }
+    pagination {
+      total
+      hasNext
+      hasPrevious
+    }
+    facets {
+      categories {
+        name
+        count
+      }
+      price {
+        min
+        max
+      }
+    }
+  }
+}
+
+# Test brand search
+query SearchByBrand {
+  searchProducts(
+    input: { 
+      query: "", 
+      limit: 10, 
+      page: 1,
+      filters: {
+        brandName: "FashionForward"
+      }
+    }
+  ) {
+    products {
+      id
+      title
+      brandName
+    }
+    pagination {
+      total
+    }
+  }
+}

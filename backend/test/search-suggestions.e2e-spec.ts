@@ -4,14 +4,14 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { SearchSuggestionService } from '../src/modules/search/services/search-suggestion.service';
-import { SearchSuggestionsResponseType } from '../src/modules/search/graphql/search-suggestion.type';
+import {} from /* SearchSuggestionsResponseType */ '../src/modules/search/graphql/search-suggestion.type';
 
 describe('SearchSuggestions (e2e)', () => {
   let app: INestApplication;
   let elasticsearchServiceMock: {
     search: jest.Mock;
   };
-  let searchSuggestionService: SearchSuggestionService;
+  let _searchSuggestionService: SearchSuggestionService;
 
   beforeAll(async () => {
     elasticsearchServiceMock = {
@@ -28,7 +28,7 @@ describe('SearchSuggestions (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    searchSuggestionService = moduleFixture.get<SearchSuggestionService>(SearchSuggestionService);
+    _searchSuggestionService = moduleFixture.get<SearchSuggestionService>(SearchSuggestionService);
   });
 
   afterAll(async () => {

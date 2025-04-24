@@ -1,0 +1,14 @@
+export * from './search.module';
+export * from './dto/search-response.dto';
+export { SearchEntityType } from './enums/search-entity-type.enum';
+export { SearchOptionsInput, FilterOption, RangeFilterOption, SortOption, SortOrder, } from './dto/search-options.dto';
+export * from './services/search-cache.service';
+export * from './services/search-experiment.service';
+export * from './services/search-monitoring.service';
+export * from './services/entity-relevance-scorer.service';
+export * from './services/discovery-search.service';
+export * from './services/autocomplete.service';
+export * from './services/related-products.service';
+export * from './services/nlp-search.service';
+export * from './elasticsearch/elasticsearch.module';
+export * from './elasticsearch/indices.config';

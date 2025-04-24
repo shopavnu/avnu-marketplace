@@ -1,0 +1,38 @@
+import { ElasticsearchService } from './elasticsearch.service';
+import { SearchRelevanceService } from './search-relevance.service';
+import { UserPreferenceService } from './user-preference.service';
+import { ABTestingService } from './ab-testing.service';
+import { GoogleAnalyticsService } from '../../analytics/services/google-analytics.service';
+import { SearchOptionsInput } from '../dto/search-options.dto';
+import { SearchResponseDto } from '../dto/search-response.dto';
+import { User } from '../../users/entities/user.entity';
+export declare class SimpleSearchService {
+    private readonly elasticsearchService;
+    private readonly searchRelevanceService;
+    private readonly userPreferenceService;
+    private readonly abTestingService;
+    private readonly googleAnalyticsService;
+    private readonly logger;
+    constructor(elasticsearchService: ElasticsearchService, searchRelevanceService: SearchRelevanceService, userPreferenceService: UserPreferenceService, abTestingService: ABTestingService, googleAnalyticsService: GoogleAnalyticsService);
+    private applyCategoryAndBrandBoosting;
+    private getTopItems;
+    private extractCategoriesFromResults;
+    private extractBrandsFromResults;
+    searchAsync(options: SearchOptionsInput, user?: User): Promise<SearchResponseDto>;
+    private buildSimpleSearchQuery;
+    private createEmptyFacets;
+    private getAggregationsForEntityType;
+    private buildMerchantAggregations;
+    private buildBrandAggregations;
+    private buildProductAggregations;
+    private buildMerchantSearchQuery;
+    private buildBrandSearchQuery;
+    private generateFacetsFromAggregations;
+    private generateFacetsFromResults;
+    private buildFilteredQuery;
+    private getFieldNameFromAggKey;
+    private buildFiltersExcept;
+    private buildFacetedSearchQuery;
+    private trackSearchInAnalytics;
+    private convertFilters;
+}

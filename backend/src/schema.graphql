@@ -42,10 +42,19 @@ type Query {
   merchantProducts(merchantId: ID!): [MerchantProduct!]!
   merchantShipping(merchantId: ID!): MerchantShipping
   merchantAdCampaigns(merchantId: ID!): [MerchantAdCampaign!]!
-  merchantAdCampaign(id: ID!): MerchantAdCampaign
+  merchantAdCampaign(id: ID!, merchantId: ID!): MerchantAdCampaign!
   activeMerchantAdCampaigns(merchantId: ID!): [MerchantAdCampaign!]!
-  merchantAdCampaignsByType(merchantId: ID!, type: String!): [MerchantAdCampaign!]!
+  merchantAdCampaignsByType(merchantId: ID!, type: CampaignType!): [MerchantAdCampaign!]!
   merchantAdCampaignsForProduct(merchantId: ID!, productId: ID!): [MerchantAdCampaign!]!
+  
+  # Ad budget management queries
+  merchantBudgetUtilization(merchantId: ID!): BudgetUtilizationReport!
+  campaignBudgetForecast(campaignId: ID!, merchantId: ID!): CampaignForecast!
+  campaignDailyBudget(campaignId: ID!, merchantId: ID!): Float!
+  
+  # Ad placement queries
+  getAdsForDiscoveryFeed(options: AdPlacementOptionsInput): [AdPlacement!]!
+  getRecommendedAdPlacements(merchantId: ID!): [ProductAdRecommendation!]!
   
   # Merchant Analytics queries
   merchantAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime, productId: ID, categoryId: ID): [MerchantAnalytics!]!
@@ -189,11 +198,18 @@ type Mutation {
   updateProductVisibility(merchantId: ID!, productId: ID!, isVisible: Boolean!): MerchantProduct!
   updateProductPromotion(merchantId: ID!, productId: ID!, isPromoted: Boolean!, monthlyAdBudget: Float): MerchantProduct!
   updateMerchantShipping(merchantId: ID!, input: UpdateMerchantShippingInput!): MerchantShipping!
+  # Ad campaign mutations
   createMerchantAdCampaign(merchantId: ID!, input: CreateMerchantAdCampaignInput!): MerchantAdCampaign!
-  updateMerchantAdCampaign(id: ID!, input: UpdateMerchantAdCampaignInput!): MerchantAdCampaign!
-  updateMerchantAdCampaignStatus(id: ID!, status: String!): MerchantAdCampaign!
-  deleteMerchantAdCampaign(id: ID!): Boolean!
-  createRetargetingCampaign(merchantId: ID!, input: CreateRetargetingCampaignInput!): RetargetingCampaign!
+  updateMerchantAdCampaign(id: ID!, merchantId: ID!, input: UpdateMerchantAdCampaignInput!): MerchantAdCampaign!
+  updateMerchantAdCampaignStatus(id: ID!, merchantId: ID!, status: CampaignStatus!): MerchantAdCampaign!
+  deleteMerchantAdCampaign(id: ID!, merchantId: ID!): Boolean!
+  createRetargetingCampaign(merchantId: ID!, productIds: [ID!]!, budget: Float!): MerchantAdCampaign!
+  
+  # Ad budget management mutations
+  allocateBudgetAcrossCampaigns(merchantId: ID!, totalBudget: Float!, campaignIds: [ID!]!, strategy: BudgetAllocationStrategy = EQUAL): [BudgetAllocation!]!
+  
+  # Ad placement mutations
+  recordAdClick(campaignId: ID!): Boolean!
   createProduct(input: CreateProductInput!): Product!
   updateProduct(id: ID!, input: UpdateProductInput!): Product!
   removeProduct(id: ID!): Boolean!
@@ -566,32 +582,30 @@ type SummaryMetrics {
 
 input CreateMerchantAdCampaignInput {
   name: String!
+  description: String
+  type: CampaignType = PRODUCT_PROMOTION
+  productIds: [ID!]!
   budget: Float!
-  startDate: String!
-  endDate: String
-  targetAudience: [String!]
-  targetProducts: [ID!]
-  status: String
+  targetAudience: TargetAudience = ALL
+  targetDemographics: [String!]
+  targetLocations: [String!]
+  targetInterests: [String!]
+  startDate: DateTime!
+  endDate: DateTime
 }
 
 input UpdateMerchantAdCampaignInput {
   name: String
+  description: String
+  type: CampaignType
+  productIds: [ID!]
   budget: Float
-  startDate: String
-  endDate: String
-  targetAudience: [String!]
-  targetProducts: [ID!]
-  status: String
-}
-
-input CreateRetargetingCampaignInput {
-  name: String!
-  budget: Float!
-  startDate: String!
-  endDate: String
-  audienceType: String!
-  targetProducts: [ID!]
-  status: String
+  targetAudience: TargetAudience
+  targetDemographics: [String!]
+  targetLocations: [String!]
+  targetInterests: [String!]
+  startDate: DateTime
+  endDate: DateTime
 }
 
 input CreateProductInput {
@@ -675,37 +689,28 @@ type MerchantShipping {
 type MerchantAdCampaign {
   id: ID!
   merchantId: ID!
+  merchant: Merchant!
   name: String!
+  description: String
+  type: CampaignType!
+  status: CampaignStatus!
+  productIds: [ID!]!
   budget: Float!
-  startDate: String!
-  endDate: String
-  targetAudience: [String!]
-  targetProducts: [ID!]
-  status: String!
+  spent: Float
+  targetAudience: TargetAudience!
+  targetDemographics: [String!]
+  targetLocations: [String!]
+  targetInterests: [String!]
+  startDate: DateTime!
+  endDate: DateTime
   impressions: Int
   clicks: Int
+  clickThroughRate: Float
   conversions: Int
-  spend: Float
-  createdAt: String!
-  updatedAt: String!
-}
-
-type RetargetingCampaign {
-  id: ID!
-  merchantId: ID!
-  name: String!
-  budget: Float!
-  startDate: String!
-  endDate: String
-  audienceType: String!
-  targetProducts: [ID!]
-  status: String!
-  impressions: Int
-  clicks: Int
-  conversions: Int
-  spend: Float
-  createdAt: String!
-  updatedAt: String!
+  conversionRate: Float
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastUpdatedByMerchantAt: DateTime
 }
 
 scalar JSON
@@ -1776,6 +1781,96 @@ type SystemAlert {
   timestamp: DateTime!
 }
 
+# Merchant ad campaign types
+enum CampaignType {
+  PRODUCT_PROMOTION
+  RETARGETING
+  BRAND_AWARENESS
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum TargetAudience {
+  ALL
+  PREVIOUS_VISITORS
+  CART_ABANDONERS
+  PREVIOUS_CUSTOMERS
+}
+
+enum BudgetAllocationStrategy {
+  EQUAL
+  PERFORMANCE_BASED
+  TIME_BASED
+}
+
+type BudgetUtilizationReport {
+  totalBudget: Float!
+  totalSpent: Float!
+  utilizationRate: Float!
+  campaignUtilization: [CampaignUtilization!]!
+}
+
+type CampaignUtilization {
+  campaignId: ID!
+  name: String!
+  budget: Float!
+  spent: Float!
+  utilizationRate: Float!
+}
+
+type CampaignForecast {
+  campaignId: ID!
+  remainingBudget: Float!
+  dailySpendRate: Float!
+  estimatedDaysRemaining: Float!
+  estimatedEndDate: DateTime!
+}
+
+type BudgetAllocation {
+  campaignId: ID!
+  allocatedBudget: Float!
+}
+
+type AdPlacement {
+  campaignId: ID!
+  merchantId: ID!
+  productIds: [ID!]!
+  type: String!
+  relevanceScore: Float!
+  isSponsored: Boolean!
+  impressionCost: Float!
+}
+
+type ProductAdRecommendation {
+  productId: ID!
+  recommendedBudget: Float!
+  estimatedImpressions: Int!
+  estimatedClicks: Int!
+  estimatedConversions: Int!
+}
+
+input AdPlacementOptionsInput {
+  location: String
+  interests: [String!]
+  demographics: [String!]
+  previouslyViewedProductIds: [ID!]
+  cartProductIds: [ID!]
+  purchasedProductIds: [ID!]
+  maxAds: Int = 2
+}
+
+type AllSearchResults {
+  products: ProductPaginatedResponse!
+  merchants: MerchantPaginatedResponse!
+  brands: BrandPaginatedResponse!
+  adPlacements: [AdPlacement!]!
+}
+
 enum ExperimentStatus {
   DRAFT
   RUNNING
@@ -1792,8 +1887,10 @@ enum BehaviorType {
   purchase
 }
 
-type AllSearchResults {
-  products: ProductPaginatedResponse!
-  merchants: MerchantPaginatedResponse!
-  brands: BrandPaginatedResponse!
+type Query {
+  # ... existing queries ...
+  getBudgetUtilizationReport(campaignId: ID!): BudgetUtilizationReport!
+  getCampaignForecast(campaignId: ID!): CampaignForecast!
+  getAdPlacements(options: AdPlacementOptionsInput!): [AdPlacement!]!
+  getProductAdRecommendations(productId: ID!): ProductAdRecommendation!
 }

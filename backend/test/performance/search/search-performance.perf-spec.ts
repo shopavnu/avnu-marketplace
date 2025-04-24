@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
+import {} from /* join */ 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -11,17 +11,17 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { performance } from 'perf_hooks';
 import { AuthModule } from '../../../src/modules/auth/auth.module';
 import { SearchModule } from '../../../src/modules/search/search.module';
-import { NlpModule } from '../../../src/modules/nlp/nlp.module';
-import { PersonalizationModule } from '../../../src/modules/personalization/personalization.module';
+import {} from /* NlpModule */ '../../../src/modules/nlp/nlp.module';
+import {} from /* PersonalizationModule */ '../../../src/modules/personalization/personalization.module';
 import { AbTestingModule } from '../../../src/modules/ab-testing/ab-testing.module';
-import { AnalyticsModule } from '../../../src/modules/analytics/analytics.module';
-import { ProductsModule } from '../../../src/modules/products/products.module';
-import { MerchantsModule } from '../../../src/modules/merchants/merchants.module';
+import {} from /* AnalyticsModule */ '../../../src/modules/analytics/analytics.module';
+import {} from /* ProductsModule */ '../../../src/modules/products/products.module';
+import {} from /* MerchantsModule */ '../../../src/modules/merchants/merchants.module';
 import { SearchEntityType } from '../../../src/modules/search/enums/search-entity-type.enum';
 import { ExperimentStatus } from '../../../src/modules/ab-testing/entities/experiment.entity';
 import { registerEnumType } from '@nestjs/graphql';
 import { AuthService } from '../../../src/modules/auth/auth.service';
-import { JwtAuthGuard } from '../../../src/modules/auth/guards/jwt-auth.guard';
+import {} from /* JwtAuthGuard */ '../../../src/modules/auth/guards/jwt-auth.guard';
 import { UsersService } from '@modules/users';
 import { User } from '@modules/users';
 
@@ -264,7 +264,7 @@ describe('Search Performance Tests', () => {
           limit: 10,
         })
         .expect(200);
-      const executionTimeUncached = performance.now() - startTimeUncached;
+      const _executionTimeUncached = performance.now() - startTimeUncached;
 
       // Second request - should be cached
       const startTimeCached = performance.now();

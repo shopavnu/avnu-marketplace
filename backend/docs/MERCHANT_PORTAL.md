@@ -12,6 +12,8 @@ The Merchant Portal provides a comprehensive dashboard for merchants to manage t
 - **Product Performance**: Identify top-selling products and underperforming inventory
 - **Customer Demographics**: Understand customer segments and purchasing patterns
 - **Search Analytics**: See how customers find and interact with products
+- **Ad Campaign Analytics**: Monitor campaign performance, ROI, and engagement metrics
+- **Budget Utilization**: Track ad spend and budget allocation across campaigns
 - **Comparison Tools**: Compare performance against marketplace averages
 
 ### Inventory Management
@@ -43,6 +45,17 @@ The Merchant Portal provides a comprehensive dashboard for merchants to manage t
 - **Value Declaration**: Declare and showcase brand values
 - **Value Verification**: Submit documentation for value verification
 - **Value-Based Analytics**: Track performance based on value alignment
+- **Value-Focused Marketing**: Create value-focused marketing campaigns
+- **Value-Aligned Recommendations**: Improve visibility to value-aligned customers
+
+### Ad Campaign Management
+
+- **Campaign Creation**: Create and manage different types of ad campaigns (product promotion, retargeting, brand awareness)
+- **Budget Management**: Set and allocate budgets across campaigns with different allocation strategies
+- **Targeting Options**: Target specific audiences based on demographics, interests, and behaviors
+- **Performance Tracking**: Monitor impressions, clicks, conversions, and ROI in real-time
+- **Budget Forecasting**: Predict campaign performance and budget utilization
+- **Ad Placement Recommendations**: Get AI-powered recommendations for optimal ad placements
 - **Value-Focused Marketing**: Create value-focused marketing campaigns
 - **Value-Aligned Recommendations**: Improve visibility to value-aligned customers
 

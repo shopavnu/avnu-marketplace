@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 // Entities
 import { Merchant } from './entities/merchant.entity';
@@ -18,12 +19,16 @@ import { MerchantDataAggregationService } from './services/merchant-data-aggrega
 import { MerchantAnalyticsFilterService } from './services/merchant-analytics-filter.service';
 import { MerchantRevenueAnalyticsService } from './services/merchant-revenue-analytics.service';
 import { MerchantDemographicAnalyticsService } from './services/merchant-demographic-analytics.service';
+import { AdBudgetManagementService } from './services/ad-budget-management.service';
+import { AdPlacementService } from './services/ad-placement.service';
 
 // Resolvers
 import { MerchantResolver } from './resolvers/merchant.resolver';
 import { MerchantAdCampaignResolver } from './resolvers/merchant-ad-campaign.resolver';
 import { MerchantAnalyticsResolver } from './resolvers/merchant-analytics.resolver';
 import { MerchantDashboardAnalyticsResolver } from './resolvers/merchant-dashboard-analytics.resolver';
+import { AdBudgetManagementResolver } from './resolvers/ad-budget-management.resolver';
+import { AdPlacementResolver } from './resolvers/ad-placement.resolver';
 
 // Related modules
 import { AuthModule } from '../auth/auth.module';
@@ -40,6 +45,7 @@ import { ProductsModule } from '../products/products.module';
       MerchantAdCampaign,
       MerchantAnalytics,
     ]),
+    EventEmitterModule.forRoot(),
     forwardRef(() => AuthModule),
     forwardRef(() => UsersModule),
     forwardRef(() => ProductsModule),
@@ -54,13 +60,23 @@ import { ProductsModule } from '../products/products.module';
     MerchantAnalyticsFilterService,
     MerchantRevenueAnalyticsService,
     MerchantDemographicAnalyticsService,
+    AdBudgetManagementService,
+    AdPlacementService,
 
     // Resolvers
     MerchantResolver,
     MerchantAdCampaignResolver,
     MerchantAnalyticsResolver,
     MerchantDashboardAnalyticsResolver,
+    AdBudgetManagementResolver,
+    AdPlacementResolver,
   ],
-  exports: [MerchantService, MerchantAdCampaignService, MerchantAnalyticsService],
+  exports: [
+    MerchantService, 
+    MerchantAdCampaignService, 
+    MerchantAnalyticsService,
+    AdBudgetManagementService,
+    AdPlacementService,
+  ],
 })
 export class MerchantsModule {}
