@@ -36,8 +36,8 @@ export default function AboutPage() {
         <section className="relative h-[50vh] min-h-[400px] overflow-hidden">
           <div className="absolute inset-0">
             <Image
-              src="https://images.unsplash.com/photo-1556760544-74068565f05c?auto=format&q=80&w=1500"
-              alt="Young artisans collaborating"
+              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&q=80&w=1500"
+              alt="Artisan crafting"
               fill
               priority
               className="object-cover"

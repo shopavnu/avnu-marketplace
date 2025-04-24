@@ -107,6 +107,26 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
     updateFilters({ category: categoryId });
   };
 
+  const toggleCategory = (categoryId: string) => {
+    // Prevent multiple clicks during animation
+    if (animatingCategories.includes(categoryId)) return;
+    
+    // Mark this category as animating
+    setAnimatingCategories(prev => [...prev, categoryId]);
+    
+    setExpandedCategories(prev => {
+      const isExpanded = prev.includes(categoryId);
+      return isExpanded
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId];
+    });
+    
+    // Remove from animating list after animation completes
+    setTimeout(() => {
+      setAnimatingCategories(prev => prev.filter(id => id !== categoryId));
+    }, 300); // Match this with your animation duration
+  };
+
   const FilterSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="mb-6">
       <h3 className="text-lg font-montserrat font-medium text-charcoal mb-3">{title}</h3>
