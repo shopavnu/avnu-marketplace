@@ -1,112 +1,125 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import { DiscoverySection, DiscoveryProduct } from '@/types/products';
+import { products } from '@/data/products';
 
-// GraphQL query for discovery homepage
-const DISCOVERY_HOMEPAGE = gql`
-  query DiscoveryHomepage($userId: ID, $sessionId: ID, $limit: Int) {
-    discoveryHomepage(userId: $userId, sessionId: $sessionId, options: { limit: $limit }) {
-      sections {
-        id
-        title
-        description
-        type
-        items {
-          id
-          name
-          description
-          price
-          salePrice
-          images
-          slug
-          brand {
-            id
-            name
-          }
-          categories
-          rating
-          reviewCount
-        }
+// Define types for our discovery feed
+interface DiscoveryProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  salePrice: number;
+  images: string[];
+  slug: string;
+  brand: {
+    id: string;
+    name: string;
+  };
+  categories: string[];
+  rating: number;
+  reviewCount: number;
+}
+
+interface DiscoverySection {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  items: DiscoveryProduct[];
+}
+
+interface DiscoveryData {
+  sections: DiscoverySection[];
+  metadata: {
+    personalizedCount: number;
+    trendingCount: number;
+    newArrivalsCount: number;
+    emergingBrandsCount: number;
+    sponsoredCount: number;
+  };
+}
+
+// Local mock data for the discovery homepage
+const createMockDiscoveryData = (limit = 20): DiscoveryData => {
+  // Transform products to match the expected format
+  const mockProducts = products.map(product => ({
+    id: product.id,
+    name: product.title,
+    description: product.description,
+    price: product.price,
+    salePrice: product.price * 0.9,
+    images: product.images || [product.image],
+    slug: product.slug || product.id.toLowerCase().replace(/\s+/g, '-'),
+    brand: {
+      id: 'brand-' + Math.floor(Math.random() * 10),
+      name: product.brand
+    },
+    categories: product.categories || ['default'],
+    rating: 4.5,
+    reviewCount: 10
+  }));
+
+  // Create mock sections
+  return {
+    sections: [
+      {
+        id: 'section-1',
+        title: 'Featured Products',
+        description: 'Handpicked selections just for you',
+        type: 'FEATURED',
+        items: mockProducts.slice(0, 4)
+      },
+      {
+        id: 'section-2',
+        title: 'New Arrivals',
+        description: 'The latest additions to our marketplace',
+        type: 'NEW_ARRIVALS',
+        items: mockProducts.slice(4, 10)
+      },
+      {
+        id: 'section-3',
+        title: 'Trending Now',
+        description: 'What everyone is shopping for',
+        type: 'TRENDING',
+        items: mockProducts.slice(10, Math.min(mockProducts.length, limit))
       }
-      metadata {
-        personalizedCount
-        trendingCount
-        newArrivalsCount
-        emergingBrandsCount
-        sponsoredCount
-      }
+    ],
+    metadata: {
+      personalizedCount: 4,
+      trendingCount: 6,
+      newArrivalsCount: 6,
+      emergingBrandsCount: 3,
+      sponsoredCount: 2
     }
-  }
-`;
+  };
+};
 
 interface DiscoveryFeedProps {
   limit?: number;
   showTitle?: boolean;
 }
 
-interface SessionUser {
-  id: string;
-  email: string;
-  name?: string;
-}
-
-interface Session {
-  user?: SessionUser;
-}
-
 export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({ 
   limit = 20,
   showTitle = true
 }) => {
-  // We'll use localStorage for session management instead of next-auth
-  const [session, setSession] = useState<Session | null>(null);
-  const userId = session?.user?.id;
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  // Use local mock data instead of GraphQL query
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<{discoveryHomepage: DiscoveryData} | null>(null);
   
-  // Generate or retrieve session ID for non-authenticated users and check for stored session
+  // Simulate loading state for a more realistic experience
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('avnu_user');
-    if (storedUser) {
-      try {
-        setSession({ user: JSON.parse(storedUser) });
-      } catch (e) {
-        console.error('Failed to parse stored user', e);
-      }
-    }
+    const timer = setTimeout(() => {
+      setData({ discoveryHomepage: createMockDiscoveryData(limit) });
+      setLoading(false);
+    }, 800);
     
-    // Generate session ID if no user ID
-    if (!userId) {
-      const storedSessionId = localStorage.getItem('avnu_session_id');
-      if (storedSessionId) {
-        setSessionId(storedSessionId);
-      } else {
-        const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-        localStorage.setItem('avnu_session_id', newSessionId);
-        setSessionId(newSessionId);
-      }
-    }
-  }, [userId]);
-
-  // Fetch discovery homepage data
-  const { data, loading, error } = useQuery(DISCOVERY_HOMEPAGE, {
-    variables: {
-      userId: userId || null,
-      sessionId: !userId ? sessionId : null,
-      limit
-    },
-    skip: !userId && !sessionId, // Skip query until we have either userId or sessionId
-    fetchPolicy: 'cache-and-network',
-  });
-
-  if (error) {
-    console.error('Error fetching discovery feed:', error);
-  }
+    return () => clearTimeout(timer);
+  }, [limit]);
 
   const sections: DiscoverySection[] = data?.discoveryHomepage?.sections || [];
 
@@ -182,77 +195,66 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
                     />
                     
                     {/* Badges for special sections */}
-                    {section.type === 'new' && (
+                    {section.type === 'NEW_ARRIVALS' && (
                       <div className="absolute top-3 left-3">
                         <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
                           New
                         </span>
                       </div>
                     )}
-                    
-                    {section.type === 'emerging_brands' && (
-                      <div className="absolute top-3 left-3">
-                        <span className="px-3 py-1 bg-purple-500 text-white text-xs font-medium rounded-full">
-                          Emerging Brand
-                        </span>
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="p-3 sm:p-4">
-                    {/* Brand */}
-                    {product.brand && (
-                      <div className="mb-2">
-                        <span className="text-xs text-neutral-gray truncate max-w-[120px]">
-                          {product.brand.name}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Title */}
-                    <h3 className="font-montserrat font-medium text-charcoal text-sm sm:text-base mb-1 line-clamp-2">
-                      {product.name}
-                    </h3>
-
-                    {/* Rating */}
-                    {product.rating && (
-                      <div className="flex items-center gap-1 mb-2">
-                        <div className="flex items-center text-yellow-400">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <svg
-                              key={i}
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill={i < Math.floor(product.rating || 0) ? 'currentColor' : 'none'}
-                              stroke="currentColor"
-                              className="w-4 h-4"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-                              />
-                            </svg>
-                          ))}
+                    <div className="p-3 sm:p-4">
+                      {/* Brand */}
+                      {product.brand && (
+                        <div className="mb-2">
+                          <span className="text-xs text-neutral-gray truncate max-w-[120px]">
+                            {product.brand.name}
+                          </span>
                         </div>
-                        <span className="text-xs text-neutral-gray">
-                          ({product.reviewCount || 0})
-                        </span>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Price */}
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <span className="text-base sm:text-lg font-montserrat font-medium text-charcoal">
+                      {/* Title */}
+                      <h3 className="font-montserrat font-medium text-charcoal text-sm sm:text-base mb-1 line-clamp-2">
+                        {product.name}
+                      </h3>
+
+                      {/* Price */}
+                      <div className="flex items-baseline">
+                        <span className="font-inter font-medium text-charcoal">
                           ${product.price.toFixed(2)}
                         </span>
-                        {product.salePrice && (
-                          <span className="ml-2 text-sm text-red-500 line-through">
-                            ${product.salePrice.toFixed(2)}
+
+                        {product.salePrice && product.salePrice < product.price && (
+                          <span className="ml-2 text-xs text-red-500 line-through">
+                            ${product.price.toFixed(2)}
                           </span>
                         )}
                       </div>
+
+                      {/* Rating */}
+                      {product.rating > 0 && (
+                        <div className="mt-2 flex items-center">
+                          <div className="flex text-yellow-400">
+                            {Array(5)
+                              .fill(0)
+                              .map((_, i) => (
+                                <svg
+                                  key={i}
+                                  className={`w-3 h-3 ${
+                                    i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
+                                  }`}
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              ))}
+                          </div>
+                          <span className="ml-1 text-xs text-gray-500">
+                            ({product.reviewCount})
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>
