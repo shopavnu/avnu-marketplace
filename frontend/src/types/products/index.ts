@@ -27,6 +27,15 @@ export interface Vendor {
   shippingInfo: ShippingInfo;
 }
 
+export interface ProductAttributes {
+  [key: string]: string | undefined;
+  size: string;
+  color: string;
+  material: string;
+  weight: string;
+  dimensions?: string;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -37,13 +46,15 @@ export interface Product {
   brand: string;
   category: string;
   subCategory: string;
-  attributes: Record<string, string>;
+  attributes: ProductAttributes;
   isNew: boolean;
   rating: ProductRating;
   vendor: Vendor;
   inStock: boolean;
   tags: string[];
   createdAt: string;
+  slug: string;
+  categories: string[];
 }
 
 export interface ProductGridProps {
