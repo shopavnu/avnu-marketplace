@@ -79,13 +79,13 @@ const AdminDashboard: React.FC = () => {
   const sessionAnalytics = overview.sessionAnalytics || {};
 
   // Format numbers for display
-  const formatNumber = (num, decimals = 2) => {
+  const formatNumber = (num: number | null | undefined, decimals: number = 2): string => {
     if (num === undefined || num === null) return '0';
     return typeof num === 'number' ? num.toFixed(decimals) : '0';
   };
 
   // Format percentages for display
-  const formatPercentage = (num, decimals = 2) => {
+  const formatPercentage = (num: number | null | undefined, decimals: number = 2): string => {
     if (num === undefined || num === null) return '0%';
     return typeof num === 'number' ? `${num.toFixed(decimals)}%` : '0%';
   };
@@ -237,7 +237,7 @@ const AdminDashboard: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {searchMetrics.topQueries?.map((query, index) => (
+            {searchMetrics.topQueries?.map((query: any, index: number) => (
               <tr key={index}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {query.query}
