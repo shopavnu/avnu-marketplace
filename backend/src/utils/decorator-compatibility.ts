@@ -1,6 +1,6 @@
 /**
  * Decorator Compatibility Layer
- * 
+ *
  * This file provides utility functions to help with TypeScript decorator compatibility issues
  * when using newer versions of TypeScript with NestJS.
  */
@@ -14,7 +14,7 @@ import { Repository } from 'typeorm';
  * @param entity The entity class to inject the repository for
  */
 export function SafeInjectRepository<T>(entity: Type<T>) {
-  return function(target: any, key: string, index?: number) {
+  return function (target: any, key: string, index?: number) {
     // The actual InjectRepository decorator is applied at runtime
     // This wrapper just helps with TypeScript type checking
     return Reflect.metadata('design:type', Repository)(target, key);
@@ -30,7 +30,7 @@ export function createRepositoryFactory<T>(entity: Type<T>) {
   class RepositoryFactory {
     constructor(
       @InjectRepository(entity)
-      public readonly repository: Repository<T>
+      public readonly repository: Repository<T>,
     ) {}
 
     getRepository(): Repository<T> {
@@ -48,6 +48,6 @@ export function createRepositoryProvider<T>(entity: Type<T>) {
   return {
     provide: `${entity.name}Repository`,
     useFactory: (factory: { getRepository(): Repository<T> }) => factory.getRepository(),
-    inject: [createRepositoryFactory(entity)]
+    inject: [createRepositoryFactory(entity)],
   };
 }

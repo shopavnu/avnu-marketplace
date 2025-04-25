@@ -6,10 +6,13 @@ import { AdPlacementOptions, AdPlacementResult } from './entity-mocks';
 export class AdPlacementResolver {
   constructor(private readonly adPlacementService: AdPlacementService) {}
 
-  async getAdsForDiscoveryFeed(options: Partial<AdPlacementOptions>, user?: any): Promise<AdPlacementResult[]> {
+  async getAdsForDiscoveryFeed(
+    options: Partial<AdPlacementOptions>,
+    user?: any,
+  ): Promise<AdPlacementResult[]> {
     const userId = user?.id;
     const sessionId = !userId ? `anonymous-${Date.now()}` : undefined;
-    
+
     return this.adPlacementService.getAdsForDiscoveryFeed({
       ...options,
       userId,
@@ -20,7 +23,7 @@ export class AdPlacementResolver {
   async recordAdClick(campaignId: string, user?: any): Promise<boolean> {
     const userId = user?.id;
     const sessionId = !userId ? `anonymous-${Date.now()}` : undefined;
-    
+
     return this.adPlacementService.recordAdClick(campaignId, userId, sessionId);
   }
 

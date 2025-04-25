@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { MerchantAdCampaign, CampaignStatus } from '../entities/merchant-ad-campaign.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -87,15 +87,12 @@ export class AdBudgetManagementService {
 
     // If budget is exhausted, pause the campaign
     if (budgetExhausted && campaign.status === CampaignStatus.ACTIVE) {
-      await this.adCampaignRepository.update(
-        { id: campaignId },
-        { status: CampaignStatus.PAUSED },
-      );
-      
+      await this.adCampaignRepository.update({ id: campaignId }, { status: CampaignStatus.PAUSED });
+
       this.logger.log(`Campaign ${campaignId} paused due to budget exhaustion`);
-      this.eventEmitter.emit('campaign.budget.exhausted', { 
-        campaignId, 
-        merchantId: campaign.merchantId 
+      this.eventEmitter.emit('campaign.budget.exhausted', {
+        campaignId,
+        merchantId: campaign.merchantId,
       });
     }
 
@@ -122,7 +119,7 @@ export class AdBudgetManagementService {
 
     // Calculate target impressions based on industry average CTR of 0.1% and target of 100 clicks
     const targetImpressions = 100 / 0.001; // 100,000 impressions
-    
+
     return campaign.budget / targetImpressions;
   }
 
@@ -156,7 +153,7 @@ export class AdBudgetManagementService {
     strategy: BudgetAllocationStrategy = BudgetAllocationStrategy.EQUAL,
   ): Promise<Record<string, number>> {
     const campaigns = await this.adCampaignRepository.find({
-      where: { id: { in: campaignIds }, merchantId },
+      where: { id: In(campaignIds), merchantId },
     });
 
     if (campaigns.length === 0) {
@@ -169,7 +166,7 @@ export class AdBudgetManagementService {
       case BudgetAllocationStrategy.PERFORMANCE_BASED:
         // Allocate budget based on campaign performance (CTR)
         const totalClicks = campaigns.reduce((sum, campaign) => sum + (campaign.clicks || 0), 0);
-        
+
         if (totalClicks === 0) {
           // If no performance data, fall back to equal allocation
           const equalBudget = totalBudget / campaigns.length;
@@ -189,13 +186,17 @@ export class AdBudgetManagementService {
         const now = new Date();
         const totalDaysActive = campaigns.reduce((sum, campaign) => {
           const startDate = new Date(campaign.startDate);
-          const daysActive = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+          const daysActive = Math.ceil(
+            (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+          );
           return sum + Math.max(1, daysActive);
         }, 0);
 
         campaigns.forEach(campaign => {
           const startDate = new Date(campaign.startDate);
-          const daysActive = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+          const daysActive = Math.ceil(
+            (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+          );
           // Newer campaigns get more budget (inverse relationship with days active)
           const inverseTimeRatio = (totalDaysActive - daysActive + 1) / totalDaysActive;
           allocation[campaign.id] = totalBudget * (inverseTimeRatio / campaigns.length);
@@ -281,16 +282,20 @@ export class AdBudgetManagementService {
     }
 
     const remainingBudget = campaign.budget - (campaign.spent || 0);
-    
+
     // Calculate daily spend rate
     const startDate = new Date(campaign.startDate);
     const now = new Date();
-    const daysActive = Math.max(1, Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
+    const daysActive = Math.max(
+      1,
+      Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)),
+    );
     const dailySpendRate = (campaign.spent || 0) / daysActive;
-    
+
     // Calculate estimated days remaining
-    const estimatedDaysRemaining = dailySpendRate > 0 ? Math.ceil(remainingBudget / dailySpendRate) : 0;
-    
+    const estimatedDaysRemaining =
+      dailySpendRate > 0 ? Math.ceil(remainingBudget / dailySpendRate) : 0;
+
     // Calculate estimated end date
     const estimatedEndDate = new Date();
     estimatedEndDate.setDate(estimatedEndDate.getDate() + estimatedDaysRemaining);

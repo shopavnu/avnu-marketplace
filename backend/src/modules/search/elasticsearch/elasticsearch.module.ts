@@ -15,7 +15,7 @@ import { LoggerService } from '@common/services/logger.service';
           password: configService.get<string>('ELASTICSEARCH_PASSWORD') || '',
         },
         tls: {
-          rejectUnauthorized: false
+          rejectUnauthorized: false,
         },
         maxRetries: 10,
         requestTimeout: 60000,

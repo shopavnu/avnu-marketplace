@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
-import { BudgetAllocationStrategy, BudgetUtilization, BudgetForecast, BudgetUpdateResult } from '../test/mocks/entity-mocks';
+import {
+  BudgetAllocationStrategy,
+  BudgetUtilization,
+  BudgetForecast,
+  BudgetUpdateResult,
+} from '../test/mocks/entity-mocks';
 
 // Import the mock service instead of the real one
 import { AdBudgetManagementService } from '../test/mocks/ad-budget-management.service.mock';
@@ -108,14 +113,14 @@ describe('AdBudgetManagementService', () => {
         remainingBudget: 1000,
         utilizationRate: 0.33,
         campaignBreakdown: {
-          'campaign1': 300,
-          'campaign2': 200,
+          campaign1: 300,
+          campaign2: 200,
         },
       };
       jest.spyOn(service, 'getBudgetUtilization').mockResolvedValue(mockUtilization);
-      
+
       const result = await service.getBudgetUtilization('merchant1');
-      
+
       expect(result).toEqual(mockUtilization);
       expect(result.totalBudget).toBe(1500);
       expect(result.totalSpent).toBe(500);
@@ -130,38 +135,40 @@ describe('AdBudgetManagementService', () => {
     it('should allocate budget equally across campaigns', async () => {
       // Mock the implementation to return equal allocations
       const equalAllocations = {
-        'campaign1': 500,
-        'campaign2': 500,
-        'campaign3': 500
+        campaign1: 500,
+        campaign2: 500,
+        campaign3: 500,
       };
       jest.spyOn(service, 'allocateBudgetAcrossCampaigns').mockResolvedValue(equalAllocations);
-      
+
       const result = await service.allocateBudgetAcrossCampaigns(
         'merchant1',
         ['campaign1', 'campaign2', 'campaign3'],
         1500,
         BudgetAllocationStrategy.EQUAL,
       );
-      
+
       expect(result).toEqual(equalAllocations);
     });
 
     it('should allocate budget based on performance', async () => {
       // Mock the implementation to return performance-based allocations
       const performanceAllocations = {
-        'campaign1': 300,
-        'campaign2': 200,
-        'campaign3': 500
+        campaign1: 300,
+        campaign2: 200,
+        campaign3: 500,
       }; // More for campaign with higher CTR
-      jest.spyOn(service, 'allocateBudgetAcrossCampaigns').mockResolvedValue(performanceAllocations);
-      
+      jest
+        .spyOn(service, 'allocateBudgetAcrossCampaigns')
+        .mockResolvedValue(performanceAllocations);
+
       const result = await service.allocateBudgetAcrossCampaigns(
         'merchant1',
         ['campaign1', 'campaign2', 'campaign3'],
         1000,
         BudgetAllocationStrategy.PERFORMANCE_BASED,
       );
-      
+
       expect(result).toEqual(performanceAllocations);
     });
   });
@@ -177,9 +184,9 @@ describe('AdBudgetManagementService', () => {
         budgetExhausted: false,
       };
       jest.spyOn(service, 'recordAdSpend').mockResolvedValue(spendResult);
-      
+
       const result = await service.recordAdSpend('1', 50, 100);
-      
+
       expect(result).toBeDefined();
       expect(result.campaignId).toBe('1');
       expect(result.budgetExhausted).toBe(false);
@@ -195,9 +202,9 @@ describe('AdBudgetManagementService', () => {
         budgetExhausted: true,
       };
       jest.spyOn(service, 'recordAdSpend').mockResolvedValue(exhaustedResult);
-      
+
       const result = await service.recordAdSpend('3', 15, 50);
-      
+
       expect(result).toBeDefined();
       expect(result.campaignId).toBe('3');
       expect(result.budgetExhausted).toBe(true);
@@ -208,9 +215,9 @@ describe('AdBudgetManagementService', () => {
     it('should calculate daily budget for a merchant', async () => {
       // Mock the implementation to return a daily budget
       jest.spyOn(service, 'getDailyBudget').mockResolvedValue(66.67);
-      
+
       const result = await service.getDailyBudget('merchant1');
-      
+
       expect(result).toBe(66.67);
     });
   });

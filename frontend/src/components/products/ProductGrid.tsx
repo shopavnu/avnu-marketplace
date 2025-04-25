@@ -1,10 +1,14 @@
-import { Product, ProductGridProps } from '@/types/products';
+import { Product } from '@/types/products';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { analyticsService } from '@/services/analytics.service';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+
+interface ProductGridProps {
+  products: Product[];
+}
 
 
 

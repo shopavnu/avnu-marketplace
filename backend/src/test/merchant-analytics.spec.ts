@@ -31,7 +31,7 @@ describe('Merchant Analytics (e2e)', () => {
     if (!testMerchant) {
       console.log('No test merchant found. Creating one...');
       testMerchant = merchantRepository.create({
-        // @ts-ignore - We're creating a test merchant with required fields
+        // @ts-expect-error - We're creating a test merchant with required fields
         name: 'Test Merchant',
         email: 'test@merchant.com',
         status: 'active',
@@ -40,11 +40,11 @@ describe('Merchant Analytics (e2e)', () => {
     }
 
     // Generate JWT token for the merchant
-    authToken = jwtService.sign({ 
-      sub: testMerchant.id, 
-      // @ts-ignore - Using email property for testing
+    authToken = jwtService.sign({
+      sub: testMerchant.id,
+      // @ts-expect-error - Using email property for testing
       email: testMerchant.email,
-      isMerchant: true 
+      isMerchant: true,
     });
   });
 

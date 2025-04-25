@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
-import { AdPlacementOptions, AdPlacementResult, BudgetUpdateResult } from '../test/mocks/entity-mocks';
+import {
+  AdPlacementOptions,
+  AdPlacementResult,
+  BudgetUpdateResult,
+} from '../test/mocks/entity-mocks';
 
 // Import the mock services instead of the real ones
 import { AdPlacementService } from '../test/mocks/ad-placement.service.mock';
@@ -123,7 +127,7 @@ describe('AdPlacementService', () => {
       eventEmitter.emit = jest.fn();
 
       const result = await service.getAdsForDiscoveryFeed(options);
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].campaignId).toBeDefined();
@@ -151,11 +155,11 @@ describe('AdPlacementService', () => {
           relevanceScore: 0.75,
           isSponsored: true,
           impressionCost: 0.03,
-        }
+        },
       ]);
 
       const result = await service.getAdsForDiscoveryFeed(options);
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBe(1);
       expect(result[0].campaignId).toBe('2');
@@ -166,15 +170,13 @@ describe('AdPlacementService', () => {
     it('should record ad click and update campaign', async () => {
       // Mock the emit method
       eventEmitter.emit = jest.fn();
-      
+
       const result = await service.recordAdClick('1', 'user1', 'session1');
-      
+
       expect(result).toBe(true);
       expect(eventEmitter.emit).toHaveBeenCalledWith('ad.click', expect.any(Object));
     });
   });
-
-
 
   describe('getRecommendedAdPlacements', () => {
     it('should return recommended ad placements for a user', async () => {
@@ -193,7 +195,7 @@ describe('AdPlacementService', () => {
       jest.spyOn(service, 'getRecommendedAdPlacements').mockResolvedValue(mockRecommendations);
 
       const result = await service.getRecommendedAdPlacements('user1');
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].campaignId).toBeDefined();

@@ -1,6 +1,9 @@
 import { Resolver, Query, Mutation, Args, ID, Float } from '@nestjs/graphql';
 import { ForbiddenException } from '@nestjs/common';
-import { AdBudgetManagementService, BudgetAllocationStrategy } from '../services/ad-budget-management.service';
+import {
+  AdBudgetManagementService,
+  BudgetAllocationStrategy,
+} from '../services/ad-budget-management.service';
 import { MerchantService } from '../services/merchant.service';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
@@ -125,7 +128,10 @@ export class AdBudgetManagementResolver {
     @Args('merchantId', { type: () => ID }) merchantId: string,
     @Args('totalBudget', { type: () => Float }) totalBudget: number,
     @Args('campaignIds', { type: () => [ID] }) campaignIds: string[],
-    @Args('strategy', { type: () => BudgetAllocationStrategy, defaultValue: BudgetAllocationStrategy.EQUAL }) 
+    @Args('strategy', {
+      type: () => BudgetAllocationStrategy,
+      defaultValue: BudgetAllocationStrategy.EQUAL,
+    })
     strategy: BudgetAllocationStrategy,
     @CurrentUser() user: User,
   ): Promise<BudgetAllocation[]> {

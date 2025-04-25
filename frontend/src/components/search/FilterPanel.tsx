@@ -105,9 +105,7 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
     
     // Update the category filter
     updateFilters({ category: categoryId });
-  };
-
-  const toggleCategory = (categoryId: string) => {
+    
     // Prevent multiple clicks during animation
     if (animatingCategories.includes(categoryId)) return;
     

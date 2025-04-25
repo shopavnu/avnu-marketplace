@@ -35,11 +35,11 @@ import { AnalyticsScheduler } from './analytics.scheduler';
       node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
       auth: {
         username: process.env.ELASTICSEARCH_USERNAME || '',
-        password: process.env.ELASTICSEARCH_PASSWORD || ''
+        password: process.env.ELASTICSEARCH_PASSWORD || '',
       },
       tls: {
-        rejectUnauthorized: false
-      }
+        rejectUnauthorized: false,
+      },
     }),
   ],
   controllers: [AnalyticsController],

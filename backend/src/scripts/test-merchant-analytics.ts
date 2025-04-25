@@ -21,38 +21,38 @@ async function bootstrap() {
     const revenueService = app.get(MerchantRevenueAnalyticsService);
     const demographicService = app.get(MerchantDemographicAnalyticsService);
     const dashboardService = app.get(MerchantDashboardAnalyticsService);
-    
+
     // Get merchant repository to find a test merchant
     const merchantRepo = app.get<Repository<Merchant>>(getRepositoryToken(Merchant));
-    
+
     // Find a merchant for testing
     const merchant = await merchantRepo.findOne({ where: {} });
-    
+
     if (!merchant) {
       console.error('No merchant found for testing');
       return;
     }
-    
+
     console.log(`Testing with merchant: ${merchant.id}`);
-    
+
     // Test revenue analytics
     console.log('\n=== Testing Revenue Analytics ===');
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 6);
     const endDate = new Date();
-    
+
     try {
       const revenueData = await revenueService.getRevenueByTimeFrame(
         merchant.id,
         'monthly',
         startDate,
-        endDate
+        endDate,
       );
       console.log('Revenue data:', JSON.stringify(revenueData, null, 2));
     } catch (error) {
       console.error('Error getting revenue data:', error.message);
     }
-    
+
     // Test impressions analytics
     console.log('\n=== Testing Impressions Analytics ===');
     try {
@@ -60,13 +60,13 @@ async function bootstrap() {
         merchant.id,
         'monthly',
         startDate,
-        endDate
+        endDate,
       );
       console.log('Impressions data:', JSON.stringify(impressionsData, null, 2));
     } catch (error) {
       console.error('Error getting impressions data:', error.message);
     }
-    
+
     // Test demographic analytics
     console.log('\n=== Testing Demographic Analytics ===');
     try {
@@ -74,13 +74,13 @@ async function bootstrap() {
         merchant.id,
         'monthly',
         startDate,
-        endDate
+        endDate,
       );
       console.log('Demographic data:', JSON.stringify(demographicData, null, 2));
     } catch (error) {
       console.error('Error getting demographic data:', error.message);
     }
-    
+
     // Test dashboard analytics
     console.log('\n=== Testing Dashboard Analytics ===');
     try {
@@ -88,13 +88,13 @@ async function bootstrap() {
         merchant.id,
         'monthly',
         startDate,
-        endDate
+        endDate,
       );
       console.log('Dashboard data summary:', JSON.stringify(dashboardData.summary, null, 2));
     } catch (error) {
       console.error('Error getting dashboard data:', error.message);
     }
-    
+
     console.log('\nAll tests completed!');
   } catch (error) {
     console.error('Error running tests:', error);

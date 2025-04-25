@@ -44,10 +44,16 @@ export class UserPreferenceResolver {
   async trackSearch(
     @CurrentUser() user: User,
     @Args('query') query: string,
-    @Args('filters', { nullable: true, type: () => SearchFiltersInput }) filters?: SearchFiltersInput,
+    @Args('filters', { nullable: true, type: () => SearchFiltersInput })
+    filters?: SearchFiltersInput,
     @Args('resultCount', { nullable: true, type: () => Number }) resultCount?: number,
   ): Promise<boolean> {
-    return this.preferenceCollectorService.trackSearch(user.id, query, filters?.filters, resultCount);
+    return this.preferenceCollectorService.trackSearch(
+      user.id,
+      query,
+      filters?.filters,
+      resultCount,
+    );
   }
 
   /**

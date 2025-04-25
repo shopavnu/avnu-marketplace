@@ -1,6 +1,34 @@
 import React, { useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import AdminLayout from '../../../components/admin/AdminLayout';
+
+// Define interfaces for data structures
+interface Segment {
+  id: string;
+  name: string;
+  userCount: number;
+  conversionRate?: number;
+  averageOrderValue?: number;
+  engagementScore?: number;
+  description?: string;
+  averagePersonalizationImpact?: {
+    clickThroughRateImprovement?: number;
+    conversionRateImprovement?: number;
+    dwellTimeImprovement?: number;
+  };
+  topPreferences?: Array<{
+    id: string;
+    name: string;
+    value: string | number;
+    category?: string;
+    count?: number;
+  }>;
+  preferences?: Array<{
+    id: string;
+    name: string;
+    value: string | number;
+  }>;
+}
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -68,21 +96,24 @@ const UserSegmentsDashboard: React.FC = () => {
   });
 
   // Format percentages for display
-  const formatPercentage = (value: number, decimals = 2) => {
+  const formatPercentage = (value: number | undefined | null, decimals = 2) => {
     if (value === undefined || value === null) return '0%';
     return `${(value * 100).toFixed(decimals)}%`;
   };
 
   // Prepare data for segment distribution chart
-  const prepareSegmentDistributionData = (segments) => {
-    if (!segments || segments.length === 0) return null;
+  const prepareSegmentDistributionData = (segments: Segment[]) => {
+    if (!segments || segments.length === 0) return {
+      labels: [],
+      datasets: [{ label: 'User Count', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }]
+    };
 
     return {
-      labels: segments.map(segment => segment.name),
+      labels: segments.map((segment: Segment) => segment.name),
       datasets: [
         {
           label: 'User Count',
-          data: segments.map(segment => segment.userCount),
+          data: segments.map((segment: Segment) => segment.userCount),
           backgroundColor: [
             'rgba(75, 192, 192, 0.6)',
             'rgba(153, 102, 255, 0.6)',
@@ -104,29 +135,32 @@ const UserSegmentsDashboard: React.FC = () => {
   };
 
   // Prepare data for personalization impact chart
-  const preparePersonalizationImpactData = (segments) => {
-    if (!segments || segments.length === 0) return null;
+  const preparePersonalizationImpactData = (segments: Segment[]) => {
+    if (!segments || segments.length === 0) return {
+      labels: [],
+      datasets: [{ label: 'CTR Improvement', data: [], backgroundColor: '', borderColor: '', borderWidth: 1 }]
+    };
 
     return {
       labels: segments.map(segment => segment.name),
       datasets: [
         {
           label: 'CTR Improvement',
-          data: segments.map(segment => segment.averagePersonalizationImpact.clickThroughRateImprovement * 100),
+          data: segments.map((segment: Segment) => segment.averagePersonalizationImpact?.clickThroughRateImprovement ? segment.averagePersonalizationImpact.clickThroughRateImprovement * 100 : 0),
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
         },
         {
           label: 'Conversion Improvement',
-          data: segments.map(segment => segment.averagePersonalizationImpact.conversionRateImprovement * 100),
+          data: segments.map((segment: Segment) => segment.averagePersonalizationImpact?.conversionRateImprovement ? segment.averagePersonalizationImpact.conversionRateImprovement * 100 : 0),
           backgroundColor: 'rgba(153, 102, 255, 0.6)',
           borderColor: 'rgba(153, 102, 255, 1)',
           borderWidth: 1,
         },
         {
           label: 'Dwell Time Improvement',
-          data: segments.map(segment => segment.averagePersonalizationImpact.dwellTimeImprovement * 100),
+          data: segments.map((segment: Segment) => segment.averagePersonalizationImpact?.dwellTimeImprovement ? segment.averagePersonalizationImpact.dwellTimeImprovement * 100 : 0),
           backgroundColor: 'rgba(255, 159, 64, 0.6)',
           borderColor: 'rgba(255, 159, 64, 1)',
           borderWidth: 1,
@@ -135,14 +169,38 @@ const UserSegmentsDashboard: React.FC = () => {
     };
   };
 
+  // Prepare data for segment performance chart
+  const prepareSegmentPerformanceData = (segments: Segment[]) => {
+    if (!segments || segments.length === 0) return {
+      labels: [],
+      datasets: [{ label: 'Conversion Rate', data: [], backgroundColor: '', borderColor: '', borderWidth: 1 }]
+    };
+
+    return {
+      labels: segments.map((segment: Segment) => segment.name),
+      datasets: [
+        {
+          label: 'Conversion Rate',
+          data: segments.map((segment: Segment) => segment.conversionRate ? segment.conversionRate * 100 : 0),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
   // Get the selected segment
   const selectedSegment = data?.userSegments?.segments?.find(
-    segment => segment.id === selectedSegmentId
+    (segment: Segment) => segment.id === selectedSegmentId
   );
 
   // Prepare data for top preferences chart
-  const prepareTopPreferencesData = (segment) => {
-    if (!segment || !segment.topPreferences || segment.topPreferences.length === 0) return null;
+  const prepareTopPreferencesData = (segment: Segment) => {
+    if (!segment || !segment.topPreferences || segment.topPreferences.length === 0) return {
+      labels: [],
+      datasets: [{ label: 'Preference Count', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }]
+    };
 
     return {
       labels: segment.topPreferences.map(pref => pref.category),
@@ -168,6 +226,33 @@ const UserSegmentsDashboard: React.FC = () => {
         },
       ],
     };
+  };
+
+  // Render segment details
+  const renderSegmentDetails = (segment: Segment) => {
+    if (!segment) return null;
+
+    return (
+      <div key={segment.id} className="mb-4 last:mb-0">
+        <h3 className="font-medium text-gray-900">{segment.name}</h3>
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Users:</span>
+            <span className="font-medium">{segment.userCount.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">% of Total:</span>
+            <span className="font-medium">{formatPercentage(segment.userCount / (data?.userSegments?.totalUsers || 0))}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">CTR Improvement:</span>
+            <span className="font-medium text-green-600">
+              {formatPercentage(segment.averagePersonalizationImpact?.clickThroughRateImprovement)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Handle loading and error states
@@ -262,7 +347,7 @@ const UserSegmentsDashboard: React.FC = () => {
 
       {/* Segment details */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {segments.map(segment => (
+        {segments.map((segment: Segment) => (
           <div 
             key={segment.id}
             className={`bg-white rounded-lg shadow p-6 cursor-pointer transition-all duration-200 ${
@@ -270,24 +355,7 @@ const UserSegmentsDashboard: React.FC = () => {
             }`}
             onClick={() => setSelectedSegmentId(segment.id)}
           >
-            <h3 className="text-lg font-medium text-gray-900 mb-1">{segment.name}</h3>
-            <p className="text-gray-500 text-sm mb-3">{segment.description}</p>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Users:</span>
-                <span className="font-medium">{segment.userCount.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">% of Total:</span>
-                <span className="font-medium">{formatPercentage(segment.userCount / totalUsers)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">CTR Improvement:</span>
-                <span className="font-medium text-green-600">
-                  {formatPercentage(segment.averagePersonalizationImpact.clickThroughRateImprovement)}
-                </span>
-              </div>
-            </div>
+            {renderSegmentDetails(segment)}
           </div>
         ))}
       </div>

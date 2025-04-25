@@ -112,7 +112,7 @@ describe('AdPlacementResolver', () => {
       };
 
       const result = await resolver.getAdsForDiscoveryFeed(options, mockUser);
-      
+
       expect(result).toEqual(mockAdPlacements);
       expect(adPlacementService.getAdsForDiscoveryFeed).toHaveBeenCalledWith({
         ...options,
@@ -128,7 +128,7 @@ describe('AdPlacementResolver', () => {
       };
 
       const result = await resolver.getAdsForDiscoveryFeed(options, undefined);
-      
+
       expect(result).toEqual(mockAdPlacements);
       expect(adPlacementService.getAdsForDiscoveryFeed).toHaveBeenCalledWith({
         ...options,
@@ -141,7 +141,7 @@ describe('AdPlacementResolver', () => {
   describe('recordAdClick', () => {
     it('should record ad click for authenticated user', async () => {
       const result = await resolver.recordAdClick('campaign1', mockUser);
-      
+
       expect(result).toBe(true);
       expect(adPlacementService.recordAdClick).toHaveBeenCalledWith(
         'campaign1',
@@ -152,7 +152,7 @@ describe('AdPlacementResolver', () => {
 
     it('should record ad click for anonymous user', async () => {
       const result = await resolver.recordAdClick('campaign1', undefined);
-      
+
       expect(result).toBe(true);
       expect(adPlacementService.recordAdClick).toHaveBeenCalledWith(
         'campaign1',
@@ -165,10 +165,12 @@ describe('AdPlacementResolver', () => {
   describe('getRecommendedAdPlacements', () => {
     it('should return recommended placements for a user', async () => {
       // We'll use the mockAdPlacements that's already defined
-      jest.spyOn(adPlacementService, 'getRecommendedAdPlacements').mockResolvedValue(mockAdPlacements);
+      jest
+        .spyOn(adPlacementService, 'getRecommendedAdPlacements')
+        .mockResolvedValue(mockAdPlacements);
 
       const result = await resolver.getRecommendedAdPlacements(mockUser, 'session123');
-      
+
       expect(result).toEqual(mockAdPlacements);
       expect(result.length).toBe(2);
       expect(result[0].campaignId).toBe('campaign1');

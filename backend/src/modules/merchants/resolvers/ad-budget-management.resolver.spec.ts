@@ -76,15 +76,15 @@ describe('AdBudgetManagementResolver', () => {
     dailyBudget: 66.67,
     projectedExhaustionDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
     campaignProjections: {
-      'campaign1': 600,
-      'campaign2': 400,
+      campaign1: 600,
+      campaign2: 400,
     },
   };
 
   const mockBudgetAllocation = {
-    'campaign1': 300,
-    'campaign2': 200,
-    'campaign3': 500
+    campaign1: 300,
+    campaign2: 200,
+    campaign3: 500,
   };
 
   beforeEach(async () => {
@@ -114,7 +114,7 @@ describe('AdBudgetManagementResolver', () => {
   describe('merchantBudgetUtilization', () => {
     it('should return budget utilization for a merchant', async () => {
       const result = await resolver.merchantBudgetUtilization(mockUser.id, mockUser);
-      
+
       expect(result).toEqual(mockBudgetUtilization);
       expect(budgetService.getBudgetUtilization).toHaveBeenCalledWith(mockUser.id);
     });
@@ -123,7 +123,7 @@ describe('AdBudgetManagementResolver', () => {
   describe('merchantBudgetForecast', () => {
     it('should return budget forecast for a merchant', async () => {
       const result = await resolver.merchantBudgetForecast(mockUser.id, mockUser);
-      
+
       expect(result).toEqual(mockBudgetForecast);
       expect(budgetService.getBudgetForecast).toHaveBeenCalledWith(mockUser.id);
     });
@@ -132,7 +132,7 @@ describe('AdBudgetManagementResolver', () => {
   describe('merchantDailyBudget', () => {
     it('should return daily budget for a merchant', async () => {
       const result = await resolver.merchantDailyBudget(mockUser.id, mockUser);
-      
+
       expect(result).toBe(66.67);
       expect(budgetService.getDailyBudget).toHaveBeenCalledWith(mockUser.id);
     });
@@ -147,7 +147,7 @@ describe('AdBudgetManagementResolver', () => {
         BudgetAllocationStrategy.PERFORMANCE_BASED,
         mockUser,
       );
-      
+
       expect(result).toEqual(mockBudgetAllocation);
       expect(budgetService.allocateBudgetAcrossCampaigns).toHaveBeenCalledWith(
         'merchant1',

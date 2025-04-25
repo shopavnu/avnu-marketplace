@@ -47,7 +47,15 @@ const generateMockProducts = (seed = 1) => Array.from({ length: 20 }, (_, i) => 
     brand: `Brand ${brandIndex}`,
     category: 'Apparel', // Fixed category for SSR
     subCategory: 'Mens',
-    attributes: { size: 'M', color: 'Blue' },
+    slug: `product-${productIndex}`, // Add required slug property
+    categories: ['Apparel', 'Mens'], // Add required categories property
+    attributes: { 
+      size: 'M', 
+      color: 'Blue', 
+      material: 'Cotton', // Add required material property
+      weight: '0.5kg', // Add required weight property
+      dimensions: '10x20x5cm' // Add optional dimensions property
+    },
     isNew: false, // Fixed for SSR
     rating: {
       shopifyRating: {

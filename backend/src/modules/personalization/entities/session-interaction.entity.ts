@@ -23,7 +23,7 @@ export class SessionInteractionEntity {
 
   @Column({
     type: 'varchar',
-    length: 50
+    length: 50,
   })
   type: SessionInteractionType;
 

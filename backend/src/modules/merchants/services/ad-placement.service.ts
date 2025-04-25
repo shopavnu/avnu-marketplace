@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MerchantAdCampaign, CampaignStatus, TargetAudience } from '../entities/merchant-ad-campaign.entity';
+import {
+  MerchantAdCampaign,
+  CampaignStatus,
+  TargetAudience,
+} from '../entities/merchant-ad-campaign.entity';
 import { AdBudgetManagementService } from './ad-budget-management.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -43,7 +47,7 @@ export class AdPlacementService {
    */
   async getAdsForDiscoveryFeed(options: AdPlacementOptions): Promise<AdPlacementResult[]> {
     const { maxAds = 2 } = options;
-    
+
     // Get all active campaigns
     const activeCampaigns = await this.adCampaignRepository.find({
       where: { status: CampaignStatus.ACTIVE },
@@ -55,10 +59,10 @@ export class AdPlacementService {
 
     // Score campaigns based on targeting relevance
     const scoredCampaigns = await Promise.all(
-      activeCampaigns.map(async (campaign) => {
+      activeCampaigns.map(async campaign => {
         const relevanceScore = await this.calculateRelevanceScore(campaign, options);
         const impressionCost = await this.budgetService.calculateCostPerImpression(campaign.id);
-        
+
         return {
           campaign,
           relevanceScore,
@@ -75,7 +79,7 @@ export class AdPlacementService {
 
     // Record impressions and budget spend
     const results: AdPlacementResult[] = [];
-    
+
     for (const { campaign, relevanceScore, impressionCost } of selectedCampaigns) {
       try {
         // Record the ad spend
@@ -135,7 +139,7 @@ export class AdPlacementService {
             score *= 1.5; // Boost score for previous visitors
           }
           break;
-          
+
         case TargetAudience.CART_ABANDONERS:
           if (!options.cartProductIds?.some(id => campaign.productIds.includes(id))) {
             score *= 0.3; // Significantly reduce score if user doesn't have these products in cart
@@ -143,7 +147,7 @@ export class AdPlacementService {
             score *= 2.0; // Significantly boost score for cart abandoners
           }
           break;
-          
+
         case TargetAudience.PREVIOUS_CUSTOMERS:
           if (!options.purchasedProductIds?.some(id => campaign.productIds.includes(id))) {
             score *= 0.4; // Reduce score if user hasn't purchased from this merchant
@@ -156,10 +160,10 @@ export class AdPlacementService {
 
     // Location targeting
     if (campaign.targetLocations?.length && options.location) {
-      const locationMatch = campaign.targetLocations.some(
-        location => options.location?.toLowerCase().includes(location.toLowerCase()),
+      const locationMatch = campaign.targetLocations.some(location =>
+        options.location?.toLowerCase().includes(location.toLowerCase()),
       );
-      
+
       if (!locationMatch) {
         score *= 0.7; // Reduce score if location doesn't match
       } else {
@@ -170,34 +174,34 @@ export class AdPlacementService {
     // Interest targeting
     if (campaign.targetInterests?.length && options.interests?.length) {
       const interestMatches = campaign.targetInterests.filter(interest =>
-        options.interests?.some(userInterest => 
-          userInterest.toLowerCase().includes(interest.toLowerCase())
-        )
+        options.interests?.some(userInterest =>
+          userInterest.toLowerCase().includes(interest.toLowerCase()),
+        ),
       );
-      
+
       if (interestMatches.length === 0) {
         score *= 0.6; // Reduce score if no interests match
       } else {
         // Boost score based on percentage of matching interests
         const matchRatio = interestMatches.length / campaign.targetInterests.length;
-        score *= (1 + matchRatio);
+        score *= 1 + matchRatio;
       }
     }
 
     // Demographic targeting
     if (campaign.targetDemographics?.length && options.demographics?.length) {
       const demographicMatches = campaign.targetDemographics.filter(demographic =>
-        options.demographics?.some(userDemographic => 
-          userDemographic.toLowerCase().includes(demographic.toLowerCase())
-        )
+        options.demographics?.some(userDemographic =>
+          userDemographic.toLowerCase().includes(demographic.toLowerCase()),
+        ),
       );
-      
+
       if (demographicMatches.length === 0) {
         score *= 0.8; // Reduce score if no demographics match
       } else {
         // Boost score based on percentage of matching demographics
         const matchRatio = demographicMatches.length / campaign.targetDemographics.length;
-        score *= (1 + matchRatio * 0.5);
+        score *= 1 + matchRatio * 0.5;
       }
     }
 
@@ -211,11 +215,7 @@ export class AdPlacementService {
   /**
    * Record a click on an ad
    */
-  async recordAdClick(
-    campaignId: string,
-    userId?: string,
-    sessionId?: string,
-  ): Promise<void> {
+  async recordAdClick(campaignId: string, userId?: string, sessionId?: string): Promise<void> {
     const campaign = await this.adCampaignRepository.findOne({
       where: { id: campaignId },
     });
@@ -257,13 +257,15 @@ export class AdPlacementService {
   /**
    * Get recommended ad placements for a merchant's products
    */
-  async getRecommendedPlacements(merchantId: string): Promise<{
-    productId: string;
-    recommendedBudget: number;
-    estimatedImpressions: number;
-    estimatedClicks: number;
-    estimatedConversions: number;
-  }[]> {
+  async getRecommendedPlacements(merchantId: string): Promise<
+    {
+      productId: string;
+      recommendedBudget: number;
+      estimatedImpressions: number;
+      estimatedClicks: number;
+      estimatedConversions: number;
+    }[]
+  > {
     // Get merchant's active campaigns
     const activeCampaigns = await this.adCampaignRepository.find({
       where: { merchantId, status: CampaignStatus.ACTIVE },
@@ -278,28 +280,28 @@ export class AdPlacementService {
     // Calculate performance metrics for each product
     const recommendations = Array.from(allProductIds).map(productId => {
       // Find campaigns featuring this product
-      const productCampaigns = activeCampaigns.filter(campaign => 
-        campaign.productIds.includes(productId)
+      const productCampaigns = activeCampaigns.filter(campaign =>
+        campaign.productIds.includes(productId),
       );
-      
+
       // Calculate average metrics
       const totalImpressions = productCampaigns.reduce((sum, c) => sum + (c.impressions || 0), 0);
       const totalClicks = productCampaigns.reduce((sum, c) => sum + (c.clicks || 0), 0);
       const totalConversions = productCampaigns.reduce((sum, c) => sum + (c.conversions || 0), 0);
-      
+
       const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0.01; // Default 1% if no data
       const avgCVR = totalClicks > 0 ? totalConversions / totalClicks : 0.02; // Default 2% if no data
-      
+
       // Calculate recommended budget based on performance
-      const performanceScore = (avgCTR * 0.6) + (avgCVR * 0.4); // Weight CTR and CVR
+      const performanceScore = avgCTR * 0.6 + avgCVR * 0.4; // Weight CTR and CVR
       const baseRecommendedBudget = 100; // Base budget of $100
       const recommendedBudget = baseRecommendedBudget * (1 + performanceScore * 10);
-      
+
       // Estimate future performance
       const estimatedImpressions = recommendedBudget / 0.01; // Assuming $0.01 per impression
       const estimatedClicks = estimatedImpressions * avgCTR;
       const estimatedConversions = estimatedClicks * avgCVR;
-      
+
       return {
         productId,
         recommendedBudget: Math.round(recommendedBudget * 100) / 100, // Round to 2 decimal places

@@ -4,7 +4,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 
 /**
  * OptionalAuthGuard
- * 
+ *
  * This guard allows requests to proceed even if authentication fails.
  * It's useful for endpoints that can work with both authenticated and unauthenticated users.
  */

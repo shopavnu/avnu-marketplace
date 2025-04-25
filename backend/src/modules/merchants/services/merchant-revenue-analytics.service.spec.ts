@@ -58,13 +58,13 @@ describe('MerchantRevenueAnalyticsService', () => {
   describe('getRevenueByTimeFrame', () => {
     it('should return revenue data by time frame', async () => {
       const result = await service.getRevenueByTimeFrame('123', 'monthly');
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].date).toEqual(new Date('2025-01-01'));
       expect(result[0].value).toEqual(1000);
       expect(result[1].date).toEqual(new Date('2025-02-01'));
       expect(result[1].value).toEqual(1500);
-      
+
       expect(mockRepository.find).toHaveBeenCalled();
     });
   });
@@ -72,7 +72,7 @@ describe('MerchantRevenueAnalyticsService', () => {
   describe('getImpressionsBySourceOverTime', () => {
     it('should return impressions data by source', async () => {
       const result = await service.getImpressionsBySourceOverTime('123', 'monthly');
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].organic).toEqual(500);
       expect(result[0].paid).toEqual(300);
@@ -80,7 +80,7 @@ describe('MerchantRevenueAnalyticsService', () => {
       expect(result[1].organic).toEqual(700);
       expect(result[1].paid).toEqual(400);
       expect(result[1].total).toEqual(1100);
-      
+
       expect(mockRepository.find).toHaveBeenCalled();
     });
   });

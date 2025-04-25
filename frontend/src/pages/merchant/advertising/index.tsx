@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -128,10 +128,9 @@ const AdvertisingPage = () => {
     }
   });
 
-  // Filter and sort campaigns based on selected criteria
-  const filterCampaigns = () => {
-    if (!campaigns.length) return [];
-    
+  // Filter and sort campaigns based on current filters
+  const filterCampaigns = useCallback(() => {
+    // Filter logic
     let filtered = [...campaigns];
 
     // Apply status filter
@@ -241,12 +240,12 @@ const AdvertisingPage = () => {
     });
 
     return filtered;
-  };
+  }, [campaigns, searchTerm, selectedStatus, selectedType, selectedDateRange, sortBy, sortDirection]);
 
   // Apply filters and update filtered campaigns whenever dependencies change
   useEffect(() => {
     setFilteredCampaigns(filterCampaigns());
-  }, [campaigns, searchTerm, selectedStatus, selectedType, selectedDateRange, sortBy, sortDirection]);
+  }, [filterCampaigns]);
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
