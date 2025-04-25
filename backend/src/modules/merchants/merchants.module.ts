@@ -72,8 +72,8 @@ import { ProductsModule } from '../products/products.module';
     AdPlacementResolver,
   ],
   exports: [
-    MerchantService, 
-    MerchantAdCampaignService, 
+    MerchantService,
+    MerchantAdCampaignService,
     MerchantAnalyticsService,
     AdBudgetManagementService,
     AdPlacementService,

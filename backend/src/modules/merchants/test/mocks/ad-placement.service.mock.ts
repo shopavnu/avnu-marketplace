@@ -4,9 +4,7 @@ import { AdPlacementOptions, AdPlacementResult } from './entity-mocks';
 
 @Injectable()
 export class AdPlacementService {
-  constructor(
-    private readonly eventEmitter: EventEmitter2
-  ) {}
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
   async getAdsForDiscoveryFeed(options: AdPlacementOptions): Promise<AdPlacementResult[]> {
     return [
@@ -26,12 +24,15 @@ export class AdPlacementService {
         type: 'BRAND_AWARENESS',
         relevanceScore: 0.75,
         isSponsored: true,
-        impressionCost: 0.20,
+        impressionCost: 0.2,
       },
     ];
   }
 
-  async getRecommendedAdPlacements(userId: string, sessionId?: string): Promise<AdPlacementResult[]> {
+  async getRecommendedAdPlacements(
+    userId: string,
+    sessionId?: string,
+  ): Promise<AdPlacementResult[]> {
     return [
       {
         campaignId: '1',
