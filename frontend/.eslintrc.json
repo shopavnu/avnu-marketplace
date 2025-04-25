@@ -1,11 +1,12 @@
 {
   "root": true,
   "extends": ["next/core-web-vitals"],
-  "plugins": [],
+  "plugins": ["@next/next"],
   "rules": {
     "react/no-unescaped-entities": "off",
     "@next/next/no-img-element": "off",
     "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "off",
     "no-undef": "off",
     "no-redeclare": "off"
   }
