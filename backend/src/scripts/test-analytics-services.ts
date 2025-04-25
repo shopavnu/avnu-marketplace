@@ -1,6 +1,6 @@
 /**
  * Manual test script for merchant analytics services
- * 
+ *
  * This script directly tests the analytics services without relying on NestJS decorators
  * to avoid TypeScript compatibility issues.
  */
@@ -23,13 +23,23 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
     const today = new Date();
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
-    
+
     // Create some sample analytics data
     this.mockData = [
       this.createAnalyticsRecord('merchant1', today, 'daily', 1000, 10, 500, 300, 200),
       this.createAnalyticsRecord('merchant1', lastMonth, 'monthly', 5000, 50, 2500, 1500, 1000),
       this.createAnalyticsRecord('merchant1', today, 'daily', 800, 8, 400, 250, 150, 'product1'),
-      this.createAnalyticsRecord('merchant1', lastMonth, 'monthly', 4000, 40, 2000, 1200, 800, 'product1'),
+      this.createAnalyticsRecord(
+        'merchant1',
+        lastMonth,
+        'monthly',
+        4000,
+        40,
+        2000,
+        1200,
+        800,
+        'product1',
+      ),
     ];
   }
 
@@ -61,35 +71,41 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
     record.clickThroughRate = record.clicks / productViews;
     record.productId = productId || null;
     record.categoryId = categoryId || null;
-    record.demographics = ['age:25-34', 'gender:male', 'location:US', 'device:mobile', 'interest:technology'];
-    
+    record.demographics = [
+      'age:25-34',
+      'gender:male',
+      'location:US',
+      'device:mobile',
+      'interest:technology',
+    ];
+
     return record;
   }
 
   async find(options?: any): Promise<MerchantAnalytics[]> {
     // Filter data based on options
     let results = [...this.mockData];
-    
+
     if (options?.where) {
       const where = options.where;
-      
+
       // Filter by merchantId
       if (where.merchantId) {
         results = results.filter(r => r.merchantId === where.merchantId);
       }
-      
+
       // Filter by timeFrame
       if (where.timeFrame) {
         results = results.filter(r => r.timeFrame === where.timeFrame);
       }
-      
+
       // Filter by productId
       if (where.productId) {
         results = results.filter(r => r.productId === where.productId);
       } else if (where.productId === null) {
         results = results.filter(r => r.productId === null);
       }
-      
+
       // Filter by categoryId
       if (where.categoryId) {
         results = results.filter(r => r.categoryId === where.categoryId);
@@ -97,7 +113,7 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
         results = results.filter(r => r.categoryId === null);
       }
     }
-    
+
     return results;
   }
 
@@ -109,15 +125,26 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
   create(): MerchantAnalytics;
   create(entityLikeArray: DeepPartial<MerchantAnalytics>[]): MerchantAnalytics[];
   create(entityLike: DeepPartial<MerchantAnalytics>): MerchantAnalytics;
-  create(entityLike?: DeepPartial<MerchantAnalytics> | DeepPartial<MerchantAnalytics>[]): MerchantAnalytics | MerchantAnalytics[] {
+  create(
+    entityLike?: DeepPartial<MerchantAnalytics> | DeepPartial<MerchantAnalytics>[],
+  ): MerchantAnalytics | MerchantAnalytics[] {
     const entity = new MerchantAnalytics();
     Object.assign(entity, entityLike);
     return entity;
   }
 
-  async save<T extends DeepPartial<MerchantAnalytics>>(entities: T[], options?: SaveOptions): Promise<T[]>;
-  async save<T extends DeepPartial<MerchantAnalytics>>(entity: T, options?: SaveOptions): Promise<T>;
-  async save(entityOrEntities: MerchantAnalytics | MerchantAnalytics[], options?: SaveOptions): Promise<MerchantAnalytics | MerchantAnalytics[]> {
+  async save<T extends DeepPartial<MerchantAnalytics>>(
+    entities: T[],
+    options?: SaveOptions,
+  ): Promise<T[]>;
+  async save<T extends DeepPartial<MerchantAnalytics>>(
+    entity: T,
+    options?: SaveOptions,
+  ): Promise<T>;
+  async save(
+    entityOrEntities: MerchantAnalytics | MerchantAnalytics[],
+    options?: SaveOptions,
+  ): Promise<MerchantAnalytics | MerchantAnalytics[]> {
     if (Array.isArray(entityOrEntities)) {
       return Promise.all(entityOrEntities.map(entity => this.saveEntity(entity)));
     }
@@ -127,19 +154,20 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
   private async saveEntity(entity: MerchantAnalytics): Promise<MerchantAnalytics> {
     // Find and update existing record or add new one
     const existingIndex = this.mockData.findIndex(
-      r => r.merchantId === entity.merchantId && 
-           r.date.getTime() === entity.date.getTime() && 
-           r.timeFrame === entity.timeFrame &&
-           r.productId === entity.productId &&
-           r.categoryId === entity.categoryId
+      r =>
+        r.merchantId === entity.merchantId &&
+        r.date.getTime() === entity.date.getTime() &&
+        r.timeFrame === entity.timeFrame &&
+        r.productId === entity.productId &&
+        r.categoryId === entity.categoryId,
     );
-    
+
     if (existingIndex >= 0) {
       this.mockData[existingIndex] = entity;
     } else {
       this.mockData.push(entity);
     }
-    
+
     return entity;
   }
 }
@@ -147,44 +175,52 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
 // Main test function
 async function runTests() {
   console.log('Starting merchant analytics services tests...');
-  
+
   // Create mock repository
   const mockRepository = new MockMerchantAnalyticsRepository();
-  
+
   // Create services with mock repository
   const revenueAnalyticsService = new MerchantRevenueAnalyticsService(mockRepository as any);
-  const demographicAnalyticsService = new MerchantDemographicAnalyticsService(mockRepository as any);
-  
+  const demographicAnalyticsService = new MerchantDemographicAnalyticsService(
+    mockRepository as any,
+  );
+
   // Test revenue analytics
   console.log('\n--- Testing Revenue Analytics ---');
   const merchantId = 'merchant1';
-  
+
   console.log('\nTesting getRevenueByTimeFrame:');
   const revenueData = await revenueAnalyticsService.getRevenueByTimeFrame(merchantId, 'monthly');
   console.log('Revenue Data:', JSON.stringify(revenueData, null, 2));
-  
+
   console.log('\nTesting getImpressionsBySourceOverTime:');
-  const impressionData = await revenueAnalyticsService.getImpressionsBySourceOverTime(merchantId, 'monthly');
+  const impressionData = await revenueAnalyticsService.getImpressionsBySourceOverTime(
+    merchantId,
+    'monthly',
+  );
   console.log('Impression Data:', JSON.stringify(impressionData, null, 2));
-  
+
   // Test demographic analytics
   console.log('\n--- Testing Demographic Analytics ---');
-  
+
   console.log('\nTesting getDemographicAnalytics:');
-  const demographicData = await demographicAnalyticsService.getDemographicAnalytics(merchantId, 'monthly');
+  const demographicData = await demographicAnalyticsService.getDemographicAnalytics(
+    merchantId,
+    'monthly',
+  );
   console.log('Demographic Data:', JSON.stringify(demographicData, null, 2));
-  
+
   console.log('\nTesting getDemographicAnalytics with filters:');
   const filters = [{ key: 'age', values: ['25-34'] }];
   const filteredDemographicData = await demographicAnalyticsService.getDemographicAnalytics(
-    merchantId, 
-    'monthly', 
-    undefined, 
-    undefined, 
-    filters
+    merchantId,
+    'monthly',
+    undefined,
+    undefined,
+    filters,
   );
   console.log('Filtered Demographic Data:', JSON.stringify(filteredDemographicData, null, 2));
-  
+
   console.log('\nAll tests completed successfully!');
 }
 
