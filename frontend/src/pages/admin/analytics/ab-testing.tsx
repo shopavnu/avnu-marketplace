@@ -105,9 +105,37 @@ const ABTestingDashboard: React.FC = () => {
     }
   }, [data, selectedTestId]);
 
+  // Define interface for test object based on the GraphQL query
+  interface ABTest {
+    id: string;
+    name: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    variants: {
+      id: string;
+      name: string;
+      trafficPercentage: number;
+    }[];
+    metrics: {
+      variant: {
+        id: string;
+        name: string;
+      };
+      impressions: number;
+      clicks: number;
+      conversions: number;
+      clickThroughRate: number;
+      conversionRate: number;
+      averageDwellTime: number;
+      averageSessionDuration: number;
+    }[];
+  }
+
   // Get the selected test
   const selectedTest = data?.abTestingAnalytics?.activeTests?.find(
-    test => test.id === selectedTestId
+    (test: ABTest) => test.id === selectedTestId
   );
 
   // Format dates for display
@@ -131,22 +159,22 @@ const ABTestingDashboard: React.FC = () => {
   };
 
   // Prepare chart data for CTR and conversion rate comparison
-  const prepareRateComparisonData = (test) => {
+  const prepareRateComparisonData = (test: ABTest | undefined) => {
     if (!test || !test.metrics) return null;
 
     return {
-      labels: test.metrics.map(metric => metric.variant.name),
+      labels: test.metrics.map((metric: ABTest['metrics'][0]) => metric.variant.name),
       datasets: [
         {
           label: 'Click-Through Rate',
-          data: test.metrics.map(metric => metric.clickThroughRate * 100),
+          data: test.metrics.map((metric: ABTest['metrics'][0]) => metric.clickThroughRate * 100),
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
         },
         {
           label: 'Conversion Rate',
-          data: test.metrics.map(metric => metric.conversionRate * 100),
+          data: test.metrics.map((metric: ABTest['metrics'][0]) => metric.conversionRate * 100),
           backgroundColor: 'rgba(153, 102, 255, 0.6)',
           borderColor: 'rgba(153, 102, 255, 1)',
           borderWidth: 1,
@@ -156,22 +184,22 @@ const ABTestingDashboard: React.FC = () => {
   };
 
   // Prepare chart data for dwell time and session duration
-  const prepareTimeMetricsData = (test) => {
+  const prepareTimeMetricsData = (test: ABTest | undefined) => {
     if (!test || !test.metrics) return null;
 
     return {
-      labels: test.metrics.map(metric => metric.variant.name),
+      labels: test.metrics.map((metric: ABTest['metrics'][0]) => metric.variant.name),
       datasets: [
         {
           label: 'Average Dwell Time (s)',
-          data: test.metrics.map(metric => metric.averageDwellTime / 1000),
+          data: test.metrics.map((metric: ABTest['metrics'][0]) => metric.averageDwellTime / 1000),
           backgroundColor: 'rgba(255, 159, 64, 0.6)',
           borderColor: 'rgba(255, 159, 64, 1)',
           borderWidth: 1,
         },
         {
           label: 'Average Session Duration (min)',
-          data: test.metrics.map(metric => metric.averageSessionDuration / 60000),
+          data: test.metrics.map((metric: ABTest['metrics'][0]) => metric.averageSessionDuration / 60000),
           backgroundColor: 'rgba(54, 162, 235, 0.6)',
           borderColor: 'rgba(54, 162, 235, 1)',
           borderWidth: 1,
@@ -181,15 +209,15 @@ const ABTestingDashboard: React.FC = () => {
   };
 
   // Prepare chart data for traffic distribution
-  const prepareTrafficDistributionData = (test) => {
+  const prepareTrafficDistributionData = (test: ABTest | undefined) => {
     if (!test || !test.variants) return null;
 
     return {
-      labels: test.variants.map(variant => variant.name),
+      labels: test.variants.map((variant: ABTest['variants'][0]) => variant.name),
       datasets: [
         {
           label: 'Traffic Percentage',
-          data: test.variants.map(variant => variant.trafficPercentage * 100),
+          data: test.variants.map((variant: ABTest['variants'][0]) => variant.trafficPercentage * 100),
           backgroundColor: [
             'rgba(75, 192, 192, 0.6)',
             'rgba(153, 102, 255, 0.6)',
@@ -208,8 +236,18 @@ const ABTestingDashboard: React.FC = () => {
     };
   };
 
+  // Define interface for winner result
+  interface TestWinner {
+    variant: {
+      id: string;
+      name: string;
+    };
+    ctrImprovement: number;
+    conversionImprovement: number;
+  }
+
   // Determine if a test has a clear winner
-  const determineWinner = (test) => {
+  const determineWinner = (test: ABTest | undefined): TestWinner | null => {
     if (!test || !test.metrics || test.metrics.length < 2) return null;
     
     // Sort metrics by CTR and conversion rate
@@ -274,7 +312,7 @@ const ABTestingDashboard: React.FC = () => {
             className="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
           >
             <option value="" disabled>Select A/B Test</option>
-            {activeTests.map(test => (
+            {activeTests.map((test: ABTest) => (
               <option key={test.id} value={test.id}>{test.name}</option>
             ))}
           </select>
@@ -322,34 +360,41 @@ const ABTestingDashboard: React.FC = () => {
               <div>
                 <span className="text-sm text-gray-500">Total Impressions</span>
                 <p className="font-medium">
-                  {selectedTest.metrics?.reduce((sum, metric) => sum + metric.impressions, 0).toLocaleString() || 0}
+                  {selectedTest.metrics?.reduce((sum: number, metric: ABTest['metrics'][0]) => sum + metric.impressions, 0).toLocaleString() || 0}
                 </p>
               </div>
             </div>
 
             {/* Winner alert if applicable */}
-            {determineWinner(selectedTest) && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">
-                      Clear Winner: {determineWinner(selectedTest).variant.name}
-                    </h3>
-                    <div className="mt-2 text-sm text-green-700">
-                      <p>
-                        CTR improvement: +{determineWinner(selectedTest).ctrImprovement.toFixed(2)}%<br />
-                        Conversion improvement: +{determineWinner(selectedTest).conversionImprovement.toFixed(2)}%
-                      </p>
+            {(() => {
+              const winner = determineWinner(selectedTest);
+              if (winner) {
+                return (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-green-800">
+                          Clear Winner: {winner.variant.name}
+                        </h3>
+                        <div className="mt-2 text-sm text-green-700">
+                          <p>
+                            CTR improvement: +{winner.ctrImprovement.toFixed(2)}%<br />
+                            Conversion improvement: +{winner.conversionImprovement.toFixed(2)}%
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
+                );
+              }
+              return null;
+            })()
+            }
           </div>
 
           {/* Metrics charts */}
@@ -359,7 +404,10 @@ const ABTestingDashboard: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Conversion Metrics</h3>
               <div className="h-64">
                 <Bar 
-                  data={prepareRateComparisonData(selectedTest)}
+                  data={prepareRateComparisonData(selectedTest) || {
+                    labels: [],
+                    datasets: []
+                  }}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -382,7 +430,10 @@ const ABTestingDashboard: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Engagement Metrics</h3>
               <div className="h-64">
                 <Bar 
-                  data={prepareTimeMetricsData(selectedTest)}
+                  data={prepareTimeMetricsData(selectedTest) || {
+                    labels: [],
+                    datasets: []
+                  }}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -404,7 +455,10 @@ const ABTestingDashboard: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Traffic Distribution</h3>
               <div className="h-64">
                 <Pie 
-                  data={prepareTrafficDistributionData(selectedTest)}
+                  data={prepareTrafficDistributionData(selectedTest) || {
+                    labels: [],
+                    datasets: []
+                  }}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -441,7 +495,7 @@ const ABTestingDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {selectedTest.metrics?.map((metric) => (
+                    {selectedTest.metrics?.map((metric: ABTest['metrics'][0]) => (
                       <tr key={metric.variant.id}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {metric.variant.name}

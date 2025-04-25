@@ -3,6 +3,37 @@ import { useQuery, gql } from '@apollo/client';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { BellIcon, ExclamationCircleIcon, CheckCircleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
+// Define interface for Alert type
+interface AlertMetric {
+  name: string;
+  value: number;
+  previousValue: number;
+  changePercent: number;
+  changePercentage: number; // Alias for changePercent used in the UI
+  threshold?: number;
+}
+
+interface AlertSegment {
+  id: string;
+  name: string;
+  value: number;
+}
+
+interface Alert {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH';
+  status: 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED' | 'ACTIVE'; // Added 'ACTIVE' status
+  createdAt: string;
+  updatedAt: string;
+  metrics: AlertMetric[];
+  affectedSegments?: AlertSegment[];
+  acknowledge: () => void; // Function to acknowledge an alert
+  resolve: () => void; // Function to resolve an alert
+}
+
 // GraphQL query for alerts
 const GET_ALERTS = gql`
   query GetAlerts($status: String, $type: String, $period: Int) {
@@ -190,7 +221,7 @@ const AlertsDashboard: React.FC = () => {
             <div className="ml-4">
               <h3 className="text-sm font-medium text-gray-500">High Severity</h3>
               <p className="text-2xl font-semibold text-charcoal">
-                {alerts.filter(alert => alert.severity === 'HIGH').length}
+                {alerts.filter((alert: Alert) => alert.severity === 'HIGH').length}
               </p>
             </div>
           </div>
@@ -204,7 +235,7 @@ const AlertsDashboard: React.FC = () => {
             <div className="ml-4">
               <h3 className="text-sm font-medium text-gray-500">Medium Severity</h3>
               <p className="text-2xl font-semibold text-charcoal">
-                {alerts.filter(alert => alert.severity === 'MEDIUM').length}
+                {alerts.filter((alert: Alert) => alert.severity === 'MEDIUM').length}
               </p>
             </div>
           </div>
@@ -218,7 +249,7 @@ const AlertsDashboard: React.FC = () => {
             <div className="ml-4">
               <h3 className="text-sm font-medium text-gray-500">Low Severity</h3>
               <p className="text-2xl font-semibold text-charcoal">
-                {alerts.filter(alert => alert.severity === 'LOW').length}
+                {alerts.filter((alert: Alert) => alert.severity === 'LOW').length}
               </p>
             </div>
           </div>
@@ -229,7 +260,7 @@ const AlertsDashboard: React.FC = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {alerts.length > 0 ? (
           <div className="divide-y divide-gray-200">
-            {alerts.map(alert => (
+            {alerts.map((alert: Alert) => (
               <div key={alert.id} className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
@@ -258,7 +289,7 @@ const AlertsDashboard: React.FC = () => {
                         className="bg-sage text-white px-3 py-1 rounded-md text-sm hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage"
                         onClick={() => {
                           // In a real implementation, this would call the updateAlertStatus mutation
-                          alert('Acknowledging alert: ' + alert.id);
+                          window.alert('Acknowledging alert: ' + alert.id);
                         }}
                       >
                         Acknowledge
@@ -269,7 +300,7 @@ const AlertsDashboard: React.FC = () => {
                         className="bg-gray-200 text-gray-800 px-3 py-1 rounded-md text-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         onClick={() => {
                           // In a real implementation, this would call the updateAlertStatus mutation
-                          alert('Resolving alert: ' + alert.id);
+                          window.alert('Resolving alert: ' + alert.id);
                         }}
                       >
                         Resolve
@@ -283,7 +314,7 @@ const AlertsDashboard: React.FC = () => {
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Affected Metrics</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {alert.metrics.map((metric, index) => (
+                      {alert.metrics.map((metric: AlertMetric, index: number) => (
                         <div key={index} className="bg-gray-50 rounded-lg p-3">
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium text-gray-700">{metric.name}</span>
@@ -313,11 +344,11 @@ const AlertsDashboard: React.FC = () => {
                 {/* Affected segments */}
                 {alert.affectedSegments && alert.affectedSegments.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Affected User Segments</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Affected Segments</h4>
                     <div className="flex flex-wrap gap-2">
-                      {alert.affectedSegments.map(segment => (
-                        <span key={segment.id} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                          {segment.name} ({segment.userCount.toLocaleString()} users)
+                      {alert.affectedSegments.map((segment: AlertSegment) => (
+                        <span key={segment.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          {segment.name} ({segment.value})
                         </span>
                       ))}
                     </div>

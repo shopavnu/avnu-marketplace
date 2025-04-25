@@ -1,6 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import AdminLayout from '../../../components/admin/AdminLayout';
+
+// Define interfaces for data structures
+interface TimeSeriesItem {
+  date: string;
+  sessionCount: number;
+  personalizedInteractions: number;
+  personalizedInteractionCount: number; // Alias for personalizedInteractions
+  conversionRate: number;
+  personalizationRate: number;
+}
+
+interface Entity {
+  id: string;
+  entityId: string;
+  entityName: string;
+  name: string;
+  count: number;
+  impactScore: number;
+}
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -217,11 +236,11 @@ const SearchPersonalizationAnalytics: React.FC = () => {
 
   // Prepare data for session time series chart
   const timeSeriesChartData = {
-    labels: timeSeries.map(item => item.date),
+    labels: timeSeries.map((item: TimeSeriesItem) => item.date),
     datasets: [
       {
         label: 'Sessions',
-        data: timeSeries.map(item => item.sessionCount),
+        data: timeSeries.map((item: TimeSeriesItem) => item.sessionCount),
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         fill: true,
@@ -229,7 +248,7 @@ const SearchPersonalizationAnalytics: React.FC = () => {
       },
       {
         label: 'Personalized Interactions',
-        data: timeSeries.map(item => item.personalizedInteractionCount),
+        data: timeSeries.map((item: TimeSeriesItem) => item.personalizedInteractionCount),
         borderColor: 'rgba(153, 102, 255, 1)',
         backgroundColor: 'rgba(153, 102, 255, 0.2)',
         fill: true,
@@ -240,11 +259,11 @@ const SearchPersonalizationAnalytics: React.FC = () => {
 
   // Prepare data for personalization rate chart
   const personalizationRateData = {
-    labels: timeSeries.map(item => item.date),
+    labels: timeSeries.map((item: TimeSeriesItem) => item.date),
     datasets: [
       {
         label: 'Personalization Rate',
-        data: timeSeries.map(item => item.personalizationRate * 100),
+        data: timeSeries.map((item: TimeSeriesItem) => item.personalizationRate * 100),
         borderColor: 'rgba(255, 99, 132, 1)',
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         fill: true,
@@ -255,11 +274,11 @@ const SearchPersonalizationAnalytics: React.FC = () => {
 
   // Prepare data for top entities chart
   const topEntitiesData = {
-    labels: topEntities.map(entity => entity.entityName || `Entity ${entity.entityId}`),
+    labels: topEntities.map((entity: Entity) => entity.entityName || `Entity ${entity.entityId}`),
     datasets: [
       {
         label: 'Click Count',
-        data: topEntities.map(entity => entity.count),
+        data: topEntities.map((entity: Entity) => entity.count),
         backgroundColor: [
           'rgba(75, 192, 192, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -326,13 +345,13 @@ const SearchPersonalizationAnalytics: React.FC = () => {
   };
 
   // Format numbers for display
-  const formatNumber = (num, decimals = 2) => {
+  const formatNumber = (num: number | null | undefined, decimals: number = 2): string => {
     if (num === undefined || num === null) return '0';
     return typeof num === 'number' ? num.toFixed(decimals) : '0';
   };
 
   // Format percentages for display
-  const formatPercentage = (num, decimals = 2) => {
+  const formatPercentage = (num: number | null | undefined, decimals: number = 2): string => {
     if (num === undefined || num === null) return '0%';
     return typeof num === 'number' ? `${num.toFixed(decimals)}%` : '0%';
   };
