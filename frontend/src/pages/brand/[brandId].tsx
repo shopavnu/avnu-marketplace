@@ -7,6 +7,7 @@ import { MapPinIcon, TagIcon } from '@heroicons/react/24/outline'; // Import out
 import { brands as allBrands } from '@/data/brands';
 import { products as allProducts } from '@/data/products'; // Import product data
 import ProductCard from '@/components/products/ProductCard'; // Import ProductCard component
+import { ConsistentProductCard } from '@/components/products'; // Import our consistent card component
 import { Brand } from '@/types/brand'; // Import from central types
 import { Product } from '@/types/products'; // Import Product type
 
@@ -341,7 +342,23 @@ const BrandDetailPage: React.FC = () => {
                     transition={{ delay: index * 0.1 }}
                     className="break-inside-avoid mb-3 md:mb-4 transform hover:scale-[1.02] transition-transform duration-200"
                   >
-                    <ProductCard product={product} />
+                    <ConsistentProductCard 
+                      product={product}
+                      badges={
+                        <>
+                          {product.isNew && (
+                            <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
+                              New
+                            </span>
+                          )}
+                          {product.vendor?.isLocal && (
+                            <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
+                              Local
+                            </span>
+                          )}
+                        </>
+                      }
+                    />
                   </motion.div>
                 ))}
               </motion.div>

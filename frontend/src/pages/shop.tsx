@@ -5,6 +5,7 @@ import { SearchFilters, SearchResult } from '@/types/search';
 import SearchBar from '@/components/search/SearchBar';
 import FilterPanel from '@/components/search/FilterPanel';
 import ProductCard from '@/components/products/ProductCard';
+import { ConsistentProductCard } from '@/components/products';
 
 // Product image URLs from Unsplash - exactly 20 verified images
 const productImages = [
@@ -229,7 +230,23 @@ export default function ShopPage() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
-                    <ProductCard product={product} />
+                    <ConsistentProductCard 
+                      product={product}
+                      badges={
+                        <>
+                          {product.isNew && (
+                            <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
+                              New
+                            </span>
+                          )}
+                          {product.vendor?.isLocal && (
+                            <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
+                              Local
+                            </span>
+                          )}
+                        </>
+                      }
+                    />
                   </motion.div>
                 ))}
               </AnimatePresence>
