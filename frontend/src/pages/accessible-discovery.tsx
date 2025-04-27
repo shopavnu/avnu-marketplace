@@ -421,15 +421,17 @@ const AccessibleDiscoveryPage: React.FC<AccessibleDiscoveryPageProps> = ({
           document.addEventListener('DOMContentLoaded', function() {
             const progressBar = document.getElementById('scroll-progress');
             
-            window.addEventListener('scroll', function() {
-              const scrollTop = window.scrollY;
-              const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-              const scrollPercent = (scrollTop / docHeight) * 100;
-              
-              if (progressBar) {
-                progressBar.style.width = scrollPercent + '%';
-              }
-            });
+            if (typeof window !== 'undefined') {
+              window.addEventListener('scroll', function() {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                
+                if (progressBar) {
+                  progressBar.style.width = scrollPercent + '%';
+                }
+              });
+            }
           });
         `}} />
       </main>

@@ -36,16 +36,21 @@ const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
   gap = 24,
   itemHeight = 360
 }) => {
-  const [containerHeight, setContainerHeight] = useState<number>(window?.innerHeight || 800);
+  const [containerHeight, setContainerHeight] = useState<number>(800); // Default height for SSR
   
-  // Update container height on resize
+  // Update container height on resize - only runs on client side
   useEffect(() => {
-    const handleResize = () => {
+    if (typeof window !== 'undefined') {
+      // Set initial height once on client side
       setContainerHeight(window.innerHeight);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+      
+      const handleResize = () => {
+        setContainerHeight(window.innerHeight);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
   
   // Set up virtualization
