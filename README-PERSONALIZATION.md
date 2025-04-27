@@ -4,6 +4,8 @@
 
 The Avnu Marketplace Personalization & Recommendation System provides a robust, production-ready solution for delivering personalized product recommendations to users. This system tracks user preferences and behaviors, analyzes product similarities, and delivers highly relevant product suggestions throughout the shopping experience.
 
+The system also includes a Product Suppression & Merchant Notification component that ensures only high-quality product listings are displayed to customers by automatically validating product data, suppressing products with missing key information, and notifying merchants so they can fix issues.
+
 ## Key Features
 
 - **Personalized Recommendations**: Tailored product suggestions based on user browsing history, preferences, and behavior
@@ -14,6 +16,9 @@ The Avnu Marketplace Personalization & Recommendation System provides a robust, 
 - **Analytics Integration**: Comprehensive tracking of impressions, clicks, and conversions
 - **Loading States**: Skeleton loaders that match exact product card dimensions to prevent layout shifts
 - **Error Handling**: Graceful fallbacks and error states throughout the system
+- **Product Validation**: Automated validation of product data completeness and quality
+- **Intelligent Suppression**: Context-aware suppression of products with missing key data
+- **Merchant Notifications**: Email alerts to merchants about suppressed products with guidance on how to fix issues
 
 ## Architecture
 
@@ -52,12 +57,24 @@ The personalization and recommendation system consists of:
   - Click tracking
   - Conversion tracking
 
+- **Product Validation Service**: Ensures product data quality
+  - Validates required product fields
+  - Updates product suppression status
+  - Triggers merchant notifications
+
+- **Notification Service**: Communicates with merchants
+  - Sends email notifications about suppressed products
+  - Provides detailed information about issues to fix
+  - Includes direct links to edit affected products
+
 ### Database Schema
 
 - **Product Similarities**: Stores pre-computed product similarity scores
 - **User Preferences**: Stores user preference data
 - **Interaction Logs**: Records user interactions for analysis
 - **Recommendation Configurations**: Stores configuration for recommendation algorithms
+- **Product Validation**: Stores product suppression status and validation history
+- **Merchant Notifications**: Tracks notification history and merchant responses
 
 ## Technical Implementation
 
@@ -260,6 +277,8 @@ Detailed documentation is available for each component:
 
 - [Product Card Components](/frontend/src/components/product/README.md)
 - [Recommendation Components](/frontend/src/components/recommendations/README.md)
+- [Product Suppression & Merchant Notification](/docs/PRODUCT_SUPPRESSION.md)
+- [Vertical Optimization for Product Cards](/docs/VERTICAL_OPTIMIZATION.md)
 - [Backend API Documentation](/backend/docs/api.md)
 
 ## Contributors
