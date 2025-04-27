@@ -22,6 +22,7 @@ export interface Section {
   backgroundColor?: string;
   productCount: number;
   priority: number; // Used for ordering sections
+  items?: any[]; // Array of products or other items for this section
 }
 
 export const discoverySections: Section[] = [

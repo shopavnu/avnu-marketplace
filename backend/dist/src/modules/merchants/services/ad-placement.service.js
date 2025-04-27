@@ -123,7 +123,7 @@ let AdPlacementService = AdPlacementService_1 = class AdPlacementService {
             }
             else {
                 const matchRatio = interestMatches.length / campaign.targetInterests.length;
-                score *= (1 + matchRatio);
+                score *= 1 + matchRatio;
             }
         }
         if (campaign.targetDemographics?.length && options.demographics?.length) {
@@ -133,7 +133,7 @@ let AdPlacementService = AdPlacementService_1 = class AdPlacementService {
             }
             else {
                 const matchRatio = demographicMatches.length / campaign.targetDemographics.length;
-                score *= (1 + matchRatio * 0.5);
+                score *= 1 + matchRatio * 0.5;
             }
         }
         const randomFactor = 0.95 + Math.random() * 0.1;
@@ -181,7 +181,7 @@ let AdPlacementService = AdPlacementService_1 = class AdPlacementService {
             const totalConversions = productCampaigns.reduce((sum, c) => sum + (c.conversions || 0), 0);
             const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0.01;
             const avgCVR = totalClicks > 0 ? totalConversions / totalClicks : 0.02;
-            const performanceScore = (avgCTR * 0.6) + (avgCVR * 0.4);
+            const performanceScore = avgCTR * 0.6 + avgCVR * 0.4;
             const baseRecommendedBudget = 100;
             const recommendedBudget = baseRecommendedBudget * (1 + performanceScore * 10);
             const estimatedImpressions = recommendedBudget / 0.01;

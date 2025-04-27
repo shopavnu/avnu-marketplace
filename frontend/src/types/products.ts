@@ -53,6 +53,8 @@ export interface Product {
   reviewCount?: number;
   createdAt: string;
   updatedAt?: string;
+  // Added for backward compatibility with existing code
+  tags: string[];
 }
 
 export interface DiscoverySection {

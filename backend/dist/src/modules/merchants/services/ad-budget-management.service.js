@@ -66,7 +66,7 @@ let AdBudgetManagementService = AdBudgetManagementService_1 = class AdBudgetMana
             this.logger.log(`Campaign ${campaignId} paused due to budget exhaustion`);
             this.eventEmitter.emit('campaign.budget.exhausted', {
                 campaignId,
-                merchantId: campaign.merchantId
+                merchantId: campaign.merchantId,
             });
         }
         return {
@@ -101,7 +101,7 @@ let AdBudgetManagementService = AdBudgetManagementService_1 = class AdBudgetMana
     }
     async allocateBudgetAcrossCampaigns(merchantId, totalBudget, campaignIds, strategy = BudgetAllocationStrategy.EQUAL) {
         const campaigns = await this.adCampaignRepository.find({
-            where: { id: { in: campaignIds }, merchantId },
+            where: { id: (0, typeorm_2.In)(campaignIds), merchantId },
         });
         if (campaigns.length === 0) {
             throw new Error('No valid campaigns found for budget allocation');

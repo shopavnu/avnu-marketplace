@@ -24,8 +24,8 @@ let AdBudgetManagementService = class AdBudgetManagementService {
             remainingBudget: 1000,
             utilizationRate: 0.33,
             campaignBreakdown: {
-                'campaign1': 300,
-                'campaign2': 200,
+                campaign1: 300,
+                campaign2: 200,
             },
         };
     }
@@ -36,8 +36,8 @@ let AdBudgetManagementService = class AdBudgetManagementService {
             dailyBudget: 66.67,
             projectedExhaustionDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
             campaignProjections: {
-                'campaign1': 600,
-                'campaign2': 400,
+                campaign1: 600,
+                campaign2: 400,
             },
         };
     }
@@ -54,14 +54,14 @@ let AdBudgetManagementService = class AdBudgetManagementService {
         }
         else if (strategy === entity_mocks_1.BudgetAllocationStrategy.PERFORMANCE_BASED) {
             return {
-                'campaign1': 600,
-                'campaign2': 400,
+                campaign1: 600,
+                campaign2: 400,
             };
         }
         else {
             return {
-                'campaign1': 500,
-                'campaign2': 500,
+                campaign1: 500,
+                campaign2: 500,
             };
         }
     }

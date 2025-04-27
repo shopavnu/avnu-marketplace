@@ -45,7 +45,7 @@ exports.ElasticsearchConfigModule = ElasticsearchConfigModule = __decorate([
                         password: configService.get('ELASTICSEARCH_PASSWORD') || '',
                     },
                     tls: {
-                        rejectUnauthorized: false
+                        rejectUnauthorized: false,
                     },
                     maxRetries: 10,
                     requestTimeout: 60000,

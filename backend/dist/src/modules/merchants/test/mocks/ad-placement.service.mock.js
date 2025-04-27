@@ -34,7 +34,7 @@ let AdPlacementService = class AdPlacementService {
                 type: 'BRAND_AWARENESS',
                 relevanceScore: 0.75,
                 isSponsored: true,
-                impressionCost: 0.20,
+                impressionCost: 0.2,
             },
         ];
     }

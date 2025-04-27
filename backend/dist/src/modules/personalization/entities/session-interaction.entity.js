@@ -28,7 +28,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({
         type: 'varchar',
-        length: 50
+        length: 50,
     }),
     __metadata("design:type", String)
 ], SessionInteractionEntity.prototype, "type", void 0);
