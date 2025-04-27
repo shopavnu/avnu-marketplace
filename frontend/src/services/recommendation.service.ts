@@ -37,16 +37,20 @@ export class RecommendationService {
    * Get personalized recommendations for the current user
    * @param limit Maximum number of products to return
    * @param refresh Whether to refresh recommendations
+   * @param excludePurchased Whether to exclude products the user has purchased
+   * @param freshness Value between 0-1 indicating preference for fresh content (1 = all fresh)
    */
   static async getPersonalizedRecommendations(
     limit: number = 10,
-    refresh: boolean = false
+    refresh: boolean = false,
+    excludePurchased: boolean = true,
+    freshness: number = 0.7
   ): Promise<Product[]> {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/recommendations/personalized`,
         {
-          params: { limit, refresh },
+          params: { limit, refresh, excludePurchased, freshness },
           headers: getAuthHeader(),
         }
       );
@@ -61,13 +65,17 @@ export class RecommendationService {
   /**
    * Get trending products
    * @param limit Maximum number of products to return
+   * @param excludePurchased Whether to exclude products the user has purchased
    */
-  static async getTrendingProducts(limit: number = 10): Promise<Product[]> {
+  static async getTrendingProducts(
+    limit: number = 10,
+    excludePurchased: boolean = true
+  ): Promise<Product[]> {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/recommendations/trending`,
         {
-          params: { limit },
+          params: { limit, excludePurchased },
           headers: getAuthHeader(),
         }
       );
