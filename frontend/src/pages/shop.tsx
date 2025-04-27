@@ -219,37 +219,48 @@ export default function ShopPage() {
               </p>
             </div>
 
-            {/* Product Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              <AnimatePresence>
-                {searchResults.products.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                  >
-                    <ConsistentProductCard 
-                      product={product}
-                      badges={
-                        <>
-                          {product.isNew && (
-                            <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
-                              New
-                            </span>
-                          )}
-                          {product.vendor?.isLocal && (
-                            <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
-                              Local
-                            </span>
-                          )}
-                        </>
-                      }
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+            {/* Product Grid - No animation wrappers to prevent layout shifts */}
+            <div 
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+              style={{ 
+                display: 'grid',
+                gridTemplateRows: 'repeat(auto-fill, 360px)',
+                contain: 'layout', /* Add CSS containment to the grid */
+                position: 'relative',
+                zIndex: 1
+              }}
+              data-testid="product-grid"
+            >
+              {searchResults.products.map((product, index) => (
+                <div
+                  key={product.id}
+                  style={{ 
+                    height: '360px',
+                    width: '100%',
+                    contain: 'strict',
+                    position: 'relative'
+                  }}
+                  data-testid="product-cell"
+                >
+                  <ConsistentProductCard 
+                    product={product}
+                    badges={
+                      <>
+                        {product.isNew && (
+                          <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
+                            New
+                          </span>
+                        )}
+                        {product.vendor?.isLocal && (
+                          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
+                            Local
+                          </span>
+                        )}
+                      </>
+                    }
+                  />
+                </div>
+              ))}
             </div>
 
             {/* Loading State */}

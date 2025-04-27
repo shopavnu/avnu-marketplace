@@ -1,0 +1,87 @@
+/* Theme variables with default values */
+:root {
+  /* Default theme (will be overridden by ThemeProvider) */
+  --color-primary: #00B87E;
+  --color-secondary: #4A6CF7;
+  --color-accent: #FF385C;
+  --color-background: #FFFFFF;
+  --color-backgroundAlt: #F9F9F9;
+  --color-surface: #FFFFFF;
+  --color-surfaceElevated: #FFFFFF;
+  --color-text: #333333;
+  --color-textSecondary: #666666;
+  --color-border: #EEEEEE;
+  --color-success: #00B87E;
+  --color-warning: #FFB800;
+  --color-error: #FF5252;
+  
+  /* Animation durations */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+}
+
+/* Apply theme variables to common elements */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: background-color var(--transition-normal) ease;
+}
+
+/* Themed button styles */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* Themed text styles */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+/* Themed background styles */
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-accent {
+  background-color: var(--color-accent);
+}
+
+.bg-surface {
+  background-color: var(--color-surface);
+}
+
+/* Themed border styles */
+.border-themed {
+  border-color: var(--color-border);
+}
+
+/* Transition for all themed elements */
+.theme-transition {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: var(--transition-normal);
+  transition-timing-function: ease;
+}

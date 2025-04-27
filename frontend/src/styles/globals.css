@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import theme variables and styles */
+@import './theme.css';
+
 /* iOS-specific styles */
 @supports (-webkit-touch-callout: none) {
   .min-h-screen {
@@ -34,6 +37,13 @@
     min-height: 44px;
     min-width: 44px;
   }
+  
+  /* Smooth scrolling for non-iOS devices */
+  @media not all and (pointer: coarse) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 
   /* Safe area insets for notched devices */
   .safe-top {
@@ -50,12 +60,89 @@
   }
 }
 
+/* Base colors (overridden by theme variables) */
 :root {
   --foreground-rgb: 45, 45, 45;
   --background-rgb: 245, 243, 238;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  /* Theme variables take precedence, these are fallbacks */
+  color: var(--color-text, rgb(var(--foreground-rgb)));
+  background: var(--color-background, rgb(var(--background-rgb)));
+  scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scroll animations and utilities */
+@layer utilities {
+  /* Hide scrollbars while maintaining functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  
+  /* Scroll reveal animations */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Section transitions */
+  .section-transition {
+    transition: background-color 0.5s ease;
+  }
+  
+  /* Staggered animations for children */
+  .stagger-children > * {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+  
+  .stagger-children.is-visible > *:nth-child(1) { transition-delay: 0.1s; }
+  .stagger-children.is-visible > *:nth-child(2) { transition-delay: 0.2s; }
+  .stagger-children.is-visible > *:nth-child(3) { transition-delay: 0.3s; }
+  .stagger-children.is-visible > *:nth-child(4) { transition-delay: 0.4s; }
+  .stagger-children.is-visible > *:nth-child(5) { transition-delay: 0.5s; }
+  .stagger-children.is-visible > *:nth-child(6) { transition-delay: 0.6s; }
+  
+  .stagger-children.is-visible > * {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Masonry grid layout */
+  .masonry-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .masonry-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .masonry-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  .masonry-grid > div {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
 }

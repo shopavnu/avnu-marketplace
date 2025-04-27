@@ -8,6 +8,7 @@ import { products, Product } from '@/data/products';
 import { ScrollItem } from '@/components/common';
 import { SectionType, discoverySections } from '@/data/sections';
 import { ConsistentProductCard } from '@/components/products';
+// HeightDebugger removed for clean UI
 
 // Define types for our discovery feed
 interface DiscoveryProduct {
@@ -212,7 +213,20 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
   const sections = data?.discoveryHomepage?.sections || [];
 
   return (
-    <div className="w-full">
+    <div className="pb-32">
+      {/* Add Height Debugger to diagnose card height issues */}
+      {/* HeightDebugger removed for clean UI */}
+      
+      {/* Header */}
+      <div className="container mx-auto px-4 mb-8 md:mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-charcoal mb-4">
+          Discover Products You'll Love
+        </h2>
+        <p className="text-gray-600 max-w-2xl">
+          Explore our curated collection of unique, high-quality products from independent brands and artisans.
+        </p>
+      </div>
+
       {loading && (
         <div className="space-y-12">
           {[1, 2].map((i) => (
@@ -262,53 +276,64 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
             </Link>
           </div>
 
-          <motion.div 
+          {/* Product Grid - No animation wrappers to prevent layout shifts */}
+          <div 
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            variants={containerVariants}
+            style={{ 
+              display: 'grid',
+              gridTemplateRows: 'repeat(auto-fill, 360px)', /* Force all grid rows to be exactly 360px tall */
+              contain: 'layout', /* Add CSS containment to the grid */
+              position: 'relative',
+              zIndex: 1
+            }}
+            data-testid="product-grid"
           >
             {section.items.map((product: DiscoveryProduct, index) => (
-              <motion.div
+              <div 
                 key={product.id}
-                variants={itemVariants}
-                custom={index}
+                style={{ 
+                  height: '360px',
+                  width: '100%',
+                  contain: 'strict',
+                  position: 'relative'
+                }}
+                data-testid="product-cell"
               >
-                <ScrollItem delay={index * 0.05}>
-                  <ConsistentProductCard 
-                    product={product}
-                    badges={
-                      <>
-                        {section.type === SectionType.NEW_ARRIVALS && (
-                          <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
-                            New
-                          </span>
-                        )}
-                        {product.isSustainable && (
-                          <span className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded-full">
-                            Sustainable
-                          </span>
-                        )}
-                        {product.isHandmade && (
-                          <span className="px-3 py-1 bg-amber-600 text-white text-xs font-medium rounded-full">
-                            Handmade
-                          </span>
-                        )}
-                        {product.isLocal && (
-                          <span className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-full">
-                            Local
-                          </span>
-                        )}
-                        {product.salePrice && product.salePrice < product.price && (
-                          <span className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
-                            Sale
-                          </span>
-                        )}
-                      </>
-                    }
-                  />
-                </ScrollItem>
-              </motion.div>
+                <ConsistentProductCard 
+                  product={product}
+                  badges={
+                    <>
+                      {section.type === SectionType.NEW_ARRIVALS && (
+                        <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
+                          New
+                        </span>
+                      )}
+                      {product.isSustainable && (
+                        <span className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded-full">
+                          Sustainable
+                        </span>
+                      )}
+                      {product.isHandmade && (
+                        <span className="px-3 py-1 bg-amber-600 text-white text-xs font-medium rounded-full">
+                          Handmade
+                        </span>
+                      )}
+                      {product.isLocal && (
+                        <span className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-full">
+                          Local
+                        </span>
+                      )}
+                      {product.salePrice && product.salePrice < product.price && (
+                        <span className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
+                          Sale
+                        </span>
+                      )}
+                    </>
+                  }
+                />
+              </div>
             ))}
-          </motion.div>
+          </div>
         </motion.div>
       ))}
     </div>

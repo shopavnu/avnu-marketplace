@@ -7,12 +7,14 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StarIcon, HeartIcon, ShoppingCartIcon, TruckIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { Product } from '@/types/products';
+import { Product } from '@/data/products';
 import ProductCard from '@/components/products/ProductCard';
 import { causes } from '@/components/search/FilterPanel';
 import { brands as allBrands } from '@/data/brands';
 import { analyticsService } from '@/services/analytics.service';
 import useDwellTimeTracking from '@/hooks/useDwellTimeTracking';
+import personalizationService from '@/services/personalization';
+import { ConsistentProductCard } from '@/components/products';
 
 /**
  * Helper function to get brand ID from name
@@ -176,11 +178,24 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       .filter((p) => p.brand === product.brand && p.id !== product.id)
       .slice(0, 4);
 
+    // Ensure all products have salePrice as null instead of undefined for proper serialization
+    const serializeProduct = (p: any) => ({
+      ...p,
+      salePrice: p.salePrice ?? null,
+      // Ensure any nested objects with potential undefined values are also handled
+      rating: p.rating ? {
+        ...p.rating,
+        shopifyRating: p.rating.shopifyRating ?? null,
+        wooCommerceRating: p.rating.wooCommerceRating ?? null,
+        avnuRating: p.rating.avnuRating ?? null
+      } : null
+    });
+    
     return {
       props: {
-        product,
-        relatedProducts,
-        brandProducts,
+        product: serializeProduct(product),
+        relatedProducts: relatedProducts.map(serializeProduct),
+        brandProducts: brandProducts.map(serializeProduct),
       },
       revalidate: 60, // Revalidate every 60 seconds
     };
@@ -199,33 +214,57 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 export default function ProductPage({ product, relatedProducts, brandProducts }: ProductPageProps) {
   const router = useRouter();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedAttributes, setSelectedAttributes] = useState<{[key: string]: string}>({});
   const [quantity, setQuantity] = useState(1);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
-  const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   
-  // Track dwell time for this product
-  const searchQuery = router.query.q as string || '';
-  const position = parseInt(router.query.pos as string) || undefined;
-  
-  // Track product view when the page loads
+  // Initialize personalization service and check if product is favorited
   useEffect(() => {
+    personalizationService.initialize();
     if (product) {
-      // Get the referrer from the router query or document.referrer
-      const referrer = router.query.ref as string || 
-                      (typeof document !== 'undefined' ? document.referrer : '');
-      
-      analyticsService.trackProductView(product, referrer);
+      setIsFavorite(personalizationService.isProductFavorited(product.id));
     }
-  }, [product, router.query]);
+  }, [product]);
   
-  // Use the dwell time tracking hook
-  useDwellTimeTracking({
-    resultId: product?.id || '',
-    query: searchQuery,
-    position: position
-  });
+  // Track product view for personalization and analytics
+  useEffect(() => {
+    if (product && !router.isFallback) {
+      // Track for analytics
+      analyticsService.trackProductView(product, 'product_page');
+      
+      // Track for personalization
+      personalizationService.trackProductView(product.id);
+      
+      // Track category view for better recommendations
+      if (product.category) {
+        personalizationService.trackCategoryView(product.category);
+      }
+    }
+  }, [product, router.isFallback]);
+  
+  // Track dwell time
+  useEffect(() => {
+    // Use the dwell time tracking hook with the product ID
+    const searchQuery = router.query.q as string || '';
+    const position = parseInt(router.query.pos as string) || undefined;
+    
+    // Start tracking when component mounts
+    const startTime = Date.now();
+    
+    return () => {
+      // Calculate dwell time when component unmounts
+      const dwellTime = Math.floor((Date.now() - startTime) / 1000);
+      
+      // If dwell time is significant (> 10 seconds), track it with the personalization service
+      if (dwellTime > 10 && product) {
+        personalizationService.trackProductView(product.id, dwellTime);
+      }
+    };
+  }, [product, router.query]);
   
   // Handle case where product is null (from error handling)
   if (!product) {
@@ -277,8 +316,8 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
       selectedAttributes
     );
     
-    setIsAddedToCart(true);
-    setTimeout(() => setIsAddedToCart(false), 2000);
+    setIsAddingToCart(true);
+    setTimeout(() => setIsAddingToCart(false), 2000);
   };
 
   // If the page is still loading
@@ -346,7 +385,7 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
               <div className="relative aspect-square rounded-2xl overflow-hidden bg-white">
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={currentImageIndex}
+                    key={selectedImage}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -354,7 +393,7 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
                     className="absolute inset-0"
                   >
                     <Image
-                      src={product.images[currentImageIndex]}
+                      src={product.images[selectedImage]}
                       alt={product.title}
                       fill
                       className="object-contain"
@@ -373,12 +412,20 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
                 
                 {/* Favorite Button */}
                 <button
-                  onClick={() => setIsFavorited(!isFavorited)}
+                  onClick={() => {
+                    if (product) {
+                      const newState = personalizationService.toggleFavoriteProduct(product.id);
+                      setIsFavorite(newState);
+                      
+                      // Track this action for analytics
+                      analyticsService.trackProductView(product, newState ? 'add_to_favorites' : 'remove_from_favorites');
+                    }
+                  }}
                   className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm
-                           text-charcoal hover:text-sage transition-colors duration-200 shadow-sm"
-                  aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                             text-charcoal hover:text-sage transition-colors duration-200 shadow-sm"
+                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
                 >
-                  {isFavorited ? (
+                  {isFavorite ? (
                     <HeartIconSolid className="w-6 h-6 text-sage" />
                   ) : (
                     <HeartIcon className="w-6 h-6" />
@@ -387,13 +434,12 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
               </div>
               
               {/* Thumbnail Gallery */}
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
+              <div className="flex items-center space-x-2 mt-4">
                 {product.images.map((image, index) => (
                   <button
                     key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 snap-start
-                              ${index === currentImageIndex ? 'ring-2 ring-sage' : 'ring-1 ring-gray-200'}`}
+                    onClick={() => setSelectedImage(index)}
+                    className={`w-16 h-16 rounded-md overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-sage' : 'border-transparent hover:border-gray-300'}`}
                   >
                     <Image
                       src={image}
@@ -586,8 +632,8 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
                             }`}
                 >
                   <ShoppingCartIcon className="w-5 h-5" />
-                  {isAddedToCart
-                    ? 'Added to Cart!'
+                  {isAddingToCart
+                    ? 'Adding to Cart...'
                     : product.inStock
                       ? 'Add to Cart'
                       : 'Out of Stock'
@@ -731,7 +777,34 @@ export default function ProductPage({ product, relatedProducts, brandProducts }:
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {relatedProducts.map((relatedProduct) => (
-                  <ProductCard key={relatedProduct.id} product={relatedProduct} />
+                  <div 
+                    key={relatedProduct.id}
+                    style={{ 
+                      height: '360px',
+                      width: '100%',
+                      contain: 'strict',
+                      position: 'relative'
+                    }}
+                    onClick={() => personalizationService.trackProductView(relatedProduct.id)}
+                  >
+                    <ConsistentProductCard 
+                      product={relatedProduct}
+                      badges={
+                        <>
+                          {relatedProduct.isNew && (
+                            <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
+                              New
+                            </span>
+                          )}
+                          {personalizationService.isProductFavorited(relatedProduct.id) && (
+                            <span className="px-3 py-1 bg-accent text-white text-xs font-medium rounded-full">
+                              Favorite
+                            </span>
+                          )}
+                        </>
+                      }
+                    />
+                  </div>
                 ))}
               </div>
             </section>
