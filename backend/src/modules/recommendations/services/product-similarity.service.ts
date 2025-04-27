@@ -27,7 +27,10 @@ export class ProductSimilarityService {
    * @param productId Source product ID
    * @param limit Maximum number of similar products to return
    */
-  async calculateAttributeBasedSimilarity(productId: string, limit: number = 20): Promise<ProductSimilarity[]> {
+  async calculateAttributeBasedSimilarity(
+    productId: string,
+    limit: number = 20,
+  ): Promise<ProductSimilarity[]> {
     try {
       // Get source product
       const sourceProduct = await this.productService.findOne(productId);
@@ -49,7 +52,10 @@ export class ProductSimilarityService {
       for (const targetProduct of allProducts) {
         if (targetProduct.id === productId) continue; // Skip self
 
-        const similarityScore = this.calculateProductAttributeSimilarity(sourceProduct, targetProduct);
+        const similarityScore = this.calculateProductAttributeSimilarity(
+          sourceProduct,
+          targetProduct,
+        );
 
         // Create similarity record
         const similarity = this.productSimilarityRepository.create({
@@ -84,7 +90,10 @@ export class ProductSimilarityService {
    * @param sourceProduct Source product
    * @param targetProduct Target product
    */
-  private calculateProductAttributeSimilarity(sourceProduct: Product, targetProduct: Product): number {
+  private calculateProductAttributeSimilarity(
+    sourceProduct: Product,
+    targetProduct: Product,
+  ): number {
     let score = 0;
     let totalWeight = 0;
 
@@ -116,7 +125,8 @@ export class ProductSimilarityService {
     totalWeight += tagsWeight;
     if (sourceProduct.tags && targetProduct.tags) {
       const commonTags = this.getCommonElements(sourceProduct.tags, targetProduct.tags);
-      const tagSimilarity = commonTags.length / Math.max(sourceProduct.tags.length, targetProduct.tags.length);
+      const tagSimilarity =
+        commonTags.length / Math.max(sourceProduct.tags.length, targetProduct.tags.length);
       score += tagsWeight * tagSimilarity;
     }
 
@@ -126,15 +136,16 @@ export class ProductSimilarityService {
     if (sourceProduct.attributes && targetProduct.attributes) {
       const sourceAttrs = Object.entries(sourceProduct.attributes);
       const targetAttrs = Object.entries(targetProduct.attributes);
-      
+
       let matchingAttributes = 0;
       for (const [key, value] of sourceAttrs) {
         if (targetProduct.attributes[key] === value) {
           matchingAttributes++;
         }
       }
-      
-      const attributeSimilarity = matchingAttributes / Math.max(sourceAttrs.length, targetAttrs.length);
+
+      const attributeSimilarity =
+        matchingAttributes / Math.max(sourceAttrs.length, targetAttrs.length);
       score += attributesWeight * attributeSimilarity;
     }
 
@@ -147,12 +158,18 @@ export class ProductSimilarityService {
    * @param sourceProduct Source product
    * @param targetProduct Target product
    */
-  private getMatchedAttributes(sourceProduct: Product, targetProduct: Product): Record<string, any> {
+  private getMatchedAttributes(
+    sourceProduct: Product,
+    targetProduct: Product,
+  ): Record<string, any> {
     const matched: Record<string, any> = {};
 
     // Match categories
     if (this.hasCommonElements(sourceProduct.categories, targetProduct.categories)) {
-      matched.categories = this.getCommonElements(sourceProduct.categories, targetProduct.categories);
+      matched.categories = this.getCommonElements(
+        sourceProduct.categories,
+        targetProduct.categories,
+      );
     }
 
     // Match brand
@@ -182,13 +199,13 @@ export class ProductSimilarityService {
     // Match attributes
     if (sourceProduct.attributes && targetProduct.attributes) {
       const matchedAttrs: Record<string, any> = {};
-      
+
       for (const [key, value] of Object.entries(sourceProduct.attributes)) {
         if (targetProduct.attributes[key] === value) {
           matchedAttrs[key] = value;
         }
       }
-      
+
       if (Object.keys(matchedAttrs).length > 0) {
         matched.attributes = matchedAttrs;
       }
@@ -222,12 +239,15 @@ export class ProductSimilarityService {
    * @param productId Source product ID
    * @param limit Maximum number of similar products to return
    */
-  async calculateViewBasedSimilarity(productId: string, limit: number = 20): Promise<ProductSimilarity[]> {
+  async calculateViewBasedSimilarity(
+    productId: string,
+    limit: number = 20,
+  ): Promise<ProductSimilarity[]> {
     try {
       // Get all product view interactions
       const productViewInteractions = await this.sessionService.getInteractionsByType(
         SessionInteractionType.PRODUCT_VIEW,
-        1000
+        1000,
       );
 
       // Get sessions that viewed the source product
@@ -241,12 +261,16 @@ export class ProductSimilarityService {
 
       // Count co-viewed products
       const coViewCounts: Record<string, number> = {};
-      
+
       for (const interaction of productViewInteractions) {
         const viewedProductId = interaction.data?.productId;
         const sessionId = interaction.session.sessionId;
-        
-        if (viewedProductId && viewedProductId !== productId && sessionsViewedSource.includes(sessionId)) {
+
+        if (
+          viewedProductId &&
+          viewedProductId !== productId &&
+          sessionsViewedSource.includes(sessionId)
+        ) {
           coViewCounts[viewedProductId] = (coViewCounts[viewedProductId] || 0) + 1;
         }
       }
@@ -293,7 +317,10 @@ export class ProductSimilarityService {
    * @param productId Source product ID
    * @param limit Maximum number of similar products to return
    */
-  async calculateHybridSimilarity(productId: string, limit: number = 20): Promise<ProductSimilarity[]> {
+  async calculateHybridSimilarity(
+    productId: string,
+    limit: number = 20,
+  ): Promise<ProductSimilarity[]> {
     try {
       // Get existing similarities
       const attributeSimilarities = await this.productSimilarityRepository.find({
@@ -409,7 +436,7 @@ export class ProductSimilarityService {
   async getSimilarProducts(
     productId: string,
     similarityType: SimilarityType = SimilarityType.HYBRID,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<Product[]> {
     try {
       // Get similarities

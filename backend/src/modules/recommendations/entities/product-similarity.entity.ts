@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-  Unique
+  Unique,
 } from 'typeorm';
 import { Field, ID, ObjectType, Float, GraphQLISODateTime } from '@nestjs/graphql';
 
@@ -22,7 +22,7 @@ export enum SimilarityType {
   CATEGORY_BASED = 'category_based',
   PRICE_BASED = 'price_based',
   BRAND_BASED = 'brand_based',
-  EMBEDDING_BASED = 'embedding_based'
+  EMBEDDING_BASED = 'embedding_based',
 }
 
 /**
@@ -51,7 +51,7 @@ export class ProductSimilarity {
   @Column({
     type: 'enum',
     enum: SimilarityType,
-    default: SimilarityType.ATTRIBUTE_BASED
+    default: SimilarityType.ATTRIBUTE_BASED,
   })
   similarityType: SimilarityType;
 

@@ -14,28 +14,18 @@ import { AbTestingModule } from '../ab-testing/ab-testing.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      ProductSimilarity,
-      ProductRecommendation,
-      RecommendationConfig
-    ]),
+    TypeOrmModule.forFeature([ProductSimilarity, ProductRecommendation, RecommendationConfig]),
     ProductsModule,
     PersonalizationModule,
-    AbTestingModule
+    AbTestingModule,
   ],
   providers: [
     ProductSimilarityService,
     PersonalizedRankingService,
     RecommendationExperimentService,
-    RecommendationResolver
+    RecommendationResolver,
   ],
-  controllers: [
-    RecommendationController
-  ],
-  exports: [
-    ProductSimilarityService,
-    PersonalizedRankingService,
-    RecommendationExperimentService
-  ]
+  controllers: [RecommendationController],
+  exports: [ProductSimilarityService, PersonalizedRankingService, RecommendationExperimentService],
 })
 export class RecommendationsModule {}

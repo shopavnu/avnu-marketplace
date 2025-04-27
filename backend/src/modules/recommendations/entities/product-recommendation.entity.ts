@@ -4,7 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  Index
+  Index,
 } from 'typeorm';
 import { Field, ID, ObjectType, Float, Int, GraphQLISODateTime } from '@nestjs/graphql';
 
@@ -21,7 +21,7 @@ export enum RecommendationType {
   RECENTLY_VIEWED = 'recently_viewed',
   PRICE_DROP = 'price_drop',
   SEASONAL = 'seasonal',
-  FEATURED = 'featured'
+  FEATURED = 'featured',
 }
 
 /**
@@ -53,7 +53,7 @@ export class ProductRecommendation {
   @Column({
     type: 'enum',
     enum: RecommendationType,
-    default: RecommendationType.SIMILAR_PRODUCTS
+    default: RecommendationType.SIMILAR_PRODUCTS,
   })
   recommendationType: RecommendationType;
 

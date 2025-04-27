@@ -51,7 +51,10 @@ export class UserPreferenceProfileService {
    * @param userId User ID
    * @param sessionId Session ID
    */
-  async updateProfileFromSession(userId: string, sessionId: string): Promise<UserPreferenceProfile> {
+  async updateProfileFromSession(
+    userId: string,
+    sessionId: string,
+  ): Promise<UserPreferenceProfile> {
     try {
       // Get user profile
       const profile = await this.getOrCreateProfile(userId);
@@ -101,7 +104,7 @@ export class UserPreferenceProfileService {
       const viewTimeByBrand: Record<string, number> = profile.viewTimeByBrand || {};
       const scrollDepthByPageType: Record<string, number> = profile.scrollDepthByPageType || {};
       const priceRangePreferences: Record<string, number> = profile.priceRangePreferences || {};
-      
+
       // Track recently viewed products
       const recentlyViewedProducts: string[] = profile.recentlyViewedProducts || [];
 
@@ -112,10 +115,11 @@ export class UserPreferenceProfileService {
         switch (type) {
           case SessionInteractionType.VIEW:
             totalPageViews++;
-            
+
             // Track category or brand views
             if (data.type === 'category' && data.categoryId) {
-              categoryPreferences[data.categoryId] = (categoryPreferences[data.categoryId] || 0) + 1;
+              categoryPreferences[data.categoryId] =
+                (categoryPreferences[data.categoryId] || 0) + 1;
             } else if (data.type === 'brand' && data.brandId) {
               brandPreferences[data.brandId] = (brandPreferences[data.brandId] || 0) + 1;
             }
@@ -123,11 +127,11 @@ export class UserPreferenceProfileService {
 
           case SessionInteractionType.PRODUCT_VIEW:
             totalProductViews++;
-            
+
             if (data.productId) {
               // Track product view
               productPreferences[data.productId] = (productPreferences[data.productId] || 0) + 1;
-              
+
               // Add to recently viewed products (maintain uniqueness and max length of 20)
               if (!recentlyViewedProducts.includes(data.productId)) {
                 recentlyViewedProducts.unshift(data.productId);
@@ -135,24 +139,26 @@ export class UserPreferenceProfileService {
                   recentlyViewedProducts.pop();
                 }
               }
-              
+
               // Track view time
               if (data.viewTimeMs) {
                 const viewTimeSeconds = data.viewTimeMs / 1000;
                 totalProductViewTime += viewTimeSeconds;
                 productViewCount++;
-                
+
                 // Track view time by category
                 if (data.categoryId) {
-                  viewTimeByCategory[data.categoryId] = (viewTimeByCategory[data.categoryId] || 0) + viewTimeSeconds;
+                  viewTimeByCategory[data.categoryId] =
+                    (viewTimeByCategory[data.categoryId] || 0) + viewTimeSeconds;
                 }
-                
+
                 // Track view time by brand
                 if (data.brandId) {
-                  viewTimeByBrand[data.brandId] = (viewTimeByBrand[data.brandId] || 0) + viewTimeSeconds;
+                  viewTimeByBrand[data.brandId] =
+                    (viewTimeByBrand[data.brandId] || 0) + viewTimeSeconds;
                 }
               }
-              
+
               // Track price range preferences
               if (data.price) {
                 const priceRange = this.getPriceRangeKey(data.price);
@@ -165,13 +171,13 @@ export class UserPreferenceProfileService {
             if (data.scrollPercentage) {
               totalScrollDepth += data.scrollPercentage;
               scrollDepthCount++;
-              
+
               // Track scroll depth by page type
               if (data.pageType) {
                 // Keep the maximum scroll depth for each page type
                 scrollDepthByPageType[data.pageType] = Math.max(
                   scrollDepthByPageType[data.pageType] || 0,
-                  data.scrollPercentage
+                  data.scrollPercentage,
                 );
               }
             }
@@ -183,21 +189,29 @@ export class UserPreferenceProfileService {
             // Track product engagement
             if (data.productId) {
               productEngagementCount++;
-              
+
               // Increase product preference weight for high-engagement actions
-              const engagementWeight = type === SessionInteractionType.CLICK ? 2 :
-                                      type === SessionInteractionType.ADD_TO_CART ? 5 :
-                                      type === SessionInteractionType.PURCHASE ? 10 : 1;
-                                      
-              productPreferences[data.productId] = (productPreferences[data.productId] || 0) + engagementWeight;
-              
+              const engagementWeight =
+                type === SessionInteractionType.CLICK
+                  ? 2
+                  : type === SessionInteractionType.ADD_TO_CART
+                    ? 5
+                    : type === SessionInteractionType.PURCHASE
+                      ? 10
+                      : 1;
+
+              productPreferences[data.productId] =
+                (productPreferences[data.productId] || 0) + engagementWeight;
+
               // Track category and brand preferences from product engagement
               if (data.categoryId) {
-                categoryPreferences[data.categoryId] = (categoryPreferences[data.categoryId] || 0) + engagementWeight;
+                categoryPreferences[data.categoryId] =
+                  (categoryPreferences[data.categoryId] || 0) + engagementWeight;
               }
-              
+
               if (data.brandId) {
-                brandPreferences[data.brandId] = (brandPreferences[data.brandId] || 0) + engagementWeight;
+                brandPreferences[data.brandId] =
+                  (brandPreferences[data.brandId] || 0) + engagementWeight;
               }
             }
             break;
@@ -205,9 +219,12 @@ export class UserPreferenceProfileService {
       }
 
       // Calculate averages
-      const averageScrollDepth = scrollDepthCount > 0 ? totalScrollDepth / scrollDepthCount : profile.averageScrollDepth;
-      const averageProductViewTimeSeconds = productViewCount > 0 ? 
-        totalProductViewTime / productViewCount : profile.averageProductViewTimeSeconds;
+      const averageScrollDepth =
+        scrollDepthCount > 0 ? totalScrollDepth / scrollDepthCount : profile.averageScrollDepth;
+      const averageProductViewTimeSeconds =
+        productViewCount > 0
+          ? totalProductViewTime / productViewCount
+          : profile.averageProductViewTimeSeconds;
 
       // Get top viewed categories and brands
       const topViewedCategories = this.getTopItems(categoryPreferences, 10);
@@ -289,15 +306,15 @@ export class UserPreferenceProfileService {
   async getPersonalizedRecommendations(userId: string, limit: number = 10): Promise<string[]> {
     try {
       const profile = await this.getOrCreateProfile(userId);
-      
+
       if (!profile.hasEnoughData) {
         this.logger.log(`Not enough data for personalized recommendations for user ${userId}`);
         return [];
       }
-      
+
       // Get top product preferences
       const topProducts = this.getTopItems(profile.productPreferences || {}, limit);
-      
+
       return topProducts;
     } catch (error) {
       this.logger.error(`Failed to get personalized recommendations: ${error.message}`);

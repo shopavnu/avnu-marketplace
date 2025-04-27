@@ -37,11 +37,11 @@ import { UserPreferenceProfile } from './entities/user-preference-profile.entity
     UserPreferenceProfileResolver,
   ],
   exports: [
-    PersonalizationService, 
-    UserPreferencesService, 
-    UserBehaviorService, 
+    PersonalizationService,
+    UserPreferencesService,
+    UserBehaviorService,
     SessionService,
-    UserPreferenceProfileService
+    UserPreferenceProfileService,
   ],
 })
 export class PersonalizationModule {}

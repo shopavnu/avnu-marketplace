@@ -17,7 +17,8 @@ export class RecommendationResolver {
   @Query(() => [Product], { name: 'similarProducts' })
   async getSimilarProducts(
     @Args('productId') productId: string,
-    @Args('type', { type: () => String, nullable: true, defaultValue: SimilarityType.HYBRID }) type: SimilarityType,
+    @Args('type', { type: () => String, nullable: true, defaultValue: SimilarityType.HYBRID })
+    type: SimilarityType,
     @Args('limit', { type: () => Int, nullable: true, defaultValue: 10 }) limit: number,
   ): Promise<Product[]> {
     return this.productSimilarityService.getSimilarProducts(productId, type, limit);
@@ -45,33 +46,25 @@ export class RecommendationResolver {
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationImpression' })
-  async trackImpression(
-    @Args('recommendationId') recommendationId: string,
-  ): Promise<boolean> {
+  async trackImpression(@Args('recommendationId') recommendationId: string): Promise<boolean> {
     await this.personalizedRankingService.trackImpression(recommendationId);
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationClick' })
-  async trackClick(
-    @Args('recommendationId') recommendationId: string,
-  ): Promise<boolean> {
+  async trackClick(@Args('recommendationId') recommendationId: string): Promise<boolean> {
     await this.personalizedRankingService.trackClick(recommendationId);
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationConversion' })
-  async trackConversion(
-    @Args('recommendationId') recommendationId: string,
-  ): Promise<boolean> {
+  async trackConversion(@Args('recommendationId') recommendationId: string): Promise<boolean> {
     await this.personalizedRankingService.trackConversion(recommendationId);
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'updateProductSimilarities' })
-  async updateProductSimilarities(
-    @Args('productId') productId: string,
-  ): Promise<boolean> {
+  async updateProductSimilarities(@Args('productId') productId: string): Promise<boolean> {
     await this.productSimilarityService.updateProductSimilarities(productId);
     return true;
   }

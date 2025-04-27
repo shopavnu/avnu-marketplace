@@ -9,7 +9,7 @@ import {
   Logger,
   Req,
   HttpStatus,
-  HttpException
+  HttpException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ProductSimilarityService } from '../services/product-similarity.service';
@@ -56,9 +56,9 @@ export class RecommendationController {
       const similarProducts = await this.productSimilarityService.getSimilarProducts(
         productId,
         type,
-        limit
+        limit,
       );
-      
+
       return {
         success: true,
         data: similarProducts,
@@ -75,7 +75,7 @@ export class RecommendationController {
           message: 'Failed to get similar products',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -93,23 +93,23 @@ export class RecommendationController {
   ) {
     try {
       const userId = req.user?.id;
-      
+
       if (!userId) {
         throw new HttpException(
           {
             success: false,
             message: 'User ID is required',
           },
-          HttpStatus.BAD_REQUEST
+          HttpStatus.BAD_REQUEST,
         );
       }
-      
+
       const recommendations = await this.personalizedRankingService.getPersonalizedRecommendations(
         userId,
         limit,
-        refresh
+        refresh,
       );
-      
+
       return {
         success: true,
         data: recommendations,
@@ -126,7 +126,7 @@ export class RecommendationController {
           message: 'Failed to get personalized recommendations',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -136,21 +136,18 @@ export class RecommendationController {
   @ApiOperation({ summary: 'Get trending products' })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Returns trending products' })
-  async getTrendingProducts(
-    @Req() req: RequestWithUser,
-    @Query('limit') limit: number = 10,
-  ) {
+  async getTrendingProducts(@Req() req: RequestWithUser, @Query('limit') limit: number = 10) {
     try {
       const userId = req.user?.id || 'anonymous';
-      
+
       // For anonymous users or when no personalized recommendations are available,
       // this will fall back to popularity-based recommendations
       const recommendations = await this.personalizedRankingService.getPersonalizedRecommendations(
         userId,
         limit,
-        false
+        false,
       );
-      
+
       return {
         success: true,
         data: recommendations,
@@ -166,7 +163,7 @@ export class RecommendationController {
           message: 'Failed to get trending products',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -178,7 +175,7 @@ export class RecommendationController {
   async trackImpression(@Param('recommendationId') recommendationId: string) {
     try {
       await this.personalizedRankingService.trackImpression(recommendationId);
-      
+
       return {
         success: true,
         message: 'Impression tracked successfully',
@@ -191,7 +188,7 @@ export class RecommendationController {
           message: 'Failed to track impression',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -203,7 +200,7 @@ export class RecommendationController {
   async trackClick(@Param('recommendationId') recommendationId: string) {
     try {
       await this.personalizedRankingService.trackClick(recommendationId);
-      
+
       return {
         success: true,
         message: 'Click tracked successfully',
@@ -216,7 +213,7 @@ export class RecommendationController {
           message: 'Failed to track click',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -228,7 +225,7 @@ export class RecommendationController {
   async trackConversion(@Param('recommendationId') recommendationId: string) {
     try {
       await this.personalizedRankingService.trackConversion(recommendationId);
-      
+
       return {
         success: true,
         message: 'Conversion tracked successfully',
@@ -241,7 +238,7 @@ export class RecommendationController {
           message: 'Failed to track conversion',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -253,7 +250,7 @@ export class RecommendationController {
   async updateProductSimilarities(@Param('productId') productId: string) {
     try {
       await this.productSimilarityService.updateProductSimilarities(productId);
-      
+
       return {
         success: true,
         message: 'Product similarities updated successfully',
@@ -266,7 +263,7 @@ export class RecommendationController {
           message: 'Failed to update product similarities',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -277,7 +274,7 @@ export class RecommendationController {
   async batchUpdateSimilarities(@Body() body: { productIds: string[] }) {
     try {
       await this.productSimilarityService.batchUpdateSimilarities(body.productIds);
-      
+
       return {
         success: true,
         message: 'Product similarities updated successfully',
@@ -293,7 +290,7 @@ export class RecommendationController {
           message: 'Failed to batch update similarities',
           error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
