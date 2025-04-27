@@ -81,7 +81,11 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
   }, [product, maxScrollDepth, hasTrackedEngagement, trackInteraction]);
   
   // Track view when component unmounts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // Store the current value of startTimeRef to use in cleanup
+    const startTime = startTimeRef.current;
+    
     return () => {
       if (!hasTrackedView) {
         trackInteraction('product_view', {
@@ -89,7 +93,7 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
           categoryId: product.categoryId || (product.categories?.[0] || ''),
           brandId: product.brandId || product.brandName,
           price: product.price,
-          viewTimeMs: Date.now() - startTimeRef.current,
+          viewTimeMs: Date.now() - startTime, // Use captured value
           scrollDepth: maxScrollDepth,
           timestamp: new Date().toISOString()
         });
@@ -101,6 +105,9 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
   
   // Track when user leaves the page
   useEffect(() => {
+    // Store the current value of startTimeRef to use in cleanup
+    const startTime = startTimeRef.current;
+    
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden' && !hasTrackedView) {
         trackInteraction('product_view', {
@@ -108,7 +115,7 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
           categoryId: product.categoryId || (product.categories?.[0] || ''),
           brandId: product.brandId || product.brandName,
           price: product.price,
-          viewTimeMs: Date.now() - startTimeRef.current,
+          viewTimeMs: Date.now() - startTime, // Use the captured startTime
           scrollDepth: maxScrollDepth,
           timestamp: new Date().toISOString()
         });

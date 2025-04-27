@@ -15,7 +15,10 @@ export type InteractionType =
   | 'add_to_cart'
   | 'purchase'
   | 'scroll_depth'
-  | 'product_view';
+  | 'product_view'
+  | 'RECOMMENDATION_IMPRESSION'
+  | 'RECOMMENDATION_CLICK'
+  | 'RECOMMENDATION_CONVERSION';
 
 /**
  * Hook for managing user session and tracking interactions

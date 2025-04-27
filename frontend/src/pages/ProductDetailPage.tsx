@@ -4,8 +4,10 @@ import axios from 'axios';
 import { Product } from '../types/product';
 import { useSession } from '../hooks/useSession';
 import ProductDetailTracker from '../components/tracking/ProductDetailTracker';
-import PersonalizedRecommendations from '../components/personalization/PersonalizedRecommendations';
 import ResponsiveProductCard from '../components/product/ResponsiveProductCard';
+import SimilarProducts from '../components/recommendations/SimilarProducts';
+import PersonalizedRecommendations from '../components/recommendations/PersonalizedRecommendations';
+import RecentlyViewedProducts from '../components/recommendations/RecentlyViewedProducts';
 
 /**
  * Product detail page with personalization tracking
@@ -147,12 +149,30 @@ const ProductDetailPage: React.FC = () => {
           </div>
         </div>
         
+        {/* Similar Products */}
+        <div className="mt-16">
+          <SimilarProducts
+            productId={product.id}
+            similarityType="hybrid"
+            limit={4}
+            title="You May Also Like"
+          />
+        </div>
+        
+        {/* Recently Viewed Products */}
+        <div className="mt-16">
+          <RecentlyViewedProducts
+            limit={4}
+            excludeProductId={product.id}
+          />
+        </div>
+        
         {/* Personalized Recommendations */}
         <div className="mt-16">
           <PersonalizedRecommendations
-            title="You May Also Like"
             limit={4}
-            renderProductCard={renderProductCard}
+            title="Recommended For You"
+            fallbackTitle="You Might Be Interested In"
           />
         </div>
       </div>

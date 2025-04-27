@@ -3,7 +3,8 @@ import axios from 'axios';
 import { Product } from '../types/product';
 import ResponsiveProductCard from '../components/product/ResponsiveProductCard';
 import PersonalizedProductGrid from '../components/tracking/PersonalizedProductGrid';
-import PersonalizedRecommendations from '../components/personalization/PersonalizedRecommendations';
+import PersonalizedRecommendations from '../components/recommendations/PersonalizedRecommendations';
+import RecentlyViewedProducts from '../components/recommendations/RecentlyViewedProducts';
 import { useSession } from '../hooks/useSession';
 
 /**
@@ -75,8 +76,17 @@ const PersonalizedDiscoveryFeed: React.FC = () => {
       <div className="mb-12">
         <PersonalizedRecommendations 
           title="Recommended for You"
+          fallbackTitle="Trending Now"
           limit={4}
-          renderProductCard={renderProductCard}
+          showRefreshButton={true}
+        />
+      </div>
+      
+      {/* Recently Viewed Products */}
+      <div className="mb-12">
+        <RecentlyViewedProducts 
+          limit={4}
+          title="Recently Viewed"
         />
       </div>
       
