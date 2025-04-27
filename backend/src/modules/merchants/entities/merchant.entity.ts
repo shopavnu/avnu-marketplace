@@ -33,6 +33,10 @@ export class Merchant {
   @Column({ nullable: true })
   website: string;
 
+  @Field()
+  @Column()
+  email: string;
+
   @Field(() => [String], { nullable: true })
   @Column('simple-array', { nullable: true })
   values: string[];

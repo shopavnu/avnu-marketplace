@@ -6,15 +6,17 @@ import { formatCurrency, truncateText } from '../../utils/formatters';
 interface ResponsiveProductCardProps {
   product: Product;
   badges?: React.ReactNode;
+  isMerchantView?: boolean; // Flag to indicate if the merchant is viewing their own products
 }
 
 /**
  * ResponsiveProductCard component that maintains consistent height
  * across different device sizes while optimizing for mobile
  */
-export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({ 
+const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({ 
   product, 
-  badges 
+  badges,
+  isMerchantView = false
 }) => {
   // State to track device size
   const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
@@ -49,7 +51,11 @@ export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
     } else if (deviceType === 'tablet' && product.tabletImages?.[0]) {
       return product.tabletImages[0];
     }
-    return product.images[0];
+    // Fall back to first available image if primary image is missing
+    return product.images[0] || 
+           product.mobileImages?.[0] || 
+           product.tabletImages?.[0] || 
+           '/images/placeholder-product.svg'; // Fallback placeholder
   };
 
   // Using imported truncateText function from formatters.ts
@@ -60,14 +66,78 @@ export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
     return truncateText(product.description, maxLength);
   };
 
+  // Define consistent dimensions based on device type
+  // These exact dimensions are critical for maintaining consistent card heights
+  const cardDimensions = {
+    mobile: {
+      height: '280px',      // Total card height
+      imageHeight: '160px', // Image section height
+      titleLines: 2,        // Number of lines for title
+      titleLineHeight: 1.2, // Line height for title
+      descriptionLines: 2,  // Number of lines for description
+      descriptionLineHeight: 1.4, // Line height for description
+      padding: '12px',      // Content padding
+      fontSize: {
+        brand: '0.75rem',
+        title: '0.875rem',
+        description: '0.75rem',
+        price: '0.875rem'
+      }
+    },
+    tablet: {
+      height: '320px',
+      imageHeight: '180px',
+      titleLines: 2,
+      titleLineHeight: 1.2,
+      descriptionLines: 3,
+      descriptionLineHeight: 1.4,
+      padding: '12px',
+      fontSize: {
+        brand: '0.75rem',
+        title: '0.9375rem',
+        description: '0.8125rem',
+        price: '0.9375rem'
+      }
+    },
+    desktop: {
+      height: '360px',
+      imageHeight: '200px',
+      titleLines: 2,
+      titleLineHeight: 1.2,
+      descriptionLines: 3,
+      descriptionLineHeight: 1.4,
+      padding: '16px',
+      fontSize: {
+        brand: '0.8125rem',
+        title: '1rem',
+        description: '0.875rem',
+        price: '1rem'
+      }
+    }
+  };
+
+  // Get current dimensions based on device type
+  const currentDimensions = cardDimensions[deviceType];
+
+  // Check if product is suppressed
+  const isProductSuppressed = product.isSuppressed || false;
+  
+  // Format suppression reasons for display
+  const suppressionReasons = isProductSuppressed && isMerchantView ? 
+    (product.suppressedFrom || []).map(location => {
+      // Convert camelCase or snake_case to readable format
+      return location
+        .replace(/([A-Z])/g, ' $1') // Convert camelCase
+        .replace(/_/g, ' ')         // Convert snake_case
+        .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+    }) : [];
+
   return (
     <div 
       className="product-card"
       style={{
         width: '100%',
-        height: 'clamp(280px, 50vw, 360px)', // Responsive height
-        minHeight: 'min(280px, 90vh)',
-        maxHeight: 'max(360px, 50vh)',
+        height: currentDimensions.height,
         backgroundColor: 'white',
         borderRadius: '12px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
@@ -84,7 +154,7 @@ export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
         style={{ 
           position: 'relative',
           flex: '0 0 auto',
-          height: 'clamp(160px, 30vw, 220px)', // Responsive image height
+          height: currentDimensions.imageHeight,
           overflow: 'hidden'
         }}
       >
@@ -96,9 +166,17 @@ export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              display: 'block'
+              objectPosition: 'center',
+              display: 'block',
+              backgroundColor: '#f8f8f8' // Light gray background for images with transparency
             }}
             loading="lazy"
+            onError={(e) => {
+              // Replace broken images with placeholder
+              const target = e.target as HTMLImageElement;
+              target.onerror = null; // Prevent infinite loop
+              target.src = '/images/placeholder-product.svg';
+            }}
           />
         </Link>
         
@@ -110,28 +188,102 @@ export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
         )}
       </div>
       
+      {/* Suppression Overlay (Only visible to merchants viewing their own products) */}
+      {isProductSuppressed && isMerchantView && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '16px',
+            textAlign: 'center',
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#d32f2f',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              marginBottom: '12px',
+              fontWeight: 'bold',
+            }}
+          >
+            Product Suppressed
+          </div>
+          <p style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
+            This product is not visible to customers due to missing or invalid data.
+          </p>
+          {suppressionReasons.length > 0 && (
+            <div>
+              <p style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '0.8rem' }}>
+                Suppressed from:
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.8rem' }}>
+                {suppressionReasons.map((reason, index) => (
+                  <li key={index} style={{ marginBottom: '2px' }}>
+                    • {reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button
+            style={{
+              marginTop: '12px',
+              backgroundColor: 'white',
+              color: '#333',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '0.8rem',
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.location.href = `/merchant/products/edit/${product.id}`;
+            }}
+          >
+            Fix Issues
+          </button>
+        </div>
+      )}
+      
       {/* Product Info */}
       <div 
         style={{ 
-          padding: '12px',
+          padding: currentDimensions.padding,
           display: 'flex',
           flexDirection: 'column',
           flex: '1 1 auto',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          position: 'relative' // For absolute positioning of elements if needed
         }}
       >
         {/* Brand */}
         <div 
+          className="product-brand"
           style={{ 
-            fontSize: '0.75rem',
+            fontSize: currentDimensions.fontSize.brand,
             color: '#666',
             marginBottom: '4px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
+            height: `${currentDimensions.fontSize.brand}` // Fixed height
           }}
         >
-          {product.brandName}
+          {product.brandName || 'Brand'}
         </div>
         
         {/* Title */}
@@ -140,51 +292,55 @@ export const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
           style={{ textDecoration: 'none', color: 'inherit' }}
         >
           <h3 
+            className="product-title"
             style={{ 
               margin: '0 0 4px 0',
-              fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+              fontSize: currentDimensions.fontSize.title,
               fontWeight: 600,
-              lineHeight: 1.2,
-              height: 'calc(1.2em * 2)',
+              lineHeight: currentDimensions.titleLineHeight,
+              height: `calc(${currentDimensions.titleLineHeight}em * ${currentDimensions.titleLines})`,
               overflow: 'hidden',
               display: '-webkit-box',
-              WebkitLineClamp: 2,
+              WebkitLineClamp: currentDimensions.titleLines,
               WebkitBoxOrient: 'vertical',
-              textOverflow: 'ellipsis'
+              textOverflow: 'ellipsis',
+              wordBreak: 'break-word' // Prevent long words from overflowing
             }}
           >
-            {product.title}
+            {product.title || 'Untitled Product'}
           </h3>
         </Link>
         
         {/* Description - truncated and responsive */}
         <p 
+          className="product-description"
           style={{ 
             margin: '0 0 8px 0',
-            fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)',
+            fontSize: currentDimensions.fontSize.description,
             color: '#666',
-            lineHeight: 1.4,
-            height: 'calc(1.4em * 2)',
+            lineHeight: currentDimensions.descriptionLineHeight,
+            height: `calc(${currentDimensions.descriptionLineHeight}em * ${currentDimensions.descriptionLines})`,
             overflow: 'hidden',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: currentDimensions.descriptionLines,
             WebkitBoxOrient: 'vertical',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-word' // Prevent long words from overflowing
           }}
         >
-          {getResponsiveDescription()}
+          {getResponsiveDescription() || 'No description available'}
         </p>
         
         {/* Price */}
-        <div style={{ marginTop: 'auto' }}>
+        <div style={{ marginTop: 'auto', height: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span 
               style={{ 
                 fontWeight: 600,
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)'
+                fontSize: currentDimensions.fontSize.price
               }}
             >
-              {formatCurrency(product.price)}
+              {formatCurrency(product.price || 0)}
             </span>
             
             {product.compareAtPrice && product.compareAtPrice > product.price && (
