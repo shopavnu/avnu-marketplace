@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import { products } from '@/data/products';
 import { discoverySections, getSectionsInOrder, Section, SectionType } from '@/data/sections';
 import OptimizedDiscoveryFeed from '@/components/discovery/OptimizedDiscoveryFeed';
@@ -79,7 +79,9 @@ const OptimizedDiscoveryPage: React.FC<OptimizedDiscoveryPageProps> = ({
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+// Use getServerSideProps instead of getStaticProps to avoid static generation
+// This ensures the page is rendered at runtime when window is available
+export const getServerSideProps = async () => {
   // Get sections in priority order
   const orderedSections = getSectionsInOrder();
   
@@ -91,8 +93,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       initialSections: filteredSections
-    },
-    revalidate: 60 * 60 // Revalidate every hour
+    }
   };
 };
 

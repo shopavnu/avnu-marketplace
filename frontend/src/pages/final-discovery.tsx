@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import { products } from '@/data/products';
 import { discoverySections, getSectionsInOrder, Section, SectionType } from '@/data/sections';
 import { categories, Category } from '@/data/categories';
@@ -213,7 +213,9 @@ const FinalDiscoveryPage: React.FC<FinalDiscoveryPageProps> = ({
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+// Use getServerSideProps instead of getStaticProps to avoid static generation
+// This ensures the page is rendered at runtime when window is available
+export const getServerSideProps = async () => {
   // Get sections in priority order
   const orderedSections = getSectionsInOrder();
   
@@ -222,7 +224,7 @@ export const getStaticProps: GetStaticProps = async () => {
       initialSections: orderedSections,
       allCategories: categories
     },
-    revalidate: 60 * 60 // Revalidate every hour
+    // No revalidate needed for server-side rendering
   };
 };
 
