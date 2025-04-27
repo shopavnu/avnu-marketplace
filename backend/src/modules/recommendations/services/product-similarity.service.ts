@@ -1,12 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ProductSimilarity, SimilarityType } from '../entities/product-similarity.entity';
-import { ProductService } from '../../products/services';
 import { Product } from '../../products/entities/product.entity';
-import { SessionService } from '../../personalization/services/session.service';
-import { SessionInteractionType } from '../../personalization/services/session.service';
-import { SessionInteractionEntity } from '../../personalization/entities/session-interaction.entity';
+import { ProductService } from '../../products/services/product.service';
+import { UserBehaviorService } from '../../personalization/services/user-behavior.service';
 
 /**
  * Service for calculating and managing product similarities
@@ -19,7 +17,7 @@ export class ProductSimilarityService {
     @InjectRepository(ProductSimilarity)
     private readonly productSimilarityRepository: Repository<ProductSimilarity>,
     private readonly productService: ProductService,
-    private readonly sessionService: SessionService,
+    private readonly userBehaviorService: UserBehaviorService,
   ) {}
 
   /**
@@ -39,18 +37,20 @@ export class ProductSimilarityService {
       }
 
       // Get all products (in a real system, this would be paginated or filtered)
-      const allProducts = await this.productService.findAll({
-        take: 1000, // Limit for performance
-        where: {
-          id: In([productId]), // Exclude source product
-        },
+      const allProductsResult = await this.productService.findAll({
+        limit: 1000, // Limit for performance
+        // Filter products in memory instead of using 'where' since it's not in PaginationDto
       });
 
       // Calculate similarity scores
       const similarities: ProductSimilarity[] = [];
+      const allProducts = allProductsResult.items || [];
+      
+      // Filter out the source product
+      const filteredProducts = allProducts.filter(product => product.id !== productId);
 
-      for (const targetProduct of allProducts) {
-        if (targetProduct.id === productId) continue; // Skip self
+      for (const targetProduct of filteredProducts) {
+        // No need to check for self anymore since we filtered above
 
         const similarityScore = this.calculateProductAttributeSimilarity(
           sourceProduct,
@@ -244,16 +244,16 @@ export class ProductSimilarityService {
     limit: number = 20,
   ): Promise<ProductSimilarity[]> {
     try {
-      // Get all product view interactions
-      const productViewInteractions = await this.sessionService.getInteractionsByType(
-        SessionInteractionType.PRODUCT_VIEW,
-        1000,
-      );
+      // Get user behaviors that viewed this product
+      const productViewBehaviors = await this.userBehaviorService.findByProductId(productId, {
+        behaviorType: 'view',
+        limit: 1000,
+      });
 
       // Get sessions that viewed the source product
-      const sessionsViewedSource = productViewInteractions
-        .filter(interaction => interaction.data?.productId === productId)
-        .map(interaction => interaction.session.sessionId);
+      const sessionsViewedSource = productViewBehaviors
+        .filter(behavior => behavior.productId === productId)
+        .map(behavior => behavior.sessionId);
 
       if (sessionsViewedSource.length === 0) {
         return [];

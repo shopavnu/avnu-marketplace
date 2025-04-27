@@ -32,7 +32,11 @@ export class RecommendationResolver {
     @Args('refresh', { type: () => Boolean, nullable: true, defaultValue: false }) refresh: boolean,
   ): Promise<Product[]> {
     const userId = context.req.user?.id;
-    return this.enhancedPersonalizationService.getPersonalizedRecommendations(userId, limit, refresh);
+    return this.enhancedPersonalizationService.getPersonalizedRecommendations(
+      userId,
+      limit,
+      refresh,
+    );
   }
 
   @Query(() => [Product], { name: 'trendingProducts' })
@@ -46,19 +50,19 @@ export class RecommendationResolver {
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationImpression' })
-  async trackImpression(@Args('recommendationId') recommendationId: string): Promise<boolean> {
+  async trackImpression(@Args('recommendationId') _recommendationId: string): Promise<boolean> {
     // Tracking is now handled by the session service
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationClick' })
-  async trackClick(@Args('recommendationId') recommendationId: string): Promise<boolean> {
+  async trackClick(@Args('recommendationId') _recommendationId: string): Promise<boolean> {
     // Tracking is now handled by the session service
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationConversion' })
-  async trackConversion(@Args('recommendationId') recommendationId: string): Promise<boolean> {
+  async trackConversion(@Args('recommendationId') _recommendationId: string): Promise<boolean> {
     // Tracking is now handled by the session service
     return true;
   }

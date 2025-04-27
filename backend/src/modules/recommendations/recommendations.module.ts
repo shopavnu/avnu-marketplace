@@ -18,11 +18,7 @@ import { AbTestingModule } from '../ab-testing/ab-testing.module';
     PersonalizationModule,
     AbTestingModule,
   ],
-  providers: [
-    ProductSimilarityService,
-    EnhancedPersonalizationService,
-    RecommendationResolver,
-  ],
+  providers: [ProductSimilarityService, EnhancedPersonalizationService, RecommendationResolver],
   controllers: [RecommendationController],
   exports: [ProductSimilarityService, EnhancedPersonalizationService],
 })
