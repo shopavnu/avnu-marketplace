@@ -63,21 +63,21 @@ export class NotificationService {
     }>,
   ): Promise<boolean> {
     const subject = 'Action Required: Issues with your Avnu Marketplace products';
-    
+
     // Create HTML content with product issues
     const issuesHtml = productIssues
       .map(
-        (issue) => `
+        issue => `
         <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 5px;">
           <h3 style="margin-top: 0; color: #d32f2f;">Product: ${issue.productTitle || issue.productId}</h3>
           <p><strong>Product ID:</strong> ${issue.productId}</p>
           <p><strong>Issues:</strong></p>
           <ul>
-            ${issue.issues.map((i) => `<li>${i}</li>`).join('')}
+            ${issue.issues.map(i => `<li>${i}</li>`).join('')}
           </ul>
           <p><strong>This product is currently suppressed from:</strong></p>
           <ul>
-            ${issue.suppressedFrom.map((location) => `<li>${location}</li>`).join('')}
+            ${issue.suppressedFrom.map(location => `<li>${location}</li>`).join('')}
           </ul>
         </div>
       `,

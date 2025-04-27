@@ -32,7 +32,7 @@ export class ProductIssuesListener {
 
       // Only send notification for products that are actually suppressed
       const suppressedProducts = payload.productIssues.filter(
-        (issue) => issue.suppressedFrom && issue.suppressedFrom.length > 0,
+        issue => issue.suppressedFrom && issue.suppressedFrom.length > 0,
       );
 
       if (suppressedProducts.length === 0) {
@@ -48,15 +48,14 @@ export class ProductIssuesListener {
       );
 
       if (success) {
-        this.logger.log(`Successfully sent product issues notification to ${payload.merchantEmail}`);
+        this.logger.log(
+          `Successfully sent product issues notification to ${payload.merchantEmail}`,
+        );
       } else {
         this.logger.error(`Failed to send product issues notification to ${payload.merchantEmail}`);
       }
     } catch (error) {
-      this.logger.error(
-        `Error handling product issues event: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Error handling product issues event: ${error.message}`, error.stack);
     }
   }
 }

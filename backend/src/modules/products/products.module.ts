@@ -23,7 +23,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Merchant]), 
+    TypeOrmModule.forFeature([Product, Merchant]),
     EventEmitterModule.forRoot(),
     NotificationsModule,
     ScheduleModule.forRoot(),

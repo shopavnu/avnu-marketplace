@@ -112,7 +112,10 @@ export class ProductValidationService {
         `Updated product ${productId} suppression status: ${isSuppressed ? 'Suppressed' : 'Visible'}`,
       );
     } catch (error) {
-      this.logger.error(`Failed to update product suppression status: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update product suppression status: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
