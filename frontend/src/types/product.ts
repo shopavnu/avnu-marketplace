@@ -13,9 +13,11 @@ export interface Product {
   tabletImages?: string[]; // URLs for tablet-sized images (600x600)
   imageMetadata?: ImageMetadata[];
   categories: string[];
+  categoryId?: string; // Primary category ID for personalization tracking
   tags?: string[];
   merchantId: string;
-  brandName: string;
+  brandName: string; // Used as brandId in personalization tracking
+  brandId?: string; // Optional explicit brand ID
   externalId?: string;
   externalSource?: string;
   slug?: string;
@@ -25,6 +27,10 @@ export interface Product {
   inStock?: boolean;
   quantity?: number;
   attributes?: Record<string, string>;
+  // Personalization tracking fields
+  viewCount?: number;
+  totalViewTimeSeconds?: number;
+  lastViewed?: number;
 }
 
 /**
