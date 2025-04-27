@@ -37,7 +37,7 @@ describe('Merchant Analytics (e2e)', () => {
         rating: 0,
         reviewCount: 0,
         productCount: 0,
-        popularity: 0
+        popularity: 0,
       });
       await merchantRepository.save(testMerchant);
     }

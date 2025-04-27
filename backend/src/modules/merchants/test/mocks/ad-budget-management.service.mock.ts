@@ -11,7 +11,7 @@ import {
 export class AdBudgetManagementService {
   constructor(private readonly eventEmitter: EventEmitter2) {}
 
-  async getBudgetUtilization(merchantId: string): Promise<BudgetUtilization> {
+  async getBudgetUtilization(_merchantId: string): Promise<BudgetUtilization> {
     return {
       totalBudget: 1500,
       totalSpent: 500,
@@ -24,7 +24,7 @@ export class AdBudgetManagementService {
     };
   }
 
-  async getBudgetForecast(merchantId: string): Promise<BudgetForecast> {
+  async getBudgetForecast(_merchantId: string): Promise<BudgetForecast> {
     return {
       projectedSpend: 1000,
       daysRemaining: 15,
@@ -37,12 +37,12 @@ export class AdBudgetManagementService {
     };
   }
 
-  async getDailyBudget(merchantId: string): Promise<number> {
+  async getDailyBudget(_merchantId: string): Promise<number> {
     return 66.67;
   }
 
   async allocateBudgetAcrossCampaigns(
-    merchantId: string,
+    _merchantId: string,
     campaignIds: string[],
     totalBudget: number,
     strategy: BudgetAllocationStrategy = BudgetAllocationStrategy.EQUAL,
@@ -74,7 +74,7 @@ export class AdBudgetManagementService {
   async recordAdSpend(
     campaignId: string,
     amount: number,
-    impressionCount = 1,
+    _impressionCount = 1,
   ): Promise<BudgetUpdateResult> {
     return {
       campaignId,

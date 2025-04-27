@@ -13,8 +13,8 @@ import { Repository } from 'typeorm';
  * A type-safe wrapper for InjectRepository to avoid TypeScript decorator errors
  * @param entity The entity class to inject the repository for
  */
-export function SafeInjectRepository<T>(entity: Type<T>) {
-  return function (target: any, key: string, index?: number) {
+export function SafeInjectRepository<T>(_entity: Type<T>) {
+  return function (target: any, key: string, _index?: number) {
     // The actual InjectRepository decorator is applied at runtime
     // This wrapper just helps with TypeScript type checking
     return Reflect.metadata('design:type', Repository)(target, key);
@@ -25,11 +25,11 @@ export function SafeInjectRepository<T>(entity: Type<T>) {
  * Creates a repository factory that can be used in place of direct repository injection
  * This helps avoid TypeScript decorator errors with newer TypeScript versions
  */
-export function createRepositoryFactory<T>(entity: Type<T>) {
+export function createRepositoryFactory<T>(_entity: Type<T>) {
   @Injectable()
   class RepositoryFactory {
     constructor(
-      @InjectRepository(entity)
+      @InjectRepository(_entity)
       public readonly repository: Repository<T>,
     ) {}
 
@@ -44,10 +44,10 @@ export function createRepositoryFactory<T>(entity: Type<T>) {
 /**
  * Helper function to create a properly typed repository provider
  */
-export function createRepositoryProvider<T>(entity: Type<T>) {
+export function createRepositoryProvider<T>(_entity: Type<T>) {
   return {
     provide: `${entity.name}Repository`,
     useFactory: (factory: { getRepository(): Repository<T> }) => factory.getRepository(),
-    inject: [createRepositoryFactory(entity)],
+    inject: [createRepositoryFactory(_entity)],
   };
 }

@@ -6,7 +6,7 @@ import { AdPlacementOptions, AdPlacementResult } from './entity-mocks';
 export class AdPlacementService {
   constructor(private readonly eventEmitter: EventEmitter2) {}
 
-  async getAdsForDiscoveryFeed(options: AdPlacementOptions): Promise<AdPlacementResult[]> {
+  async getAdsForDiscoveryFeed(_options: AdPlacementOptions): Promise<AdPlacementResult[]> {
     return [
       {
         campaignId: '1',
@@ -30,8 +30,8 @@ export class AdPlacementService {
   }
 
   async getRecommendedAdPlacements(
-    userId: string,
-    sessionId?: string,
+    _userId: string,
+    _sessionId?: string,
   ): Promise<AdPlacementResult[]> {
     return [
       {
@@ -46,11 +46,11 @@ export class AdPlacementService {
     ];
   }
 
-  async recordAdClick(campaignId: string, userId?: string, sessionId?: string): Promise<boolean> {
+  async recordAdClick(campaignId: string, _userId?: string, _sessionId?: string): Promise<boolean> {
     this.eventEmitter.emit('ad.click', {
       campaignId,
-      userId,
-      sessionId,
+      _userId,
+      _sessionId,
       timestamp: new Date(),
     });
     return true;

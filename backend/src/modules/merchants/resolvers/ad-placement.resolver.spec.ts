@@ -64,7 +64,7 @@ describe('AdPlacementResolver', () => {
     },
   ];
 
-  const mockProductRecommendations = [
+  const _mockProductRecommendations = [
     {
       productId: 'product1',
       recommendedBudget: 100,

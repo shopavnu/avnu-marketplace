@@ -3,9 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
 import {
-  AdPlacementOptions,
-  AdPlacementResult,
-  BudgetUpdateResult,
+  _AdPlacementOptions,
+  _AdPlacementResult,
+  _BudgetUpdateResult,
 } from '../test/mocks/entity-mocks';
 
 // Import the mock services instead of the real ones
@@ -15,7 +15,7 @@ import { AdBudgetManagementService } from '../test/mocks/ad-budget-management.se
 describe('AdPlacementService', () => {
   let service: AdPlacementService;
   let budgetService: AdBudgetManagementService;
-  let campaignRepository: any;
+  let _campaignRepository: any;
   let eventEmitter: any;
 
   const mockCampaigns = [
@@ -97,7 +97,7 @@ describe('AdPlacementService', () => {
 
     service = module.get<AdPlacementService>(AdPlacementService);
     budgetService = module.get<AdBudgetManagementService>(AdBudgetManagementService);
-    campaignRepository = module.get(getRepositoryToken(MerchantAdCampaign));
+    _campaignRepository = module.get(getRepositoryToken(MerchantAdCampaign));
     eventEmitter = module.get(EventEmitter2);
   });
 

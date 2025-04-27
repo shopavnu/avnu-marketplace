@@ -82,11 +82,11 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
     return record;
   }
 
-  async find(options?: any): Promise<MerchantAnalytics[]> {
+  async find(_options?: any): Promise<MerchantAnalytics[]> {
     // Filter data based on options
     let results = [...this.mockData];
 
-    if (options?.where) {
+    if (_options?.where) {
       const where = options.where;
 
       // Filter by merchantId
@@ -117,8 +117,8 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
     return results;
   }
 
-  async findOne(options?: any): Promise<MerchantAnalytics | null> {
-    const results = await this.find(options);
+  async findOne(_options?: any): Promise<MerchantAnalytics | null> {
+    const results = await this.find(_options);
     return results.length > 0 ? results[0] : null;
   }
 
@@ -135,15 +135,15 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
 
   async save<T extends DeepPartial<MerchantAnalytics>>(
     entities: T[],
-    options?: SaveOptions,
+    _options?: SaveOptions,
   ): Promise<T[]>;
   async save<T extends DeepPartial<MerchantAnalytics>>(
     entity: T,
-    options?: SaveOptions,
+    _options?: SaveOptions,
   ): Promise<T>;
   async save(
     entityOrEntities: MerchantAnalytics | MerchantAnalytics[],
-    options?: SaveOptions,
+    _options?: SaveOptions,
   ): Promise<MerchantAnalytics | MerchantAnalytics[]> {
     if (Array.isArray(entityOrEntities)) {
       return Promise.all(entityOrEntities.map(entity => this.saveEntity(entity)));
