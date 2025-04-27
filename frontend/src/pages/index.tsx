@@ -1,17 +1,31 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
+import { useRef } from 'react';
 import { Logo } from '@/components/layout';
 import { ProductGrid } from '@/components/products';
 import { products } from '@/data/products';
 import { brands } from '@/data/brands';
-import { BrandCard } from '@/components/brands';
+import { BrandCard, FeaturedBrands } from '@/components/brands';
 import { HeroMasonry } from '@/components/home';
 import { SearchSection } from '@/components/search';
-import { DiscoveryFeed } from '@/components/discovery';
+import { DiscoveryFeed, CategoryGrid, PersonalizedGrid } from '@/components/discovery';
 import ClientOnly from '@/components/common/ClientOnly';
+import { ScrollSection, ScrollItem } from '@/components/common';
+import { getFeaturedCategories } from '@/data/categories';
+import DOMInspector from '../components/debug/DOMInspector';
+import FlexProductCard from '@/components/products/FlexProductCard';
+import CardWrapper from '@/components/products/CardWrapper';
 
 export default function Home() {
+  // Refs for scroll animations
+  const mainRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: mainRef });
+  
+  // Transform values for parallax effects
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 1.1]);
+  
   return (
     <div className="min-h-screen bg-warm-white">
       <Head>
@@ -19,67 +33,120 @@ export default function Home() {
         <meta name="description" content="Discover curated independent brands on av | nu marketplace" />
       </Head>
 
-
-      <main>
-        {/* Hero Section */}
+      <main ref={mainRef}>
+        <DOMInspector />
+        {/* Hero Section with Prominent Search */}
         <ClientOnly>
-          <HeroMasonry />
-        </ClientOnly>
-
-        {/* Search Section */}
-        <ClientOnly>
-          <SearchSection />
-        </ClientOnly>
-
-        {/* Featured Brands */}
-        <section className="mb-12">
-          <div className="max-w-7xl mx-auto px-4">
-            <h2 className="font-montserrat text-2xl text-charcoal mb-8">
-              Featured Brands
-            </h2>
-            <ClientOnly>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {brands.slice(0, 4).map((brand) => (
-                  <motion.div
-                    key={brand.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <BrandCard brand={brand} />
-                  </motion.div>
-                ))}
-              </div>
-            </ClientOnly>
-          </div>
-        </section>
-
-        {/* Personalized Discovery Feed */}
-        <section className="mb-12">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="mb-8 flex items-center justify-between">
-              <h2 className="font-montserrat text-2xl text-charcoal">
-                Discover Products
-              </h2>
-              <div className="flex gap-2">
-                {['All', 'Home', 'Art', 'Lighting', 'Textiles'].map((category) => (
-                  <button
-                    key={category}
-                    className="px-4 py-2 rounded-full text-sm font-inter text-neutral-gray hover:text-sage hover:bg-sage/10 transition-all"
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
+          <motion.div 
+            className="relative" 
+            style={{ opacity: heroOpacity, scale: heroScale }}
+          >
+            <HeroMasonry />
+            
+            {/* Prominent Search Section - Positioned over Hero */}
+            <div className="absolute top-1/2 left-0 right-0 z-10 transform -translate-y-1/2">
+              <SearchSection />
             </div>
+          </motion.div>
+        </ClientOnly>
+
+        {/* Visual Category Browser */}
+        <ScrollSection
+          fadeIn={true}
+          slideUp={true}
+          bgColor="bg-warm-white"
+          className="py-12"
+        >
+          <ClientOnly>
+            <ScrollItem>
+              <CategoryGrid 
+                title="Browse Categories"
+                description="Discover sustainable products across our curated collections"
+                showFeaturedOnly={true}
+                maxCategories={12}
+              />
+            </ScrollItem>
+          </ClientOnly>
+        </ScrollSection>
+
+        {/* Featured Brands with Value Tags */}
+        <ScrollSection
+          fadeIn={true}
+          slideUp={true}
+          bgColor="bg-sage/5"
+          className="py-16"
+        >
+          <ClientOnly>
+              <FeaturedBrands 
+                title="Brands with Similar Values"
+                description="Discover more brands that align with your preferences"
+                brands={brands}
+                maxBrands={4}
+                valueFiltered={true}
+              />
+          </ClientOnly>
+        </ScrollSection>
+
+        {/* Personalized "For You" Masonry Grid */}
+        <ScrollSection
+          fadeIn={true}
+          slideUp={true}
+          bgColor="bg-warm-white"
+          className="py-16"
+        >
+          <ClientOnly>
+              <PersonalizedGrid 
+                title="For You"
+                description="Products we think you'll love based on your preferences"
+                products={products}
+                maxProducts={12}
+              />
+          </ClientOnly>
+        </ScrollSection>
+        
+        {/* Vertical Discovery Feed */}
+        <ScrollSection
+          fadeIn={true}
+          slideUp={true}
+          bgColor="bg-white"
+          className="py-16"
+        >
+          <div className="max-w-7xl mx-auto px-4">
+            <ScrollItem>
+              <div className="mb-8 flex items-center justify-between">
+                <h2 className="font-montserrat text-2xl text-charcoal">
+                  Discover More
+                </h2>
+                <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+                  {['All', 'Home', 'Art', 'Lighting', 'Textiles'].map((category, index) => (
+                    <ScrollItem key={category} delay={index * 0.05}>
+                      <motion.button
+                        className="px-4 py-2 rounded-full text-sm font-inter text-neutral-gray hover:text-sage hover:bg-sage/10 transition-all whitespace-nowrap"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {category}
+                      </motion.button>
+                    </ScrollItem>
+                  ))}
+                </div>
+              </div>
+            </ScrollItem>
             <ClientOnly>
-              <DiscoveryFeed limit={24} showTitle={true} />
+              <ScrollItem>
+                <DiscoveryFeed limit={24} showTitle={true} />
+              </ScrollItem>
             </ClientOnly>
           </div>
-        </section>
+        </ScrollSection>
       </main>
 
-      <footer className="bg-charcoal text-warm-white py-12">
+      <ScrollSection
+        fadeIn={true}
+        slideUp={false}
+        bgColor="bg-charcoal"
+        className="py-12 text-warm-white"
+      >
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -128,7 +195,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </footer>
+      </ScrollSection>
     </div>
   );
 }

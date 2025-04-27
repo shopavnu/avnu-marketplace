@@ -1,95 +1,15 @@
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { StarIcon } from '@heroicons/react/20/solid'; // Keep solid for filled star
-import { MapPinIcon, TagIcon } from '@heroicons/react/24/outline'; // Import outline icons
 import { brands as allBrands } from '@/data/brands';
 import { products as allProducts } from '@/data/products'; // Import product data
 import ProductCard from '@/components/products/ProductCard'; // Import ProductCard component
+import { ConsistentProductCard } from '@/components/products'; // Import our consistent card components
 import { Brand } from '@/types/brand'; // Import from central types
 import { Product } from '@/types/products'; // Import Product type
-
-// --- Placeholder Components (Replace with actual implementations later) ---
-
-interface FreeShippingProgressBarProps {
-  brandName: string;
-  // TODO: Add props for current cart total for this brand & free shipping threshold
-}
-
-const FreeShippingProgressBar: React.FC<FreeShippingProgressBarProps> = ({ brandName }) => {
-  // Dummy values - replace with actual logic
-  const currentAmount = 15.50;
-  const threshold = 50.00;
-  const progress = Math.min((currentAmount / threshold) * 100, 100);
-  const amountNeeded = Math.max(0, threshold - currentAmount);
-
-  return (
-    <div className="bg-gradient-to-r from-teal-50 to-blue-50 p-4 rounded-lg mb-6 shadow border border-teal-100">
-      <p className="text-sm text-gray-700 font-medium mb-1">
-        {amountNeeded > 0
-          ? <>Spend <span className="font-semibold text-teal-700">${amountNeeded.toFixed(2)}</span> more for FREE shipping from {brandName}!</>
-          : <span className="font-semibold text-green-600">You&apos;ve earned free shipping from {brandName}! 🎉</span>
-        }
-      </p>
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
-        <div 
-          className="bg-teal-500 h-2.5 rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-      <p className="text-xs text-gray-500 text-right mt-1">${currentAmount.toFixed(2)} / ${threshold.toFixed(2)}</p>
-    </div>
-  );
-};
-
-interface BrandProductSearchProps {
-  brandName: string;
-  // TODO: Add props for handling search results / state management
-}
-
-const BrandProductSearch: React.FC<BrandProductSearchProps> = ({ brandName }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // --- COMPLEXITY WARNING --- 
-    // Implementing this search requires:
-    // 1. Fetching products specifically for this brand (potentially API call or filtering existing data).
-    // 2. Filtering products based on searchTerm.
-    // 3. Displaying results (likely updating state in this component or parent).
-    // 4. Handling loading/error/no results states.
-    // Consider if a simple text filter on already displayed products is sufficient,
-    // or if a more robust backend search is needed.
-    console.log(`Search requested for '${searchTerm}' within ${brandName} products... (Full implementation pending)`);
-    // Example: alert(`Search for '${searchTerm}' - Implementation needed!`); 
-  };
-
-  return (
-    <div className="mb-8">
-      {/* Redesigned Search Input */}
-      <form onSubmit={handleSearch} className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          {/* Search Icon */}
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-          </svg>
-        </div>
-        <input
-          type="search"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder={`Search ${brandName} products...`}
-          className="block w-full rounded-md border-gray-300 py-2.5 pl-10 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 transition-colors duration-150"
-          aria-label={`Search products from ${brandName}`}
-        />
-        {/* Optional: Add a clear button inside the input */}
-      </form>
-    </div>
-  );
-};
-
-// --- Main Page Component ---
 
 const BrandDetailPage: React.FC = () => {
   const router = useRouter();
@@ -152,7 +72,9 @@ const BrandDetailPage: React.FC = () => {
             <h1 className="text-4xl md:text-6xl font-bold mb-2 drop-shadow-lg">{brand.name}</h1>
             {brand.rating && (
               <div className="flex items-center gap-2 text-white/90">
-                <StarIcon className="w-5 h-5 text-yellow-400" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
                 <span className="font-medium">{brand.rating.average.toFixed(1)}</span>
                 <span className="text-sm">({brand.rating.count} reviews)</span>
               </div>
@@ -177,7 +99,9 @@ const BrandDetailPage: React.FC = () => {
               transition={{ delay: 0.5 }}
               className="flex items-center gap-2"
             >
-              <MapPinIcon className="w-5 h-5 text-gray-500" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
               <span className="text-gray-700">{brand.location}</span>
             </motion.div>
 
@@ -188,7 +112,9 @@ const BrandDetailPage: React.FC = () => {
               transition={{ delay: 0.6 }}
               className="flex flex-wrap items-center gap-2"
             >
-              <TagIcon className="w-5 h-5 text-gray-500" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2v-3a2 2 0 00-2-2h-2a2 2 0 00-2 2v3a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2v-6a2 2 0 00-2-2h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v8a2 2 0 002 2h6z" />
+              </svg>
               {brand.values.map((value, index) => (
                 <motion.span 
                   key={value}
@@ -202,94 +128,6 @@ const BrandDetailPage: React.FC = () => {
               ))}
             </motion.div>
           </div>
-        </div>
-      </motion.div>
-
-      {/* Free Shipping Progress */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="container mx-auto px-4 py-4"
-      >
-        <div className="max-w-2xl mx-auto">
-          <FreeShippingProgressBar brandName={brand.name} />
-        </div>
-      </motion.div>
-
-      {/* Description Section */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="relative bg-gradient-to-b from-white via-gray-50 to-white py-8 md:py-12 overflow-hidden"
-      >
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '30px 30px'
-          }} />
-        </div>
-
-        <div className="container mx-auto px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="max-w-4xl mx-auto"
-          >
-            {/* Quote marks and content */}
-            <div className="relative">
-              {/* Top quote mark */}
-              <svg className="absolute -top-6 -left-4 h-12 w-12 text-gray-200 transform -rotate-12" fill="currentColor" viewBox="0 0 32 32">
-                <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-              </svg>
-
-              {/* Description Text */}
-              <div className="relative z-10 text-center px-4 md:px-8">
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  className="text-xl md:text-2xl text-gray-700 leading-relaxed font-light italic"
-                >
-                  {brand.description}
-                </motion.p>
-              </div>
-
-              {/* Bottom quote mark */}
-              <svg className="absolute -bottom-6 -right-4 h-12 w-12 text-gray-200 transform rotate-12" fill="currentColor" viewBox="0 0 32 32">
-                <path d="M22.648 28C27.544 24.544 31 18.88 31 12.64c0-5.088-3.072-8.064-6.624-8.064-3.36 0-5.856 2.688-5.856 5.856 0 3.168 2.208 5.472 5.088 5.472.576 0 1.344-.096 1.536-.192-.48 3.264-3.552 7.104-6.624 9.024L22.648 28zm-16.512 0c4.8-3.456 8.256-9.12 8.256-15.36 0-5.088-3.072-8.064-6.624-8.064-3.264 0-5.856 2.688-5.856 5.856 0 3.168 2.304 5.472 5.184 5.472.576 0 1.248-.096 1.44-.192-.48 3.264-3.456 7.104-6.528 9.024L6.136 28z" />
-              </svg>
-            </div>
-
-            {/* Brand Stats or Highlights */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
-              className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center"
-            >
-              {/* Example stats - you can customize these based on your brand data */}
-              <div className="p-4">
-                <div className="text-2xl font-bold text-gray-900">{brand.rating?.count || 0}</div>
-                <div className="text-sm text-gray-500">Happy Customers</div>
-              </div>
-              <div className="p-4">
-                <div className="text-2xl font-bold text-gray-900">{brandProducts.length}</div>
-                <div className="text-sm text-gray-500">Products</div>
-              </div>
-              <div className="p-4">
-                <div className="text-2xl font-bold text-gray-900">{brand.rating?.average.toFixed(1) || '0.0'}</div>
-                <div className="text-sm text-gray-500">Average Rating</div>
-              </div>
-              <div className="p-4">
-                <div className="text-2xl font-bold text-gray-900">{brand.values.length}</div>
-                <div className="text-sm text-gray-500">Core Values</div>
-              </div>
-            </motion.div>
-          </motion.div>
         </div>
       </motion.div>
 
@@ -311,7 +149,21 @@ const BrandDetailPage: React.FC = () => {
             <div className="sticky top-4">
               <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Search {brand.name} Products</h3>
-                <BrandProductSearch brandName={brand.name} />
+                {/* Search Input */}
+                <form className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    {/* Search Icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <input
+                    type="search"
+                    placeholder={`Search ${brand.name} products...`}
+                    className="block w-full rounded-md border-gray-300 py-2.5 pl-10 pr-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6 transition-colors duration-150"
+                    aria-label={`Search products from ${brand.name}`}
+                  />
+                </form>
               </div>
             </div>
           </motion.div>
@@ -321,30 +173,52 @@ const BrandDetailPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="flex-1"
           >
             {brandProducts.length > 0 ? (
-              <motion.div 
-                className="columns-2 sm:columns-3 lg:columns-4 gap-3 md:gap-4 [column-fill:_balance] mx-auto"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  delay: 1.1,
-                  staggerChildren: 0.1
+              /* Product Grid - No animation wrappers to prevent layout shifts */
+              <div 
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                style={{ 
+                  display: 'grid',
+                  gridTemplateRows: 'repeat(auto-fill, 360px)',
+                  contain: 'layout', /* Add CSS containment to the grid */
+                  position: 'relative',
+                  zIndex: 1
                 }}
+                data-testid="product-grid"
               >
                 {brandProducts.map((product, index) => (
-                  <motion.div
+                  <div
                     key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="break-inside-avoid mb-3 md:mb-4 transform hover:scale-[1.02] transition-transform duration-200"
+                    className="transform hover:scale-[1.02] transition-transform duration-200"
+                    style={{ 
+                      height: '360px',
+                      width: '100%',
+                      contain: 'strict',
+                      position: 'relative'
+                    }}
+                    data-testid="product-cell"
                   >
-                    <ProductCard product={product} />
-                  </motion.div>
+                    <ConsistentProductCard 
+                      product={product}
+                      badges={
+                        <>
+                          {product.isNew && (
+                            <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
+                              New
+                            </span>
+                          )}
+                          {product.vendor?.isLocal && (
+                            <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
+                              Local
+                            </span>
+                          )}
+                        </>
+                      }
+                    />
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             ) : (
               <motion.div 
                 initial={{ opacity: 0 }}
