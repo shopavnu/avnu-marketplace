@@ -155,10 +155,10 @@ export class AddRecommendationTables1714600000000 implements MigrationInterface 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP TABLE IF EXISTS product_recommendations;`);
     await queryRunner.query(`DROP TYPE IF EXISTS recommendation_type_enum;`);
-    
+
     await queryRunner.query(`DROP TABLE IF EXISTS recommendation_configs;`);
     await queryRunner.query(`DROP TYPE IF EXISTS recommendation_algorithm_type_enum;`);
-    
+
     await queryRunner.query(`DROP TABLE IF EXISTS product_similarities;`);
     await queryRunner.query(`DROP TYPE IF EXISTS similarity_type_enum;`);
   }

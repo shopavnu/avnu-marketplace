@@ -30,17 +30,17 @@ export class CreateUserPreferenceProfile1714414890000 implements MigrationInterf
         CONSTRAINT "FK_user_preference_profiles_user" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE
       )
     `);
-    
+
     // Create index for faster lookups
     await queryRunner.query(`
       CREATE INDEX "IDX_user_preference_profiles_userId" ON "user_preference_profiles" ("userId")
     `);
-    
+
     // Add new interaction types to session_interactions type enum
     await queryRunner.query(`
       ALTER TYPE "public"."session_interactions_type_enum" ADD VALUE IF NOT EXISTS 'scroll_depth'
     `);
-    
+
     await queryRunner.query(`
       ALTER TYPE "public"."session_interactions_type_enum" ADD VALUE IF NOT EXISTS 'product_view'
     `);
@@ -51,7 +51,7 @@ export class CreateUserPreferenceProfile1714414890000 implements MigrationInterf
     await queryRunner.query(`
       DROP TABLE "user_preference_profiles"
     `);
-    
+
     // Note: We cannot easily remove values from an enum type in PostgreSQL
     // The enum values will remain but won't cause issues
   }
