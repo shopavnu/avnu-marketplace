@@ -52,10 +52,34 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
         // Fetch product details for the IDs
         const fetchedProducts = await ProductService.getProductsByIds(recentProductIds);
         
+        // Filter out suppressed products
+        const validProducts = fetchedProducts.filter((product: Product) => !product.isSuppressed);
+        
         // Preserve the original order of recently viewed products
         const orderedProducts = recentProductIds
-          .map(id => fetchedProducts.find((product: Product) => product.id === id))
+          .map(id => validProducts.find((product: Product) => product.id === id))
           .filter((product): product is Product => !!product);
+          
+        // If we have fewer products than the limit after filtering, try to fetch more
+        if (orderedProducts.length < limit && userPreferences.recentlyViewedProducts.length > recentProductIds.length) {
+          // Get additional product IDs beyond the initial limit
+          const additionalIds = userPreferences.recentlyViewedProducts
+            .filter(id => id !== excludeProductId && !recentProductIds.includes(id))
+            .slice(0, limit - orderedProducts.length + 3); // Fetch a few extra to account for possible suppressed products
+            
+          if (additionalIds.length > 0) {
+            // Fetch additional products
+            const additionalProducts = await ProductService.getProductsByIds(additionalIds);
+            
+            // Filter out suppressed products
+            const validAdditionalProducts = additionalProducts
+              .filter((product: Product) => !product.isSuppressed)
+              .slice(0, limit - orderedProducts.length);
+              
+            // Add to ordered products
+            orderedProducts.push(...validAdditionalProducts);
+          }
+        }
         
         setProducts(orderedProducts);
       } catch (error) {

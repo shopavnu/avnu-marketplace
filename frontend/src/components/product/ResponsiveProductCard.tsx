@@ -6,6 +6,7 @@ import { formatCurrency, truncateText } from '../../utils/formatters';
 interface ResponsiveProductCardProps {
   product: Product;
   badges?: React.ReactNode;
+  isMerchantView?: boolean; // Flag to indicate if the merchant is viewing their own products
 }
 
 /**
@@ -14,7 +15,8 @@ interface ResponsiveProductCardProps {
  */
 const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({ 
   product, 
-  badges 
+  badges,
+  isMerchantView = false
 }) => {
   // State to track device size
   const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
@@ -117,6 +119,19 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
   // Get current dimensions based on device type
   const currentDimensions = cardDimensions[deviceType];
 
+  // Check if product is suppressed
+  const isProductSuppressed = product.isSuppressed || false;
+  
+  // Format suppression reasons for display
+  const suppressionReasons = isProductSuppressed && isMerchantView ? 
+    (product.suppressedFrom || []).map(location => {
+      // Convert camelCase or snake_case to readable format
+      return location
+        .replace(/([A-Z])/g, ' $1') // Convert camelCase
+        .replace(/_/g, ' ')         // Convert snake_case
+        .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+    }) : [];
+
   return (
     <div 
       className="product-card"
@@ -172,6 +187,77 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
           </div>
         )}
       </div>
+      
+      {/* Suppression Overlay (Only visible to merchants viewing their own products) */}
+      {isProductSuppressed && isMerchantView && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '16px',
+            textAlign: 'center',
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#d32f2f',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              marginBottom: '12px',
+              fontWeight: 'bold',
+            }}
+          >
+            Product Suppressed
+          </div>
+          <p style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
+            This product is not visible to customers due to missing or invalid data.
+          </p>
+          {suppressionReasons.length > 0 && (
+            <div>
+              <p style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '0.8rem' }}>
+                Suppressed from:
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.8rem' }}>
+                {suppressionReasons.map((reason, index) => (
+                  <li key={index} style={{ marginBottom: '2px' }}>
+                    • {reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button
+            style={{
+              marginTop: '12px',
+              backgroundColor: 'white',
+              color: '#333',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '0.8rem',
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.location.href = `/merchant/products/edit/${product.id}`;
+            }}
+          >
+            Fix Issues
+          </button>
+        </div>
+      )}
       
       {/* Product Info */}
       <div 

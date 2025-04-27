@@ -37,13 +37,33 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
       if (isAuthenticated) {
         // Try to get personalized recommendations for authenticated users
         fetchedProducts = await RecommendationService.getPersonalizedRecommendations(limit, refresh);
+        
+        // Filter out suppressed products
+        fetchedProducts = fetchedProducts.filter(product => !product.isSuppressed);
         setIsPersonalized(fetchedProducts.length > 0);
       }
       
       // Fall back to trending products if no personalized recommendations or not authenticated
       if (fetchedProducts.length === 0) {
         fetchedProducts = await RecommendationService.getTrendingProducts(limit);
+        
+        // Filter out suppressed products
+        fetchedProducts = fetchedProducts.filter(product => !product.isSuppressed);
         setIsPersonalized(false);
+      }
+      
+      // If we need more products to reach the limit after filtering, fetch additional ones
+      if (fetchedProducts.length < limit) {
+        const additionalCount = limit - fetchedProducts.length;
+        const additionalProducts = await RecommendationService.getTrendingProducts(additionalCount + 5); // Fetch extra to account for possible suppressed products
+        
+        // Filter out suppressed products and any duplicates
+        const filteredAdditional = additionalProducts
+          .filter(product => !product.isSuppressed)
+          .filter(product => !fetchedProducts.some(p => p.id === product.id));
+        
+        // Add additional products up to the limit
+        fetchedProducts = [...fetchedProducts, ...filteredAdditional.slice(0, additionalCount)];
       }
       
       setProducts(fetchedProducts);

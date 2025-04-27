@@ -37,7 +37,10 @@ const SimilarProducts: React.FC<SimilarProductsProps> = ({
           similarityType,
           limit
         );
-        setSimilarProducts(products);
+        
+        // Filter out suppressed products
+        const filteredProducts = products.filter(product => !product.isSuppressed);
+        setSimilarProducts(filteredProducts);
       } catch (error) {
         console.error('Error fetching similar products:', error);
         setError(true);

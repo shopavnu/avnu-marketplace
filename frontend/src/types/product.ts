@@ -31,6 +31,10 @@ export interface Product {
   viewCount?: number;
   totalViewTimeSeconds?: number;
   lastViewed?: number;
+  // Suppression fields
+  isSuppressed?: boolean;
+  suppressedFrom?: string[];
+  lastValidationDate?: string;
 }
 
 /**

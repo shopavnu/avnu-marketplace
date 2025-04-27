@@ -163,6 +163,18 @@ export class Product {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Field(() => Boolean, { defaultValue: false })
+  @Column({ default: false })
+  isSuppressed: boolean;
+
+  @Field(() => [String], { nullable: true })
+  @Column('simple-array', { nullable: true })
+  suppressedFrom?: string[];
+
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Column({ nullable: true })
+  lastValidationDate?: Date;
+
   // Virtual fields
   @Field(() => Boolean)
   get isOnSale(): boolean {

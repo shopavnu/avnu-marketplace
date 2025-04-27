@@ -10,6 +10,7 @@ interface ProductCardProps {
   showBadges?: boolean;
   className?: string;
   testId?: string;
+  isMerchantView?: boolean; // Flag to indicate if the merchant is viewing their own products
 }
 
 /**
@@ -22,7 +23,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   trackImpression,
   showBadges = true,
   className = '',
-  testId
+  testId,
+  isMerchantView = false
 }) => {
   // Track impression when component mounts
   React.useEffect(() => {
@@ -126,6 +128,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <ResponsiveProductCard 
         product={product} 
         badges={renderBadges()}
+        isMerchantView={isMerchantView}
       />
     </div>
   );
