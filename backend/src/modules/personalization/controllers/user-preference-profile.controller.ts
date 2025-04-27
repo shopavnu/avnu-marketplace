@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Param, UseGuards, Req } from '@nestjs/common';
 import { UserPreferenceProfileService } from '../services/user-preference-profile.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UserPreferenceProfile } from '../entities/user-preference-profile.entity';
