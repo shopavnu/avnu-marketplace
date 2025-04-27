@@ -145,4 +145,102 @@ export class ProductService {
       return [];
     }
   }
+
+  /**
+   * Get suppressed products for a merchant
+   * @param merchantId The ID of the merchant
+   * @param limit Maximum number of products to return
+   */
+  static async getSuppressedProducts(merchantId: string, limit: number = 50): Promise<Product[]> {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/merchant/${merchantId}/products/suppressed`,
+        {
+          params: { limit },
+          headers: getAuthHeader()
+        }
+      );
+      
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching suppressed products:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Suppress a product
+   * @param merchantId The ID of the merchant
+   * @param productId The ID of the product to suppress
+   */
+  static async suppressProduct(merchantId: string, productId: string): Promise<boolean> {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/merchant/${merchantId}/products/${productId}/suppress`,
+        {},
+        { headers: getAuthHeader() }
+      );
+      return true;
+    } catch (error) {
+      console.error(`Error suppressing product ${productId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Unsuppress a product
+   * @param merchantId The ID of the merchant
+   * @param productId The ID of the product to unsuppress
+   */
+  static async unsuppressProduct(merchantId: string, productId: string): Promise<boolean> {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/merchant/${merchantId}/products/${productId}/unsuppress`,
+        {},
+        { headers: getAuthHeader() }
+      );
+      return true;
+    } catch (error) {
+      console.error(`Error unsuppressing product ${productId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Bulk suppress products
+   * @param merchantId The ID of the merchant
+   * @param productIds Array of product IDs to suppress
+   */
+  static async bulkSuppressProducts(merchantId: string, productIds: string[]): Promise<boolean> {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/merchant/${merchantId}/products/bulk-suppress`,
+        { productIds },
+        { headers: getAuthHeader() }
+      );
+      return true;
+    } catch (error) {
+      console.error('Error bulk suppressing products:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Bulk unsuppress products
+   * @param merchantId The ID of the merchant
+   * @param productIds Array of product IDs to unsuppress
+   */
+  static async bulkUnsuppressProducts(merchantId: string, productIds: string[]): Promise<boolean> {
+    try {
+      await axios.post(
+        `${API_BASE_URL}/merchant/${merchantId}/products/bulk-unsuppress`,
+        { productIds },
+        { headers: getAuthHeader() }
+      );
+      return true;
+    } catch (error) {
+      console.error('Error bulk unsuppressing products:', error);
+      return false;
+    }
+  }
 }

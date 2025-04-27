@@ -45,8 +45,51 @@ const SuppressedProductsPage = () => {
     const fetchSuppressedProducts = async () => {
       setLoading(true);
       try {
-        const data = await ProductService.getSuppressedProducts(MOCK_MERCHANT_ID);
-        setProducts(data);
+        // For now, use mock data since the API endpoint might not be ready
+        // In production, this would use: await ProductService.getSuppressedProducts(MOCK_MERCHANT_ID);
+        const mockData: Product[] = [
+          {
+            id: 'prod-001',
+            title: 'Organic Cotton T-Shirt',
+            description: 'Made with 100% organic cotton for ultimate comfort.',
+            price: 29.99,
+            images: ['/images/products/tshirt-1.jpg'],
+            categories: ['Clothing', 'T-Shirts'],
+            merchantId: MOCK_MERCHANT_ID,
+            brandName: '',  // Missing brand name - reason for suppression
+            isSuppressed: true,
+            suppressedFrom: ['search results', 'recommendations'],
+            lastValidationDate: '2025-03-15T10:30:00Z'
+          },
+          {
+            id: 'prod-002',
+            title: 'Bamboo Yoga Mat',
+            description: '',  // Missing description - reason for suppression
+            price: 49.99,
+            images: ['/images/products/yoga-mat-1.jpg'],
+            categories: ['Fitness', 'Yoga'],
+            merchantId: MOCK_MERCHANT_ID,
+            brandName: 'Eco Fitness',
+            isSuppressed: true,
+            suppressedFrom: ['search results', 'trending products'],
+            lastValidationDate: '2025-03-20T14:15:00Z'
+          },
+          {
+            id: 'prod-003',
+            title: '',  // Missing title - reason for suppression
+            description: 'Handcrafted ceramic mug for your morning coffee.',
+            price: 19.99,
+            images: ['/images/products/mug-1.jpg'],
+            categories: ['Home', 'Kitchen'],
+            merchantId: MOCK_MERCHANT_ID,
+            brandName: 'Home Essentials',
+            isSuppressed: true,
+            suppressedFrom: ['search results', 'recommendations', 'category pages'],
+            lastValidationDate: '2025-03-25T09:45:00Z'
+          }
+        ];
+        
+        setProducts(mockData);
         // Reset selected products when fetching new data
         setSelectedProducts([]);
       } catch (error) {
@@ -102,7 +145,8 @@ const SuppressedProductsPage = () => {
   const handleRevalidateProduct = async (productId: string) => {
     setRevalidationStatus(prev => ({ ...prev, [productId]: 'loading' }));
     try {
-      // In a real app, this would call an API endpoint
+      // In a real app, this would call the API endpoint
+      // await ProductService.unsuppressProduct(MOCK_MERCHANT_ID, productId);
       console.log(`Revalidating product ${productId}...`);
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -120,17 +164,22 @@ const SuppressedProductsPage = () => {
   
   // Handle bulk revalidation
   const handleBulkRevalidate = async (productIds: string[]) => {
-    // In a real app, this would call an API endpoint
-    console.log(`Revalidating ${productIds.length} products...`);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    // After successful revalidation, we'd refetch the products
-    // For now, we'll just simulate by removing the products after a delay
-    setTimeout(() => {
-      setProducts(prev => prev.filter(p => !productIds.includes(p.id)));
-      setSelectedProducts([]);
-    }, 500);
-    return true;
+    try {
+      // In a real app, this would call the API endpoint
+      // await ProductService.bulkUnsuppressProducts(MOCK_MERCHANT_ID, productIds);
+      console.log(`Bulk revalidating products: ${productIds.join(', ')}`);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      // After successful revalidation, we'd refetch the products
+      // For now, we'll just simulate by removing the products after a delay
+      setTimeout(() => {
+        setProducts(prev => prev.filter(p => !productIds.includes(p.id)));
+      }, 1000);
+      return true;
+    } catch (error) {
+      console.error('Error bulk revalidating products:', error);
+      return false;
+    }
   };
   
   // Handle bulk edit
