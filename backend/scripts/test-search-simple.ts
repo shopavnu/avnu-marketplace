@@ -13,7 +13,7 @@ async function bootstrap() {
 
   // Create a NestJS application
   const app = await NestFactory.createApplicationContext(AppModule);
-  
+
   // Get the search service
   const searchService = app.get(SearchService);
 
@@ -48,28 +48,25 @@ async function bootstrap() {
 
     try {
       // Run the search with standard options
-      const standardResult = await searchService.searchProducts(
-        test.query,
-        { page: 1, limit: 5 }
-      );
-      
+      const standardResult = await searchService.searchProducts(test.query, { page: 1, limit: 5 });
+
       logger.log(`Standard search results: ${standardResult.total}`);
-      
+
       // Run the search with NLP
-      const nlpResult = await searchService.naturalLanguageSearch(
-        test.query,
-        { page: 1, limit: 5 }
-      );
-      
+      const nlpResult = await searchService.naturalLanguageSearch(test.query, {
+        page: 1,
+        limit: 5,
+      });
+
       logger.log(`NLP search results: ${nlpResult.total}`);
-      
+
       if (nlpResult.metadata) {
         logger.log(`NLP Metadata: ${JSON.stringify(nlpResult.metadata, null, 2)}`);
       }
-      
+
       // Compare results
       logger.log(`Difference in result count: ${nlpResult.total - standardResult.total}`);
-      
+
       // Log the top 3 results from NLP search
       const topResults = nlpResult.items.slice(0, 3);
       if (topResults.length > 0) {

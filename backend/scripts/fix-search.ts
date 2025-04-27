@@ -83,7 +83,7 @@ const productsMapping = {
 // Define the settings for products index
 const productsSettings = {
   index: {
-    max_ngram_diff: 3,  // Allow a larger difference between min_gram and max_gram
+    max_ngram_diff: 3, // Allow a larger difference between min_gram and max_gram
   },
   analysis: {
     analyzer: {
@@ -155,7 +155,7 @@ const products = [
     categories: ['Clothing', 'Athletic'],
     inStock: true,
     merchantId: 'merchant3',
-  }
+  },
 ];
 
 // Helper function to check if an index exists
@@ -184,7 +184,7 @@ async function createIndex(index: string, mappings: any, settings: any): Promise
       body: {
         settings,
         mappings: {
-          properties: mappings.properties
+          properties: mappings.properties,
         },
       },
     });
@@ -348,7 +348,9 @@ async function main() {
     const shirtResults = await searchDocuments('products', 'shirt');
     logger.log(`Found ${shirtResults.total.value} shirts:`);
     shirtResults.hits.forEach((hit: any, index: number) => {
-      logger.log(`${index + 1}. ${hit._source.title} - $${hit._source.price} (${hit._source.brandName})`);
+      logger.log(
+        `${index + 1}. ${hit._source.title} - $${hit._source.price} (${hit._source.brandName})`,
+      );
     });
 
     // Create GraphQL test file
@@ -359,7 +361,7 @@ async function main() {
     logger.log('NEXT STEPS:');
     logger.log('1. Restart your NestJS server to use the updated Elasticsearch indices');
     logger.log('2. Use the generated search-test-queries.graphql file to test the GraphQL API');
-    logger.log('3. If search still doesn\'t work, check the NestJS logs for errors');
+    logger.log("3. If search still doesn't work, check the NestJS logs for errors");
   } catch (error) {
     logger.error('Error setting up Elasticsearch:', error);
   }

@@ -42,7 +42,7 @@ const products = [
     categories: ['Clothing', 'Formal'],
     inStock: true,
     merchantId: 'merchant2',
-  }
+  },
 ];
 
 // Create Elasticsearch client
@@ -193,7 +193,9 @@ async function main() {
     const shirtResults = await searchDocuments('products', 'shirt');
     logger.log(`Found ${shirtResults.total.value} shirts:`);
     shirtResults.hits.forEach((hit: any, index: number) => {
-      logger.log(`${index + 1}. ${hit._source.title} - $${hit._source.price} (${hit._source.brandName})`);
+      logger.log(
+        `${index + 1}. ${hit._source.title} - $${hit._source.price} (${hit._source.brandName})`,
+      );
     });
 
     // Search for tech products
@@ -201,7 +203,9 @@ async function main() {
     const techResults = await searchDocuments('products', 'tech');
     logger.log(`Found ${techResults.total.value} tech products:`);
     techResults.hits.forEach((hit: any, index: number) => {
-      logger.log(`${index + 1}. ${hit._source.title} - $${hit._source.price} (${hit._source.brandName})`);
+      logger.log(
+        `${index + 1}. ${hit._source.title} - $${hit._source.price} (${hit._source.brandName})`,
+      );
     });
 
     logger.log('Elasticsearch testing completed successfully!');

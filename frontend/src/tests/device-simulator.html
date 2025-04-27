@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Product Card Device Simulator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.5;
+      color: #333;
+      padding: 20px;
+    }
+    
+    h1, h2, h3 {
+      margin-bottom: 1rem;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .device-simulator {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 30px 0;
+      justify-content: center;
+    }
+    
+    .device-frame {
+      border: 12px solid #333;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    
+    .device-frame.mobile {
+      width: 375px;
+      height: 667px;
+    }
+    
+    .device-frame.tablet {
+      width: 768px;
+      height: 1024px;
+    }
+    
+    .device-frame.desktop {
+      width: 1280px;
+      height: 800px;
+    }
+    
+    .device-screen {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: #f5f5f5;
+    }
+    
+    .device-label {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .device-info {
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    /* Product Grid Styles */
+    .product-grid {
+      display: grid;
+      gap: 16px;
+      padding: 16px;
+    }
+    
+    .mobile .product-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tablet .product-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .desktop .product-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* Product Card Styles */
+    .product-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .mobile .product-card {
+      height: 280px;
+    }
+    
+    .tablet .product-card {
+      height: 320px;
+    }
+    
+    .desktop .product-card {
+      height: 360px;
+    }
+    
+    .product-image {
+      width: 100%;
+      object-fit: cover;
+    }
+    
+    .mobile .product-image {
+      height: 160px;
+    }
+    
+    .tablet .product-image {
+      height: 190px;
+    }
+    
+    .desktop .product-image {
+      height: 220px;
+    }
+    
+    .product-info {
+      padding: 12px;
+    }
+    
+    .product-brand {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .product-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    
+    .mobile .product-title {
+      font-size: 0.875rem;
+    }
+    
+    .tablet .product-title {
+      font-size: 0.9375rem;
+    }
+    
+    .desktop .product-title {
+      font-size: 1rem;
+    }
+    
+    .product-description {
+      color: #666;
+      margin-bottom: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    
+    .mobile .product-description {
+      font-size: 0.75rem;
+    }
+    
+    .tablet .product-description {
+      font-size: 0.8125rem;
+    }
+    
+    .desktop .product-description {
+      font-size: 0.875rem;
+    }
+    
+    .product-price {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .product-compare-price {
+      text-decoration: line-through;
+      color: #999;
+      font-weight: normal;
+    }
+    
+    .product-discount {
+      background-color: #f44336;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .badge.sale {
+      background-color: #f44336;
+    }
+    
+    .badge.featured {
+      background-color: #4caf50;
+    }
+    
+    .results-panel {
+      background-color: #e8f5e9;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 30px 0;
+    }
+    
+    .results-title {
+      color: #2e7d32;
+      margin-top: 0;
+    }
+    
+    .results-item {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Responsive Product Card Device Simulator</h1>
+    <p>This simulator demonstrates how our product cards adapt to different device sizes while maintaining consistent heights.</p>
+    
+    <div class="device-simulator">
+      <!-- Mobile Device -->
+      <div class="device-frame mobile">
+        <div class="device-label">Mobile</div>
+        <div class="device-info">375 × 667px</div>
+        <div class="device-screen">
+          <div class="product-grid" id="mobile-grid"></div>
+        </div>
+      </div>
+      
+      <!-- Tablet Device -->
+      <div class="device-frame tablet">
+        <div class="device-label">Tablet</div>
+        <div class="device-info">768 × 1024px</div>
+        <div class="device-screen">
+          <div class="product-grid" id="tablet-grid"></div>
+        </div>
+      </div>
+      
+      <!-- Desktop Device -->
+      <div class="device-frame desktop">
+        <div class="device-label">Desktop</div>
+        <div class="device-info">1280 × 800px</div>
+        <div class="device-screen">
+          <div class="product-grid" id="desktop-grid"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="results-panel">
+      <h2 class="results-title">Test Results</h2>
+      <p class="results-item"><strong>Mobile (375px):</strong> 280px card height, 400x400 images, 160px image height, 60 char description</p>
+      <p class="results-item"><strong>Tablet (768px):</strong> 320px card height, 600x600 images, 190px image height, 100 char description</p>
+      <p class="results-item"><strong>Desktop (1280px):</strong> 360px card height, 800x800 images, 220px image height, 150 char description</p>
+      <p class="results-item">All cards maintain consistent heights within their respective device categories.</p>
+      <p class="results-item">Images are optimized for each device size to improve loading performance.</p>
+      <p class="results-item">Text is properly truncated to prevent layout shifts.</p>
+    </div>
+  </div>
+  
+  <script>
+    // Sample product data
+    const products = [
+      {
+        id: 'product-1',
+        title: 'Modern Minimalist Chair',
+        description: 'Ergonomic design with premium materials for maximum comfort. Perfect for home office or living room.',
+        price: 149.99,
+        compareAtPrice: 199.99,
+        brand: 'Modern Living',
+        images: {
+          mobile: 'https://via.placeholder.com/400x400?text=Chair+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Chair+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Chair+Desktop'
+        },
+        isOnSale: true,
+        discountPercentage: 25
+      },
+      {
+        id: 'product-2',
+        title: 'Handcrafted Ceramic Mug Set',
+        description: 'Set of 4 handcrafted ceramic mugs. Each piece is unique with subtle variations in glaze and texture.',
+        price: 39.99,
+        brand: 'Artisan Crafts',
+        images: {
+          mobile: 'https://via.placeholder.com/400x400?text=Mugs+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Mugs+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Mugs+Desktop'
+        },
+        isFeatured: true
+      },
+      {
+        id: 'product-3',
+        title: 'Smart Home Security Camera',
+        description: 'HD wireless security camera with motion detection, night vision, and two-way audio. Easy to install and connects to your smartphone.',
+        price: 79.99,
+        compareAtPrice: 99.99,
+        brand: 'TechSmart',
+        images: {
+          mobile: 'https://via.placeholder.com/400x400?text=Camera+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Camera+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Camera+Desktop'
+        },
+        isOnSale: true,
+        discountPercentage: 20
+      },
+      {
+        id: 'product-4',
+        title: 'Organic Cotton Throw Blanket',
+        description: 'Soft, cozy throw blanket made from 100% organic cotton. Perfect for snuggling on the couch or adding warmth to your bed.',
+        price: 59.99,
+        brand: 'Eco Home',
+        images: {
+          mobile: 'https://via.placeholder.com/400x400?text=Blanket+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Blanket+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Blanket+Desktop'
+        }
+      },
+      {
+        id: 'product-5',
+        title: 'Stainless Steel Water Bottle',
+        description: 'Double-walled insulated water bottle that keeps drinks cold for 24 hours or hot for 12 hours. Leak-proof and eco-friendly.',
+        price: 29.99,
+        compareAtPrice: 34.99,
+        brand: 'EcoVessel',
+        images: {
+          mobile: 'https://via.placeholder.com/400x400?text=Bottle+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Bottle+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Bottle+Desktop'
+        },
+        isOnSale: true,
+        discountPercentage: 14
+      },
+      {
+        id: 'product-6',
+        title: 'Wireless Bluetooth Headphones',
+        description: 'Premium noise-cancelling headphones with 30-hour battery life. Comfortable over-ear design with memory foam ear cushions.',
+        price: 199.99,
+        brand: 'SoundPro',
+        images: {
+          mobile: 'https://via.placeholder.com/400x400?text=Headphones+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Headphones+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Headphones+Desktop'
+        },
+        isFeatured: true
+      }
+    ];
+    
+    // Format currency
+    function formatCurrency(price) {
+      return '$' + price.toFixed(2);
+    }
+    
+    // Truncate text based on device type
+    function truncateText(text, deviceType) {
+      const maxLength = deviceType === 'mobile' ? 60 : deviceType === 'tablet' ? 100 : 150;
+      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+    
+    // Create product card HTML
+    function createProductCard(product, deviceType) {
+      const truncatedDescription = truncateText(product.description, deviceType);
+      
+      return `
+        <div class="product-card">
+          ${product.isOnSale ? '<div class="badge sale">SALE</div>' : ''}
+          ${product.isFeatured ? '<div class="badge featured">FEATURED</div>' : ''}
+          <img 
+            src="${product.images[deviceType]}" 
+            alt="${product.title}" 
+            class="product-image"
+          >
+          <div class="product-info">
+            <div class="product-brand">${product.brand}</div>
+            <h3 class="product-title">${product.title}</h3>
+            <p class="product-description">${truncatedDescription}</p>
+            <div class="product-price">
+              ${formatCurrency(product.price)}
+              ${product.compareAtPrice ? `<span class="product-compare-price">${formatCurrency(product.compareAtPrice)}</span>` : ''}
+              ${product.discountPercentage ? `<span class="product-discount">${product.discountPercentage}% OFF</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Populate device grids with product cards
+    function populateDeviceGrids() {
+      const deviceTypes = ['mobile', 'tablet', 'desktop'];
+      
+      deviceTypes.forEach(deviceType => {
+        const grid = document.getElementById(`${deviceType}-grid`);
+        let gridHTML = '';
+        
+        products.forEach(product => {
+          gridHTML += createProductCard(product, deviceType);
+        });
+        
+        grid.innerHTML = gridHTML;
+      });
+    }
+    
+    // Initialize the simulator
+    window.addEventListener('DOMContentLoaded', () => {
+      populateDeviceGrids();
+    });
+  </script>
+</body>
+</html>

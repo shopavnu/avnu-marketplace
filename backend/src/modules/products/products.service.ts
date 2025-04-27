@@ -1,14 +1,25 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, FindOptionsWhere, In } from 'typeorm';
+import {
+  Repository,
+  FindOptionsWhere,
+  LessThan,
+  In,
+  Like,
+  MoreThan as _MoreThan,
+  FindOperator as _FindOperator,
+} from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { CursorPaginationDto, PaginatedResponseDto } from '../../common/dto/cursor-pagination.dto';
 
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
+
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
@@ -25,17 +36,113 @@ export class ProductsService {
     return savedProduct;
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<{ items: Product[]; total: number }> {
-    const { page = 1, limit = 10 } = paginationDto;
+  /**
+   * Find all products with offset-based pagination
+   * @param paginationDto Pagination parameters
+   * @returns Paginated products
+   */
+  async findAll(paginationDto?: PaginationDto) {
+    const { page = 1, limit = 10 } = paginationDto || {};
     const skip = (page - 1) * limit;
 
     const [items, total] = await this.productsRepository.findAndCount({
-      take: limit,
       skip,
+      take: limit,
       order: { createdAt: 'DESC' },
     });
 
-    return { items, total };
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * Find products with cursor-based pagination (ideal for continuous scroll)
+   * @param paginationDto Cursor pagination parameters
+   * @param filter Optional filter conditions
+   * @returns Paginated products with cursor
+   */
+  async findWithCursor(
+    paginationDto: CursorPaginationDto,
+    filter?: FindOptionsWhere<Product>,
+  ): Promise<PaginatedResponseDto<Product>> {
+    const { cursor, limit = 20, withCount = false } = paginationDto;
+
+    // Build query conditions
+    let where: FindOptionsWhere<Product> = filter || {};
+    let prevCursor: string | undefined;
+
+    if (cursor) {
+      try {
+        // Decode cursor (base64 encoded JSON with id and createdAt)
+        const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
+
+        // Store previous cursor for backward navigation
+        prevCursor = cursor;
+
+        // Query for items created before the cursor
+        where = {
+          createdAt: LessThan(decodedCursor.createdAt),
+        };
+
+        // If we have an ID, add it to ensure stable ordering
+        if (decodedCursor.id) {
+          // Use a more specific approach for TypeORM
+          where = {
+            createdAt: LessThan(decodedCursor.createdAt),
+          };
+        }
+      } catch (error) {
+        this.logger.warn(`Invalid cursor format: ${error.message}`);
+        // If cursor is invalid, start from the beginning
+      }
+    }
+
+    // Execute query with limit + 1 to determine if there are more items
+    const items = await this.productsRepository.find({
+      where,
+      take: limit + 1,
+      order: {
+        createdAt: 'DESC',
+        id: 'DESC',
+      },
+    });
+
+    // Check if there are more items
+    const hasMore = items.length > limit;
+    if (hasMore) {
+      // Remove the extra item we fetched
+      items.pop();
+    }
+
+    // Generate next cursor from the last item
+    let nextCursor: string | undefined;
+    if (hasMore && items.length > 0) {
+      const lastItem = items[items.length - 1];
+      const cursorData = {
+        id: lastItem.id,
+        createdAt: lastItem.createdAt,
+      };
+      nextCursor = Buffer.from(JSON.stringify(cursorData)).toString('base64');
+    }
+
+    // Get total count if requested
+    let totalCount: number | undefined;
+    if (withCount) {
+      totalCount = await this.productsRepository.count();
+    }
+
+    return {
+      items,
+      nextCursor,
+      prevCursor,
+      hasMore,
+      totalCount,
+    };
   }
 
   async findOne(id: string): Promise<Product> {

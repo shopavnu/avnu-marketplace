@@ -14,7 +14,7 @@ import { MockSearchService } from './mock-search.service';
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
-    
+
     // Elasticsearch
     ElasticsearchModule.register({
       node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
@@ -23,7 +23,7 @@ import { MockSearchService } from './mock-search.service';
         password: process.env.ELASTICSEARCH_PASSWORD || 'changeme',
       },
     }),
-    
+
     // NLP Module
     NlpModule,
   ],

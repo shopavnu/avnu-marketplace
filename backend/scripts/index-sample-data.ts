@@ -1,6 +1,6 @@
 /**
  * Script to index sample data in Elasticsearch
- * 
+ *
  * This script creates sample products, brands, and merchants
  * and indexes them in Elasticsearch with proper mappings and settings.
  */
@@ -146,7 +146,7 @@ const merchantsMapping = {
 // Define the settings for all indices
 const indexSettings = {
   index: {
-    max_ngram_diff: 3,  // Allow a larger difference between min_gram and max_gram
+    max_ngram_diff: 3, // Allow a larger difference between min_gram and max_gram
   },
   analysis: {
     analyzer: {
@@ -526,10 +526,7 @@ async function bulkIndexDocuments(index: string, documents: any[]): Promise<void
   }
 
   try {
-    const operations = documents.flatMap(doc => [
-      { index: { _index: index, _id: doc.id } },
-      doc
-    ]);
+    const operations = documents.flatMap(doc => [{ index: { _index: index, _id: doc.id } }, doc]);
 
     const bulkResponse = await client.bulk({ refresh: true, body: operations });
 
@@ -580,13 +577,12 @@ async function main() {
     logger.log(`Products indexed: ${productCount.count}`);
     logger.log(`Brands indexed: ${brandCount.count}`);
     logger.log(`Merchants indexed: ${merchantCount.count}`);
-    
+
     logger.log('');
     logger.log('NEXT STEPS:');
     logger.log('1. Restart your NestJS server to use the updated Elasticsearch indices');
     logger.log('2. Use the GraphQL API to test search functionality');
-    logger.log('3. If search still doesn\'t work, check the NestJS logs for errors');
-
+    logger.log("3. If search still doesn't work, check the NestJS logs for errors");
   } catch (error) {
     logger.error('Error indexing sample data:', error);
   }

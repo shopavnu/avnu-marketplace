@@ -13,33 +13,33 @@ async function bootstrap() {
 
   try {
     logger.log('Starting database seeding...');
-    
+
     // Get the DataSource from the app
     const dataSource = app.get(DataSource);
-    
+
     // Verify connection
     if (!dataSource.isInitialized) {
       await dataSource.initialize();
       logger.log('Database connection initialized');
     }
-    
+
     // Start a transaction
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    
+
     try {
       logger.log('Clearing existing data...');
-      
+
       // Disable foreign key checks temporarily
       await queryRunner.query('SET CONSTRAINTS ALL DEFERRED');
-      
+
       // Clear tables in reverse dependency order
       await queryRunner.query('DELETE FROM products');
       await queryRunner.query('DELETE FROM merchants');
       await queryRunner.query('DELETE FROM brands');
       await queryRunner.query('DELETE FROM users');
-      
+
       // Seed users
       logger.log('Seeding users...');
       await queryRunner.query(`
@@ -49,7 +49,7 @@ async function bootstrap() {
           ('22222222-2222-2222-2222-222222222222', 'merchant@example.com', 'Merchant', 'User', 'password123', 'MERCHANT', true, ARRAY['fashion', 'sports']),
           ('33333333-3333-3333-3333-333333333333', 'user@example.com', 'Regular', 'User', 'password123', 'USER', true, ARRAY['electronics', 'books', 'outdoor'])
       `);
-      
+
       // Seed brands
       logger.log('Seeding brands...');
       await queryRunner.query(`
@@ -60,7 +60,7 @@ async function bootstrap() {
           ('33333333-3333-3333-3333-333333333333', 'HomeStyle', 'Beautiful home decor and furniture', 'https://example.com/homestyle-logo.png', 'https://homestyle.example.com', 2008, ARRAY['quality', 'design', 'comfort'], ARRAY['home decor', 'furniture']),
           ('44444444-4444-4444-4444-444444444444', 'SportsPro', 'Professional sports equipment and apparel', 'https://example.com/sportspro-logo.png', 'https://sportspro.example.com', 2005, ARRAY['performance', 'durability', 'innovation'], ARRAY['sports', 'fitness', 'outdoor'])
       `);
-      
+
       // Seed merchants
       logger.log('Seeding merchants...');
       await queryRunner.query(`
@@ -71,10 +71,10 @@ async function bootstrap() {
           ('33333333-3333-3333-3333-333333333333', 'Home & Beyond', 'Everything you need for your home', 'https://example.com/home-beyond-logo.png', 'https://home-beyond.example.com', ARRAY['home decor', 'furniture', 'kitchen'], ARRAY['quality', 'design', 'customer satisfaction'], 4.6, 150, 35, true, 88.7),
           ('44444444-4444-4444-4444-444444444444', 'Active Life Store', 'Gear up for your active lifestyle', 'https://example.com/active-life-logo.png', 'https://active-life.example.com', ARRAY['sports', 'fitness', 'outdoor'], ARRAY['performance', 'health', 'adventure'], 4.8, 200, 30, true, 90.1)
       `);
-      
+
       // Seed products
       logger.log('Seeding products...');
-      
+
       // TechGear products
       await queryRunner.query(`
         INSERT INTO products (id, title, description, price, "compareAtPrice", images, thumbnail, categories, tags, "merchantId", "brandName", "isActive", "inStock", quantity, values, "externalId", "externalSource")
@@ -85,7 +85,7 @@ async function bootstrap() {
           
           ('33333333-3333-3333-3333-333333333333', 'TechGear Wireless Earbuds', 'Premium wireless earbuds with noise cancellation', 149.99, 179.99, ARRAY['https://example.com/techgear-earbuds-1.jpg', 'https://example.com/techgear-earbuds-2.jpg'], 'https://example.com/techgear-earbuds-thumb.jpg', ARRAY['electronics', 'audio'], ARRAY['earbuds', 'wireless', 'noise-cancellation'], '11111111-1111-1111-1111-111111111111', 'TechGear', true, true, 100, ARRAY['premium', 'audio'], 'TG-EARBUDS-001', 'seed-script')
       `);
-      
+
       // FashionForward products
       await queryRunner.query(`
         INSERT INTO products (id, title, description, price, "compareAtPrice", images, thumbnail, categories, tags, "merchantId", "brandName", "isActive", "inStock", quantity, values, "externalId", "externalSource")
@@ -96,7 +96,7 @@ async function bootstrap() {
           
           ('66666666-6666-6666-6666-666666666666', 'Summer Floral Dress', 'Light and breezy summer dress with floral pattern', 59.99, 69.99, ARRAY['https://example.com/ff-dress-1.jpg', 'https://example.com/ff-dress-2.jpg'], 'https://example.com/ff-dress-thumb.jpg', ARRAY['clothing', 'dresses'], ARRAY['dress', 'summer', 'floral', 'women'], '22222222-2222-2222-2222-222222222222', 'FashionForward', true, true, 80, ARRAY['seasonal', 'trendy'], 'FF-DRESS-001', 'seed-script')
       `);
-      
+
       // HomeStyle products
       await queryRunner.query(`
         INSERT INTO products (id, title, description, price, "compareAtPrice", images, thumbnail, categories, tags, "merchantId", "brandName", "isActive", "inStock", quantity, values, "externalId", "externalSource")
@@ -107,7 +107,7 @@ async function bootstrap() {
           
           ('99999999-9999-9999-9999-999999999999', 'Handwoven Wool Rug', 'Beautiful handwoven wool rug with geometric pattern', 349.99, 399.99, ARRAY['https://example.com/hs-rug-1.jpg', 'https://example.com/hs-rug-2.jpg'], 'https://example.com/hs-rug-thumb.jpg', ARRAY['home decor', 'rugs'], ARRAY['rug', 'wool', 'handwoven'], '33333333-3333-3333-3333-333333333333', 'HomeStyle', true, true, 30, ARRAY['handcrafted', 'premium'], 'HS-RUG-001', 'seed-script')
       `);
-      
+
       // SportsPro products
       await queryRunner.query(`
         INSERT INTO products (id, title, description, price, "compareAtPrice", images, thumbnail, categories, tags, "merchantId", "brandName", "isActive", "inStock", quantity, values, "externalId", "externalSource")
@@ -118,7 +118,7 @@ async function bootstrap() {
           
           ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Mountain Bike Pro', 'Professional mountain bike for trail riding and competitions', 1499.99, 1699.99, ARRAY['https://example.com/sp-bike-1.jpg', 'https://example.com/sp-bike-2.jpg'], 'https://example.com/sp-bike-thumb.jpg', ARRAY['sports', 'cycling'], ARRAY['bike', 'mountain bike', 'cycling'], '44444444-4444-4444-4444-444444444444', 'SportsPro', true, true, 15, ARRAY['performance', 'professional'], 'SP-BIKE-001', 'seed-script')
       `);
-      
+
       // Add some clothing items with "shirt" in the name for testing search
       await queryRunner.query(`
         INSERT INTO products (id, title, description, price, "compareAtPrice", images, thumbnail, categories, tags, "merchantId", "brandName", "isActive", "inStock", quantity, values, "externalId", "externalSource")
@@ -129,11 +129,11 @@ async function bootstrap() {
           
           ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'Performance Athletic Shirt', 'Moisture-wicking athletic shirt for intense workouts', 39.99, 49.99, ARRAY['https://example.com/sp-athletic-1.jpg', 'https://example.com/sp-athletic-2.jpg'], 'https://example.com/sp-athletic-thumb.jpg', ARRAY['sports', 'clothing'], ARRAY['shirt', 'athletic', 'performance', 'workout'], '44444444-4444-4444-4444-444444444444', 'SportsPro', true, true, 200, ARRAY['performance', 'athletic'], 'SP-SHIRT-001', 'seed-script')
       `);
-      
+
       // Commit transaction
       await queryRunner.commitTransaction();
       logger.log('Database seeding completed successfully!');
-      
+
       // Try to index in Elasticsearch if available
       try {
         const elasticsearchService = app.get('ElasticsearchService');
@@ -146,7 +146,6 @@ async function bootstrap() {
       } catch (error) {
         logger.warn(`Elasticsearch indexing skipped: ${error.message}`);
       }
-      
     } catch (error) {
       // Rollback transaction on error
       await queryRunner.rollbackTransaction();
@@ -155,7 +154,6 @@ async function bootstrap() {
       // Release query runner
       await queryRunner.release();
     }
-    
   } catch (error) {
     logger.error(`Error during seeding: ${error.message}`, error.stack);
   } finally {
