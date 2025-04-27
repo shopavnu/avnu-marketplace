@@ -1,25 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { HeartIcon } from '@heroicons/react/24/solid';
+import useLazyImage from '@/hooks/useLazyImage';
 
 interface ConsistentProductCardProps {
   product: any; // Using any to accommodate both Product and discovery product types
   badges?: React.ReactNode;
+  priority?: boolean; // Whether to prioritize image loading
 }
 
-const ConsistentProductCard: React.FC<ConsistentProductCardProps> = ({ product, badges }) => {
+const ConsistentProductCard: React.FC<ConsistentProductCardProps> = ({ product, badges, priority = false }) => {
   const [mounted, setMounted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // Only render price on client to avoid hydration mismatch
+  // Use lazy loading for images unless priority is true
+  const { isLoaded, currentSrc, ref } = useLazyImage({
+    src: product.image,
+    placeholderSrc: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4=',
+    rootMargin: '200px 0px',
+    threshold: 0.1
+  });
+  
+  // Only render interactive elements on client to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Handle quick view and favorite actions
+  // Handle favorite action
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -47,142 +57,51 @@ const ConsistentProductCard: React.FC<ConsistentProductCardProps> = ({ product, 
         transform: isHovered ? 'translateY(-4px)' : 'translateY(0)'
       }}
     >
-      <Link 
-        href={`/product/${product.id}`}
-        style={{
-          display: 'block',
-          height: '100%',
-          textDecoration: 'none',
-          color: 'inherit'
-        }}
-      >
+      <Link href={`/product/${product.id}`}>
         {/* Image section - fixed 200px height with hover zoom effect */}
-        <div style={{ 
-          height: '200px',
-          width: '100%',
-          position: 'relative',
-          backgroundColor: '#f9f9f9',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-            transition: 'transform 0.7s ease',
-            zIndex: 1
-          }}>
-            <Image 
-              src={product.image} 
-              alt={product.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority={false}
-              style={{ 
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
-            />
-          </div>
-          
-          {/* Favorite button - Netflix/Airbnb style */}
-          {mounted && (
-            <button
-              onClick={handleFavoriteClick}
-              aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: 'none',
-                cursor: 'pointer',
-                zIndex: 10,
-                boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                transition: 'transform 0.2s ease, background-color 0.2s ease',
-                transform: isHovered ? 'scale(1)' : 'scale(0.9)',
-                opacity: isHovered ? 1 : 0.8
-              }}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill={isFavorited ? '#FF385C' : 'none'}
-                stroke={isFavorited ? '#FF385C' : '#484848'}
-                strokeWidth="2"
-                style={{ transition: 'all 0.2s ease' }}
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </button>
-          )}
+        <div 
+          ref={ref as React.RefObject<HTMLDivElement>}
+          style={{ 
+            position: 'relative', 
+            height: '200px', 
+            overflow: 'hidden',
+            backgroundColor: '#f5f5f5'
+          }}
+        >
+          <Image
+            src={priority ? product.image : currentSrc}
+            alt={product.title}
+            fill
+            priority={priority}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            style={{
+              objectFit: 'cover',
+              transition: 'transform 0.3s ease',
+              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+              opacity: (priority || isLoaded) ? 1 : 0.5,
+              filter: (priority || isLoaded) ? 'none' : 'blur(10px)'
+            }}
+          />
         </div>
         
         {/* Content section - fixed 160px height */}
         <div style={{ 
-          height: '160px',
-          width: '100%',
           padding: '16px',
-          boxSizing: 'border-box',
+          height: '160px',
           display: 'flex',
           flexDirection: 'column',
-          position: 'relative'
+          justifyContent: 'space-between'
         }}>
-          {/* Trust indicators - Airbnb style */}
+          {/* Title - fixed 32px height */}
           <div style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            height: '16px',
-            marginBottom: '4px',
-            overflow: 'hidden'
-          }}>
-            {product.vendor?.isLocal && (
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                marginRight: '8px',
-                backgroundColor: 'rgba(0, 184, 126, 0.1)',
-                borderRadius: '4px',
-                padding: '2px 4px'
-              }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00B87E" strokeWidth="2">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <span style={{ fontSize: '10px', color: '#00B87E', marginLeft: '2px' }}>Verified</span>
-              </div>
-            )}
-            <p style={{ 
-              fontSize: '12px',
-              color: '#666',
-              margin: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {typeof product.brand === 'string' ? product.brand : (product.brand?.name || '')}
-            </p>
-          </div>
-          
-          {/* Title - fixed 40px height */}
-          <div style={{ 
-            height: '40px',
-            marginBottom: '8px',
-            overflow: 'hidden'
+            height: '32px',
+            marginBottom: '8px'
           }}>
             <h3 style={{ 
-              fontSize: '15px',
-              fontWeight: 500,
+              fontSize: '16px',
+              fontWeight: 600,
               margin: 0,
-              lineHeight: '1.4',
+              lineHeight: '1.2',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -259,60 +178,96 @@ const ConsistentProductCard: React.FC<ConsistentProductCardProps> = ({ product, 
               </div>
             )}
           </div>
-          
-          {/* Quick view button - Netflix style */}
-          {isHovered && mounted && (
-            <div style={{
-              position: 'absolute',
-              bottom: '16px',
-              right: '16px',
-              opacity: isHovered ? 1 : 0,
-              transform: isHovered ? 'translateY(0)' : 'translateY(10px)',
-              transition: 'opacity 0.3s ease, transform 0.3s ease',
-              zIndex: 5
-            }}>
-              <button 
-                style={{
-                  backgroundColor: '#FF385C',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  // Quick view functionality would go here
-                }}
-              >
-                Quick View
-              </button>
-            </div>
-          )}
         </div>
-        
-        {/* Badges */}
-        {badges && (
-          <div style={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            zIndex: 10
-          }}>
-            {badges}
-          </div>
-        )}
       </Link>
+      
+      {/* Favorite button - Netflix/Airbnb style */}
+      {mounted && (
+        <button
+          onClick={handleFavoriteClick}
+          aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            backgroundColor: isFavorited ? '#FF385C' : 'rgba(255, 255, 255, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: 'none',
+            cursor: 'pointer',
+            zIndex: 10,
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            transition: 'transform 0.2s ease, background-color 0.2s ease',
+            transform: isHovered ? 'scale(1)' : 'scale(0.9)',
+            opacity: isHovered ? 1 : 0.8
+          }}
+        >
+          <HeartIcon 
+            style={{ 
+              width: '18px', 
+              height: '18px',
+              color: isFavorited ? 'white' : '#FF385C',
+              transition: 'color 0.2s ease'
+            }} 
+          />
+        </button>
+      )}
+      
+      {/* Quick view button - Netflix style */}
+      {isHovered && mounted && (
+        <div style={{
+          position: 'absolute',
+          bottom: '16px',
+          right: '16px',
+          opacity: isHovered ? 1 : 0,
+          transform: isHovered ? 'translateY(0)' : 'translateY(10px)',
+          transition: 'opacity 0.3s ease, transform 0.3s ease',
+          zIndex: 5
+        }}>
+          <button 
+            style={{
+              backgroundColor: '#FF385C',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '10px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Quick view functionality would go here
+            }}
+          >
+            Quick View
+          </button>
+        </div>
+      )}
+      
+      {/* Badges */}
+      {badges && (
+        <div style={{
+          position: 'absolute',
+          top: '12px',
+          left: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          zIndex: 10
+        }}>
+          {badges}
+        </div>
+      )}
     </div>
   );
 };

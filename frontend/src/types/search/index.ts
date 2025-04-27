@@ -11,6 +11,13 @@ export interface SearchFilters {
     min: number;
     max: number;
   };
+  // Added for backward compatibility with existing code
+  price?: {
+    min?: number;
+    max?: number;
+  };
+  // Added for backward compatibility with existing code
+  brand?: string[];
   freeShipping?: boolean;
   rating?: number;
   sortBy?: 'relevance' | 'price_low' | 'price_high' | 'rating' | 'newest';

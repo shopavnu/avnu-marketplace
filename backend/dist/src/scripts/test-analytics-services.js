@@ -36,7 +36,13 @@ class MockMerchantAnalyticsRepository {
         record.clickThroughRate = record.clicks / productViews;
         record.productId = productId || null;
         record.categoryId = categoryId || null;
-        record.demographics = ['age:25-34', 'gender:male', 'location:US', 'device:mobile', 'interest:technology'];
+        record.demographics = [
+            'age:25-34',
+            'gender:male',
+            'location:US',
+            'device:mobile',
+            'interest:technology',
+        ];
         return record;
     }
     async find(options) {

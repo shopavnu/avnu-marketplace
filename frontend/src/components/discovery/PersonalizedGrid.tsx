@@ -49,61 +49,49 @@ const PersonalizedGrid: React.FC<PersonalizedGridProps> = ({
       p.sectionTypes?.includes(SectionType.FOR_YOU)
     );
     
-    // Track a sample of products to help with recommendations
-    if (forYouProducts.length > 0) {
-      const sampleSize = Math.min(5, forYouProducts.length);
-      const randomSample = [...forYouProducts]
-        .sort(() => 0.5 - Math.random())
-        .slice(0, sampleSize);
-      
-      randomSample.forEach(product => {
-        personalizationService.trackProductView(product.id);
-      });
-    }
+    // Track views for these products
+    forYouProducts.forEach(product => {
+      personalizationService.trackProductView(product.id);
+    });
   }, [products]);
-
-  // Setup intersection observer for infinite scroll
-  const loadMoreProducts = useCallback(() => {
+  
+  // Load more products when reaching the threshold
+  const loadMoreProducts = useCallback(async () => {
     if (loading || !hasMore) return;
     
     setLoading(true);
-    
-    // Simulate network delay for smoother UX
-    setTimeout(() => {
+    try {
+      // Get more personalized products
       const currentCount = displayProducts.length;
-      const moreProducts = personalizationService.loadMoreRecommendations(
-        products,
-        currentCount,
-        8 // Load 8 more products at a time
-      );
+      const moreProducts = personalizationService.generateRecommendations(products, 8, currentCount);
       
       if (moreProducts.length === 0) {
         setHasMore(false);
       } else {
         setDisplayProducts(prev => [...prev, ...moreProducts]);
+        setHasMore(moreProducts.length === 8 && displayProducts.length + moreProducts.length < maxProducts);
       }
-      
+    } catch (error) {
+      console.error('Error loading more personalized products:', error);
+    } finally {
       setLoading(false);
-    }, 800);
-  }, [loading, hasMore, displayProducts, products]);
+    }
+  }, [loading, hasMore, displayProducts, products, maxProducts]);
   
-  // Setup intersection observer for infinite scroll
+  // Set up intersection observer for infinite scroll
   useEffect(() => {
-    if (loading || initialLoad) return;
+    if (!loadingRef.current) return;
     
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && !loading && hasMore && !initialLoad) {
           loadMoreProducts();
         }
       },
-      { threshold: 0.1 }
+      { rootMargin: '200px 0px' }
     );
     
-    if (loadingRef.current) {
-      observer.observe(loadingRef.current);
-    }
-    
+    observer.observe(loadingRef.current);
     observerRef.current = observer;
     
     return () => {
@@ -113,118 +101,107 @@ const PersonalizedGrid: React.FC<PersonalizedGridProps> = ({
     };
   }, [loadMoreProducts, loading, hasMore, initialLoad]);
   
-  // Handle click on a product to track it
-  const handleProductClick = (productId: string) => {
-    personalizationService.trackProductView(productId);
+  // Responsive columns based on screen width
+  const getGridTemplateColumns = () => {
+    if (typeof window === 'undefined') return 'repeat(4, 1fr)';
+    
+    const width = window.innerWidth;
+    if (width < 640) return 'repeat(2, 1fr)';
+    if (width < 768) return 'repeat(2, 1fr)';
+    if (width < 1024) return 'repeat(3, 1fr)';
+    return 'repeat(4, 1fr)';
   };
   
+  // Empty state
+  if (products.length === 0 && !loading) {
+    return (
+      <div className="w-full py-8 text-center">
+        <h2 className="text-2xl font-semibold mb-4">{title}</h2>
+        <p className="text-gray-500 mb-4">We're still learning your preferences.</p>
+        <p className="text-gray-500">Browse more products to get personalized recommendations.</p>
+      </div>
+    );
+  }
+  
   return (
-    <section className={`my-12 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        {(title || description) && (
-          <div className="mb-8">
-            {title && (
-              <h2 className="text-2xl font-medium text-charcoal mb-2">
-                {title}
-              </h2>
-            )}
-            {description && (
-              <p className="text-neutral-gray">
-                {description}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Product Grid with Personalization */}
-        <div 
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-          style={{ 
-            display: 'grid',
-            gridTemplateRows: 'repeat(auto-fill, 360px)',
-            contain: 'layout',
-            position: 'relative',
-            zIndex: 1
-          }}
-          data-testid="for-you-grid"
-        >
-          {displayProducts.map((product, index) => (
-            <div 
-              key={`${product.id}-${index}`}
-              style={{ 
-                height: '360px',
-                width: '100%',
-                contain: 'strict',
-                position: 'relative'
-              }}
-              data-testid="for-you-item"
-              onClick={() => handleProductClick(product.id)}
-            >
-              <ConsistentProductCard 
-                product={product}
-                badges={
-                  <>
-                    {product.isNew && (
-                      <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
-                        New
-                      </span>
-                    )}
-                    {product.vendor?.isLocal && (
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
-                        Local
-                      </span>
-                    )}
-                    {personalizationService.isProductFavorited(product.id) && (
-                      <span className="px-3 py-1 bg-accent text-white text-xs font-medium rounded-full">
-                        Favorite
-                      </span>
-                    )}
-                  </>
-                }
-              />
-            </div>
-          ))}
-        </div>
-        
-        {/* Loading indicator and infinite scroll trigger */}
-        {!initialLoad && (
+    <div className="w-full">
+      <h2 className="text-2xl font-semibold mb-6">{title}</h2>
+      {description && <p className="text-gray-500 mb-4">{description}</p>}
+      
+      <div 
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        style={{ 
+          display: 'grid',
+          gridTemplateRows: 'repeat(auto-fill, 360px)',
+          contain: 'layout',
+          position: 'relative',
+          zIndex: 1
+        }}
+        data-testid="for-you-grid"
+      >
+        {displayProducts.map((product, index) => (
           <div 
-            ref={loadingRef} 
-            className="flex justify-center items-center py-8"
-            style={{ height: hasMore ? '100px' : '0px', transition: 'height 0.3s ease' }}
+            key={`${product.id}-${index}`}
+            style={{ 
+              height: '360px',
+              width: '100%',
+              contain: 'strict',
+              position: 'relative'
+            }}
           >
-            {loading && (
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full border-2 border-sage border-t-transparent animate-spin mb-2"></div>
-                <p className="text-sm text-neutral-gray">Loading more recommendations...</p>
-              </div>
-            )}
-            {!hasMore && displayProducts.length > 0 && (
-              <p className="text-sm text-neutral-gray py-4">You've seen all recommendations for now</p>
-            )}
+            <ConsistentProductCard 
+              product={product}
+              badges={
+                product.isNew ? (
+                  <span className="bg-sage text-white text-xs font-medium px-2 py-1 rounded">
+                    New
+                  </span>
+                ) : product.isTrending ? (
+                  <span className="bg-coral text-white text-xs font-medium px-2 py-1 rounded">
+                    Trending
+                  </span>
+                ) : null
+              }
+            />
+          </div>
+        ))}
+      </div>
+      
+      {/* Loading indicator and infinite scroll trigger */}
+      <div 
+        ref={loadingRef} 
+        className="flex justify-center items-center py-8"
+        style={{ height: hasMore ? '100px' : '0px', transition: 'height 0.3s ease' }}
+      >
+        {loading && (
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full border-2 border-sage border-t-transparent animate-spin mb-2"></div>
+            <p className="text-sm text-gray-500">Loading more recommendations...</p>
           </div>
         )}
-        
-        {/* Empty state */}
-        {displayProducts.length === 0 && !initialLoad && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-lg text-charcoal mb-2">We're still learning your preferences</p>
-            <p className="text-neutral-gray mb-6">Browse more products to get personalized recommendations</p>
-            <button 
-              className="px-6 py-2 bg-sage text-white rounded-md hover:bg-sage/90 transition-colors"
-              onClick={() => {
-                // Reset and load initial recommendations with some randomness
-                const randomizedProducts = [...products].sort(() => 0.5 - Math.random());
-                setDisplayProducts(randomizedProducts.slice(0, 12));
-              }}
-            >
-              Explore Products
-            </button>
-          </div>
+        {!hasMore && displayProducts.length > 0 && (
+          <p className="text-sm text-gray-500 py-4">You've seen all recommendations for now</p>
         )}
       </div>
-    </section>
+      
+      {/* Empty state */}
+      {displayProducts.length === 0 && !initialLoad && (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <p className="text-lg text-gray-800 mb-2">We're still learning your preferences</p>
+          <p className="text-gray-500 mb-6">Browse more products to get personalized recommendations</p>
+          <button 
+            className="px-6 py-2 bg-sage text-white rounded-md hover:bg-sage/90 transition-colors"
+            onClick={() => {
+              // Reset and load initial recommendations with some randomness
+              const randomizedProducts = [...products].sort(() => 0.5 - Math.random());
+              setDisplayProducts(randomizedProducts.slice(0, 12));
+            }}
+          >
+            Explore Products
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

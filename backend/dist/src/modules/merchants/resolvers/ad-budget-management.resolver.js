@@ -179,7 +179,10 @@ __decorate([
     __param(0, (0, graphql_1.Args)('merchantId', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('totalBudget', { type: () => graphql_1.Float })),
     __param(2, (0, graphql_1.Args)('campaignIds', { type: () => [graphql_1.ID] })),
-    __param(3, (0, graphql_1.Args)('strategy', { type: () => ad_budget_management_service_1.BudgetAllocationStrategy, defaultValue: ad_budget_management_service_1.BudgetAllocationStrategy.EQUAL })),
+    __param(3, (0, graphql_1.Args)('strategy', {
+        type: () => ad_budget_management_service_1.BudgetAllocationStrategy,
+        defaultValue: ad_budget_management_service_1.BudgetAllocationStrategy.EQUAL,
+    })),
     __param(4, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Number, Array, String, user_entity_1.User]),

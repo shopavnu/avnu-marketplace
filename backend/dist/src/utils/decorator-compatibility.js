@@ -43,7 +43,7 @@ function createRepositoryProvider(entity) {
     return {
         provide: `${entity.name}Repository`,
         useFactory: (factory) => factory.getRepository(),
-        inject: [createRepositoryFactory(entity)]
+        inject: [createRepositoryFactory(entity)],
     };
 }
 //# sourceMappingURL=decorator-compatibility.js.map

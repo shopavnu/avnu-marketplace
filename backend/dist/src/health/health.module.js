@@ -12,6 +12,7 @@ const terminus_1 = require("@nestjs/terminus");
 const axios_1 = require("@nestjs/axios");
 const config_1 = require("@nestjs/config");
 const health_controller_1 = require("./health.controller");
+const render_health_controller_1 = require("./render-health.controller");
 const logger_service_1 = require("../common/services/logger.service");
 let HealthModule = class HealthModule {
 };
@@ -19,7 +20,7 @@ exports.HealthModule = HealthModule;
 exports.HealthModule = HealthModule = __decorate([
     (0, common_1.Module)({
         imports: [terminus_1.TerminusModule, axios_1.HttpModule, config_1.ConfigModule],
-        controllers: [health_controller_1.HealthController],
+        controllers: [health_controller_1.HealthController, render_health_controller_1.RenderHealthController],
         providers: [logger_service_1.LoggerService],
     })
 ], HealthModule);

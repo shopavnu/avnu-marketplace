@@ -11,4 +11,8 @@ export interface Brand {
   values: string[];
   location: string;
   rating?: { average: number; count: number };
+  // Added for backward compatibility with existing code
+  founded?: string;
+  // Added for backward compatibility with existing code
+  causes?: string[];
 }
