@@ -4,8 +4,48 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { Field, ID, ObjectType, Float, Int, GraphQLISODateTime } from '@nestjs/graphql';
+
+@ObjectType()
+class ImageMetadata {
+  @Field(() => Int)
+  width: number;
+
+  @Field(() => Int)
+  height: number;
+
+  @Field()
+  format: string;
+
+  @Field(() => Float, { nullable: true })
+  aspectRatio?: number;
+
+  @Field(() => Int, { nullable: true })
+  size?: number;
+}
+
+@ObjectType()
+class ProductAttributes {
+  @Field({ nullable: true })
+  size?: string;
+
+  @Field({ nullable: true })
+  color?: string;
+
+  @Field({ nullable: true })
+  material?: string;
+
+  @Field({ nullable: true })
+  weight?: string;
+
+  @Field({ nullable: true })
+  dimensions?: string;
+
+  @Field(() => [String], { nullable: true })
+  customAttributes?: string[];
+}
 
 @ObjectType()
 @Entity('products')
@@ -33,6 +73,29 @@ export class Product {
   @Field(() => [String])
   @Column('simple-array')
   images: string[];
+
+  @Field(() => [ImageMetadata], { nullable: true })
+  @Column('json', { nullable: true })
+  imageMetadata?: ImageMetadata[];
+
+  @Field(() => [String], { nullable: true })
+  @Column('simple-array', { nullable: true })
+  mobileImages?: string[];
+
+  @Field(() => [String], { nullable: true })
+  @Column('simple-array', { nullable: true })
+  tabletImages?: string[];
+
+  @Field(() => String, { nullable: true })
+  @Column('json', { nullable: true })
+  responsiveImageData?: Record<
+    string,
+    {
+      desktop: string;
+      tablet?: string;
+      mobile?: string;
+    }
+  >;
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
@@ -62,6 +125,10 @@ export class Product {
   @Column({ default: true })
   inStock: boolean;
 
+  @Field()
+  @Column({ default: false })
+  featured: boolean;
+
   @Field(() => Int, { nullable: true })
   @Column('int', { nullable: true })
   quantity?: number;
@@ -70,13 +137,23 @@ export class Product {
   @Column('simple-array', { nullable: true })
   values?: string[];
 
+  @Field(() => ProductAttributes, { nullable: true })
+  @Column('json', { nullable: true })
+  attributes?: ProductAttributes;
+
   @Field()
   @Column()
   externalId: string;
 
   @Field()
   @Column()
+  @Index()
   externalSource: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  @Index()
+  slug?: string;
 
   @Field(() => GraphQLISODateTime)
   @CreateDateColumn()

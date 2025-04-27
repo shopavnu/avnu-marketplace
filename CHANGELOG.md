@@ -4,6 +4,26 @@ All notable changes to the Avnu Marketplace project will be documented in this f
 
 ## [Unreleased]
 
+### Added
+- Responsive product cards that maintain consistent height across all device sizes
+- Device-specific image optimization (mobile: 400x400, tablet: 600x600, desktop: 800x800)
+- Separate TypeScript configuration for backend example scripts with JSX support
+- Type declarations for external modules used in example scripts
+
+### Fixed
+- Comprehensive linting cleanup across the entire platform:
+  - Removed or prefixed unused imports and variables
+  - Fixed import/export issues in backend modules
+  - Corrected type errors in test files
+  - Updated test implementations to match current service return types
+- TypeScript compilation errors:
+  - Updated frontend tsconfig.json with proper module resolution and JSX settings
+  - Fixed type errors in merchant-analytics.spec.ts
+  - Restored vertical optimization and card consistency work
+- Frontend module resolution:
+  - Fixed import paths for Product types and formatters
+  - Ensured SSR compatibility with dynamic imports
+
 ## [0.2.0] - 2025-04-24
 
 ### Added

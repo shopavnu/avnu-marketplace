@@ -18,7 +18,7 @@ async function bootstrap() {
 
   // Create a NestJS application
   const app = await NestFactory.createApplicationContext(AppModule);
-  
+
   // Get the services we need
   const searchService = app.get(SearchService);
   const nlpService = app.get(EnhancedNlpService);
@@ -153,8 +153,8 @@ async function bootstrap() {
         if (!hasPreferences) {
           await userPrefService.saveUserPreferences({
             userId: mockUser.id,
-            categories: { 'laptops': 0.8, 'electronics': 0.6 },
-            brands: { 'Apple': 0.7, 'Dell': 0.5 },
+            categories: { laptops: 0.8, electronics: 0.6 },
+            brands: { Apple: 0.7, Dell: 0.5 },
             priceRanges: [{ min: 800, max: 2000, weight: 0.9 }],
             values: {},
             recentSearches: [],
@@ -177,7 +177,7 @@ async function bootstrap() {
           ...test.options,
           user: mockUser,
           clientId,
-        }
+        },
       );
       const duration = Date.now() - startTime;
 
@@ -185,7 +185,7 @@ async function bootstrap() {
       logger.log(`Search completed in ${duration}ms`);
       logger.log(`Total results: ${searchResult.total}`);
       logger.log(`Metadata: ${JSON.stringify(searchResult.metadata, null, 2)}`);
-      
+
       // Log the top 3 results (or fewer if less than 3)
       const topResults = searchResult.items.slice(0, 3);
       logger.log(`Top ${topResults.length} results:`);
@@ -211,18 +211,18 @@ async function bootstrap() {
 
   for (const query of nlpQueries) {
     logger.log(`\nNatural Language Query: "${query}"`);
-    
+
     try {
       const result = await searchService.naturalLanguageSearch(
         query,
         { page: 1, limit: 5 },
         mockUser,
-        clientId
+        clientId,
       );
-      
+
       logger.log(`Total results: ${result.total}`);
       logger.log(`Metadata: ${JSON.stringify(result.metadata, null, 2)}`);
-      
+
       // Log the top 3 results (or fewer if less than 3)
       const topResults = result.items.slice(0, 3);
       logger.log(`Top ${topResults.length} results:`);
@@ -250,9 +250,9 @@ async function bootstrap() {
     const variant = await abTestingService.assignUserToVariant(
       'search-relevance-test-001',
       user.id,
-      user.clientId
+      user.clientId,
     );
-    
+
     logger.log(`User ${user.id} assigned to variant: ${JSON.stringify(variant)}`);
   }
 

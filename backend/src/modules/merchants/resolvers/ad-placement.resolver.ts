@@ -112,7 +112,7 @@ export class AdPlacementResolver {
   @Query(() => [ProductAdRecommendation])
   async getRecommendedAdPlacements(
     @Args('merchantId', { type: () => ID }) merchantId: string,
-    @CurrentUser() user: User,
+    @CurrentUser() _user: User,
   ): Promise<ProductAdRecommendation[]> {
     // Note: We're not validating merchant access here because the ad placement service
     // will only return data for the merchant's products anyway

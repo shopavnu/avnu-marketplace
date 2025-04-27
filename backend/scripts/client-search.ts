@@ -56,7 +56,7 @@ class ClientSearchUtility {
         }),
       });
 
-      const data = await response.json() as ApiResponse;
+      const data = (await response.json()) as ApiResponse;
       this.products = data.data.products.items;
       this.isLoaded = true;
       console.log(`Loaded ${this.products.length} products from API`);
@@ -106,9 +106,7 @@ class ClientSearchUtility {
     }
 
     const lowerBrand = brandName.toLowerCase();
-    return this.products.filter(product =>
-      product.brandName.toLowerCase().includes(lowerBrand)
-    );
+    return this.products.filter(product => product.brandName.toLowerCase().includes(lowerBrand));
   }
 
   // Filter products by category
@@ -121,7 +119,7 @@ class ClientSearchUtility {
     return this.products.filter(
       product =>
         product.categories &&
-        product.categories.some(cat => cat.toLowerCase().includes(lowerCategory))
+        product.categories.some(cat => cat.toLowerCase().includes(lowerCategory)),
     );
   }
 
@@ -153,9 +151,7 @@ class ClientSearchUtility {
 
     if (options.brandName) {
       const lowerBrand = options.brandName.toLowerCase();
-      results = results.filter(product =>
-        product.brandName.toLowerCase().includes(lowerBrand)
-      );
+      results = results.filter(product => product.brandName.toLowerCase().includes(lowerBrand));
     }
 
     if (options.category) {
@@ -163,7 +159,7 @@ class ClientSearchUtility {
       results = results.filter(
         product =>
           product.categories &&
-          product.categories.some(cat => cat.toLowerCase().includes(lowerCategory))
+          product.categories.some(cat => cat.toLowerCase().includes(lowerCategory)),
       );
     }
 

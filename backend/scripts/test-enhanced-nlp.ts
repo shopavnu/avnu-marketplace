@@ -39,10 +39,10 @@ async function testEnhancedNlp() {
     logger.log('Running tests with original NLP service...');
     for (const query of testQueries) {
       logger.log(`\nProcessing query: "${query}"`);
-      
+
       // Process with original NLP service
       const originalResult = originalNlpService.processQuery(query);
-      
+
       logger.log('Original NLP Results:');
       logger.log(`- Processed Query: ${originalResult.processedQuery}`);
       logger.log(`- Entities: ${JSON.stringify(originalResult.entities)}`);
@@ -52,33 +52,39 @@ async function testEnhancedNlp() {
     logger.log('\n\nRunning tests with enhanced NLP service...');
     for (const query of testQueries) {
       logger.log(`\nProcessing query: "${query}"`);
-      
+
       // Process with enhanced NLP service
       const enhancedResult = await enhancedNlpService.processQuery(query);
-      
+
       logger.log('Enhanced NLP Results:');
       logger.log(`- Processed Query: ${enhancedResult.processedQuery}`);
       logger.log(`- Expanded Query: ${enhancedResult.expandedQuery}`);
-      logger.log(`- Entities: ${JSON.stringify(enhancedResult.entities.slice(0, 3))}${enhancedResult.entities.length > 3 ? ` ...and ${enhancedResult.entities.length - 3} more` : ''}`);
-      logger.log(`- Primary Intent: ${enhancedResult.intent.primary} (confidence: ${enhancedResult.intent.confidence.toFixed(2)})`);
-      
+      logger.log(
+        `- Entities: ${JSON.stringify(enhancedResult.entities.slice(0, 3))}${enhancedResult.entities.length > 3 ? ` ...and ${enhancedResult.entities.length - 3} more` : ''}`,
+      );
+      logger.log(
+        `- Primary Intent: ${enhancedResult.intent.primary} (confidence: ${enhancedResult.intent.confidence.toFixed(2)})`,
+      );
+
       if (enhancedResult.intent.secondary.length > 0) {
-        logger.log(`- Secondary Intents: ${enhancedResult.intent.secondary.map(i => `${i.intent} (${i.confidence.toFixed(2)})`).join(', ')}`);
+        logger.log(
+          `- Secondary Intents: ${enhancedResult.intent.secondary.map(i => `${i.intent} (${i.confidence.toFixed(2)})`).join(', ')}`,
+        );
       }
-      
+
       if (enhancedResult.expansionTerms.length > 0) {
         logger.log(`- Expansion Terms: ${enhancedResult.expansionTerms.join(', ')}`);
       }
-      
+
       logger.log('- Search Parameters:');
       if (Object.keys(enhancedResult.searchParameters.boost).length > 0) {
         logger.log(`  - Boost: ${JSON.stringify(enhancedResult.searchParameters.boost)}`);
       }
-      
+
       if (enhancedResult.searchParameters.sort.length > 0) {
         logger.log(`  - Sort: ${JSON.stringify(enhancedResult.searchParameters.sort)}`);
       }
-      
+
       if (Object.keys(enhancedResult.searchParameters.filters).length > 0) {
         logger.log(`  - Filters: ${JSON.stringify(enhancedResult.searchParameters.filters)}`);
       }
@@ -88,7 +94,7 @@ async function testEnhancedNlp() {
     logger.log('\n\nDetailed Analysis Example:');
     const analysisQuery = 'sustainable dress under $100 with good reviews';
     logger.log(`Analyzing query: "${analysisQuery}"`);
-    
+
     const analysis = await enhancedNlpService.analyzeQuery(analysisQuery);
     logger.log(JSON.stringify(analysis, null, 2));
 

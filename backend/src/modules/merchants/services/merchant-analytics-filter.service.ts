@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, IsNull, Not, FindOptionsWhere, In, Raw } from 'typeorm';
+import { Repository, Between, IsNull, Not, FindOptionsWhere, In, _Raw } from 'typeorm';
 import { MerchantAnalytics } from '../entities/merchant-analytics.entity';
 import { ProductService, CategoryService } from '../../products/services';
 

@@ -144,7 +144,10 @@ const products = [
     inventory: 50,
     categories: ['electronics', 'computers'],
     tags: ['laptop', 'gaming', 'professional'],
-    images: ['https://example.com/techgear-laptop-1.jpg', 'https://example.com/techgear-laptop-2.jpg'],
+    images: [
+      'https://example.com/techgear-laptop-1.jpg',
+      'https://example.com/techgear-laptop-2.jpg',
+    ],
     specifications: {
       processor: 'Intel Core i7',
       memory: '16GB RAM',
@@ -169,7 +172,10 @@ const products = [
     inventory: 75,
     categories: ['electronics', 'phones'],
     tags: ['smartphone', 'android', 'camera'],
-    images: ['https://example.com/techgear-phone-1.jpg', 'https://example.com/techgear-phone-2.jpg'],
+    images: [
+      'https://example.com/techgear-phone-1.jpg',
+      'https://example.com/techgear-phone-2.jpg',
+    ],
     specifications: {
       processor: 'Snapdragon 8 Gen 2',
       memory: '8GB RAM',
@@ -194,7 +200,10 @@ const products = [
     inventory: 100,
     categories: ['electronics', 'audio'],
     tags: ['earbuds', 'wireless', 'noise-cancellation'],
-    images: ['https://example.com/techgear-earbuds-1.jpg', 'https://example.com/techgear-earbuds-2.jpg'],
+    images: [
+      'https://example.com/techgear-earbuds-1.jpg',
+      'https://example.com/techgear-earbuds-2.jpg',
+    ],
     specifications: {
       batteryLife: '8 hours (30 with case)',
       connectivity: 'Bluetooth 5.2',
@@ -208,7 +217,7 @@ const products = [
     isActive: true,
     isFeatured: true,
   },
-  
+
   // FashionForward products
   {
     sku: 'FF-TSHIRT-001',
@@ -285,7 +294,7 @@ const products = [
     isActive: true,
     isFeatured: true,
   },
-  
+
   // HomeStyle products
   {
     sku: 'HS-SOFA-001',
@@ -348,7 +357,7 @@ const products = [
     images: ['https://example.com/hs-rug-1.jpg', 'https://example.com/hs-rug-2.jpg'],
     specifications: {
       material: '100% Wool',
-      dimensions: '8\' x 10\'',
+      dimensions: "8' x 10'",
       pile: 'Medium',
       colors: ['Multicolor', 'Blue/Grey', 'Earth Tones'],
     },
@@ -359,7 +368,7 @@ const products = [
     isActive: true,
     isFeatured: true,
   },
-  
+
   // SportsPro products
   {
     sku: 'SP-SHOES-001',
@@ -454,19 +463,19 @@ async function bootstrap() {
 
     // Get the database connection
     const connection = app.get('DATABASE_CONNECTION');
-    
+
     // Clear existing data with proper handling of foreign key constraints
     logger.log('Clearing existing data...');
-    
+
     // Disable foreign key constraints
     await connection.query('SET CONSTRAINTS ALL DEFERRED');
-    
+
     // Delete data in reverse order of dependencies
     await connection.query('DELETE FROM product');
     await connection.query('DELETE FROM merchant');
     await connection.query('DELETE FROM brand');
     await connection.query('DELETE FROM "user"');
-    
+
     // Re-enable foreign key constraints
     await connection.query('SET CONSTRAINTS ALL IMMEDIATE');
 
@@ -504,14 +513,14 @@ async function bootstrap() {
       } catch (error) {
         logger.error('Error checking Elasticsearch status:', error.message);
       }
-      
+
       if (!isElasticsearchRunning) {
         logger.error('Elasticsearch is not running. Indexing will be skipped.');
         return;
       }
-      
+
       logger.log('Elasticsearch is running. Proceeding with indexing...');
-      
+
       // Clear existing indices to start fresh
       logger.log('Clearing existing indices...');
       for (const index of ['products', 'merchants', 'brands']) {
@@ -520,12 +529,12 @@ async function bootstrap() {
           logger.log(`Deleting index: ${index}`);
           await elasticsearchService.deleteIndex(index);
         }
-        
+
         // Create index with proper mappings
         logger.log(`Creating index: ${index}`);
         await elasticsearchService.createIndex(index);
       }
-      
+
       // Index products
       logger.log(`Indexing ${createdProducts.length} products...`);
       for (const product of createdProducts) {
@@ -553,16 +562,16 @@ async function bootstrap() {
               externalId: product.externalId,
               externalSource: product.externalSource,
               createdAt: product.createdAt,
-              updatedAt: product.updatedAt
+              updatedAt: product.updatedAt,
             },
-            true // refresh
+            true, // refresh
           );
           logger.log(`Indexed product: ${product.title} (${product.id})`);
         } catch (error) {
           logger.error(`Failed to index product ${product.id}: ${error.message}`);
         }
       }
-      
+
       // Index merchants
       logger.log(`Indexing ${createdMerchants.length} merchants...`);
       for (const merchant of createdMerchants) {
@@ -584,16 +593,16 @@ async function bootstrap() {
               values: merchant.values,
               isVerified: merchant.isVerified,
               createdAt: merchant.createdAt,
-              updatedAt: merchant.updatedAt
+              updatedAt: merchant.updatedAt,
             },
-            true // refresh
+            true, // refresh
           );
           logger.log(`Indexed merchant: ${merchant.name} (${merchant.id})`);
         } catch (error) {
           logger.error(`Failed to index merchant ${merchant.id}: ${error.message}`);
         }
       }
-      
+
       // Index brands
       logger.log(`Indexing ${createdBrands.length} brands...`);
       for (const brand of createdBrands) {
@@ -611,29 +620,29 @@ async function bootstrap() {
               values: brand.values,
               isActive: brand.isActive,
               createdAt: brand.createdAt,
-              updatedAt: brand.updatedAt
+              updatedAt: brand.updatedAt,
             },
-            true // refresh
+            true, // refresh
           );
           logger.log(`Indexed brand: ${brand.name} (${brand.id})`);
         } catch (error) {
           logger.error(`Failed to index brand ${brand.id}: ${error.message}`);
         }
       }
-      
+
       // Refresh indices to make the documents searchable immediately
       logger.log('Refreshing indices...');
       for (const index of ['products', 'merchants', 'brands']) {
         await elasticsearchService.refreshIndex(index);
       }
-      
+
       logger.log('Elasticsearch indexing completed successfully!');
     } catch (error) {
       logger.error(`Error indexing data in Elasticsearch: ${error.message}`);
       logger.error(error.stack);
       // Continue with the script despite indexing errors
     }
-    
+
     logger.log('Elasticsearch indexing complete');
 
     logger.log('Database seeding completed successfully!');

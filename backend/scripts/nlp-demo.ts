@@ -1,6 +1,6 @@
 /**
  * NLP Enhancement Demo
- * 
+ *
  * This script demonstrates the enhanced NLP capabilities for the Avnu Marketplace
  * including query expansion, entity recognition, and intent detection.
  */
@@ -15,7 +15,7 @@ class NlpProcessor {
   } {
     // Very simple entity extraction
     const entities: { type: string; value: string }[] = [];
-    
+
     // Extract price ranges (e.g., $50 to $100)
     const priceRangeRegex = /\$(\d+(?:\.\d+)?)\s*(?:to|-)\s*\$(\d+(?:\.\d+)?)/gi;
     const priceMatches = query.match(priceRangeRegex);
@@ -37,14 +37,16 @@ class NlpProcessor {
 
     singlePriceMatches.forEach(match => {
       const price = parseFloat(match[1]);
-      const modifier = match[0].toLowerCase().includes('under') ||
-                      match[0].toLowerCase().includes('less than') ||
-                      match[0].toLowerCase().includes('below')
-                      ? 'max' : 'min';
-      
-      entities.push({ 
-        type: 'price', 
-        value: modifier === 'max' ? `0-${price}` : `${price}-9999`
+      const modifier =
+        match[0].toLowerCase().includes('under') ||
+        match[0].toLowerCase().includes('less than') ||
+        match[0].toLowerCase().includes('below')
+          ? 'max'
+          : 'min';
+
+      entities.push({
+        type: 'price',
+        value: modifier === 'max' ? `0-${price}` : `${price}-9999`,
       });
     });
 
@@ -83,16 +85,16 @@ class NlpProcessor {
   } {
     // 1. Entity Recognition
     const entities = this.extractEntities(query);
-    
+
     // 2. Intent Detection
     const intent = this.detectIntent(query);
-    
+
     // 3. Query Expansion
     const { expandedQuery, expansionTerms } = this.expandQuery(query);
-    
+
     // 4. Generate Search Parameters
     const searchParameters = this.generateSearchParameters(intent.primary, entities, query);
-    
+
     return {
       originalQuery: query,
       processedQuery: this.buildProcessedQuery(query, entities),
@@ -107,7 +109,7 @@ class NlpProcessor {
   // Extract entities with confidence scores
   private extractEntities(query: string): { type: string; value: string; confidence: number }[] {
     const entities: { type: string; value: string; confidence: number }[] = [];
-    
+
     // Extract categories
     if (query.includes('dress') || query.includes('dresses')) {
       entities.push({ type: 'category', value: 'dresses', confidence: 0.9 });
@@ -118,12 +120,12 @@ class NlpProcessor {
     if (query.includes('jeans') || query.includes('denim')) {
       entities.push({ type: 'category', value: 'jeans', confidence: 0.9 });
     }
-    
+
     // Extract brands
     if (query.includes('eco collective')) {
       entities.push({ type: 'brand', value: 'eco collective', confidence: 0.95 });
     }
-    
+
     // Extract values
     if (query.includes('sustainable')) {
       entities.push({ type: 'value', value: 'sustainable', confidence: 0.9 });
@@ -146,7 +148,7 @@ class NlpProcessor {
     if (query.includes('local')) {
       entities.push({ type: 'value', value: 'local', confidence: 0.8 });
     }
-    
+
     // Extract colors
     if (query.includes('black')) {
       entities.push({ type: 'color', value: 'black', confidence: 0.95 });
@@ -160,7 +162,7 @@ class NlpProcessor {
     if (query.includes('blue')) {
       entities.push({ type: 'color', value: 'blue', confidence: 0.95 });
     }
-    
+
     // Extract sizes
     if (query.includes('size')) {
       const sizeMatch = query.match(/size\s+(\d+)/i);
@@ -168,7 +170,7 @@ class NlpProcessor {
         entities.push({ type: 'size', value: sizeMatch[1], confidence: 0.9 });
       }
     }
-    
+
     // Extract price ranges (e.g., $50 to $100)
     const priceRangeRegex = /\$(\d+(?:\.\d+)?)\s*(?:to|-)\s*\$(\d+(?:\.\d+)?)/gi;
     const priceMatches = query.match(priceRangeRegex);
@@ -190,18 +192,20 @@ class NlpProcessor {
 
     singlePriceMatches.forEach(match => {
       const price = parseFloat(match[1]);
-      const modifier = match[0].toLowerCase().includes('under') ||
-                      match[0].toLowerCase().includes('less than') ||
-                      match[0].toLowerCase().includes('below')
-                      ? 'max' : 'min';
-      
-      entities.push({ 
-        type: 'price', 
+      const modifier =
+        match[0].toLowerCase().includes('under') ||
+        match[0].toLowerCase().includes('less than') ||
+        match[0].toLowerCase().includes('below')
+          ? 'max'
+          : 'min';
+
+      entities.push({
+        type: 'price',
         value: modifier === 'max' ? `0-${price}` : `${price}-9999`,
-        confidence: 0.9
+        confidence: 0.9,
       });
     });
-    
+
     // Extract ratings
     if (query.includes('good reviews') || query.includes('well reviewed')) {
       entities.push({ type: 'rating', value: '4+', confidence: 0.8 });
@@ -209,7 +213,7 @@ class NlpProcessor {
     if (query.includes('best rated') || query.includes('top rated')) {
       entities.push({ type: 'rating', value: '4.5+', confidence: 0.9 });
     }
-    
+
     return entities;
   }
 
@@ -220,7 +224,7 @@ class NlpProcessor {
     secondary: { intent: string; confidence: number }[];
   } {
     const intents: { intent: string; confidence: number }[] = [];
-    
+
     // Product search intent
     if (query.includes('find') || query.includes('search') || query.includes('looking for')) {
       intents.push({ intent: 'product_search', confidence: 0.8 });
@@ -228,52 +232,73 @@ class NlpProcessor {
       // Default intent
       intents.push({ intent: 'product_search', confidence: 0.6 });
     }
-    
+
     // Category browse intent
     if (query.includes('browse') || query.includes('explore') || query.includes('show me all')) {
       intents.push({ intent: 'category_browse', confidence: 0.85 });
     }
-    
+
     // Brand specific intent
     if (query.includes('by ') || query.includes('from ') || query.includes('brand')) {
       intents.push({ intent: 'brand_specific', confidence: 0.85 });
     }
-    
+
     // Value driven intent
-    if (query.includes('sustainable') || query.includes('organic') || 
-        query.includes('vegan') || query.includes('fair trade') || 
-        query.includes('handmade') || query.includes('recycled') || 
-        query.includes('local')) {
+    if (
+      query.includes('sustainable') ||
+      query.includes('organic') ||
+      query.includes('vegan') ||
+      query.includes('fair trade') ||
+      query.includes('handmade') ||
+      query.includes('recycled') ||
+      query.includes('local')
+    ) {
       intents.push({ intent: 'value_driven', confidence: 0.85 });
     }
-    
+
     // Comparison intent
-    if (query.includes('compare') || query.includes('vs') || query.includes('versus') || 
-        query.includes('difference between')) {
+    if (
+      query.includes('compare') ||
+      query.includes('vs') ||
+      query.includes('versus') ||
+      query.includes('difference between')
+    ) {
       intents.push({ intent: 'comparison', confidence: 0.9 });
     }
-    
+
     // Recommendation intent
-    if (query.includes('recommend') || query.includes('suggest') || 
-        query.includes('best') || query.includes('top')) {
+    if (
+      query.includes('recommend') ||
+      query.includes('suggest') ||
+      query.includes('best') ||
+      query.includes('top')
+    ) {
       intents.push({ intent: 'recommendation', confidence: 0.9 });
     }
-    
+
     // Sort intent
-    if (query.includes('sort') || query.includes('order by') || 
-        query.includes('high to low') || query.includes('low to high')) {
+    if (
+      query.includes('sort') ||
+      query.includes('order by') ||
+      query.includes('high to low') ||
+      query.includes('low to high')
+    ) {
       intents.push({ intent: 'sort', confidence: 0.9 });
     }
-    
+
     // Filter intent
-    if (query.includes('filter') || query.includes('only show') || 
-        query.includes('with') || query.includes('that have')) {
+    if (
+      query.includes('filter') ||
+      query.includes('only show') ||
+      query.includes('with') ||
+      query.includes('that have')
+    ) {
       intents.push({ intent: 'filter', confidence: 0.85 });
     }
-    
+
     // Sort intents by confidence
     intents.sort((a, b) => b.confidence - a.confidence);
-    
+
     return {
       primary: intents[0].intent,
       confidence: intents[0].confidence,
@@ -287,7 +312,7 @@ class NlpProcessor {
     expansionTerms: string[];
   } {
     const expansionTerms: string[] = [];
-    
+
     // Add synonyms based on query terms
     if (query.includes('sustainable')) {
       expansionTerms.push('eco-friendly', 'green', 'ethical');
@@ -313,13 +338,13 @@ class NlpProcessor {
     if (query.includes('premium') || query.includes('luxury')) {
       expansionTerms.push('high-end', 'designer', 'exclusive');
     }
-    
+
     // Deduplicate and limit
     const uniqueTerms = [...new Set(expansionTerms)].slice(0, 5);
-    
+
     // Build expanded query
     const expandedQuery = `${query} ${uniqueTerms.join(' ')}`;
-    
+
     return {
       expandedQuery,
       expansionTerms: uniqueTerms,
@@ -345,18 +370,18 @@ class NlpProcessor {
       sort: [],
       filters: {},
     };
-    
+
     // Adjust search parameters based on intent
     switch (intent) {
       case 'product_search':
         // Standard product search
         searchParams.boost = { name: 2.0, description: 1.0, categories: 1.5 };
         break;
-        
+
       case 'category_browse':
         // Boost category matches
         searchParams.boost = { categories: 3.0, name: 1.0, description: 0.5 };
-        
+
         // Add category filters
         const categoryEntities = entities.filter(e => e.type === 'category');
         if (categoryEntities.length > 0) {
@@ -366,11 +391,11 @@ class NlpProcessor {
           };
         }
         break;
-        
+
       case 'brand_specific':
         // Boost brand matches
         searchParams.boost = { brand: 3.0, name: 1.0 };
-        
+
         // Add brand filters
         const brandEntities = entities.filter(e => e.type === 'brand');
         if (brandEntities.length > 0) {
@@ -380,11 +405,11 @@ class NlpProcessor {
           };
         }
         break;
-        
+
       case 'value_driven':
         // Boost value-related fields
         searchParams.boost = { values: 3.0, description: 2.0, name: 1.0 };
-        
+
         // Add value filters
         const valueEntities = entities.filter(e => e.type === 'value');
         if (valueEntities.length > 0) {
@@ -394,18 +419,18 @@ class NlpProcessor {
           };
         }
         break;
-        
+
       case 'comparison':
         // For comparison, ensure both items appear
         searchParams.boost = { name: 2.0, description: 1.0 };
         break;
-        
+
       case 'recommendation':
         // Sort by rating for recommendations
         searchParams.sort.push({ field: 'rating', order: 'desc' });
         searchParams.boost = { rating: 2.0, reviewCount: 1.5, name: 1.0 };
         break;
-        
+
       case 'sort':
         // Determine sort field and order
         if (query.includes('price')) {
@@ -420,12 +445,12 @@ class NlpProcessor {
           searchParams.sort.push({ field: 'createdAt', order: 'desc' });
         }
         break;
-        
+
       case 'filter':
         // Apply all entity filters
         break;
     }
-    
+
     // Add common filters from entities
     entities.forEach(entity => {
       switch (entity.type) {
@@ -472,7 +497,7 @@ class NlpProcessor {
         }
       }
     });
-    
+
     return searchParams;
   }
 
@@ -509,10 +534,10 @@ console.log('NLP Enhancement Demo\n');
 console.log('Running tests with basic NLP processing...\n');
 for (const query of testQueries) {
   console.log(`Query: "${query}"`);
-  
+
   // Process with basic NLP
   const basicResult = nlpProcessor.processQueryBasic(query);
-  
+
   console.log('Basic NLP Results:');
   console.log(`- Processed Query: ${basicResult.processedQuery}`);
   console.log(`- Entities: ${JSON.stringify(basicResult.entities)}`);
@@ -523,37 +548,43 @@ for (const query of testQueries) {
 console.log('\nRunning tests with enhanced NLP processing...\n');
 for (const query of testQueries) {
   console.log(`Query: "${query}"`);
-  
+
   // Process with enhanced NLP
   const enhancedResult = nlpProcessor.processQueryEnhanced(query);
-  
+
   console.log('Enhanced NLP Results:');
   console.log(`- Processed Query: ${enhancedResult.processedQuery}`);
   console.log(`- Expanded Query: ${enhancedResult.expandedQuery}`);
-  console.log(`- Entities: ${JSON.stringify(enhancedResult.entities.slice(0, 3))}${enhancedResult.entities.length > 3 ? ` ...and ${enhancedResult.entities.length - 3} more` : ''}`);
-  console.log(`- Primary Intent: ${enhancedResult.intent.primary} (confidence: ${enhancedResult.intent.confidence.toFixed(2)})`);
-  
+  console.log(
+    `- Entities: ${JSON.stringify(enhancedResult.entities.slice(0, 3))}${enhancedResult.entities.length > 3 ? ` ...and ${enhancedResult.entities.length - 3} more` : ''}`,
+  );
+  console.log(
+    `- Primary Intent: ${enhancedResult.intent.primary} (confidence: ${enhancedResult.intent.confidence.toFixed(2)})`,
+  );
+
   if (enhancedResult.intent.secondary.length > 0) {
-    console.log(`- Secondary Intents: ${enhancedResult.intent.secondary.map(i => `${i.intent} (${i.confidence.toFixed(2)})`).join(', ')}`);
+    console.log(
+      `- Secondary Intents: ${enhancedResult.intent.secondary.map(i => `${i.intent} (${i.confidence.toFixed(2)})`).join(', ')}`,
+    );
   }
-  
+
   if (enhancedResult.expansionTerms.length > 0) {
     console.log(`- Expansion Terms: ${enhancedResult.expansionTerms.join(', ')}`);
   }
-  
+
   console.log('- Search Parameters:');
   if (Object.keys(enhancedResult.searchParameters.boost).length > 0) {
     console.log(`  - Boost: ${JSON.stringify(enhancedResult.searchParameters.boost)}`);
   }
-  
+
   if (enhancedResult.searchParameters.sort.length > 0) {
     console.log(`  - Sort: ${JSON.stringify(enhancedResult.searchParameters.sort)}`);
   }
-  
+
   if (Object.keys(enhancedResult.searchParameters.filters).length > 0) {
     console.log(`  - Filters: ${JSON.stringify(enhancedResult.searchParameters.filters)}`);
   }
-  
+
   console.log('');
 }
 

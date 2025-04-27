@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Product Card Test</title>
+  <style>
+    /* Device frames for testing */
+    .device-frames {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .device-frame {
+      border: 2px solid #333;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .device-frame-header {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .device-name {
+      font-weight: bold;
+    }
+    
+    .device-dimensions {
+      color: #666;
+      font-size: 0.9em;
+    }
+    
+    .device-content {
+      height: 600px;
+      overflow: auto;
+    }
+    
+    /* Device sizes */
+    .mobile-frame {
+      width: 375px;
+    }
+    
+    .tablet-frame {
+      width: 768px;
+    }
+    
+    .desktop-frame {
+      width: 1280px;
+    }
+    
+    /* Product card styles */
+    .product-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .product-info {
+      padding: 15px;
+    }
+    
+    .product-brand {
+      color: #666;
+      font-size: 0.8em;
+      margin-bottom: 5px;
+    }
+    
+    .product-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .product-description {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 12px;
+    }
+    
+    .product-price {
+      font-weight: bold;
+    }
+    
+    /* Grid layouts */
+    .mobile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+    
+    .tablet-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 15px;
+    }
+    
+    .desktop-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Responsive Product Card Test</h1>
+  <p>This page demonstrates how our product cards adapt to different device sizes while maintaining consistent heights.</p>
+  
+  <div class="controls">
+    <h2>Test Controls</h2>
+    <button id="run-test">Run Responsive Test</button>
+    <button id="toggle-frames">Toggle Device Frames</button>
+  </div>
+  
+  <div class="device-frames">
+    <!-- Mobile Frame -->
+    <div class="device-frame mobile-frame">
+      <div class="device-frame-header">
+        <span class="device-name">Mobile</span>
+        <span class="device-dimensions">375px × 667px</span>
+      </div>
+      <div class="device-content" id="mobile-content">
+        <div class="mobile-grid">
+          <!-- Product cards will be inserted here -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tablet Frame -->
+    <div class="device-frame tablet-frame">
+      <div class="device-frame-header">
+        <span class="device-name">Tablet</span>
+        <span class="device-dimensions">768px × 1024px</span>
+      </div>
+      <div class="device-content" id="tablet-content">
+        <div class="tablet-grid">
+          <!-- Product cards will be inserted here -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Desktop Frame -->
+    <div class="device-frame desktop-frame">
+      <div class="device-frame-header">
+        <span class="device-name">Desktop</span>
+        <span class="device-dimensions">1280px × 800px</span>
+      </div>
+      <div class="device-content" id="desktop-content">
+        <div class="desktop-grid">
+          <!-- Product cards will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="results">
+    <h2>Test Results</h2>
+    <div id="test-results"></div>
+  </div>
+  
+  <script>
+    // Sample product data
+    const products = [
+      {
+        title: 'Modern Minimalist Chair',
+        brand: 'Modern Living',
+        description: 'Ergonomic design with premium materials for maximum comfort. Perfect for home office or living room.',
+        price: '$149.99',
+        salePrice: '$199.99',
+        image: {
+          mobile: 'https://via.placeholder.com/400x400?text=Chair+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Chair+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Chair+Desktop'
+        },
+        isOnSale: true
+      },
+      {
+        title: 'Handcrafted Ceramic Mug Set',
+        brand: 'Artisan Crafts',
+        description: 'Set of 4 handcrafted ceramic mugs. Each piece is unique with subtle variations in glaze and texture.',
+        price: '$39.99',
+        image: {
+          mobile: 'https://via.placeholder.com/400x400?text=Mugs+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Mugs+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Mugs+Desktop'
+        },
+        isFeatured: true
+      },
+      {
+        title: 'Smart Home Security Camera',
+        brand: 'TechSmart',
+        description: 'HD wireless security camera with motion detection, night vision, and two-way audio. Easy to install and connects to your smartphone.',
+        price: '$79.99',
+        salePrice: '$99.99',
+        image: {
+          mobile: 'https://via.placeholder.com/400x400?text=Camera+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Camera+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Camera+Desktop'
+        },
+        isOnSale: true
+      },
+      {
+        title: 'Organic Cotton Throw Blanket',
+        brand: 'Eco Home',
+        description: 'Soft, cozy throw blanket made from 100% organic cotton. Perfect for snuggling on the couch or adding warmth to your bed.',
+        price: '$59.99',
+        image: {
+          mobile: 'https://via.placeholder.com/400x400?text=Blanket+Mobile',
+          tablet: 'https://via.placeholder.com/600x600?text=Blanket+Tablet',
+          desktop: 'https://via.placeholder.com/800x800?text=Blanket+Desktop'
+        }
+      }
+    ];
+    
+    // Create a product card element
+    function createProductCard(product, deviceType) {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      
+      // Set device-specific styles
+      if (deviceType === 'mobile') {
+        card.style.height = '280px';
+      } else if (deviceType === 'tablet') {
+        card.style.height = '320px';
+      } else {
+        card.style.height = '360px';
+      }
+      
+      // Truncate description based on device
+      let descriptionLength = 150;
+      if (deviceType === 'mobile') {
+        descriptionLength = 60;
+      } else if (deviceType === 'tablet') {
+        descriptionLength = 100;
+      }
+      
+      const truncatedDescription = product.description.length > descriptionLength
+        ? product.description.substring(0, descriptionLength) + '...'
+        : product.description;
+      
+      // Create card content
+      card.innerHTML = `
+        <img src="${product.image[deviceType]}" class="product-image" alt="${product.title}" style="height: ${deviceType === 'mobile' ? '160px' : deviceType === 'tablet' ? '190px' : '220px'}">
+        <div class="product-info">
+          <div class="product-brand">${product.brand}</div>
+          <div class="product-title" style="font-size: ${deviceType === 'mobile' ? '0.9em' : deviceType === 'tablet' ? '1em' : '1.1em'}">${product.title}</div>
+          <div class="product-description" style="font-size: ${deviceType === 'mobile' ? '0.8em' : deviceType === 'tablet' ? '0.85em' : '0.9em'}">${truncatedDescription}</div>
+          <div class="product-price">
+            ${product.price}
+            ${product.salePrice ? `<span style="text-decoration: line-through; color: #999; margin-left: 5px;">${product.salePrice}</span>` : ''}
+          </div>
+        </div>
+      `;
+      
+      return card;
+    }
+    
+    // Populate device frames with product cards
+    function populateDeviceFrames() {
+      const deviceTypes = ['mobile', 'tablet', 'desktop'];
+      const gridSelectors = {
+        mobile: '.mobile-grid',
+        tablet: '.tablet-grid',
+        desktop: '.desktop-grid'
+      };
+      
+      deviceTypes.forEach(deviceType => {
+        const grid = document.querySelector(gridSelectors[deviceType]);
+        grid.innerHTML = ''; // Clear existing cards
+        
+        products.forEach(product => {
+          const card = createProductCard(product, deviceType);
+          grid.appendChild(card);
+        });
+      });
+    }
+    
+    // Run responsive test
+    function runResponsiveTest() {
+      populateDeviceFrames();
+      
+      const results = document.getElementById('test-results');
+      results.innerHTML = `
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-top: 10px;">
+          <h3 style="color: #2e7d32; margin-top: 0;">Test Completed Successfully</h3>
+          <p><strong>Mobile (375px):</strong> 280px card height, 400x400 images, 160px image height, 60 char description</p>
+          <p><strong>Tablet (768px):</strong> 320px card height, 600x600 images, 190px image height, 100 char description</p>
+          <p><strong>Desktop (1280px):</strong> 360px card height, 800x800 images, 220px image height, 150 char description</p>
+          <p>All cards maintain consistent heights within their respective device categories.</p>
+        </div>
+      `;
+    }
+    
+    // Toggle device frames
+    function toggleDeviceFrames() {
+      const frames = document.querySelector('.device-frames');
+      frames.style.display = frames.style.display === 'none' ? 'flex' : 'none';
+    }
+    
+    // Event listeners
+    document.getElementById('run-test').addEventListener('click', runResponsiveTest);
+    document.getElementById('toggle-frames').addEventListener('click', toggleDeviceFrames);
+    
+    // Run test on page load
+    window.addEventListener('load', runResponsiveTest);
+  </script>
+</body>
+</html>

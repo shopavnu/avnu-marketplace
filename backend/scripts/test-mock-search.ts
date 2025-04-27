@@ -1,6 +1,6 @@
 /**
  * test-mock-search.ts
- * 
+ *
  * A simplified test script for testing the mock search server
  * This script is designed to work with the mock-search-server.ts
  */
@@ -60,7 +60,7 @@ async function executeQuery(query: string, variables: any): Promise<GraphQLRespo
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
     return response.data as GraphQLResponse;
   } catch (error: any) {
@@ -75,7 +75,7 @@ async function executeQuery(query: string, variables: any): Promise<GraphQLRespo
 // Test basic product search
 async function testBasicSearch(query: string) {
   console.log(`\n=== Testing basic search for: "${query}" ===`);
-  
+
   const graphqlQuery = `
     query ProductSearch($input: SearchOptionsInput!) {
       searchProducts(input: $input) {
@@ -95,21 +95,23 @@ async function testBasicSearch(query: string) {
       }
     }
   `;
-  
+
   const variables = {
     input: {
       query,
       limit: 5,
-      page: 1
-    }
+      page: 1,
+    },
   };
-  
+
   try {
     const result = await executeQuery(graphqlQuery, variables);
     const searchResult = result.data.searchProducts;
-    
-    console.log(`Found ${searchResult.pagination.total} products for query "${searchResult.query}"`);
-    
+
+    console.log(
+      `Found ${searchResult.pagination.total} products for query "${searchResult.query}"`,
+    );
+
     if (searchResult.products.length > 0) {
       console.log('\nTop results:');
       searchResult.products.forEach((product, index) => {
@@ -126,7 +128,7 @@ async function testBasicSearch(query: string) {
 // Test NLP-enhanced search
 async function testNlpSearch(query: string) {
   console.log(`\n=== Testing NLP-enhanced search for: "${query}" ===`);
-  
+
   const graphqlQuery = `
     query NlpSearch($input: SearchOptionsInput!) {
       searchProducts(input: $input) {
@@ -144,30 +146,34 @@ async function testNlpSearch(query: string) {
       }
     }
   `;
-  
+
   const variables = {
     input: {
       query,
       limit: 5,
       page: 1,
-      enableNlp: true
-    }
+      enableNlp: true,
+    },
   };
-  
+
   try {
     const result = await executeQuery(graphqlQuery, variables);
     const searchResult = result.data.searchProducts;
-    
-    console.log(`Found ${searchResult.pagination.total} products for query "${searchResult.query}"`);
-    
+
+    console.log(
+      `Found ${searchResult.pagination.total} products for query "${searchResult.query}"`,
+    );
+
     if (searchResult.processedQuery && searchResult.processedQuery !== searchResult.query) {
       console.log(`Processed query: "${searchResult.processedQuery}"`);
     }
-    
+
     // Note: NLP metadata is not available in the current schema
     console.log('\nNote: NLP metadata is not exposed in the current GraphQL schema');
-    console.log('To see NLP features, we would need to update the schema to include nlpMetadata field');
-    
+    console.log(
+      'To see NLP features, we would need to update the schema to include nlpMetadata field',
+    );
+
     if (searchResult.products.length > 0) {
       console.log('\nTop results:');
       searchResult.products.forEach((product, index) => {
@@ -184,7 +190,7 @@ async function testNlpSearch(query: string) {
 // Test faceted search
 async function testFacetedSearch(query: string): Promise<void> {
   console.log(`\n=== Testing faceted search for: "${query}" ===`);
-  
+
   const graphqlQuery = `
     query FacetedSearch($input: SearchOptionsInput!) {
       searchProducts(input: $input) {
@@ -212,49 +218,53 @@ async function testFacetedSearch(query: string): Promise<void> {
       }
     }
   `;
-  
+
   const variables = {
     input: {
       query,
       limit: 0,
-      page: 1
-    }
+      page: 1,
+    },
   };
-  
+
   try {
     const result = await executeQuery(graphqlQuery, variables);
-    
+
     if (!result.data.searchProducts) {
       console.error('Faceted search failed: No search results returned');
       return;
     }
-    
+
     const searchResult = result.data.searchProducts;
-    
-    console.log(`Found ${searchResult.pagination.total} products for query "${searchResult.query}"`);
-    
+
+    console.log(
+      `Found ${searchResult.pagination.total} products for query "${searchResult.query}"`,
+    );
+
     if (searchResult.facets) {
       console.log('\nFacets:');
-      
+
       if (searchResult.facets.categories && searchResult.facets.categories.length > 0) {
         console.log('\nCategories:');
         searchResult.facets.categories.forEach(cat => {
           console.log(`  ${cat.name} (${cat.count})`);
         });
       }
-      
+
       if (searchResult.facets.brands && searchResult.facets.brands.length > 0) {
         console.log('\nBrands:');
         searchResult.facets.brands.forEach(brand => {
           console.log(`  ${brand.name} (${brand.count})`);
         });
       }
-      
+
       // Colors facet is not available in the current schema
       console.log('\nNote: Color facets are not exposed in the current GraphQL schema');
-      
+
       if (searchResult.facets.price) {
-        console.log(`\nPrice Range: $${searchResult.facets.price.min.toFixed(2)} - $${searchResult.facets.price.max.toFixed(2)}`);
+        console.log(
+          `\nPrice Range: $${searchResult.facets.price.min.toFixed(2)} - $${searchResult.facets.price.max.toFixed(2)}`,
+        );
       }
     }
   } catch (error) {
@@ -265,7 +275,7 @@ async function testFacetedSearch(query: string): Promise<void> {
 // Test filtered search
 async function testFilteredSearch(query: string, brandFilter: string) {
   console.log(`\n=== Testing filtered search for: "${query}" with brand: "${brandFilter}" ===`);
-  
+
   const graphqlQuery = `
     query FilteredSearch($input: SearchOptionsInput!) {
       searchProducts(input: $input) {
@@ -282,7 +292,7 @@ async function testFilteredSearch(query: string, brandFilter: string) {
       }
     }
   `;
-  
+
   const variables = {
     input: {
       query,
@@ -292,18 +302,20 @@ async function testFilteredSearch(query: string, brandFilter: string) {
         {
           field: 'brandName',
           values: [brandFilter],
-          exact: true
-        }
-      ]
-    }
+          exact: true,
+        },
+      ],
+    },
   };
-  
+
   try {
     const result = await executeQuery(graphqlQuery, variables);
     const searchResult = result.data.searchProducts;
-    
-    console.log(`Found ${searchResult.pagination.total} ${brandFilter} products for query "${searchResult.query}"`);
-    
+
+    console.log(
+      `Found ${searchResult.pagination.total} ${brandFilter} products for query "${searchResult.query}"`,
+    );
+
     if (searchResult.products.length > 0) {
       console.log('\nFiltered results:');
       searchResult.products.forEach((product, index) => {
@@ -321,20 +333,20 @@ async function testFilteredSearch(query: string, brandFilter: string) {
 async function main() {
   const args = process.argv.slice(2);
   const query = args[0] || 'shoes';
-  
+
   console.log('=== MOCK SEARCH SERVER TEST ===');
   console.log('Make sure the mock search server is running on port 3001');
-  
+
   try {
     // Test basic search
     await testBasicSearch(query);
-    
+
     // Test NLP-enhanced search
     await testNlpSearch(query);
-    
+
     // Test faceted search
     await testFacetedSearch(query);
-    
+
     // Test filtered search (if brand specified)
     if (args[1]) {
       await testFilteredSearch(query, args[1]);
@@ -342,7 +354,7 @@ async function main() {
       // Use a default brand filter
       await testFilteredSearch(query, 'Nike');
     }
-    
+
     console.log('\n=== All tests completed successfully ===');
   } catch (error) {
     console.error('\nTest suite failed:', error.message);

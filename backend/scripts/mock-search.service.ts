@@ -37,7 +37,7 @@ export class MockSearchService {
    */
   async getProductSuggestions(partialQuery: string, limit = 5): Promise<string[]> {
     this.logger.log(`Mock suggestions for: ${partialQuery}`);
-    
+
     // Return mock suggestions
     return [
       `${partialQuery} suggestion 1`,
