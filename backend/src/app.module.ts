@@ -27,6 +27,7 @@ import { PersonalizationModule } from '@modules/personalization';
 import { AnalyticsModule } from '@modules/analytics';
 import { AbTestingModule } from '@modules/ab-testing';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { AdvertisingModule } from './modules/advertising/advertising.module';
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -111,6 +112,7 @@ registerEnumType(ExperimentStatus, {
     AnalyticsModule,
     AbTestingModule,
     RecommendationsModule,
+    AdvertisingModule,
   ],
 })
 export class AppModule {}

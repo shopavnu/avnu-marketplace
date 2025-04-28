@@ -1,5 +1,38 @@
 # Avnu Marketplace Changelog - April 2025
 
+## Feature: Merchant Advertising Analytics Dashboard
+
+Added a comprehensive analytics dashboard for monitoring merchant advertising performance, including platform revenue, product sales, and historical trends.
+
+### Key Components:
+
+1. **Frontend**:
+   - New admin dashboard page at `/admin/analytics/merchant-advertising`
+   - Interactive trend charts for visualizing performance over time
+   - Campaign-level performance metrics and insights
+   - Filtering by merchant, time period, and campaign
+   - Responsive design for desktop and mobile viewing
+
+2. **Backend**:
+   - Created `AdvertisingModule` with DTOs, services, and resolvers
+   - Implemented GraphQL API for advertising metrics
+   - Added historical metrics for trend tracking
+   - Integrated with existing analytics infrastructure
+
+3. **Key Metrics**:
+   - Platform Ad Revenue: Revenue Avnu makes directly from ads
+   - Product Sales from Ads: Revenue from products sold through ad campaigns
+   - Return on Ad Spend (ROAS): Ratio of product sales to ad spend
+   - Cost Per Acquisition (CPA): Average cost to acquire a customer
+   - Conversion Value: Average revenue per conversion
+
+### User Flow:
+1. Admin logs into the dashboard
+2. Navigates to Analytics > Merchant Advertising
+3. Views aggregate metrics and performance trends
+4. Can filter by merchant and time period
+5. Can select specific campaigns for detailed analysis
+
 ## Feature: Merchant Portal Product Suppression
 
 Merchants can now manage which of their products appear in marketplace recommendations and discovery feeds through a dedicated suppression dashboard.
@@ -58,8 +91,10 @@ Enhanced the recommendation system to ensure users see fresh, diverse products a
 - Fallback to trending products if not enough recommendations after filtering
 
 ## Code Quality Improvements:
-- Fixed TypeScript errors in recommendation modules
-- Addressed linting warnings with proper variable naming
+- Fixed TypeScript errors in recommendation modules and analytics components
+- Addressed linting warnings with proper variable naming and type annotations
 - Improved code documentation and comments
 - Maintained consistent styling across components
+- Created comprehensive documentation for the admin dashboard
 - Removed deprecated code and services
+- Enhanced D3.js visualizations with proper TypeScript typing
