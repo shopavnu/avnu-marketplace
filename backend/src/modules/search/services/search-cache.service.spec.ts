@@ -1,8 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import {} from /* Cache */ 'cache-manager';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { SearchCacheService } from './search-cache.service';
 import { SearchOptionsInput } from '../dto/search-options.dto';
 import { SearchEntityType } from '../enums/search-entity-type.enum';
@@ -10,60 +8,37 @@ import { SearchResponseDto } from '../dto/search-response.dto';
 
 describe('SearchCacheService', () => {
   let service: SearchCacheService;
-  let cacheManagerMock: {
-    get: jest.Mock;
-    set: jest.Mock;
-    del: jest.Mock;
-    reset: jest.Mock;
-    store: {
-      keys: jest.Mock;
-    };
-  };
-  let loggerMock: Logger;
-  let configService: { get: jest.Mock };
+  let cacheManagerMock: any;
+  let configServiceMock: any;
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    // Create mocks for dependencies
     cacheManagerMock = {
       get: jest.fn(),
       set: jest.fn(),
       del: jest.fn(),
       reset: jest.fn(),
-      store: { keys: jest.fn() },
     };
 
-    loggerMock = new Logger(SearchCacheService.name);
-
-    configService = {
+    configServiceMock = {
       get: jest.fn(),
     };
 
-    configService.get.mockImplementation((key: string, defaultValue: any) => {
+    // Configure the config service mock to return expected values
+    configServiceMock.get.mockImplementation((key: string, defaultValue: any) => {
       const config = {
         SEARCH_CACHE_ENABLED: true,
-        SEARCH_CACHE_TTL: 300,
+        SEARCH_CACHE_TTL_SECONDS: 300,
       };
       return config[key] !== undefined ? config[key] : defaultValue;
     });
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SearchCacheService,
-        {
-          provide: CACHE_MANAGER,
-          useValue: cacheManagerMock,
-        },
-        {
-          provide: Logger,
-          useValue: loggerMock,
-        },
-        {
-          provide: ConfigService,
-          useValue: configService,
-        },
-      ],
-    }).compile();
-
-    service = module.get<SearchCacheService>(SearchCacheService);
+    // Create the service directly with mocked dependencies
+    // Use type assertion to bypass TypeScript's type checking for the mocks
+    service = new SearchCacheService(
+      cacheManagerMock, 
+      configServiceMock as unknown as ConfigService
+    );
   });
 
   it('should be defined', () => {
@@ -106,32 +81,19 @@ describe('SearchCacheService', () => {
     });
 
     it('should return null when cache is disabled', async () => {
-      // Create a local testing module with cache explicitly disabled
-      const module = await Test.createTestingModule({
-        providers: [
-          SearchCacheService,
-          {
-            provide: CACHE_MANAGER,
-            useValue: cacheManagerMock, // Reuse the mock from beforeEach
-          },
-          {
-            provide: Logger,
-            useValue: new Logger(SearchCacheService.name), // Can create a new logger instance
-          },
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn((key: string, defaultValue: any) => {
-                if (key === 'SEARCH_CACHE_ENABLED') return false;
-                if (key === 'SEARCH_CACHE_TTL_SECONDS') return 300;
-                return defaultValue;
-              }),
-            },
-          },
-        ],
-      }).compile();
-
-      const localService = module.get<SearchCacheService>(SearchCacheService);
+      // Create a service instance with cache disabled
+      const disabledConfigService = {
+        get: jest.fn((key: string, defaultValue: any) => {
+          if (key === 'SEARCH_CACHE_ENABLED') return false;
+          if (key === 'SEARCH_CACHE_TTL_SECONDS') return 300;
+          return defaultValue;
+        }),
+      };
+      
+      const localService = new SearchCacheService(
+        cacheManagerMock, 
+        disabledConfigService as unknown as ConfigService
+      );
 
       const options: SearchOptionsInput = {
         query: 'test query',
@@ -212,7 +174,7 @@ describe('SearchCacheService', () => {
     });
 
     it('should not cache results when caching is disabled', async () => {
-      configService.get.mockReturnValueOnce(false);
+      configServiceMock.get.mockReturnValueOnce(false);
       const options: SearchOptionsInput = {
         query: 'test query',
         page: 0,
