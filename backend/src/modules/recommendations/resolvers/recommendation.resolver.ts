@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ProductSimilarityService } from '../services/product-similarity.service';
-import { PersonalizedRankingService } from '../services/personalized-ranking.service';
+import { EnhancedPersonalizationService } from '../services/enhanced-personalization.service';
 import { SimilarityType } from '../entities/product-similarity.entity';
 import { Product } from '../../products/entities/product.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -11,7 +11,7 @@ import { OptionalAuthGuard } from '../../auth/guards/optional-auth.guard';
 export class RecommendationResolver {
   constructor(
     private readonly productSimilarityService: ProductSimilarityService,
-    private readonly personalizedRankingService: PersonalizedRankingService,
+    private readonly enhancedPersonalizationService: EnhancedPersonalizationService,
   ) {}
 
   @Query(() => [Product], { name: 'similarProducts' })
@@ -32,7 +32,11 @@ export class RecommendationResolver {
     @Args('refresh', { type: () => Boolean, nullable: true, defaultValue: false }) refresh: boolean,
   ): Promise<Product[]> {
     const userId = context.req.user?.id;
-    return this.personalizedRankingService.getPersonalizedRecommendations(userId, limit, refresh);
+    return this.enhancedPersonalizationService.getPersonalizedRecommendations(
+      userId,
+      limit,
+      refresh,
+    );
   }
 
   @Query(() => [Product], { name: 'trendingProducts' })
@@ -42,24 +46,24 @@ export class RecommendationResolver {
     @Args('limit', { type: () => Int, nullable: true, defaultValue: 10 }) limit: number,
   ): Promise<Product[]> {
     const userId = context.req.user?.id || 'anonymous';
-    return this.personalizedRankingService.getPersonalizedRecommendations(userId, limit, false);
+    return this.enhancedPersonalizationService.getTrendingProducts(userId, limit);
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationImpression' })
-  async trackImpression(@Args('recommendationId') recommendationId: string): Promise<boolean> {
-    await this.personalizedRankingService.trackImpression(recommendationId);
+  async trackImpression(@Args('recommendationId') _recommendationId: string): Promise<boolean> {
+    // Tracking is now handled by the session service
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationClick' })
-  async trackClick(@Args('recommendationId') recommendationId: string): Promise<boolean> {
-    await this.personalizedRankingService.trackClick(recommendationId);
+  async trackClick(@Args('recommendationId') _recommendationId: string): Promise<boolean> {
+    // Tracking is now handled by the session service
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'trackRecommendationConversion' })
-  async trackConversion(@Args('recommendationId') recommendationId: string): Promise<boolean> {
-    await this.personalizedRankingService.trackConversion(recommendationId);
+  async trackConversion(@Args('recommendationId') _recommendationId: string): Promise<boolean> {
+    // Tracking is now handled by the session service
     return true;
   }
 

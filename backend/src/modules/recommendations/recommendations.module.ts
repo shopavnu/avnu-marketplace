@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductSimilarityService } from './services/product-similarity.service';
-import { PersonalizedRankingService } from './services/personalized-ranking.service';
-import { RecommendationExperimentService } from './services/recommendation-experiment.service';
+import { EnhancedPersonalizationService } from './services/enhanced-personalization.service';
 import { RecommendationController } from './controllers/recommendation.controller';
 import { RecommendationResolver } from './resolvers/recommendation.resolver';
 import { ProductSimilarity } from './entities/product-similarity.entity';
@@ -19,13 +18,8 @@ import { AbTestingModule } from '../ab-testing/ab-testing.module';
     PersonalizationModule,
     AbTestingModule,
   ],
-  providers: [
-    ProductSimilarityService,
-    PersonalizedRankingService,
-    RecommendationExperimentService,
-    RecommendationResolver,
-  ],
+  providers: [ProductSimilarityService, EnhancedPersonalizationService, RecommendationResolver],
   controllers: [RecommendationController],
-  exports: [ProductSimilarityService, PersonalizedRankingService, RecommendationExperimentService],
+  exports: [ProductSimilarityService, EnhancedPersonalizationService],
 })
 export class RecommendationsModule {}

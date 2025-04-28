@@ -132,6 +132,22 @@ npm run test
 
 The project is configured for deployment on Vercel. All TypeScript errors and linting issues have been resolved to ensure smooth deployment.
 
+## Latest Features (April 2025)
+
+### 1. Merchant Product Suppression
+- Merchants can now control which products appear in recommendations and discovery feeds
+- Dedicated dashboard for managing suppressed products
+- Bulk actions for efficient product management
+- Immediate effect on marketplace visibility
+
+### 2. Fresh & Diverse Recommendations
+- Enhanced recommendation system to prevent repetitive product suggestions
+- Automatic exclusion of purchased products from recommendations
+- Freshness controls to balance between new discoveries and familiar items
+- Interactive "Discover" page for exploring personalized recommendations
+
+See the [April 2025 Changelog](./CHANGELOG-APRIL-2025.md) for complete details on these features.
+
 ## Future Enhancements
 
 1. Further optimization of TypeScript types across the codebase

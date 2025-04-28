@@ -11,6 +11,8 @@ interface PersonalizedRecommendationsProps {
   title?: string;
   fallbackTitle?: string;
   showRefreshButton?: boolean;
+  excludePurchased?: boolean;
+  freshness?: number;
 }
 
 /**
@@ -21,6 +23,8 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
   title = 'Recommended for you',
   fallbackTitle = 'Trending now',
   showRefreshButton = false,
+  excludePurchased = true,
+  freshness = 0.7,
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,7 +40,12 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
       
       if (isAuthenticated) {
         // Try to get personalized recommendations for authenticated users
-        fetchedProducts = await RecommendationService.getPersonalizedRecommendations(limit, refresh);
+        fetchedProducts = await RecommendationService.getPersonalizedRecommendations(
+          limit,
+          refresh,
+          excludePurchased,
+          freshness
+        );
         
         // Filter out suppressed products
         fetchedProducts = fetchedProducts.filter(product => !product.isSuppressed);
@@ -45,7 +54,10 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
       
       // Fall back to trending products if no personalized recommendations or not authenticated
       if (fetchedProducts.length === 0) {
-        fetchedProducts = await RecommendationService.getTrendingProducts(limit);
+        fetchedProducts = await RecommendationService.getTrendingProducts(
+          limit,
+          excludePurchased
+        );
         
         // Filter out suppressed products
         fetchedProducts = fetchedProducts.filter(product => !product.isSuppressed);
@@ -78,7 +90,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
   useEffect(() => {
     fetchRecommendations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [limit, isAuthenticated]);
+  }, [limit, isAuthenticated, excludePurchased, freshness]);
 
   // Track impression when products are displayed
   useEffect(() => {

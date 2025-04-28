@@ -19,6 +19,7 @@ The system also includes a Product Suppression & Merchant Notification component
 - **Product Validation**: Automated validation of product data completeness and quality
 - **Intelligent Suppression**: Context-aware suppression of products with missing key data
 - **Merchant Notifications**: Email alerts to merchants about suppressed products with guidance on how to fix issues
+- **Merchant Dashboard**: Dedicated interface for viewing and managing suppressed products
 
 ## Architecture
 
@@ -66,6 +67,11 @@ The personalization and recommendation system consists of:
   - Sends email notifications about suppressed products
   - Provides detailed information about issues to fix
   - Includes direct links to edit affected products
+
+- **Merchant Dashboard Service**: Manages suppressed product visibility and actions
+  - Provides filtered views of suppressed products
+  - Enables bulk actions for product management
+  - Supports revalidation of fixed products
 
 ### Database Schema
 
@@ -278,8 +284,10 @@ Detailed documentation is available for each component:
 - [Product Card Components](/frontend/src/components/product/README.md)
 - [Recommendation Components](/frontend/src/components/recommendations/README.md)
 - [Product Suppression & Merchant Notification](/docs/PRODUCT_SUPPRESSION.md)
+- [Merchant Dashboard for Suppressed Products](/frontend/src/pages/merchant/products/README.md)
 - [Vertical Optimization for Product Cards](/docs/VERTICAL_OPTIMIZATION.md)
 - [Backend API Documentation](/backend/docs/api.md)
+- [TypeScript Issues Documentation](/TYPESCRIPT-ISSUES.md)
 
 ## Contributors
 

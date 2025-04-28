@@ -32,6 +32,7 @@ export default function Navigation() {
       <NavLink href="/shop">Shop</NavLink>
       <NavLink href="/brand">Brands</NavLink>
       <NavLink href="/interests">Interests</NavLink>
+      <NavLink href="/FreshRecommendations">Discover</NavLink>
       <NavLink href="/about">About</NavLink>
       <NavLink href="/account/settings">
         <span style={{ color: 'var(--color-primary)' }}>Settings</span>

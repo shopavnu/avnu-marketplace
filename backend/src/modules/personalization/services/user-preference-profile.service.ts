@@ -84,7 +84,7 @@ export class UserPreferenceProfileService {
   private async processInteractionsForProfile(
     profile: UserPreferenceProfile,
     interactions: SessionInteractionEntity[],
-    sessionWeights: Record<string, any>,
+    _sessionWeights: Record<string, any>,
   ): Promise<void> {
     try {
       // Initialize counters

@@ -13,9 +13,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ProductSimilarityService } from '../services/product-similarity.service';
-import { PersonalizedRankingService } from '../services/personalized-ranking.service';
+import { EnhancedPersonalizationService } from '../services/enhanced-personalization.service';
 import { SimilarityType } from '../entities/product-similarity.entity';
-import { RecommendationType } from '../entities/product-recommendation.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../auth/guards/optional-auth.guard';
 // Define the request type with user property
@@ -38,7 +37,7 @@ export class RecommendationController {
 
   constructor(
     private readonly productSimilarityService: ProductSimilarityService,
-    private readonly personalizedRankingService: PersonalizedRankingService,
+    private readonly enhancedPersonalizationService: EnhancedPersonalizationService,
   ) {}
 
   @Get('similar-products/:productId')
@@ -85,11 +84,15 @@ export class RecommendationController {
   @ApiOperation({ summary: 'Get personalized recommendations' })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiQuery({ name: 'refresh', type: Boolean, required: false })
+  @ApiQuery({ name: 'excludePurchased', type: Boolean, required: false })
+  @ApiQuery({ name: 'freshness', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Returns personalized recommendations' })
   async getPersonalizedRecommendations(
     @Req() req: RequestWithUser,
     @Query('limit') limit: number = 10,
     @Query('refresh') refresh: boolean = false,
+    @Query('excludePurchased') excludePurchased: boolean = true,
+    @Query('freshness') freshness: number = 0.7,
   ) {
     try {
       const userId = req.user?.id;
@@ -104,11 +107,14 @@ export class RecommendationController {
         );
       }
 
-      const recommendations = await this.personalizedRankingService.getPersonalizedRecommendations(
-        userId,
-        limit,
-        refresh,
-      );
+      const recommendations =
+        await this.enhancedPersonalizationService.getPersonalizedRecommendations(
+          userId,
+          limit,
+          refresh,
+          excludePurchased,
+          freshness,
+        );
 
       return {
         success: true,
@@ -135,24 +141,29 @@ export class RecommendationController {
   @UseGuards(OptionalAuthGuard)
   @ApiOperation({ summary: 'Get trending products' })
   @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'excludePurchased', type: Boolean, required: false })
   @ApiResponse({ status: 200, description: 'Returns trending products' })
-  async getTrendingProducts(@Req() req: RequestWithUser, @Query('limit') limit: number = 10) {
+  async getTrendingProducts(
+    @Req() req: RequestWithUser,
+    @Query('limit') limit: number = 10,
+    @Query('excludePurchased') excludePurchased: boolean = true,
+  ) {
     try {
       const userId = req.user?.id || 'anonymous';
 
       // For anonymous users or when no personalized recommendations are available,
       // this will fall back to popularity-based recommendations
-      const recommendations = await this.personalizedRankingService.getPersonalizedRecommendations(
+      const trendingProducts = await this.enhancedPersonalizationService.getTrendingProducts(
         userId,
         limit,
-        false,
+        excludePurchased,
       );
 
       return {
         success: true,
-        data: recommendations,
+        data: trendingProducts,
         meta: {
-          count: recommendations.length,
+          count: trendingProducts.length,
         },
       };
     } catch (error) {
@@ -172,9 +183,9 @@ export class RecommendationController {
   @ApiOperation({ summary: 'Track recommendation impression' })
   @ApiParam({ name: 'recommendationId', description: 'Recommendation ID' })
   @ApiResponse({ status: 200, description: 'Impression tracked successfully' })
-  async trackImpression(@Param('recommendationId') recommendationId: string) {
+  async trackImpression(@Param('recommendationId') _recommendationId: string) {
     try {
-      await this.personalizedRankingService.trackImpression(recommendationId);
+      // Tracking is handled by the session service now
 
       return {
         success: true,
@@ -197,9 +208,9 @@ export class RecommendationController {
   @ApiOperation({ summary: 'Track recommendation click' })
   @ApiParam({ name: 'recommendationId', description: 'Recommendation ID' })
   @ApiResponse({ status: 200, description: 'Click tracked successfully' })
-  async trackClick(@Param('recommendationId') recommendationId: string) {
+  async trackClick(@Param('recommendationId') _recommendationId: string) {
     try {
-      await this.personalizedRankingService.trackClick(recommendationId);
+      // Tracking is handled by the session service now
 
       return {
         success: true,
@@ -222,9 +233,9 @@ export class RecommendationController {
   @ApiOperation({ summary: 'Track recommendation conversion' })
   @ApiParam({ name: 'recommendationId', description: 'Recommendation ID' })
   @ApiResponse({ status: 200, description: 'Conversion tracked successfully' })
-  async trackConversion(@Param('recommendationId') recommendationId: string) {
+  async trackConversion(@Param('recommendationId') _recommendationId: string) {
     try {
-      await this.personalizedRankingService.trackConversion(recommendationId);
+      // Tracking is handled by the session service now
 
       return {
         success: true,
