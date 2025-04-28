@@ -4,9 +4,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
 import {
   BudgetAllocationStrategy,
-  _BudgetUtilization,
-  _BudgetForecast,
-  _BudgetUpdateResult,
+  BudgetUtilization as _BudgetUtilization,
+  BudgetForecast as _BudgetForecast,
+  BudgetUpdateResult as _BudgetUpdateResult,
 } from '../test/mocks/entity-mocks';
 
 // Import the mock service instead of the real one

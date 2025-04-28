@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
-import { UserPreferenceProfile } from '../../personalization/entities/user-preference-profile.entity';
+// Unused import but kept for reference
+// import { UserPreferenceProfile } from '../../personalization/entities/user-preference-profile.entity';
 import { UserPreferenceProfileService } from '../../personalization/services/user-preference-profile.service';
 
 /**

@@ -3,9 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
 import {
-  _AdPlacementOptions,
-  _AdPlacementResult,
-  _BudgetUpdateResult,
+  AdPlacementOptions as _AdPlacementOptions,
+  AdPlacementResult as _AdPlacementResult,
+  BudgetUpdateResult as _BudgetUpdateResult,
 } from '../test/mocks/entity-mocks';
 
 // Import the mock services instead of the real ones

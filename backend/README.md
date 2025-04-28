@@ -11,6 +11,9 @@ A sophisticated, discovery-focused e-commerce platform with an advanced search i
 - Search caching, experimentation, and monitoring
 - Entity relevance scoring
 - Comprehensive analytics dashboard
+- Advanced query optimization and adaptive caching
+- Query performance analytics and monitoring
+- Database-specific optimizations (PostgreSQL)
 
 ## Tech Stack
 
@@ -18,9 +21,11 @@ A sophisticated, discovery-focused e-commerce platform with an advanced search i
 - Elasticsearch
 - GraphQL
 - Redis (Caching)
-- PostgreSQL
+- PostgreSQL (with full-text search)
 - Docker
 - Kubernetes
+- Circuit Breaker Pattern
+- Adaptive Caching
 
 ## Getting Started
 
@@ -146,6 +151,13 @@ SEARCH_ENABLE_ENTITY_RECOGNITION=true
 SEARCH_CACHE_ENABLED=true
 SEARCH_CACHE_TTL=300
 SEARCH_CACHE_MAX_ITEMS=1000
+CACHE_ENABLED=true
+CACHE_TTL=300
+SLOW_QUERY_THRESHOLD_MS=500
+QUERY_CACHE_TTL_DEFAULT=300
+QUERY_CACHE_TTL_HIGH_TRAFFIC=600
+QUERY_CACHE_TTL_LOW_TRAFFIC=60
+CACHE_WARMUP_ENABLED=true
 
 # Experiments Configuration
 SEARCH_EXPERIMENTS_ENABLED=true
@@ -170,7 +182,12 @@ npm run test:e2e
 
 # Performance tests
 npm run test:perf
+
+# Run caching and query optimization tests
+npm test -- --config=jest.config.js "src/modules/**/*(cache|query)*.spec.ts"
 ```
+
+See the [Testing Guide](./docs/TESTING_GUIDE.md) for more details on our testing approach.
 
 ## CI/CD Pipeline
 
@@ -179,6 +196,11 @@ The project uses GitHub Actions for CI/CD:
 - Linting and testing on pull requests
 - Automatic deployment to staging on merge to develop
 - Automatic deployment to production on merge to main
+
+## Documentation
+
+- [Caching & Query Optimization](./docs/CACHING_QUERY_OPTIMIZATION.md) - Details on our caching layer and query optimization
+- [Testing Guide](./docs/TESTING_GUIDE.md) - Guide for running and extending tests
 
 ## License
 

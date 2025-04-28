@@ -134,6 +134,27 @@ export class SessionService {
   }
 
   /**
+   * Get interactions by type across all sessions
+   * @param type Interaction type
+   * @param limit Maximum number of interactions to return
+   */
+  async getInteractionsByType(
+    type: SessionInteractionType,
+    limit: number = 100,
+  ): Promise<SessionInteractionEntity[]> {
+    try {
+      return this.interactionRepository.find({
+        where: { type },
+        order: { timestamp: 'DESC' },
+        take: limit,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get interactions by type: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
    * Calculate session-based personalization weights
    * @param sessionId Session ID
    */
