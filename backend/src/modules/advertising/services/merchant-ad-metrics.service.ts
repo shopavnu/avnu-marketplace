@@ -17,10 +17,17 @@ export class MerchantAdMetricsService {
     const totalRevenue = campaigns.reduce((sum, campaign) => sum + campaign.totalRevenue, 0);
     const totalCost = campaigns.reduce((sum, campaign) => sum + campaign.totalCost, 0);
     const totalRoi = totalCost > 0 ? ((totalRevenue - totalCost) / totalCost) * 100 : 0;
-    const totalImpressions = campaigns.reduce((sum, campaign) => sum + campaign.totalImpressions, 0);
+    const totalImpressions = campaigns.reduce(
+      (sum, campaign) => sum + campaign.totalImpressions,
+      0,
+    );
     const totalClicks = campaigns.reduce((sum, campaign) => sum + campaign.totalClicks, 0);
-    const averageClickThroughRate = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-    const totalConversions = campaigns.reduce((sum, campaign) => sum + campaign.totalConversions, 0);
+    const averageClickThroughRate = 
+      totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+    const totalConversions = campaigns.reduce(
+      (sum, campaign) => sum + campaign.totalConversions,
+      0,
+    );
     const averageConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
     // Calculate platform revenue (what Avnu makes from ads)
@@ -37,7 +44,8 @@ export class MerchantAdMetricsService {
     const returnOnAdSpend = totalCost > 0 ? productSalesFromAds / totalCost : 0;
 
     // Calculate average conversion value
-    const averageConversionValue = totalConversions > 0 ? productSalesFromAds / totalConversions : 0;
+    const averageConversionValue = 
+      totalConversions > 0 ? productSalesFromAds / totalConversions : 0;
 
     // Calculate cost per acquisition (CPA)
     const costPerAcquisition = totalConversions > 0 ? totalCost / totalConversions : 0;
