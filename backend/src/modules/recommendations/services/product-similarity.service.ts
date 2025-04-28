@@ -44,7 +44,7 @@ export class ProductSimilarityService {
       // Calculate similarity scores
       const similarities: ProductSimilarity[] = [];
       const allProducts = allProductsResult.items || [];
-      
+
       // Filter out the source product
       const filteredProducts = allProducts.filter(product => product.id !== productId);
 
@@ -200,11 +200,11 @@ export class ProductSimilarityService {
    */
   private hasCommonKeywords(text1: string, text2: string): boolean {
     if (!text1 || !text2) return false;
-    
+
     // Extract keywords (simple implementation)
     const keywords1 = this.extractKeywords(text1);
     const keywords2 = this.extractKeywords(text2);
-    
+
     return this.hasCommonElements(keywords1, keywords2);
   }
 
@@ -214,7 +214,7 @@ export class ProductSimilarityService {
    */
   private extractKeywords(text: string): string[] {
     if (!text) return [];
-    
+
     // Simple implementation: split by spaces, lowercase, remove punctuation
     return text
       .toLowerCase()
@@ -235,7 +235,7 @@ export class ProductSimilarityService {
   ): Promise<ProductSimilarity[]> {
     try {
       this.logger.log(`Calculating view-based similarity for product ${productId}`);
-      
+
       // In a real implementation, we would use user behavior data to calculate view-based similarity
       // For now, we'll return an empty array as this is just a placeholder
       return [];
@@ -256,7 +256,7 @@ export class ProductSimilarityService {
   ): Promise<ProductSimilarity[]> {
     try {
       this.logger.log(`Calculating hybrid similarity for product ${productId}`);
-      
+
       // In a real implementation, we would combine attribute and view-based similarities
       // For now, we'll just use attribute-based similarity as a placeholder
       const attributeSimilarities = await this.calculateAttributeBasedSimilarity(productId, limit);
