@@ -5,7 +5,7 @@ import {
   BudgetAllocationStrategy,
 } from '../services/ad-budget-management.service';
 import { MerchantService } from '../services/merchant.service';
-import { _MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
+import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { MerchantOnly } from '../../auth/decorators/merchant-only.decorator';
 import { User, UserRole } from '../../users/entities/user.entity';

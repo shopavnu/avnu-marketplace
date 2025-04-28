@@ -12,6 +12,7 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { UsersModule } from '@modules/users';
 import { ProductsModule } from '@modules/products';
 import { MerchantsModule } from '@modules/merchants';
+import { CategoriesModule } from '@modules/categories/categories.module';
 import { OrdersModule } from '@modules/orders';
 import { IntegrationsModule } from '@modules/integrations';
 import { SearchModule } from '@modules/search';
@@ -21,7 +22,7 @@ import { NlpModule } from '@modules/nlp';
 import { PersonalizationModule } from '@modules/personalization';
 import { AnalyticsModule } from '@modules/analytics';
 import { AbTestingModule } from '@modules/ab-testing';
-import { RecommendationsModule } from '@modules/recommendations';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -86,6 +87,7 @@ registerEnumType(ExperimentStatus, {
     UsersModule,
     ProductsModule,
     MerchantsModule,
+    CategoriesModule,
     OrdersModule,
     IntegrationsModule,
     SearchModule,

@@ -46,7 +46,7 @@ export function createRepositoryFactory<T>(_entity: Type<T>) {
  */
 export function createRepositoryProvider<T>(_entity: Type<T>) {
   return {
-    provide: `${entity.name}Repository`,
+    provide: `${_entity.name}Repository`,
     useFactory: (factory: { getRepository(): Repository<T> }) => factory.getRepository(),
     inject: [createRepositoryFactory(_entity)],
   };

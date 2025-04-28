@@ -87,7 +87,7 @@ class MockMerchantAnalyticsRepository implements Partial<Repository<MerchantAnal
     let results = [...this.mockData];
 
     if (_options?.where) {
-      const where = options.where;
+      const where = _options.where;
 
       // Filter by merchantId
       if (where.merchantId) {
