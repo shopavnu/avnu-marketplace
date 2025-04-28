@@ -76,10 +76,20 @@ registerEnumType(ExperimentStatus, {
     }),
 
     // Redis Cache
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      ttl: 60 * 60, // 1 hour
-      max: 1000, // Maximum number of items in cache
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: require('cache-manager-redis-store').create({
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+          auth_pass: configService.get('REDIS_PASSWORD', ''),
+          db: configService.get('REDIS_DB', 0),
+          ttl: configService.get('REDIS_TTL', 60 * 60), // 1 hour default
+        }),
+        max: configService.get('REDIS_MAX_ITEMS', 1000), // Maximum number of items in cache
+      }),
     }),
 
     // Feature modules

@@ -24,6 +24,13 @@ import { MerchantProductsController } from './controllers/merchant-products.cont
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ProductSuppressionAnalyticsService } from './services/product-suppression-analytics.service';
 import { ProductSuppressionAnalyticsResolver } from './resolvers/product-suppression-analytics.resolver';
+import { ProductCacheService } from './services/product-cache.service';
+import { CachedProductsService } from './services/cached-products.service';
+import { CacheWarmingService } from './services/cache-warming.service';
+import { ProductCacheController } from './controllers/product-cache.controller';
+import { CachedProductsResolver } from './resolvers/cached-products.resolver';
+import { CachePerformanceMonitorService } from './services/cache-performance-monitor.service';
+import { CachePerformanceResolver } from './resolvers/cache-performance.resolver';
 
 @Module({
   imports: [
@@ -38,6 +45,7 @@ import { ProductSuppressionAnalyticsResolver } from './resolvers/product-suppres
     BatchSectionsController,
     ProgressiveLoadingController,
     MerchantProductsController,
+    ProductCacheController,
   ],
   providers: [
     ProductsService,
@@ -54,6 +62,12 @@ import { ProductSuppressionAnalyticsResolver } from './resolvers/product-suppres
     ProductValidationTask,
     ProductSuppressionAnalyticsService,
     ProductSuppressionAnalyticsResolver,
+    ProductCacheService,
+    CachedProductsService,
+    CacheWarmingService,
+    CachedProductsResolver,
+    CachePerformanceMonitorService,
+    CachePerformanceResolver,
   ],
   exports: [
     ProductsService,
@@ -67,6 +81,12 @@ import { ProductSuppressionAnalyticsResolver } from './resolvers/product-suppres
     ProgressiveLoadingService,
     ProductValidationService,
     ProductSuppressionAnalyticsService,
+    ProductCacheService,
+    CachedProductsService,
+    CacheWarmingService,
+    CachedProductsResolver,
+    CachePerformanceMonitorService,
+    CachePerformanceResolver,
   ],
 })
 export class ProductsModule {}
