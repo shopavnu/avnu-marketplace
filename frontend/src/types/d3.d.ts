@@ -1,34 +1,35 @@
 // This file ensures TypeScript recognizes the d3 module
-// The actual types come from @types/d3 package which should be installed
 declare module 'd3' {
-  export * from 'd3-array';
-  export * from 'd3-axis';
-  export * from 'd3-brush';
-  export * from 'd3-chord';
-  export * from 'd3-color';
-  export * from 'd3-contour';
-  export * from 'd3-delaunay';
-  export * from 'd3-dispatch';
-  export * from 'd3-drag';
-  export * from 'd3-dsv';
-  export * from 'd3-ease';
-  export * from 'd3-fetch';
-  export * from 'd3-force';
-  export * from 'd3-format';
-  export * from 'd3-geo';
-  export * from 'd3-hierarchy';
-  export * from 'd3-interpolate';
-  export * from 'd3-path';
-  export * from 'd3-polygon';
-  export * from 'd3-quadtree';
-  export * from 'd3-random';
-  export * from 'd3-scale';
-  export * from 'd3-scale-chromatic';
-  export * from 'd3-selection';
-  export * from 'd3-shape';
-  export * from 'd3-time';
-  export * from 'd3-time-format';
-  export * from 'd3-timer';
-  export * from 'd3-transition';
-  export * from 'd3-zoom';
+  // Selection
+  export function select(selector: string | Element | null): any;
+  export function selectAll(selector: string): any;
+  
+  // Scales
+  export function scaleTime(): any;
+  export function scaleLinear(): any;
+  export function scaleOrdinal(): any;
+  
+  // Arrays
+  export function max(array: any[], accessor?: (d: any) => number): number | undefined;
+  export function extent(array: any[], accessor?: (d: any) => any): [any, any];
+  
+  // Shapes
+  export function line(): any;
+  export function area(): any;
+  export const curveMonotoneX: any;
+  export const curveBasis: any;
+  
+  // Axes
+  export function axisBottom(scale: any): any;
+  export function axisLeft(scale: any): any;
+  export function axisRight(scale: any): any;
+  export function axisTop(scale: any): any;
+  
+  // Time
+  export const timeDay: any;
+  export function timeFormat(specifier: string): (date: Date) => string;
+  
+  // Other utilities
+  export function format(specifier: string): (n: number) => string;
+  export function randomUniform(min: number, max: number): () => number;
 }

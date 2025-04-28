@@ -136,7 +136,7 @@ export class MerchantAdMetrics {
 
   @Field(() => Float)
   averageConversionRate: number;
-  
+
   // Platform revenue (what Avnu makes from ads)
   @Field(() => Float)
   platformAdRevenue: number;
