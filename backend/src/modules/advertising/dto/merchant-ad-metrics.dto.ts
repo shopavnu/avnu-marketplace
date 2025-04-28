@@ -85,25 +85,25 @@ export class AdCampaign {
 export class HistoricalMetricPoint {
   @Field()
   date: string;
-  
+
   @Field(() => Float)
   totalRevenue: number;
-  
+
   @Field(() => Float)
   totalCost: number;
-  
+
   @Field(() => Float)
   platformAdRevenue: number;
-  
+
   @Field(() => Float)
   productSalesFromAds: number;
-  
+
   @Field(() => Int)
   totalImpressions: number;
-  
+
   @Field(() => Int)
   totalClicks: number;
-  
+
   @Field(() => Int)
   totalConversions: number;
 }
@@ -140,23 +140,23 @@ export class MerchantAdMetrics {
   // Platform revenue (what Avnu makes from ads)
   @Field(() => Float)
   platformAdRevenue: number;
-  
+
   // Product sales revenue (dollars sold because of ads)
   @Field(() => Float)
   productSalesFromAds: number;
-  
+
   // Return on ad spend (ROAS) - product sales / ad spend
   @Field(() => Float)
   returnOnAdSpend: number;
-  
+
   // Conversion value - average revenue per conversion
   @Field(() => Float)
   averageConversionValue: number;
-  
+
   // Cost per acquisition
   @Field(() => Float)
   costPerAcquisition: number;
-  
+
   // Historical metrics for trend tracking
   @Field(() => [HistoricalMetricPoint])
   historicalMetrics: HistoricalMetricPoint[];
