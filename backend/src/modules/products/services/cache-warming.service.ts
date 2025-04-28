@@ -45,13 +45,13 @@ export class CacheWarmingService {
     try {
       // Warm popular products cache
       await this.productCacheService.warmPopularProductsCache();
-      
+
       // Warm category products cache
       await this.productCacheService.warmCategoryProductsCache();
-      
+
       // Warm merchant products cache
       await this.productCacheService.warmMerchantProductsCache();
-      
+
       this.logger.log('Daily cache warming completed successfully');
     } catch (error) {
       this.logger.error(`Error during daily cache warming: ${error.message}`, error.stack);

@@ -47,7 +47,7 @@ export class ResilientCacheService {
     return this.circuitBreaker.execute<T | null>(
       // Primary operation using Redis
       async () => {
-        const value = await this.primaryCache.get(key) as T;
+        const value = ((await this.primaryCache.get(key))) as T;
 
         // If found in primary cache, also update fallback cache
         if (value !== undefined && value !== null) {
