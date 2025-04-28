@@ -4,9 +4,11 @@ import { PersonalizationService } from './services/personalization.service';
 import { UserPreferencesService } from './services/user-preferences.service';
 import { UserBehaviorService } from './services/user-behavior.service';
 import { SessionService } from './services/session.service';
+import { AnonymousUserService } from './services/anonymous-user.service';
 import { UserPreferenceProfileService } from './services/user-preference-profile.service';
 import { PersonalizationController } from './personalization.controller';
 import { SessionController } from './controllers/session.controller';
+import { AnonymousUserController } from './controllers/anonymous-user.controller';
 import { UserPreferenceProfileController } from './controllers/user-preference-profile.controller';
 import { PersonalizationResolver } from './personalization.resolver';
 import { UserPreferenceProfileResolver } from './resolvers/user-preference-profile.resolver';
@@ -26,12 +28,18 @@ import { UserPreferenceProfile } from './entities/user-preference-profile.entity
       UserPreferenceProfile,
     ]),
   ],
-  controllers: [PersonalizationController, SessionController, UserPreferenceProfileController],
+  controllers: [
+    PersonalizationController,
+    SessionController,
+    UserPreferenceProfileController,
+    AnonymousUserController,
+  ],
   providers: [
     PersonalizationService,
     UserPreferencesService,
     UserBehaviorService,
     SessionService,
+    AnonymousUserService,
     UserPreferenceProfileService,
     PersonalizationResolver,
     UserPreferenceProfileResolver,
@@ -41,6 +49,7 @@ import { UserPreferenceProfile } from './entities/user-preference-profile.entity
     UserPreferencesService,
     UserBehaviorService,
     SessionService,
+    AnonymousUserService,
     UserPreferenceProfileService,
   ],
 })
