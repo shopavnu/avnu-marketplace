@@ -8,8 +8,9 @@ import { CachedProductsService } from '../services/cached-products.service';
 import { ProductCacheService } from '../services/product-cache.service';
 import { CacheWarmingService } from '../services/cache-warming.service';
 import { Product } from '../entities/product.entity';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
+// Unused imports but kept for future use
+// import { CreateProductDto } from '../dto/create-product.dto';
+// import { UpdateProductDto } from '../dto/update-product.dto';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import { CursorPaginationDto } from '../../../common/dto/cursor-pagination.dto';
 
@@ -35,9 +36,7 @@ export class CachedProductsResolver {
   }
 
   @Query(() => [Product], { name: 'cachedProductsByCursor' })
-  async findByCursor(
-    @Args('pagination') paginationDto: CursorPaginationDto,
-  ): Promise<Product[]> {
+  async findByCursor(@Args('pagination') paginationDto: CursorPaginationDto): Promise<Product[]> {
     const result = await this.cachedProductsService.findWithCursor(paginationDto);
     return result.items;
   }

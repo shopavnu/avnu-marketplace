@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
-import { Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject as _Inject } from '@nestjs/common';
+import { CACHE_MANAGER as _CACHE_MANAGER } from '@nestjs/cache-manager';
 import { SearchCacheService } from './search-cache.service';
 import { SearchOptionsInput } from '../dto/search-options.dto';
 import { SearchEntityType } from '../enums/search-entity-type.enum';
@@ -36,8 +36,8 @@ describe('SearchCacheService', () => {
     // Create the service directly with mocked dependencies
     // Use type assertion to bypass TypeScript's type checking for the mocks
     service = new SearchCacheService(
-      cacheManagerMock, 
-      configServiceMock as unknown as ConfigService
+      cacheManagerMock,
+      configServiceMock as unknown as ConfigService,
     );
   });
 
@@ -89,10 +89,10 @@ describe('SearchCacheService', () => {
           return defaultValue;
         }),
       };
-      
+
       const localService = new SearchCacheService(
-        cacheManagerMock, 
-        disabledConfigService as unknown as ConfigService
+        cacheManagerMock,
+        disabledConfigService as unknown as ConfigService,
       );
 
       const options: SearchOptionsInput = {

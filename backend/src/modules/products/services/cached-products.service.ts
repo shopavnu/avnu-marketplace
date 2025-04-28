@@ -1,19 +1,17 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  FindOptionsWhere,
-  LessThan,
-  In,
-  Like,
-} from 'typeorm';
+import { Repository, LessThan, In } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../entities/product.entity';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
-import { CursorPaginationDto, PaginatedResponseDto } from '../../../common/dto/cursor-pagination.dto';
+import {
+  CursorPaginationDto,
+  PaginatedResponseDto,
+} from '../../../common/dto/cursor-pagination.dto';
 import { ProductCacheService } from './product-cache.service';
+import { ProductQueryOptimizerService } from './product-query-optimizer.service';
 
 @Injectable()
 export class CachedProductsService {
@@ -24,6 +22,7 @@ export class CachedProductsService {
     private readonly productsRepository: Repository<Product>,
     private readonly eventEmitter: EventEmitter2,
     private readonly productCacheService: ProductCacheService,
+    private readonly queryOptimizerService: ProductQueryOptimizerService,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -38,7 +37,7 @@ export class CachedProductsService {
 
   async findAll(paginationDto?: PaginationDto) {
     const { page = 1, limit = 10 } = paginationDto || {};
-    
+
     // Try to get from cache first
     const cachedProducts = await this.productCacheService.getCachedProductsList(page, limit);
     if (cachedProducts) {
@@ -59,7 +58,7 @@ export class CachedProductsService {
       order: { createdAt: 'DESC' },
     });
     const endTime = Date.now();
-    
+
     // Emit response time without cache
     this.eventEmitter.emit('cache.response.time.without', endTime - startTime);
 
@@ -176,14 +175,14 @@ export class CachedProductsService {
 
     // If not in cache, fetch from database
     const startTime = Date.now();
-    const product = await this.productsRepository.findOne({ 
-      where: { id } as any // Type assertion to avoid TypeORM typing issues
+    const product = await this.productsRepository.findOne({
+      where: { id } as any, // Type assertion to avoid TypeORM typing issues
     });
     const endTime = Date.now();
-    
+
     // Emit response time without cache
     this.eventEmitter.emit('cache.response.time.without', endTime - startTime);
-    
+
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -274,10 +273,12 @@ export class CachedProductsService {
       merchantId?: string;
       inStock?: boolean;
       values?: string[];
+      featured?: boolean;
+      isActive?: boolean;
     },
   ): Promise<{ items: Product[]; total: number }> {
     const { page = 1, limit = 10 } = paginationDto;
-    
+
     // Try to get from cache first
     const cachedResults = await this.productCacheService.getCachedSearchProducts(
       query,
@@ -289,99 +290,30 @@ export class CachedProductsService {
       return cachedResults;
     }
 
-    const skip = (page - 1) * limit;
+    // Skip calculation not needed with query optimizer
 
-    // Basic search implementation
-    // In a real app, you would use a dedicated search engine like Elasticsearch
-    let whereClause = {};
-    
-    // Create a query builder for more flexibility
-    let queryBuilder = this.productsRepository.createQueryBuilder('product')
-      .where('product.name LIKE :query', { query: `%${query}%` });
+    // Use the query optimizer service for efficient search with caching
+    const queryFilters = {
+      ...filters,
+      searchQuery: query,
+      isActive: true, // Default to active products
+    };
 
-    // Add filters
-    if (filters) {
-      if (filters.categories && filters.categories.length > 0) {
-        // This is a simplification - for proper category filtering with simple-array
-        // you might need a custom query or consider using a different approach
-        // for storing categories (e.g., a join table)
-        queryBuilder = queryBuilder.andWhere('product.categories LIKE :category', 
-          { category: `%${filters.categories[0]}%` });
-      }
-
-      if (filters.merchantId) {
-        queryBuilder = queryBuilder.andWhere('product.merchantId = :merchantId', 
-          { merchantId: filters.merchantId });
-      }
-
-      if (filters.inStock !== undefined) {
-        queryBuilder = queryBuilder.andWhere('product.inStock = :inStock', 
-          { inStock: filters.inStock });
-      }
-
-      if (filters.priceMin !== undefined) {
-        queryBuilder = queryBuilder.andWhere('product.price >= :priceMin', 
-          { priceMin: filters.priceMin });
-      }
-
-      if (filters.priceMax !== undefined) {
-        queryBuilder = queryBuilder.andWhere('product.price <= :priceMax', 
-          { priceMax: filters.priceMax });
-      }
-
-      // Apply pagination
-      queryBuilder = queryBuilder.skip(skip).take(limit).orderBy('product.createdAt', 'DESC');
-
-      const [items, total] = await queryBuilder.getManyAndCount();
-      
-      // Cache the results
-      const result = { items, total };
-      await this.productCacheService.cacheSearchProducts(query, result, page, limit, filters);
-      
-      return result;
-    }
-
-    // If we reach here, execute the query builder
-    queryBuilder = queryBuilder.skip(skip).take(limit).orderBy('product.createdAt', 'DESC');
-    const [items, total] = await queryBuilder.getManyAndCount();
-
-    // Cache the results
-    const result = { items, total };
-    await this.productCacheService.cacheSearchProducts(query, result, page, limit, filters);
-    
-    return result;
+    return this.queryOptimizerService.optimizedQuery(queryFilters, paginationDto);
   }
 
   async findByMerchant(
     merchantId: string,
     paginationDto: PaginationDto,
   ): Promise<{ items: Product[]; total: number }> {
-    const { page = 1, limit = 10 } = paginationDto;
-    
-    // Try to get from cache first
-    const cachedProducts = await this.productCacheService.getCachedProductsByMerchant(
-      merchantId,
-      page,
-      limit,
+    // Use the query optimizer service for efficient merchant filtering with caching
+    return this.queryOptimizerService.optimizedQuery(
+      {
+        merchantId: merchantId,
+        isActive: true,
+      },
+      paginationDto,
     );
-    if (cachedProducts) {
-      return cachedProducts;
-    }
-
-    const skip = (page - 1) * limit;
-
-    const [items, total] = await this.productsRepository.findAndCount({
-      where: { merchantId },
-      take: limit,
-      skip,
-      order: { createdAt: 'DESC' },
-    });
-
-    // Cache the results
-    const result = { items, total };
-    await this.productCacheService.cacheProductsByMerchant(merchantId, result, page, limit);
-    
-    return result;
   }
 
   async updateStock(id: string, inStock: boolean, quantity?: number): Promise<Product> {
@@ -394,10 +326,10 @@ export class CachedProductsService {
     }
 
     const updatedProduct = await this.productsRepository.save(product);
-    
+
     // Emit product updated event
     this.eventEmitter.emit('product.updated', updatedProduct);
-    
+
     return updatedProduct;
   }
 
@@ -432,7 +364,10 @@ export class CachedProductsService {
 
   async getRecommendedProducts(userId: string, limit = 10): Promise<Product[]> {
     // Try to get from cache first
-    const cachedProducts = await this.productCacheService.getCachedRecommendedProducts(userId, limit);
+    const cachedProducts = await this.productCacheService.getCachedRecommendedProducts(
+      userId,
+      limit,
+    );
     if (cachedProducts) {
       return cachedProducts;
     }
@@ -440,17 +375,16 @@ export class CachedProductsService {
     // This is a placeholder for a recommendation engine
     // In a real implementation, this would use user behavior data and ML models
 
-    // For now, just return some random products
-    const products = await this.productsRepository.find({
-      where: { isActive: true, inStock: true },
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    // Use query optimizer for better performance
+    const { items } = await this.queryOptimizerService.optimizedQuery(
+      { isActive: true, inStock: true, featured: true },
+      { limit },
+    );
 
     // Cache the results
-    await this.productCacheService.cacheRecommendedProducts(userId, products, limit);
-    
-    return products;
+    await this.productCacheService.cacheRecommendedProducts(userId, items, limit);
+
+    return items;
   }
 
   async getDiscoveryProducts(limit = 10): Promise<Product[]> {
@@ -463,16 +397,15 @@ export class CachedProductsService {
     // This is a placeholder for the discovery algorithm
     // In a real implementation, this would use a mix of new, trending, and diverse products
 
-    // For now, just return some random products
-    const products = await this.productsRepository.find({
-      where: { isActive: true, inStock: true },
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    // Use query optimizer for better performance
+    const { items } = await this.queryOptimizerService.optimizedQuery(
+      { isActive: true, inStock: true },
+      { limit },
+    );
 
     // Cache the results
-    await this.productCacheService.cacheDiscoveryProducts(products, limit);
-    
-    return products;
+    await this.productCacheService.cacheDiscoveryProducts(items, limit);
+
+    return items;
   }
 }

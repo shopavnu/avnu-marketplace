@@ -10,8 +10,8 @@ jest.mock('./pagination-cache.service', () => {
       generatePageKey: jest.fn((keyPrefix, filters, page) => {
         return `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
       }),
-      determineOptimalTtl: jest.fn()
-    }))
+      determineOptimalTtl: jest.fn(),
+    })),
   };
 });
 
@@ -27,7 +27,7 @@ describe('PaginationCacheService', () => {
   beforeEach(() => {
     // Clear all mocks
     jest.clearAllMocks();
-    
+
     // Create mocks
     cacheServiceMock = {
       get: jest.fn().mockResolvedValue(null),
@@ -41,10 +41,7 @@ describe('PaginationCacheService', () => {
     } as unknown as jest.Mocked<EventEmitter2>;
 
     // Create service instance with mocked dependencies
-    service = new PaginationCacheService(
-      cacheServiceMock,
-      eventEmitterMock,
-    );
+    service = new PaginationCacheService(cacheServiceMock, eventEmitterMock);
   });
 
   afterEach(() => {
@@ -71,7 +68,7 @@ describe('PaginationCacheService', () => {
       (service.cachePage as jest.Mock).mockImplementation(async (page, items, options) => {
         const { keyPrefix, filters, totalItems, pageSize, ttl = 300 } = options;
         const totalPages = Math.ceil(totalItems / pageSize);
-        
+
         // Store metadata
         const metadataKey = `pagination:meta:${keyPrefix}:${JSON.stringify(filters)}`;
         const metadata = {
@@ -83,11 +80,11 @@ describe('PaginationCacheService', () => {
           filters,
         };
         await cacheServiceMock.set(metadataKey, metadata, 600);
-        
+
         // Store page content
         const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
         await cacheServiceMock.set(pageKey, items, ttl);
-        
+
         // Store access time
         const accessKey = `pagination:access:${pageKey}`;
         await cacheServiceMock.set(accessKey, Date.now(), 600);
@@ -143,23 +140,23 @@ describe('PaginationCacheService', () => {
       (service.getPage as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
         const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
         const items = await cacheServiceMock.get(pageKey);
-        
+
         if (!items) {
           return null;
         }
-        
+
         const metadataKey = `pagination:meta:${keyPrefix}:${JSON.stringify(filters)}`;
         const metadata = await cacheServiceMock.get(metadataKey);
-        
+
         if (!metadata) {
           await cacheServiceMock.del(pageKey);
           return null;
         }
-        
+
         // Update access time
         const accessKey = `pagination:access:${pageKey}`;
         await cacheServiceMock.set(accessKey, Date.now(), 600);
-        
+
         return { items, metadata };
       });
 
@@ -210,19 +207,19 @@ describe('PaginationCacheService', () => {
       (service.getPage as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
         const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
         const items = await cacheServiceMock.get(pageKey);
-        
+
         if (!items) {
           return null;
         }
-        
+
         const metadataKey = `pagination:meta:${keyPrefix}:${JSON.stringify(filters)}`;
         const metadata = await cacheServiceMock.get(metadataKey);
-        
+
         if (!metadata) {
           await cacheServiceMock.del(pageKey);
           return null;
         }
-        
+
         return { items, metadata };
       });
 
@@ -258,23 +255,23 @@ describe('PaginationCacheService', () => {
       (service.getPage as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
         const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
         const items = await cacheServiceMock.get(pageKey);
-        
+
         if (!items) {
           return null;
         }
-        
+
         const metadataKey = `pagination:meta:${keyPrefix}:${JSON.stringify(filters)}`;
         const metadata = await cacheServiceMock.get(metadataKey);
-        
+
         if (!metadata) {
           await cacheServiceMock.del(pageKey);
           return null;
         }
-        
+
         // Update access time
         const accessKey = `pagination:access:${pageKey}`;
         await cacheServiceMock.set(accessKey, Date.now(), 600);
-        
+
         return { items, metadata };
       });
 
@@ -312,20 +309,20 @@ describe('PaginationCacheService', () => {
       (service.invalidatePages as jest.Mock).mockImplementation(async (keyPrefix, filters) => {
         const metadataKey = `pagination:meta:${keyPrefix}:${JSON.stringify(filters)}`;
         const metadata = await cacheServiceMock.get(metadataKey);
-        
+
         if (!metadata) {
           return;
         }
-        
+
         // Invalidate metadata
         await cacheServiceMock.del(metadataKey);
-        
+
         // Invalidate all pages
         const { totalPages } = metadata;
         for (let page = 1; page <= totalPages; page++) {
           const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
           await cacheServiceMock.del(pageKey);
-          
+
           // Also delete access time
           const accessKey = `pagination:access:${pageKey}`;
           await cacheServiceMock.del(accessKey);
@@ -349,7 +346,7 @@ describe('PaginationCacheService', () => {
       (service.invalidatePages as jest.Mock).mockImplementation(async (keyPrefix, filters) => {
         const metadataKey = `pagination:meta:${keyPrefix}:${JSON.stringify(filters)}`;
         const metadata = await cacheServiceMock.get(metadataKey);
-        
+
         if (!metadata) {
           return;
         }
@@ -375,24 +372,24 @@ describe('PaginationCacheService', () => {
       } as Product;
 
       // Setup mock implementation for this test
-      (service.invalidateRelatedPages as jest.Mock).mockImplementation(async (product) => {
+      (service.invalidateRelatedPages as jest.Mock).mockImplementation(async product => {
         // Invalidate merchant pages
         await service.invalidatePages('merchant', { merchantId: product.merchantId });
-        
+
         // Invalidate category pages
         for (const category of product.categories) {
           await service.invalidatePages('category', { category });
         }
-        
+
         // Invalidate featured pages if product is featured
         if (product.featured) {
           await service.invalidatePages('featured', {});
         }
-        
+
         // Invalidate recent products pages
         await service.invalidatePages('recent', {});
       });
-      
+
       // Mock invalidatePages to track calls
       (service.invalidatePages as jest.Mock).mockResolvedValue(undefined);
 
@@ -411,24 +408,24 @@ describe('PaginationCacheService', () => {
       } as Product;
 
       // Setup mock implementation for this test
-      (service.invalidateRelatedPages as jest.Mock).mockImplementation(async (product) => {
+      (service.invalidateRelatedPages as jest.Mock).mockImplementation(async product => {
         // Invalidate merchant pages
         await service.invalidatePages('merchant', { merchantId: product.merchantId });
-        
+
         // Invalidate category pages
         for (const category of product.categories) {
           await service.invalidatePages('category', { category });
         }
-        
+
         // Invalidate featured pages if product is featured
         if (product.featured) {
           await service.invalidatePages('featured', {});
         }
-        
+
         // Invalidate recent products pages
         await service.invalidatePages('recent', {});
       });
-      
+
       // Mock invalidatePages to track calls
       (service.invalidatePages as jest.Mock).mockResolvedValue(undefined);
 
@@ -446,19 +443,21 @@ describe('PaginationCacheService', () => {
       const page = 1;
 
       // Setup mock implementation for this test
-      (service.determineOptimalTtl as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
-        const DEFAULT_TTL = 300; // 5 minutes
-        
-        const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
-        const accessKey = `pagination:access:${pageKey}`;
-        const lastAccess = await cacheServiceMock.get(accessKey);
-        
-        if (!lastAccess) {
+      (service.determineOptimalTtl as jest.Mock).mockImplementation(
+        async (keyPrefix, filters, page) => {
+          const DEFAULT_TTL = 300; // 5 minutes
+
+          const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
+          const accessKey = `pagination:access:${pageKey}`;
+          const lastAccess = await cacheServiceMock.get(accessKey);
+
+          if (!lastAccess) {
+            return DEFAULT_TTL;
+          }
+
           return DEFAULT_TTL;
-        }
-        
-        return DEFAULT_TTL;
-      });
+        },
+      );
 
       // Mock cache to return null for access time
       cacheServiceMock.get = jest.fn().mockResolvedValue(null);
@@ -475,31 +474,33 @@ describe('PaginationCacheService', () => {
       const page = 1;
 
       // Setup mock implementation for this test
-      (service.determineOptimalTtl as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
-        const DEFAULT_TTL = 300; // 5 minutes
-        const MIN_TTL = 60; // 1 minute
-        const MAX_TTL = 3600; // 1 hour
-        
-        const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
-        const accessKey = `pagination:access:${pageKey}`;
-        const lastAccess = await cacheServiceMock.get(accessKey);
-        
-        if (!lastAccess) {
+      (service.determineOptimalTtl as jest.Mock).mockImplementation(
+        async (keyPrefix, filters, page) => {
+          const DEFAULT_TTL = 300; // 5 minutes
+          const _MIN_TTL = 60; // 1 minute
+          const MAX_TTL = 3600; // 1 hour
+
+          const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
+          const accessKey = `pagination:access:${pageKey}`;
+          const lastAccess = await cacheServiceMock.get(accessKey);
+
+          if (!lastAccess) {
+            return DEFAULT_TTL;
+          }
+
+          // Calculate time since last access
+          const now = Date.now();
+          const timeSinceLastAccess = (now - lastAccess) / 1000; // in seconds
+
+          // Determine TTL based on access pattern
+          if (timeSinceLastAccess < 60) {
+            // Accessed within the last minute - frequently accessed page
+            return MAX_TTL;
+          }
+
           return DEFAULT_TTL;
-        }
-        
-        // Calculate time since last access
-        const now = Date.now();
-        const timeSinceLastAccess = (now - lastAccess) / 1000; // in seconds
-        
-        // Determine TTL based on access pattern
-        if (timeSinceLastAccess < 60) {
-          // Accessed within the last minute - frequently accessed page
-          return MAX_TTL;
-        }
-        
-        return DEFAULT_TTL;
-      });
+        },
+      );
 
       // Mock cache to return recent access time (30 seconds ago)
       cacheServiceMock.get = jest.fn().mockResolvedValue(Date.now() - 30 * 1000);
@@ -516,29 +517,31 @@ describe('PaginationCacheService', () => {
       const page = 1;
 
       // Setup mock implementation for this test
-      (service.determineOptimalTtl as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
-        const DEFAULT_TTL = 300; // 5 minutes
-        
-        const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
-        const accessKey = `pagination:access:${pageKey}`;
-        const lastAccess = await cacheServiceMock.get(accessKey);
-        
-        if (!lastAccess) {
+      (service.determineOptimalTtl as jest.Mock).mockImplementation(
+        async (keyPrefix, filters, page) => {
+          const DEFAULT_TTL = 300; // 5 minutes
+
+          const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
+          const accessKey = `pagination:access:${pageKey}`;
+          const lastAccess = await cacheServiceMock.get(accessKey);
+
+          if (!lastAccess) {
+            return DEFAULT_TTL;
+          }
+
+          // Calculate time since last access
+          const now = Date.now();
+          const timeSinceLastAccess = (now - lastAccess) / 1000; // in seconds
+
+          // Determine TTL based on access pattern
+          if (timeSinceLastAccess < 300) {
+            // Accessed within the last 5 minutes - moderately accessed page
+            return DEFAULT_TTL * 2;
+          }
+
           return DEFAULT_TTL;
-        }
-        
-        // Calculate time since last access
-        const now = Date.now();
-        const timeSinceLastAccess = (now - lastAccess) / 1000; // in seconds
-        
-        // Determine TTL based on access pattern
-        if (timeSinceLastAccess < 300) {
-          // Accessed within the last 5 minutes - moderately accessed page
-          return DEFAULT_TTL * 2;
-        }
-        
-        return DEFAULT_TTL;
-      });
+        },
+      );
 
       // Mock cache to return access time (3 minutes ago)
       cacheServiceMock.get = jest.fn().mockResolvedValue(Date.now() - 3 * 60 * 1000);
@@ -555,30 +558,32 @@ describe('PaginationCacheService', () => {
       const page = 1;
 
       // Setup mock implementation for this test
-      (service.determineOptimalTtl as jest.Mock).mockImplementation(async (keyPrefix, filters, page) => {
-        const DEFAULT_TTL = 300; // 5 minutes
-        const MIN_TTL = 60; // 1 minute
-        
-        const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
-        const accessKey = `pagination:access:${pageKey}`;
-        const lastAccess = await cacheServiceMock.get(accessKey);
-        
-        if (!lastAccess) {
+      (service.determineOptimalTtl as jest.Mock).mockImplementation(
+        async (keyPrefix, filters, page) => {
+          const DEFAULT_TTL = 300; // 5 minutes
+          const _MIN_TTL = 60; // 1 minute
+
+          const pageKey = `pagination:page:${keyPrefix}:${JSON.stringify(filters)}:${page}`;
+          const accessKey = `pagination:access:${pageKey}`;
+          const lastAccess = await cacheServiceMock.get(accessKey);
+
+          if (!lastAccess) {
+            return DEFAULT_TTL;
+          }
+
+          // Calculate time since last access
+          const now = Date.now();
+          const timeSinceLastAccess = (now - lastAccess) / 1000; // in seconds
+
+          // Determine TTL based on access pattern
+          if (timeSinceLastAccess >= 3600) {
+            // Not accessed for over an hour - rarely accessed page
+            return _MIN_TTL;
+          }
+
           return DEFAULT_TTL;
-        }
-        
-        // Calculate time since last access
-        const now = Date.now();
-        const timeSinceLastAccess = (now - lastAccess) / 1000; // in seconds
-        
-        // Determine TTL based on access pattern
-        if (timeSinceLastAccess >= 3600) {
-          // Not accessed for over an hour - rarely accessed page
-          return MIN_TTL;
-        }
-        
-        return DEFAULT_TTL;
-      });
+        },
+      );
 
       // Mock cache to return old access time (2 hours ago)
       cacheServiceMock.get = jest.fn().mockResolvedValue(Date.now() - 2 * 60 * 60 * 1000);

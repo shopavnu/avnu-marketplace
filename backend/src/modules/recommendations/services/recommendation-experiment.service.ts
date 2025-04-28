@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
-import { User } from '../../users/entities/user.entity';
+// Unused import but kept for reference
+// import { User } from '../../users/entities/user.entity';
 
 /**
  * Service for managing recommendation experiments

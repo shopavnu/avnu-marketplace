@@ -25,8 +25,8 @@ jest.mock('./query-analytics.service', () => {
       getQueryAnalytics: jest.fn().mockResolvedValue([]),
       getSlowQueries: jest.fn().mockResolvedValue([]),
       getQueryAnalyticsById: jest.fn().mockResolvedValue(null),
-      getMostFrequentQueries: jest.fn().mockResolvedValue([])
-    }))
+      getMostFrequentQueries: jest.fn().mockResolvedValue([]),
+    })),
   };
 });
 
@@ -43,7 +43,7 @@ describe('QueryAnalyticsService', () => {
   beforeEach(() => {
     // Clear all mocks
     jest.clearAllMocks();
-    
+
     // Create mocks
     eventEmitterMock = {
       on: jest.fn(),
@@ -64,11 +64,7 @@ describe('QueryAnalyticsService', () => {
     };
 
     // Create service instance with mocked dependencies
-    service = new QueryAnalyticsService(
-      eventEmitterMock,
-      configServiceMock,
-      cacheServiceMock
-    );
+    service = new QueryAnalyticsService(eventEmitterMock, configServiceMock, cacheServiceMock);
 
     // Mock setInterval to prevent timer creation
     jest.spyOn(global, 'setInterval').mockImplementation(() => 1 as any);
@@ -116,17 +112,19 @@ describe('QueryAnalyticsService', () => {
   describe('recordQuery', () => {
     it('should emit a query.executed event with the correct metrics', () => {
       // Setup the mock implementation for this test
-      (service.recordQuery as jest.Mock).mockImplementation((queryPattern, filters, executionTime, resultCount) => {
-        const queryId = service.generateQueryId(queryPattern, filters);
-        eventEmitterMock.emit('query.executed', {
-          queryId,
-          queryPattern,
-          filters,
-          executionTime,
-          timestamp: Date.now(),
-          resultCount,
-        });
-      });
+      (service.recordQuery as jest.Mock).mockImplementation(
+        (queryPattern, filters, executionTime, resultCount) => {
+          const queryId = service.generateQueryId(queryPattern, filters);
+          eventEmitterMock.emit('query.executed', {
+            queryId,
+            queryPattern,
+            filters,
+            executionTime,
+            timestamp: Date.now(),
+            resultCount,
+          });
+        },
+      );
 
       const queryPattern = 'ProductListing';
       const filters = { merchantId: 'merchant1' };
@@ -147,31 +145,33 @@ describe('QueryAnalyticsService', () => {
 
     it('should update the metric keys in the cache', async () => {
       // Setup the mock implementation for this test
-      (service.recordQuery as jest.Mock).mockImplementation((queryPattern, filters, executionTime, resultCount) => {
-        const queryId = service.generateQueryId(queryPattern, filters);
-        cacheServiceMock.get('query:metric:keys').then(keys => {
-          const metricKey = `query:metrics:${queryId}`;
-          if (!keys) {
-            cacheServiceMock.set('query:metric:keys', [metricKey], 604800);
-          } else if (!keys.includes(metricKey)) {
-            keys.push(metricKey);
-            cacheServiceMock.set('query:metric:keys', keys, 604800);
-          }
-        });
+      (service.recordQuery as jest.Mock).mockImplementation(
+        (queryPattern, filters, executionTime, resultCount) => {
+          const queryId = service.generateQueryId(queryPattern, filters);
+          cacheServiceMock.get('query:metric:keys').then(keys => {
+            const metricKey = `query:metrics:${queryId}`;
+            if (!keys) {
+              cacheServiceMock.set('query:metric:keys', [metricKey], 604800);
+            } else if (!keys.includes(metricKey)) {
+              keys.push(metricKey);
+              cacheServiceMock.set('query:metric:keys', keys, 604800);
+            }
+          });
 
-        eventEmitterMock.emit('query.executed', {
-          queryId,
-          queryPattern,
-          filters,
-          executionTime,
-          timestamp: Date.now(),
-          resultCount,
-        });
-      });
+          eventEmitterMock.emit('query.executed', {
+            queryId,
+            queryPattern,
+            filters,
+            executionTime,
+            timestamp: Date.now(),
+            resultCount,
+          });
+        },
+      );
 
       const queryPattern = 'ProductListing';
       const filters = { merchantId: 'merchant1' };
-      
+
       // Mock cache to return existing keys
       cacheServiceMock.get = jest.fn().mockResolvedValue(['existing-key']);
 
@@ -187,9 +187,9 @@ describe('QueryAnalyticsService', () => {
   describe('recordQueryMetrics', () => {
     it('should store metrics in the cache', async () => {
       // Setup the mock implementation for this test
-      (service.recordQueryMetrics as jest.Mock).mockImplementation(async (metrics) => {
+      (service.recordQueryMetrics as jest.Mock).mockImplementation(async metrics => {
         const metricsKey = `query:metrics:${metrics.queryId}`;
-        const existingMetrics = await cacheServiceMock.get(metricsKey) || [];
+        const existingMetrics = (await cacheServiceMock.get(metricsKey)) || [];
         existingMetrics.push(metrics);
         await cacheServiceMock.set(metricsKey, existingMetrics, 604800);
       });
@@ -223,7 +223,7 @@ describe('QueryAnalyticsService', () => {
 
     it('should emit a query.slow event for slow queries', async () => {
       // Setup the mock implementation for this test
-      (service.recordQueryMetrics as jest.Mock).mockImplementation(async (metrics) => {
+      (service.recordQueryMetrics as jest.Mock).mockImplementation(async metrics => {
         if (metrics.executionTime > 500) {
           eventEmitterMock.emit('query.slow', metrics);
         }
@@ -246,7 +246,7 @@ describe('QueryAnalyticsService', () => {
     it('should filter out old metrics', async () => {
       const now = Date.now();
       const oldTimestamp = now - 3 * 24 * 60 * 60 * 1000; // 3 days ago (beyond 2-day retention)
-      
+
       const newMetrics = {
         queryId: 'test-query-id',
         queryPattern: 'ProductListing',
@@ -262,15 +262,15 @@ describe('QueryAnalyticsService', () => {
       };
 
       // Setup the mock implementation for this test
-      (service.recordQueryMetrics as jest.Mock).mockImplementation(async (metrics) => {
+      (service.recordQueryMetrics as jest.Mock).mockImplementation(async metrics => {
         const metricsKey = `query:metrics:${metrics.queryId}`;
-        let queryMetrics = await cacheServiceMock.get(metricsKey) || [];
+        let queryMetrics = (await cacheServiceMock.get(metricsKey)) || [];
         queryMetrics.push(metrics);
-        
+
         // Filter out old metrics
         const cutoffTime = Date.now() - 2 * 24 * 60 * 60 * 1000; // 2 days ago
         queryMetrics = queryMetrics.filter(m => m.timestamp >= cutoffTime);
-        
+
         await cacheServiceMock.set(metricsKey, queryMetrics, 604800);
       });
 
@@ -293,7 +293,7 @@ describe('QueryAnalyticsService', () => {
       const queryId = 'test-query-id';
       const metricKey = `query:metrics:${queryId}`;
       const now = Date.now();
-      
+
       // Mock metric keys
       cacheServiceMock.get = jest.fn().mockImplementation((key: string) => {
         if (key === 'query:metric:keys') {
@@ -324,15 +324,15 @@ describe('QueryAnalyticsService', () => {
 
       // Setup the mock implementation for this test
       (service.processQueryAnalytics as jest.Mock).mockImplementation(async () => {
-        const metricKeys = await cacheServiceMock.get('query:metric:keys') || [];
+        const metricKeys = (await cacheServiceMock.get('query:metric:keys')) || [];
         const analytics = {};
-        
+
         for (const key of metricKeys) {
           const queryId = key.replace('query:metrics:', '');
-          const metrics = await cacheServiceMock.get(key) || [];
-          
+          const metrics = (await cacheServiceMock.get(key)) || [];
+
           if (metrics.length === 0) continue;
-          
+
           // Calculate analytics
           const executionTimes = metrics.map(m => m.executionTime);
           const totalExecutions = metrics.length;
@@ -341,22 +341,22 @@ describe('QueryAnalyticsService', () => {
           const maxExecutionTime = Math.max(...executionTimes);
           const lastExecutionTime = metrics[metrics.length - 1].executionTime;
           const lastExecuted = metrics[metrics.length - 1].timestamp;
-          
+
           // Calculate frequency (executions per hour)
           const frequency = totalExecutions / (24 * 7); // Simplified calculation
-          
+
           // Determine common filters
           const commonFilters = {};
-          
+
           // Get recent result sizes
           const resultSizes = metrics
             .sort((a, b) => b.timestamp - a.timestamp)
             .slice(0, 10)
             .map(m => m.resultCount);
-          
+
           // Determine if this is a slow query
           const isSlowQuery = averageExecutionTime > 500;
-          
+
           // Store analytics
           analytics[queryId] = {
             queryId,
@@ -373,7 +373,7 @@ describe('QueryAnalyticsService', () => {
             resultSizes,
           };
         }
-        
+
         await cacheServiceMock.set('query:analytics', analytics, 604800);
       });
 
@@ -387,7 +387,7 @@ describe('QueryAnalyticsService', () => {
   describe('getQueryAnalytics', () => {
     it('should return all query analytics', async () => {
       const analytics = {
-        'query1': {
+        query1: {
           queryId: 'query1',
           queryPattern: 'ProductListing',
           averageExecutionTime: 150,
@@ -401,7 +401,7 @@ describe('QueryAnalyticsService', () => {
           commonFilters: {},
           resultSizes: [20, 10],
         },
-        'query2': {
+        query2: {
           queryId: 'query2',
           queryPattern: 'ProductSearch',
           averageExecutionTime: 300,
