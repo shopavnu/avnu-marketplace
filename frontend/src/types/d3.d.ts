@@ -8,6 +8,8 @@ declare module 'd3' {
   export function scaleTime(): any;
   export function scaleLinear(): any;
   export function scaleOrdinal(): any;
+  export function scaleBand(): any;
+  export function scaleSequential(): any;
   
   // Arrays
   export function max(array: any[], accessor?: (d: any) => number): number | undefined;
@@ -28,6 +30,10 @@ declare module 'd3' {
   // Time
   export const timeDay: any;
   export function timeFormat(specifier: string): (date: Date) => string;
+  
+  // Colors
+  export const schemeCategory10: string[];
+  export function interpolateRgb(a: string, b: string): (t: number) => string;
   
   // Other utilities
   export function format(specifier: string): (n: number) => string;
