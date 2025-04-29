@@ -11,5 +11,10 @@ export declare enum SessionInteractionType {
     CATEGORY_VIEW = "CATEGORY_VIEW",
     MERCHANT_VIEW = "MERCHANT_VIEW",
     REVIEW_VIEW = "REVIEW_VIEW",
-    REVIEW_SUBMIT = "REVIEW_SUBMIT"
+    REVIEW_SUBMIT = "REVIEW_SUBMIT",
+    VIEW = "view",
+    SORT = "sort",
+    IMPRESSION = "impression",
+    DWELL = "dwell",
+    SCROLL_DEPTH = "scroll_depth"
 }

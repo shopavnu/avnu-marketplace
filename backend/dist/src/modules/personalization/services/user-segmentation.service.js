@@ -270,7 +270,7 @@ let UserSegmentationService = class UserSegmentationService {
         });
         return shoppers;
     }
-    identifyReturners(userSessions, userInteractions) {
+    identifyReturners(userSessions, _userInteractions) {
         const returners = new Set();
         userSessions.forEach((sessions, userId) => {
             if (sessions.length > 1) {

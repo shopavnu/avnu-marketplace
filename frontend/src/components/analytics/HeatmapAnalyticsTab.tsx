@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
@@ -73,7 +73,7 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
   }, [data]);
 
   // Load mock heatmap image for selected page and device
-  const loadHeatmapImage = () => {
+  const loadHeatmapImage = useCallback(() => {
     if (!selectedPage) return;
     
     setIsLoadingHeatmap(true);
@@ -98,17 +98,14 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
         setIsLoadingHeatmap(false);
       }
     }, 800); // Simulate network delay
-  };
+  }, [selectedPage, selectedDevice]);
 
   // Effect to load heatmap image when selected page or device changes
   useEffect(() => {
     if (selectedPage) {
       loadHeatmapImage();
     }
-  }, [selectedPage, selectedDevice]);
-  
-  // This is needed to avoid the dependency warning
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPage, selectedDevice, loadHeatmapImage]);
 
   // Format percentage
   const formatPercentage = (value: number) => `${(value * 100).toFixed(1)}%`;
