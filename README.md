@@ -23,6 +23,9 @@ Avnu Marketplace is a comprehensive e-commerce platform that connects merchants 
 - Segment analysis and reporting
 - A/B testing framework
 - Search personalization impact metrics
+- Merchant advertising performance tracking
+- Platform revenue and product sales analytics
+- Historical trend analysis with interactive visualizations
 - Real-time alerts and monitoring
 
 ### 4. Product and Brand Management
@@ -134,19 +137,26 @@ The project is configured for deployment on Vercel. All TypeScript errors and li
 
 ## Latest Features (April 2025)
 
-### 1. Merchant Product Suppression
+### 1. Merchant Advertising Analytics Dashboard
+- Comprehensive analytics for merchant advertising performance
+- Platform revenue and product sales tracking from ads
+- Historical trend analysis with interactive visualizations
+- Campaign-level performance metrics and insights
+- Filtering by merchant, time period, and campaign
+
+### 2. Merchant Product Suppression
 - Merchants can now control which products appear in recommendations and discovery feeds
 - Dedicated dashboard for managing suppressed products
 - Bulk actions for efficient product management
 - Immediate effect on marketplace visibility
 
-### 2. Fresh & Diverse Recommendations
+### 3. Fresh & Diverse Recommendations
 - Enhanced recommendation system to prevent repetitive product suggestions
 - Automatic exclusion of purchased products from recommendations
 - Freshness controls to balance between new discoveries and familiar items
 - Interactive "Discover" page for exploring personalized recommendations
 
-See the [April 2025 Changelog](./CHANGELOG-APRIL-2025.md) for complete details on these features.
+See the [April 2025 Changelog](./CHANGELOG-APRIL-2025.md) and [Admin Dashboard Documentation](./docs/ADMIN-DASHBOARD.md) for complete details on these features.
 
 ## Future Enhancements
 
@@ -154,3 +164,6 @@ See the [April 2025 Changelog](./CHANGELOG-APRIL-2025.md) for complete details o
 2. Addressing remaining lint warnings in the backend
 3. Expanding test coverage for critical components
 4. Enhancing documentation for API endpoints and component usage
+5. Integrating real data sources for advertising analytics
+6. Adding export functionality for analytics reports
+7. Expanding segmentation options for advertising performance analysis

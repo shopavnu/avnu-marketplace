@@ -2,12 +2,17 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
+  HomeIcon,
   ChartBarIcon,
+  ShieldExclamationIcon,
+  UserIcon,
   BeakerIcon,
   BellIcon,
   UserGroupIcon,
   MagnifyingGlassIcon,
   ExclamationTriangleIcon,
+  AdjustmentsHorizontalIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
 const AnalyticsNav: React.FC = () => {
@@ -18,32 +23,31 @@ const AnalyticsNav: React.FC = () => {
     {
       name: 'Overview',
       href: '/admin/analytics',
-      icon: ChartBarIcon,
-      current: currentPath === '/admin/analytics',
+      icon: HomeIcon,
     },
     {
-      name: 'A/B Testing',
-      href: '/admin/analytics/ab-testing',
-      icon: BeakerIcon,
-      current: currentPath === '/admin/analytics/ab-testing',
-    },
-    {
-      name: 'User Journey',
-      href: '/admin/analytics/user-journey',
-      icon: UserGroupIcon,
-      current: currentPath === '/admin/analytics/user-journey',
-    },
-    {
-      name: 'User Segments',
-      href: '/admin/analytics/user-segments',
-      icon: UserGroupIcon,
-      current: currentPath === '/admin/analytics/user-segments',
-    },
-    {
-      name: 'Search Personalization',
-      href: '/admin/analytics/search-personalization',
+      name: 'Search Performance',
+      href: '/admin/analytics/search-performance',
       icon: MagnifyingGlassIcon,
-      current: currentPath === '/admin/analytics/search-personalization',
+      current: currentPath === '/admin/analytics/search-performance'
+    },
+    {
+      name: 'Personalization Testing',
+      href: '/admin/analytics/personalization-testing',
+      icon: BeakerIcon,
+      current: currentPath === '/admin/analytics/personalization-testing'
+    },
+    {
+      name: 'Advanced Analytics',
+      href: '/admin/analytics/advanced-analytics',
+      icon: AdjustmentsHorizontalIcon,
+      current: currentPath === '/admin/analytics/advanced-analytics'
+    },
+    {
+      name: 'Merchant Advertising',
+      href: '/admin/analytics/merchant-advertising',
+      icon: CurrencyDollarIcon,
+      current: currentPath === '/admin/analytics/merchant-advertising'
     },
     {
       name: 'Suppression Metrics',
