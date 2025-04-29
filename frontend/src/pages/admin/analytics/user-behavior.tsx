@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNavigation from '../../../components/admin/AnalyticsNavigation';
-import axios from 'axios';
+// Using mock data instead of axios
 import { GridContainer, GridItem } from '../../../components/ui/MuiGrid';
 
 // Import analytics components with type declarations
@@ -95,41 +95,103 @@ export default function UserBehaviorDashboard() {
     setTabValue(newValue);
   };
 
-  // Load scroll analytics data
-  const loadScrollData = async () => {
+  // Load scroll analytics data with mock data
+  const loadScrollData = () => {
     setScrollLoading(true);
     try {
-      const response = await axios.get(`/analytics/behavior/scroll?period=${period}`);
-      setScrollData(response.data);
+      // Mock data instead of API call
+      setTimeout(() => {
+        setScrollData({
+          averageScrollDepth: 65,
+          scrollHeatmap: [
+            { position: 0, density: 100 },
+            { position: 25, density: 85 },
+            { position: 50, density: 60 },
+            { position: 75, density: 40 },
+            { position: 100, density: 25 }
+          ],
+          scrollByPage: [
+            { page: '/', averageDepth: 70 },
+            { page: '/products', averageDepth: 65 },
+            { page: '/product/123', averageDepth: 85 },
+            { page: '/cart', averageDepth: 90 },
+            { page: '/checkout', averageDepth: 95 }
+          ]
+        });
+        setScrollLoading(false);
+      }, 800);
     } catch (error) {
       console.error('Failed to load scroll analytics data:', error);
-    } finally {
       setScrollLoading(false);
     }
   };
 
-  // Load heatmap data
-  const loadHeatmapData = async () => {
+  // Load heatmap data with mock data
+  const loadHeatmapData = () => {
     setHeatmapLoading(true);
     try {
-      const response = await axios.get(`/analytics/behavior/heatmap?period=${period}`);
-      setHeatmapData(response.data);
+      // Mock data instead of API call
+      setTimeout(() => {
+        setHeatmapData({
+          clickHeatmap: [
+            { x: 100, y: 150, value: 25 },
+            { x: 300, y: 200, value: 40 },
+            { x: 500, y: 250, value: 15 },
+            { x: 700, y: 300, value: 30 }
+          ],
+          topClickedElements: [
+            { selector: '#product-card-1', clicks: 450 },
+            { selector: '#add-to-cart-btn', clicks: 320 },
+            { selector: '#nav-menu', clicks: 280 },
+            { selector: '#search-bar', clicks: 210 }
+          ],
+          pageViews: [
+            { page: '/', views: 5000 },
+            { page: '/products', views: 3500 },
+            { page: '/product/123', views: 2000 },
+            { page: '/cart', views: 1200 }
+          ]
+        });
+        setHeatmapLoading(false);
+      }, 800);
     } catch (error) {
       console.error('Failed to load heatmap data:', error);
-    } finally {
       setHeatmapLoading(false);
     }
   };
 
-  // Load funnel data
-  const loadFunnelData = async () => {
+  // Load funnel data with mock data
+  const loadFunnelData = () => {
     setFunnelLoading(true);
     try {
-      const response = await axios.get(`/analytics/behavior/funnel?period=${period}`);
-      setFunnelData(response.data);
+      // Mock data instead of API call
+      setTimeout(() => {
+        setFunnelData({
+          conversionSteps: [
+            { step: 'Homepage Visit', count: 10000, rate: 100 },
+            { step: 'Product View', count: 7500, rate: 75 },
+            { step: 'Add to Cart', count: 3000, rate: 40 },
+            { step: 'Checkout', count: 1800, rate: 60 },
+            { step: 'Purchase', count: 1200, rate: 67 }
+          ],
+          dropOffPoints: [
+            { from: 'Homepage', to: 'Product', count: 2500 },
+            { from: 'Product', to: 'Cart', count: 4500 },
+            { from: 'Cart', to: 'Checkout', count: 1200 },
+            { from: 'Checkout', to: 'Purchase', count: 600 }
+          ],
+          conversionBySource: [
+            { source: 'Direct', rate: 8.5 },
+            { source: 'Organic Search', rate: 6.2 },
+            { source: 'Social Media', rate: 4.8 },
+            { source: 'Email', rate: 12.3 },
+            { source: 'Referral', rate: 9.1 }
+          ]
+        });
+        setFunnelLoading(false);
+      }, 800);
     } catch (error) {
       console.error('Failed to load funnel data:', error);
-    } finally {
       setFunnelLoading(false);
     }
   };

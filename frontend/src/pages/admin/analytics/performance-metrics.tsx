@@ -42,7 +42,7 @@ import {
 } from 'recharts';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNavigation from '../../../components/admin/AnalyticsNavigation';
-import axios from 'axios';
+// Mock data instead of using axios
 import { format } from 'date-fns';
 import { GridContainer, GridItem } from '../../../components/ui/MuiGrid';
 
@@ -102,13 +102,11 @@ export default function PerformanceMetricsDashboard() {
     setTabValue(newValue);
   };
 
-  // Load API performance metrics
-  const loadApiMetrics = async () => {
+  // Load API performance metrics with mock data
+  const loadApiMetrics = () => {
     setApiLoading(true);
     try {
-      // Simulate API call - in a real app, this would be an actual API call
-      // const response = await axios.get(`/analytics/performance/api?period=${period}&slowThreshold=${apiSlowThreshold}`);
-      // setApiMetrics(response.data);
+      // Use mock data instead of axios
       setTimeout(() => {
         setApiMetrics({
           slowEndpoints: [
