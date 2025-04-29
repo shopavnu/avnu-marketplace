@@ -15,15 +15,33 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
+/**
+ * Navigation component for the admin analytics section
+ * Provides links to different analytics dashboards
+ */
 const AnalyticsNav: React.FC = () => {
   const router = useRouter();
   const currentPath = router.pathname;
 
+  // Combined navigation items from both branches
   const navItems = [
     {
       name: 'Overview',
       href: '/admin/analytics',
       icon: HomeIcon,
+      current: currentPath === '/admin/analytics'
+    },
+    {
+      name: 'Performance Metrics',
+      href: '/admin/analytics/performance-metrics',
+      icon: ChartBarIcon,
+      current: currentPath === '/admin/analytics/performance-metrics'
+    },
+    {
+      name: 'User Behavior',
+      href: '/admin/analytics/user-behavior',
+      icon: UserIcon,
+      current: currentPath === '/admin/analytics/user-behavior'
     },
     {
       name: 'Search Performance',
