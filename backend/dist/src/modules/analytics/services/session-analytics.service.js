@@ -19,7 +19,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const session_entity_1 = require("../../personalization/entities/session.entity");
 const session_interaction_entity_1 = require("../../personalization/entities/session-interaction.entity");
-const session_service_1 = require("../../personalization/services/session.service");
+const session_interaction_type_enum_1 = require("../../personalization/enums/session-interaction-type.enum");
 let SessionAnalyticsService = SessionAnalyticsService_1 = class SessionAnalyticsService {
     constructor(sessionRepository, interactionRepository) {
         this.sessionRepository = sessionRepository;
@@ -127,28 +127,28 @@ let SessionAnalyticsService = SessionAnalyticsService_1 = class SessionAnalytics
         try {
             const personalizedClicks = await this.interactionRepository.count({
                 where: {
-                    type: session_service_1.SessionInteractionType.CLICK,
+                    type: session_interaction_type_enum_1.SessionInteractionType.CLICK,
                     timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     data: { hasPersonalization: true },
                 },
             });
             const personalizedImpressions = await this.interactionRepository.count({
                 where: {
-                    type: session_service_1.SessionInteractionType.IMPRESSION,
+                    type: session_interaction_type_enum_1.SessionInteractionType.IMPRESSION,
                     timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     data: { hasPersonalization: true },
                 },
             });
             const regularClicks = await this.interactionRepository.count({
                 where: {
-                    type: session_service_1.SessionInteractionType.CLICK,
+                    type: session_interaction_type_enum_1.SessionInteractionType.CLICK,
                     timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     data: { hasPersonalization: false },
                 },
             });
             const regularImpressions = await this.interactionRepository.count({
                 where: {
-                    type: session_service_1.SessionInteractionType.IMPRESSION,
+                    type: session_interaction_type_enum_1.SessionInteractionType.IMPRESSION,
                     timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     data: { hasPersonalization: false },
                 },
@@ -186,7 +186,7 @@ let SessionAnalyticsService = SessionAnalyticsService_1 = class SessionAnalytics
         try {
             const dwellTimeInteractions = await this.interactionRepository.find({
                 where: {
-                    type: session_service_1.SessionInteractionType.DWELL,
+                    type: session_interaction_type_enum_1.SessionInteractionType.DWELL,
                     timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                 },
                 select: ['data', 'durationMs'],
@@ -263,8 +263,8 @@ let SessionAnalyticsService = SessionAnalyticsService_1 = class SessionAnalytics
             };
             sessions.forEach(session => {
                 const hasPersonalization = session.interactions.some(interaction => interaction.data?.hasPersonalization === true);
-                const impressions = session.interactions.filter(interaction => interaction.type === session_service_1.SessionInteractionType.IMPRESSION).length;
-                const clicks = session.interactions.filter(interaction => interaction.type === session_service_1.SessionInteractionType.CLICK).length;
+                const impressions = session.interactions.filter(interaction => interaction.type === session_interaction_type_enum_1.SessionInteractionType.IMPRESSION).length;
+                const clicks = session.interactions.filter(interaction => interaction.type === session_interaction_type_enum_1.SessionInteractionType.CLICK).length;
                 if (hasPersonalization) {
                     metrics.personalized.sessions++;
                     metrics.personalized.impressions += impressions;
@@ -350,7 +350,7 @@ let SessionAnalyticsService = SessionAnalyticsService_1 = class SessionAnalytics
             startDate.setDate(startDate.getDate() - period);
             const clickInteractions = await this.interactionRepository.find({
                 where: {
-                    type: session_service_1.SessionInteractionType.CLICK,
+                    type: session_interaction_type_enum_1.SessionInteractionType.CLICK,
                     timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                 },
                 select: ['data'],

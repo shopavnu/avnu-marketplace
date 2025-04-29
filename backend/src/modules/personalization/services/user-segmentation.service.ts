@@ -403,7 +403,7 @@ export class UserSegmentationService {
    */
   private identifyReturners(
     userSessions: Map<string, SessionEntity[]>,
-    userInteractions: Map<string, SessionInteractionEntity[]>,
+    _userInteractions: Map<string, SessionInteractionEntity[]>,
   ): Set<string> {
     const returners = new Set<string>();
 

@@ -1,4 +1,4 @@
-import { Field, ObjectType, Float, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Float, Int as _Int } from '@nestjs/graphql';
 
 @ObjectType()
 export class ABTestVariantDto {

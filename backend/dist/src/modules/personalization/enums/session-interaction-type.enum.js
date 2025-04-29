@@ -16,5 +16,10 @@ var SessionInteractionType;
     SessionInteractionType["MERCHANT_VIEW"] = "MERCHANT_VIEW";
     SessionInteractionType["REVIEW_VIEW"] = "REVIEW_VIEW";
     SessionInteractionType["REVIEW_SUBMIT"] = "REVIEW_SUBMIT";
+    SessionInteractionType["VIEW"] = "view";
+    SessionInteractionType["SORT"] = "sort";
+    SessionInteractionType["IMPRESSION"] = "impression";
+    SessionInteractionType["DWELL"] = "dwell";
+    SessionInteractionType["SCROLL_DEPTH"] = "scroll_depth";
 })(SessionInteractionType || (exports.SessionInteractionType = SessionInteractionType = {}));
 //# sourceMappingURL=session-interaction-type.enum.js.map

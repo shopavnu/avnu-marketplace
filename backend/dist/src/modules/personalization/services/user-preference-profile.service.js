@@ -19,6 +19,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_preference_profile_entity_1 = require("../entities/user-preference-profile.entity");
 const session_service_1 = require("./session.service");
+const session_interaction_type_enum_1 = require("../enums/session-interaction-type.enum");
 let UserPreferenceProfileService = UserPreferenceProfileService_1 = class UserPreferenceProfileService {
     constructor(userPreferenceProfileRepository, sessionService) {
         this.userPreferenceProfileRepository = userPreferenceProfileRepository;
@@ -78,7 +79,7 @@ let UserPreferenceProfileService = UserPreferenceProfileService_1 = class UserPr
             for (const interaction of interactions) {
                 const { type, data } = interaction;
                 switch (type) {
-                    case session_service_1.SessionInteractionType.VIEW:
+                    case session_interaction_type_enum_1.SessionInteractionType.VIEW:
                         totalPageViews++;
                         if (data.type === 'category' && data.categoryId) {
                             categoryPreferences[data.categoryId] =
@@ -88,7 +89,7 @@ let UserPreferenceProfileService = UserPreferenceProfileService_1 = class UserPr
                             brandPreferences[data.brandId] = (brandPreferences[data.brandId] || 0) + 1;
                         }
                         break;
-                    case session_service_1.SessionInteractionType.PRODUCT_VIEW:
+                    case session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW:
                         totalProductViews++;
                         if (data.productId) {
                             productPreferences[data.productId] = (productPreferences[data.productId] || 0) + 1;
@@ -117,7 +118,7 @@ let UserPreferenceProfileService = UserPreferenceProfileService_1 = class UserPr
                             }
                         }
                         break;
-                    case session_service_1.SessionInteractionType.SCROLL_DEPTH:
+                    case session_interaction_type_enum_1.SessionInteractionType.SCROLL_DEPTH:
                         if (data.scrollPercentage) {
                             totalScrollDepth += data.scrollPercentage;
                             scrollDepthCount++;
@@ -126,16 +127,16 @@ let UserPreferenceProfileService = UserPreferenceProfileService_1 = class UserPr
                             }
                         }
                         break;
-                    case session_service_1.SessionInteractionType.CLICK:
-                    case session_service_1.SessionInteractionType.ADD_TO_CART:
-                    case session_service_1.SessionInteractionType.PURCHASE:
+                    case session_interaction_type_enum_1.SessionInteractionType.CLICK:
+                    case session_interaction_type_enum_1.SessionInteractionType.ADD_TO_CART:
+                    case session_interaction_type_enum_1.SessionInteractionType.PURCHASE:
                         if (data.productId) {
                             productEngagementCount++;
-                            const engagementWeight = type === session_service_1.SessionInteractionType.CLICK
+                            const engagementWeight = type === session_interaction_type_enum_1.SessionInteractionType.CLICK
                                 ? 2
-                                : type === session_service_1.SessionInteractionType.ADD_TO_CART
+                                : type === session_interaction_type_enum_1.SessionInteractionType.ADD_TO_CART
                                     ? 5
-                                    : type === session_service_1.SessionInteractionType.PURCHASE
+                                    : type === session_interaction_type_enum_1.SessionInteractionType.PURCHASE
                                         ? 10
                                         : 1;
                             productPreferences[data.productId] =

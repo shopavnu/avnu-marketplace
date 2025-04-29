@@ -13,26 +13,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 var SessionService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SessionService = exports.SessionInteractionType = void 0;
+exports.SessionService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const session_entity_1 = require("../entities/session.entity");
 const session_interaction_entity_1 = require("../entities/session-interaction.entity");
-var SessionInteractionType;
-(function (SessionInteractionType) {
-    SessionInteractionType["SEARCH"] = "search";
-    SessionInteractionType["CLICK"] = "click";
-    SessionInteractionType["VIEW"] = "view";
-    SessionInteractionType["FILTER"] = "filter";
-    SessionInteractionType["SORT"] = "sort";
-    SessionInteractionType["IMPRESSION"] = "impression";
-    SessionInteractionType["DWELL"] = "dwell";
-    SessionInteractionType["ADD_TO_CART"] = "add_to_cart";
-    SessionInteractionType["PURCHASE"] = "purchase";
-    SessionInteractionType["SCROLL_DEPTH"] = "scroll_depth";
-    SessionInteractionType["PRODUCT_VIEW"] = "product_view";
-})(SessionInteractionType || (exports.SessionInteractionType = SessionInteractionType = {}));
+const session_interaction_type_enum_1 = require("../enums/session-interaction-type.enum");
 let SessionService = SessionService_1 = class SessionService {
     constructor(sessionRepository, interactionRepository) {
         this.sessionRepository = sessionRepository;
@@ -134,14 +121,14 @@ let SessionService = SessionService_1 = class SessionService {
                 const recencyWeight = Math.max(0, 1 - hoursSinceInteraction / 24);
                 let interactionWeight = 0;
                 switch (type) {
-                    case SessionInteractionType.CLICK:
+                    case session_interaction_type_enum_1.SessionInteractionType.CLICK:
                         interactionWeight = 0.8;
                         if (data.resultId) {
                             weights.entities[data.resultId] =
                                 (weights.entities[data.resultId] || 0) + interactionWeight * recencyWeight;
                         }
                         break;
-                    case SessionInteractionType.DWELL:
+                    case session_interaction_type_enum_1.SessionInteractionType.DWELL:
                         const dwellTimeMinutes = (durationMs || 0) / (1000 * 60);
                         interactionWeight = Math.min(1.0, dwellTimeMinutes / 2);
                         if (data.resultId) {
@@ -149,7 +136,7 @@ let SessionService = SessionService_1 = class SessionService {
                                 (weights.entities[data.resultId] || 0) + interactionWeight * recencyWeight;
                         }
                         break;
-                    case SessionInteractionType.IMPRESSION:
+                    case session_interaction_type_enum_1.SessionInteractionType.IMPRESSION:
                         interactionWeight = 0.1;
                         if (data.resultIds && Array.isArray(data.resultIds)) {
                             data.resultIds.forEach((resultId) => {
@@ -158,14 +145,14 @@ let SessionService = SessionService_1 = class SessionService {
                             });
                         }
                         break;
-                    case SessionInteractionType.SEARCH:
+                    case session_interaction_type_enum_1.SessionInteractionType.SEARCH:
                         interactionWeight = 0.7;
                         if (data.query) {
                             weights.queries[data.query] =
                                 (weights.queries[data.query] || 0) + interactionWeight * recencyWeight;
                         }
                         break;
-                    case SessionInteractionType.FILTER:
+                    case session_interaction_type_enum_1.SessionInteractionType.FILTER:
                         interactionWeight = 0.6;
                         if (data.filterType && data.filterValue) {
                             const filterKey = `${data.filterType}:${data.filterValue}`;
@@ -181,7 +168,7 @@ let SessionService = SessionService_1 = class SessionService {
                             }
                         }
                         break;
-                    case SessionInteractionType.VIEW:
+                    case session_interaction_type_enum_1.SessionInteractionType.VIEW:
                         interactionWeight = 0.5;
                         if (data.type === 'category' && data.categoryId) {
                             weights.categories[data.categoryId] =
@@ -192,7 +179,7 @@ let SessionService = SessionService_1 = class SessionService {
                                 (weights.brands[data.brandId] || 0) + interactionWeight * recencyWeight;
                         }
                         break;
-                    case SessionInteractionType.SCROLL_DEPTH:
+                    case session_interaction_type_enum_1.SessionInteractionType.SCROLL_DEPTH:
                         const scrollPercentage = data.scrollPercentage || 0;
                         interactionWeight = 0.1 + (scrollPercentage / 100) * 0.7;
                         if (data.pageType) {
@@ -205,7 +192,7 @@ let SessionService = SessionService_1 = class SessionService {
                             });
                         }
                         break;
-                    case SessionInteractionType.PRODUCT_VIEW:
+                    case session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW:
                         const viewTimeSeconds = (data.viewTimeMs || 0) / 1000;
                         interactionWeight = Math.min(1.0, viewTimeSeconds / 60) * 0.9;
                         if (data.productId) {

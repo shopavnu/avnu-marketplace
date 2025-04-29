@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const uuid_1 = require("uuid");
 const config_1 = require("@nestjs/config");
 const session_service_1 = require("./session.service");
+const session_interaction_type_enum_1 = require("../enums/session-interaction-type.enum");
 let AnonymousUserService = AnonymousUserService_1 = class AnonymousUserService {
     constructor(configService, sessionService) {
         this.configService = configService;
@@ -59,7 +60,7 @@ let AnonymousUserService = AnonymousUserService_1 = class AnonymousUserService {
     }
     async getRecentSearches(req, res, limit = 5) {
         const anonymousId = this.getOrCreateAnonymousId(req, res);
-        const searchInteractions = await this.sessionService.getRecentInteractions(anonymousId, session_service_1.SessionInteractionType.SEARCH, limit);
+        const searchInteractions = await this.sessionService.getRecentInteractions(anonymousId, session_interaction_type_enum_1.SessionInteractionType.SEARCH, limit);
         return searchInteractions.map(interaction => ({
             query: interaction.data.query,
             timestamp: interaction.timestamp,
@@ -68,7 +69,7 @@ let AnonymousUserService = AnonymousUserService_1 = class AnonymousUserService {
     }
     async getRecentlyViewedProducts(req, res, limit = 10) {
         const anonymousId = this.getOrCreateAnonymousId(req, res);
-        const viewInteractions = await this.sessionService.getRecentInteractions(anonymousId, session_service_1.SessionInteractionType.PRODUCT_VIEW, limit);
+        const viewInteractions = await this.sessionService.getRecentInteractions(anonymousId, session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW, limit);
         return viewInteractions.map(interaction => ({
             productId: interaction.data.productId,
             timestamp: interaction.timestamp,

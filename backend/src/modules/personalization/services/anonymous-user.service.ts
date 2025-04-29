@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
-import { SessionService, SessionInteractionType } from './session.service';
+import { SessionService } from './session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 
 /**
  * Service for managing anonymous user identification and preferences
