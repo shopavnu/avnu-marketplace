@@ -12,6 +12,7 @@ const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const logger_service_1 = require("./services/logger.service");
 const global_exception_filter_1 = require("./filters/global-exception.filter");
+const services_1 = require("./services");
 let CommonModule = class CommonModule {
 };
 exports.CommonModule = CommonModule;
@@ -21,12 +22,15 @@ exports.CommonModule = CommonModule = __decorate([
         imports: [config_1.ConfigModule],
         providers: [
             logger_service_1.LoggerService,
+            services_1.CircuitBreakerService,
+            services_1.RedisHealthService,
+            services_1.ResilientCacheService,
             {
                 provide: core_1.APP_FILTER,
                 useClass: global_exception_filter_1.GlobalExceptionFilter,
             },
         ],
-        exports: [logger_service_1.LoggerService],
+        exports: [logger_service_1.LoggerService, services_1.CircuitBreakerService, services_1.RedisHealthService, services_1.ResilientCacheService],
     })
 ], CommonModule);
 //# sourceMappingURL=common.module.js.map

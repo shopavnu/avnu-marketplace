@@ -5,6 +5,7 @@ export declare class Merchant {
     description: string;
     logo: string;
     website: string;
+    email: string;
     values: string[];
     categories: string[];
     latitude: number;

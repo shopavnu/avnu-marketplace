@@ -122,7 +122,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
       style={{ 
         position: 'relative',
         width: '100%',
-        height: '100%'
+        height: '100%',
+        display: 'flex', // Ensure flex display
+        flexDirection: 'column' // Stack children vertically
       }}
     >
       <ResponsiveProductCard 

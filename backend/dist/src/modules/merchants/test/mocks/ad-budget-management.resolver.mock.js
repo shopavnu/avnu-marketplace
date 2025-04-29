@@ -17,16 +17,16 @@ let AdBudgetManagementResolver = class AdBudgetManagementResolver {
     constructor(budgetService) {
         this.budgetService = budgetService;
     }
-    async merchantBudgetUtilization(merchantId, user) {
+    async merchantBudgetUtilization(merchantId, _user) {
         return this.budgetService.getBudgetUtilization(merchantId);
     }
-    async merchantBudgetForecast(merchantId, user) {
+    async merchantBudgetForecast(merchantId, _user) {
         return this.budgetService.getBudgetForecast(merchantId);
     }
-    async merchantDailyBudget(merchantId, user) {
+    async merchantDailyBudget(merchantId, _user) {
         return this.budgetService.getDailyBudget(merchantId);
     }
-    async allocateBudgetAcrossCampaigns(merchantId, totalBudget, campaignIds, strategy = entity_mocks_1.BudgetAllocationStrategy.EQUAL, user) {
+    async allocateBudgetAcrossCampaigns(merchantId, totalBudget, campaignIds, strategy = entity_mocks_1.BudgetAllocationStrategy.EQUAL, _user) {
         return this.budgetService.allocateBudgetAcrossCampaigns(merchantId, campaignIds, totalBudget, strategy);
     }
 };

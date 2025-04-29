@@ -17,7 +17,7 @@ let AdBudgetManagementService = class AdBudgetManagementService {
     constructor(eventEmitter) {
         this.eventEmitter = eventEmitter;
     }
-    async getBudgetUtilization(merchantId) {
+    async getBudgetUtilization(_merchantId) {
         return {
             totalBudget: 1500,
             totalSpent: 500,
@@ -29,7 +29,7 @@ let AdBudgetManagementService = class AdBudgetManagementService {
             },
         };
     }
-    async getBudgetForecast(merchantId) {
+    async getBudgetForecast(_merchantId) {
         return {
             projectedSpend: 1000,
             daysRemaining: 15,
@@ -41,10 +41,10 @@ let AdBudgetManagementService = class AdBudgetManagementService {
             },
         };
     }
-    async getDailyBudget(merchantId) {
+    async getDailyBudget(_merchantId) {
         return 66.67;
     }
-    async allocateBudgetAcrossCampaigns(merchantId, campaignIds, totalBudget, strategy = entity_mocks_1.BudgetAllocationStrategy.EQUAL) {
+    async allocateBudgetAcrossCampaigns(_merchantId, campaignIds, totalBudget, strategy = entity_mocks_1.BudgetAllocationStrategy.EQUAL) {
         if (strategy === entity_mocks_1.BudgetAllocationStrategy.EQUAL) {
             const perCampaignBudget = totalBudget / campaignIds.length;
             return campaignIds.reduce((acc, id) => {
@@ -65,7 +65,7 @@ let AdBudgetManagementService = class AdBudgetManagementService {
             };
         }
     }
-    async recordAdSpend(campaignId, amount, impressionCount = 1) {
+    async recordAdSpend(campaignId, amount, _impressionCount = 1) {
         return {
             campaignId,
             previousSpent: 100,

@@ -30,6 +30,8 @@ var SessionInteractionType;
     SessionInteractionType["DWELL"] = "dwell";
     SessionInteractionType["ADD_TO_CART"] = "add_to_cart";
     SessionInteractionType["PURCHASE"] = "purchase";
+    SessionInteractionType["SCROLL_DEPTH"] = "scroll_depth";
+    SessionInteractionType["PRODUCT_VIEW"] = "product_view";
 })(SessionInteractionType || (exports.SessionInteractionType = SessionInteractionType = {}));
 let SessionService = SessionService_1 = class SessionService {
     constructor(sessionRepository, interactionRepository) {
@@ -94,6 +96,19 @@ let SessionService = SessionService_1 = class SessionService {
             return [];
         }
     }
+    async getInteractionsByType(type, limit = 100) {
+        try {
+            return this.interactionRepository.find({
+                where: { type },
+                order: { timestamp: 'DESC' },
+                take: limit,
+            });
+        }
+        catch (error) {
+            this.logger.error(`Failed to get interactions by type: ${error.message}`);
+            return [];
+        }
+    }
     async calculateSessionWeights(sessionId) {
         try {
             const session = await this.getOrCreateSession(sessionId);
@@ -107,6 +122,9 @@ let SessionService = SessionService_1 = class SessionService {
                 brands: {},
                 queries: {},
                 filters: {},
+                scrollDepth: {},
+                productViews: {},
+                viewTime: {},
             };
             interactions.forEach(interaction => {
                 const { type, data, durationMs } = interaction;
@@ -174,6 +192,43 @@ let SessionService = SessionService_1 = class SessionService {
                                 (weights.brands[data.brandId] || 0) + interactionWeight * recencyWeight;
                         }
                         break;
+                    case SessionInteractionType.SCROLL_DEPTH:
+                        const scrollPercentage = data.scrollPercentage || 0;
+                        interactionWeight = 0.1 + (scrollPercentage / 100) * 0.7;
+                        if (data.pageType) {
+                            weights.scrollDepth[data.pageType] = Math.max(weights.scrollDepth[data.pageType] || 0, scrollPercentage);
+                        }
+                        if (data.visibleProductIds && Array.isArray(data.visibleProductIds)) {
+                            data.visibleProductIds.forEach((productId) => {
+                                weights.entities[productId] =
+                                    (weights.entities[productId] || 0) + interactionWeight * recencyWeight * 0.3;
+                            });
+                        }
+                        break;
+                    case SessionInteractionType.PRODUCT_VIEW:
+                        const viewTimeSeconds = (data.viewTimeMs || 0) / 1000;
+                        interactionWeight = Math.min(1.0, viewTimeSeconds / 60) * 0.9;
+                        if (data.productId) {
+                            weights.productViews[data.productId] = {
+                                count: (weights.productViews[data.productId]?.count || 0) + 1,
+                                totalTime: (weights.productViews[data.productId]?.totalTime || 0) + viewTimeSeconds,
+                                lastViewed: Date.now(),
+                            };
+                            weights.entities[data.productId] =
+                                (weights.entities[data.productId] || 0) + interactionWeight * recencyWeight;
+                            weights.viewTime[data.productId] =
+                                (weights.viewTime[data.productId] || 0) + viewTimeSeconds;
+                            if (data.categoryId) {
+                                weights.categories[data.categoryId] =
+                                    (weights.categories[data.categoryId] || 0) +
+                                        interactionWeight * recencyWeight * 0.5;
+                            }
+                            if (data.brandId) {
+                                weights.brands[data.brandId] =
+                                    (weights.brands[data.brandId] || 0) + interactionWeight * recencyWeight * 0.5;
+                            }
+                        }
+                        break;
                 }
             });
             return weights;
@@ -186,6 +241,9 @@ let SessionService = SessionService_1 = class SessionService {
                 brands: {},
                 queries: {},
                 filters: {},
+                scrollDepth: {},
+                productViews: {},
+                viewTime: {},
             };
         }
     }

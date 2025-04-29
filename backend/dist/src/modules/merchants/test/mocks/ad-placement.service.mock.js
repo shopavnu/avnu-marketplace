@@ -16,7 +16,7 @@ let AdPlacementService = class AdPlacementService {
     constructor(eventEmitter) {
         this.eventEmitter = eventEmitter;
     }
-    async getAdsForDiscoveryFeed(options) {
+    async getAdsForDiscoveryFeed(_options) {
         return [
             {
                 campaignId: '1',
@@ -38,7 +38,7 @@ let AdPlacementService = class AdPlacementService {
             },
         ];
     }
-    async getRecommendedAdPlacements(userId, sessionId) {
+    async getRecommendedAdPlacements(_userId, _sessionId) {
         return [
             {
                 campaignId: '1',
@@ -51,11 +51,11 @@ let AdPlacementService = class AdPlacementService {
             },
         ];
     }
-    async recordAdClick(campaignId, userId, sessionId) {
+    async recordAdClick(campaignId, _userId, _sessionId) {
         this.eventEmitter.emit('ad.click', {
             campaignId,
-            userId,
-            sessionId,
+            _userId,
+            _sessionId,
             timestamp: new Date(),
         });
         return true;

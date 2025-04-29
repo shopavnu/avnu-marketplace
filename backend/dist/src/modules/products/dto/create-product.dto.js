@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateProductDto = void 0;
 const class_validator_1 = require("class-validator");
 const graphql_1 = require("@nestjs/graphql");
+const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
+const product_attributes_dto_1 = require("./product-attributes.dto");
 let CreateProductDto = class CreateProductDto {
 };
 exports.CreateProductDto = CreateProductDto;
@@ -54,9 +56,21 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: ['https://example.com/image1.jpg'], description: 'Product images' }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsUrl)({}, { each: true, message: 'Each image must be a valid URL' }),
     (0, class_validator_1.IsNotEmpty)({ message: 'At least one image is required' }),
     __metadata("design:type", Array)
 ], CreateProductDto.prototype, "images", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        example: 'handcrafted-ceramic-mug',
+        description: 'URL-friendly slug',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, swagger_1.ApiProperty)({ required: false, description: 'Product thumbnail' }),
@@ -80,6 +94,19 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateProductDto.prototype, "tags", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => product_attributes_dto_1.ProductAttributesDto, { nullable: true }),
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        description: 'Product attributes like size, color, material, etc.',
+        type: () => product_attributes_dto_1.ProductAttributesDto,
+    }),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => product_attributes_dto_1.ProductAttributesDto),
+    __metadata("design:type", product_attributes_dto_1.ProductAttributesDto)
+], CreateProductDto.prototype, "attributes", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     (0, swagger_1.ApiProperty)({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'Merchant ID' }),

@@ -62,6 +62,7 @@
     "graphql-type-json": "^0.3.2",
     "is-url": "^1.2.4",
     "natural": "^6.7.0",
+    "node-cache": "^5.1.2",
     "nodemailer": "^6.10.1",
     "oauth-1.0a": "^2.2.6",
     "passport": "^0.6.0",

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsOptional, IsBoolean, Min } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsOptional, IsBoolean, Min, IsObject } from 'class-validator';
 import { Field, InputType, Float, Int, PartialType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateProductDto } from './create-product.dto';
@@ -50,6 +50,23 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   @IsString({ each: true })
   @IsOptional()
   categories?: string[];
+
+  @Field(() => Object, { nullable: true })
+  @ApiProperty({ required: false, description: 'Accessibility metadata for the product' })
+  @IsObject()
+  @IsOptional()
+  accessibilityMetadata?: {
+    altText?: string;
+    ariaLabel?: string;
+    role?: string;
+    longDescription?: string;
+  };
+
+  @Field(() => Object, { nullable: true })
+  @ApiProperty({ required: false, description: 'Map of image URLs to alt texts' })
+  @IsObject()
+  @IsOptional()
+  imageAltTexts?: Record<string, string>;
 
   @Field(() => [String], { nullable: true })
   @ApiProperty({ required: false, description: 'Product tags' })

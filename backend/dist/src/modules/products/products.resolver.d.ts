@@ -14,6 +14,9 @@ export declare class ProductsResolver {
     findAll(paginationDto: PaginationDto): Promise<{
         items: Product[];
         total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     }>;
     findOne(id: string): Promise<Product>;
     search(query: string, paginationDto: PaginationDto, categories?: string[], priceMin?: number, priceMax?: number, merchantId?: string, inStock?: boolean, values?: string[]): Promise<{

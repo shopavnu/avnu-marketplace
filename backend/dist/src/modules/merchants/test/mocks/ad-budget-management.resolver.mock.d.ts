@@ -3,8 +3,8 @@ import { BudgetAllocationStrategy, BudgetForecast, BudgetUtilization } from './e
 export declare class AdBudgetManagementResolver {
     private readonly budgetService;
     constructor(budgetService: AdBudgetManagementService);
-    merchantBudgetUtilization(merchantId: string, user?: any): Promise<BudgetUtilization>;
-    merchantBudgetForecast(merchantId: string, user?: any): Promise<BudgetForecast>;
-    merchantDailyBudget(merchantId: string, user?: any): Promise<number>;
-    allocateBudgetAcrossCampaigns(merchantId: string, totalBudget: number, campaignIds: string[], strategy?: BudgetAllocationStrategy, user?: any): Promise<Record<string, number>>;
+    merchantBudgetUtilization(merchantId: string, _user?: any): Promise<BudgetUtilization>;
+    merchantBudgetForecast(merchantId: string, _user?: any): Promise<BudgetForecast>;
+    merchantDailyBudget(merchantId: string, _user?: any): Promise<number>;
+    allocateBudgetAcrossCampaigns(merchantId: string, totalBudget: number, campaignIds: string[], strategy?: BudgetAllocationStrategy, _user?: any): Promise<Record<string, number>>;
 }

@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SessionInteractionEntity = void 0;
 const typeorm_1 = require("typeorm");
 const session_entity_1 = require("./session.entity");
-const session_service_1 = require("../services/session.service");
+const session_interaction_type_enum_1 = require("../enums/session-interaction-type.enum");
 let SessionInteractionEntity = class SessionInteractionEntity {
 };
 exports.SessionInteractionEntity = SessionInteractionEntity;
@@ -36,6 +36,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'jsonb' }),
     __metadata("design:type", Object)
 ], SessionInteractionEntity.prototype, "data", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Object)
+], SessionInteractionEntity.prototype, "metadata", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp' }),
     __metadata("design:type", Date)

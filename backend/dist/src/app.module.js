@@ -13,12 +13,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const graphql_1 = require("@nestjs/graphql");
 const apollo_1 = require("@nestjs/apollo");
 const cache_manager_1 = require("@nestjs/cache-manager");
+const redisStore = require('cache-manager-redis-store').default;
 const common_module_1 = require("./common/common.module");
 const health_module_1 = require("./health/health.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const users_1 = require("./modules/users");
 const products_1 = require("./modules/products");
 const merchants_1 = require("./modules/merchants");
+const categories_module_1 = require("./modules/categories/categories.module");
 const orders_1 = require("./modules/orders");
 const integrations_1 = require("./modules/integrations");
 const search_1 = require("./modules/search");
@@ -28,6 +30,9 @@ const nlp_1 = require("./modules/nlp");
 const personalization_1 = require("./modules/personalization");
 const analytics_1 = require("./modules/analytics");
 const ab_testing_1 = require("./modules/ab-testing");
+const recommendations_module_1 = require("./modules/recommendations/recommendations.module");
+const advertising_module_1 = require("./modules/advertising/advertising.module");
+const accessibility_module_1 = require("./modules/accessibility/accessibility.module");
 const graphql_2 = require("@nestjs/graphql");
 const search_entity_type_enum_1 = require("./modules/search/enums/search-entity-type.enum");
 const experiment_entity_1 = require("./modules/ab-testing/entities/experiment.entity");
@@ -71,15 +76,24 @@ exports.AppModule = AppModule = __decorate([
                 playground: true,
                 debug: true,
             }),
-            cache_manager_1.CacheModule.register({
+            cache_manager_1.CacheModule.registerAsync({
                 isGlobal: true,
-                ttl: 60 * 60,
-                max: 1000,
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: (configService) => ({
+                    store: redisStore,
+                    ttl: configService.get('REDIS_TTL', 60 * 60),
+                    url: `redis://${configService.get('REDIS_HOST', 'localhost')}:${configService.get('REDIS_PORT', 6379)}`,
+                    password: configService.get('REDIS_PASSWORD', ''),
+                    database: configService.get('REDIS_DB', 0),
+                    max: configService.get('REDIS_MAX_ITEMS', 1000),
+                }),
             }),
             auth_module_1.AuthModule,
             users_1.UsersModule,
             products_1.ProductsModule,
             merchants_1.MerchantsModule,
+            categories_module_1.CategoriesModule,
             orders_1.OrdersModule,
             integrations_1.IntegrationsModule,
             search_1.SearchModule,
@@ -89,6 +103,9 @@ exports.AppModule = AppModule = __decorate([
             personalization_1.PersonalizationModule,
             analytics_1.AnalyticsModule,
             ab_testing_1.AbTestingModule,
+            recommendations_module_1.RecommendationsModule,
+            advertising_module_1.AdvertisingModule,
+            accessibility_module_1.AccessibilityModule,
         ],
     })
 ], AppModule);

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ProductsService } from './products.service';
+import { ProductQueryOptimizerService } from './services/product-query-optimizer.service';
 import { ProductService, CategoryService } from './services';
 import { ProductsController } from './products.controller';
 import { ProductsResolver } from './products.resolver';
@@ -31,6 +32,13 @@ import { ProductCacheController } from './controllers/product-cache.controller';
 import { CachedProductsResolver } from './resolvers/cached-products.resolver';
 import { CachePerformanceMonitorService } from './services/cache-performance-monitor.service';
 import { CachePerformanceResolver } from './resolvers/cache-performance.resolver';
+import { QueryCacheWarmupTask } from './tasks/query-cache-warmup.task';
+import { QueryAnalyticsService } from './services/query-analytics.service';
+import { PaginationCacheService } from './services/pagination-cache.service';
+import { QueryAnalyticsResolver } from './resolvers/query-analytics.resolver';
+import { AccessibilityService } from './services/accessibility.service';
+import { AccessibilityResolver } from './resolvers/accessibility.resolver';
+import { AccessibilityController } from './controllers/accessibility.controller';
 
 @Module({
   imports: [
@@ -46,8 +54,13 @@ import { CachePerformanceResolver } from './resolvers/cache-performance.resolver
     ProgressiveLoadingController,
     MerchantProductsController,
     ProductCacheController,
+    AccessibilityController,
   ],
   providers: [
+    ProductQueryOptimizerService,
+    QueryAnalyticsService,
+    PaginationCacheService,
+    QueryAnalyticsResolver,
     ProductsService,
     ProductService,
     CategoryService,
@@ -68,6 +81,9 @@ import { CachePerformanceResolver } from './resolvers/cache-performance.resolver
     CachedProductsResolver,
     CachePerformanceMonitorService,
     CachePerformanceResolver,
+    QueryCacheWarmupTask,
+    AccessibilityService,
+    AccessibilityResolver,
   ],
   exports: [
     ProductsService,
@@ -84,9 +100,14 @@ import { CachePerformanceResolver } from './resolvers/cache-performance.resolver
     ProductCacheService,
     CachedProductsService,
     CacheWarmingService,
+    ProductQueryOptimizerService,
+    QueryAnalyticsService,
+    PaginationCacheService,
     CachedProductsResolver,
     CachePerformanceMonitorService,
     CachePerformanceResolver,
+    QueryCacheWarmupTask,
+    AccessibilityService,
   ],
 })
 export class ProductsModule {}

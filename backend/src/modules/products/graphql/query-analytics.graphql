@@ -1,0 +1,23 @@
+type QueryAnalytics {
+  queryId: String!
+  queryPattern: String!
+  averageExecutionTime: Float!
+  minExecutionTime: Float!
+  maxExecutionTime: Float!
+  totalExecutions: Int!
+  lastExecutionTime: Float!
+  lastExecuted: Float!
+  frequency: Float!
+  isSlowQuery: Boolean!
+  commonFilters: JSON
+  resultSizes: [Int!]!
+}
+
+type Query {
+  queryAnalytics: [QueryAnalytics!]!
+  slowQueries: [QueryAnalytics!]!
+  queryAnalyticsById(queryId: String!): QueryAnalytics
+  mostFrequentQueries(limit: Int): [QueryAnalytics!]!
+}
+
+scalar JSON

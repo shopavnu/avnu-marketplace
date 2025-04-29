@@ -9,6 +9,24 @@ import {
 import { Field, ID, ObjectType, Float, Int, GraphQLISODateTime } from '@nestjs/graphql';
 
 @ObjectType()
+class AccessibilityMetadata {
+  @Field({ nullable: true })
+  altText?: string;
+
+  @Field({ nullable: true })
+  ariaLabel?: string;
+
+  @Field({ nullable: true })
+  role?: string;
+
+  @Field({ nullable: true })
+  longDescription?: string;
+
+  @Field(() => Object, { nullable: true })
+  structuredData?: Record<string, any>;
+}
+
+@ObjectType()
 class ImageMetadata {
   @Field(() => Int)
   width: number;
@@ -49,6 +67,9 @@ class ProductAttributes {
 
 @ObjectType()
 @Entity('products')
+@Index(['merchantId', 'inStock', 'isActive'])
+@Index(['price', 'inStock', 'isActive'])
+@Index(['createdAt', 'id'])
 export class Product {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
@@ -64,6 +85,7 @@ export class Product {
 
   @Field(() => Float)
   @Column('decimal', { precision: 10, scale: 2 })
+  @Index()
   price: number;
 
   @Field(() => Float, { nullable: true })
@@ -103,6 +125,7 @@ export class Product {
 
   @Field(() => [String])
   @Column('simple-array')
+  @Index({ fulltext: true })
   categories: string[];
 
   @Field(() => [String], { nullable: true })
@@ -111,6 +134,7 @@ export class Product {
 
   @Field()
   @Column()
+  @Index()
   merchantId: string;
 
   @Field()
@@ -123,10 +147,12 @@ export class Product {
 
   @Field()
   @Column({ default: true })
+  @Index()
   inStock: boolean;
 
   @Field()
   @Column({ default: false })
+  @Index()
   featured: boolean;
 
   @Field(() => Int, { nullable: true })
@@ -157,6 +183,7 @@ export class Product {
 
   @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
+  @Index()
   createdAt: Date;
 
   @Field(() => GraphQLISODateTime)
@@ -165,6 +192,7 @@ export class Product {
 
   @Field(() => Boolean, { defaultValue: false })
   @Column({ default: false })
+  @Index()
   isSuppressed: boolean;
 
   @Field(() => [String], { nullable: true })
@@ -174,6 +202,14 @@ export class Product {
   @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   lastValidationDate?: Date;
+
+  @Field(() => AccessibilityMetadata, { nullable: true })
+  @Column('json', { nullable: true })
+  accessibilityMetadata?: AccessibilityMetadata;
+
+  @Field(() => String, { nullable: true })
+  @Column('json', { nullable: true })
+  imageAltTexts?: Record<string, string>; // Map of image URLs to alt texts
 
   // Virtual fields
   @Field(() => Boolean)
