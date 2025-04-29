@@ -22,7 +22,7 @@ export class MerchantAdMetricsService {
       0,
     );
     const totalClicks = campaigns.reduce((sum, campaign) => sum + campaign.totalClicks, 0);
-    const averageClickThroughRate = 
+    const averageClickThroughRate =
       totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
     const totalConversions = campaigns.reduce(
       (sum, campaign) => sum + campaign.totalConversions,
@@ -44,7 +44,7 @@ export class MerchantAdMetricsService {
     const returnOnAdSpend = totalCost > 0 ? productSalesFromAds / totalCost : 0;
 
     // Calculate average conversion value
-    const averageConversionValue = 
+    const averageConversionValue =
       totalConversions > 0 ? productSalesFromAds / totalConversions : 0;
 
     // Calculate cost per acquisition (CPA)

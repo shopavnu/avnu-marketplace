@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import d3 from '../../utils/d3-imports';
+import React from 'react';
 
 interface HeatmapDataPoint {
   x: string | number;
@@ -26,193 +25,158 @@ const HeatmapVisualization: React.FC<HeatmapVisualizationProps> = ({
   yLabel = 'Y Axis',
   colorRange = ['#f7fbff', '#08306b']
 }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    if (!data || data.length === 0 || !svgRef.current) return;
-
-    // Clear previous visualization
-    d3.select(svgRef.current).selectAll('*').remove();
-
-    // Set margins
-    const margin = { top: 60, right: 30, bottom: 60, left: 60 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    // Create SVG
-    const svg = d3.select(svgRef.current)
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Get unique x and y values for scales
-    const xValues = Array.from(new Set(data.map((d: HeatmapDataPoint) => String(d.x))));
-    const yValues = Array.from(new Set(data.map((d: HeatmapDataPoint) => String(d.y))));
-
-    // Create scales
-    const xScale = d3.scaleBand()
-      .domain(xValues)
-      .range([0, innerWidth])
-      .padding(0.05);
-
-    const yScale = d3.scaleBand()
-      .domain(yValues)
-      .range([0, innerHeight])
-      .padding(0.05);
-
-    // Create color scale
-    const maxValue = d3.max(data, (d: HeatmapDataPoint) => d.value) || 0;
-    const colorScale = d3.scaleSequential()
-      .domain([0, maxValue])
-      .interpolator(d3.interpolateRgb(colorRange[0], colorRange[1]));
-
-    // Draw heatmap cells
-    svg.selectAll('rect')
-      .data(data)
-      .enter()
-      .append('rect')
-      .attr('x', (d: HeatmapDataPoint) => xScale(String(d.x)) || 0)
-      .attr('y', (d: HeatmapDataPoint) => yScale(String(d.y)) || 0)
-      .attr('width', xScale.bandwidth())
-      .attr('height', yScale.bandwidth())
-      .style('fill', (d: HeatmapDataPoint) => colorScale(d.value))
-      .style('stroke', '#fff')
-      .style('stroke-width', 0.5)
-      .on('mouseover', function(this: SVGRectElement, event: MouseEvent, d: HeatmapDataPoint) {
-        d3.select(this).style('stroke', '#000').style('stroke-width', '1');
-        
-        // Show tooltip
-        tooltip
-          .style('opacity', '1')
-          .style('left', `${event.pageX + 10}px`)
-          .style('top', `${event.pageY - 28}px`)
-          .html(`
-            <div><strong>${d.x}, ${d.y}</strong></div>
-            <div>Value: ${d.value.toFixed(2)}</div>
-          `);
-      })
-      .on('mouseout', function(this: SVGRectElement) {
-        d3.select(this).style('stroke', '#fff').style('stroke-width', '0.5');
-        tooltip.style('opacity', '0');
-      });
-
-    // Add tooltip
-    const tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'heatmap-tooltip')
-      .style('opacity', 0)
-      .style('position', 'absolute')
-      .style('background-color', 'white')
-      .style('border', 'solid 1px #ddd')
-      .style('border-radius', '4px')
-      .style('padding', '8px')
-      .style('pointer-events', 'none')
-      .style('font-size', '12px')
-      .style('z-index', 1000);
-
-    // Add x-axis
-    svg.append('g')
-      .attr('transform', `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(xScale))
-      .selectAll('text')
-      .style('text-anchor', 'end')
-      .attr('dx', '-.8em')
-      .attr('dy', '.15em')
-      .attr('transform', 'rotate(-45)');
-
-    // Add y-axis
-    svg.append('g')
-      .call(d3.axisLeft(yScale));
-
-    // Add title
-    svg.append('text')
-      .attr('x', innerWidth / 2)
-      .attr('y', -margin.top / 2)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '16px')
-      .style('font-weight', 'bold')
-      .text(title);
-
-    // Add x-axis label
-    svg.append('text')
-      .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + margin.bottom - 10)
-      .attr('text-anchor', 'middle')
-      .text(xLabel);
-
-    // Add y-axis label
-    svg.append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -innerHeight / 2)
-      .attr('y', -margin.left + 15)
-      .attr('text-anchor', 'middle')
-      .text(yLabel);
-
-    // Add color legend
-    const legendWidth = 200;
-    const legendHeight = 20;
+  // Get unique x and y values
+  const xValues = Array.from(new Set(data.map(d => String(d.x))));
+  const yValues = Array.from(new Set(data.map(d => String(d.y))));
+  
+  // Find the maximum value for color scaling
+  const maxValue = Math.max(...data.map(d => d.value));
+  
+  // Calculate color intensity for each cell
+  const getColorIntensity = (value: number): number => {
+    return maxValue > 0 ? (value / maxValue) : 0;
+  };
+  
+  // Generate a color based on intensity (from light to dark blue)
+  const getColor = (intensity: number): string => {
+    // Simple linear interpolation between the two colors
+    const r1 = parseInt(colorRange[0].slice(1, 3), 16);
+    const g1 = parseInt(colorRange[0].slice(3, 5), 16);
+    const b1 = parseInt(colorRange[0].slice(5, 7), 16);
     
-    const legend = svg.append('g')
-      .attr('transform', `translate(${innerWidth + 20}, ${innerHeight - legendHeight})`);
+    const r2 = parseInt(colorRange[1].slice(1, 3), 16);
+    const g2 = parseInt(colorRange[1].slice(3, 5), 16);
+    const b2 = parseInt(colorRange[1].slice(5, 7), 16);
     
-    // Create gradient for legend
-    const defs = svg.append('defs');
-    const gradient = defs.append('linearGradient')
-      .attr('id', 'heatmap-gradient')
-      .attr('x1', '0%')
-      .attr('y1', '100%')
-      .attr('x2', '0%')
-      .attr('y2', '0%');
+    const r = Math.round(r1 + (r2 - r1) * intensity);
+    const g = Math.round(g1 + (g2 - g1) * intensity);
+    const b = Math.round(b1 + (b2 - b1) * intensity);
     
-    // Add color stops
-    gradient.append('stop')
-      .attr('offset', '0%')
-      .attr('stop-color', colorRange[0]);
-      
-    gradient.append('stop')
-      .attr('offset', '100%')
-      .attr('stop-color', colorRange[1]);
-    
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', legendWidth)
-      .attr('height', legendHeight)
-      .style('fill', 'url(#heatmap-gradient)');
-    
-    // Add legend scale
-    const legendScale = d3.scaleLinear()
-      .domain([0, maxValue])
-      .range([0, legendWidth]);
-      
-    const legendAxis = d3.axisBottom(legendScale)
-      .ticks(5);
-      
-    // Add legend axis
-    legend.append('g')
-      .attr('transform', `translate(0, ${legendHeight})`)
-      .call(legendAxis)
-      .select('.domain')
-      .remove();
-
-    // Add legend title
-    legend.append('text')
-      .attr('x', legendWidth / 2)
-      .attr('y', -10)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '12px')
-      .text('Value');
-
-    // Cleanup function
-    return () => {
-      d3.select('body').selectAll('.heatmap-tooltip').remove();
-    };
-  }, [data, width, height, title, xLabel, yLabel, colorRange]);
-
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+  
+  // Group data by x and y for table rendering
+  const dataMap = new Map<string, Map<string, number>>();
+  
+  // Initialize the map with all x,y combinations
+  xValues.forEach(x => {
+    const yMap = new Map<string, number>();
+    yValues.forEach(y => {
+      yMap.set(y, 0);
+    });
+    dataMap.set(x, yMap);
+  });
+  
+  // Fill in actual values
+  data.forEach(d => {
+    const xMap = dataMap.get(String(d.x));
+    if (xMap) {
+      xMap.set(String(d.y), d.value);
+    }
+  });
+  
   return (
-    <div className="heatmap-container">
-      <svg ref={svgRef}></svg>
+    <div className="bg-white rounded-lg shadow p-4">
+      <h2 className="text-lg font-medium text-gray-900 mb-4">{title}</h2>
+      
+      <div className="flex mb-2">
+        <div className="w-24 font-medium text-gray-700">{yLabel}</div>
+        <div className="flex-1 text-center font-medium text-gray-700">{xLabel}</div>
+      </div>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="w-24 border border-gray-300 bg-gray-100 p-2"></th>
+              {xValues.map((x, i) => (
+                <th key={i} className="border border-gray-300 bg-gray-100 p-2 text-sm">
+                  {x}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {yValues.map((y, yIndex) => (
+              <tr key={yIndex}>
+                <td className="border border-gray-300 bg-gray-100 p-2 text-sm font-medium">
+                  {y}
+                </td>
+                {xValues.map((x, xIndex) => {
+                  const value = dataMap.get(String(x))?.get(String(y)) || 0;
+                  const intensity = getColorIntensity(value);
+                  const color = getColor(intensity);
+                  
+                  return (
+                    <td 
+                      key={xIndex} 
+                      className="border border-gray-300 p-2 text-center relative"
+                      style={{ 
+                        backgroundColor: color,
+                        color: intensity > 0.6 ? 'white' : 'black',
+                        minWidth: '60px',
+                        height: '40px'
+                      }}
+                      title={`${x}, ${y}: ${value.toFixed(2)}`}
+                    >
+                      {value.toFixed(1)}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      {/* Simple legend */}
+      <div className="mt-4 flex items-center justify-end">
+        <div className="text-xs text-gray-600 mr-2">Value:</div>
+        <div className="flex h-4 w-40 rounded overflow-hidden">
+          {[...Array(10)].map((_, i) => (
+            <div 
+              key={i} 
+              className="flex-1" 
+              style={{ backgroundColor: getColor(i / 9) }}
+            ></div>
+          ))}
+        </div>
+        <div className="flex justify-between w-40 text-xs text-gray-600 px-1">
+          <span>0</span>
+          <span>{(maxValue / 2).toFixed(1)}</span>
+          <span>{maxValue.toFixed(1)}</span>
+        </div>
+      </div>
+      
+      {/* Summary stats */}
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <h3 className="text-md font-medium mb-3">Heatmap Summary</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-3 bg-gray-50 rounded shadow-sm">
+            <p className="text-sm text-gray-500">Max Value</p>
+            <p className="text-xl font-medium">{maxValue.toFixed(2)}</p>
+          </div>
+          
+          <div className="p-3 bg-gray-50 rounded shadow-sm">
+            <p className="text-sm text-gray-500">Min Value</p>
+            <p className="text-xl font-medium">
+              {Math.min(...data.map(d => d.value)).toFixed(2)}
+            </p>
+          </div>
+          
+          <div className="p-3 bg-gray-50 rounded shadow-sm">
+            <p className="text-sm text-gray-500">Average Value</p>
+            <p className="text-xl font-medium">
+              {(data.reduce((sum, d) => sum + d.value, 0) / data.length).toFixed(2)}
+            </p>
+          </div>
+          
+          <div className="p-3 bg-gray-50 rounded shadow-sm">
+            <p className="text-sm text-gray-500">Data Points</p>
+            <p className="text-xl font-medium">{data.length}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

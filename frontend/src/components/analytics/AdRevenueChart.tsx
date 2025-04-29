@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import d3 from '../../utils/d3-imports';
+import React from 'react';
 
 interface DailyMetric {
   date: string;
@@ -15,212 +14,104 @@ interface DailyMetric {
 
 interface AdRevenueChartProps {
   dailyMetrics: DailyMetric[];
+  title: string;
 }
 
-const AdRevenueChart: React.FC<AdRevenueChartProps> = ({ dailyMetrics }) => {
-  const chartRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    if (!chartRef.current || !dailyMetrics || dailyMetrics.length === 0) return;
-
-    // Clear previous chart
-    d3.select(chartRef.current).selectAll('*').remove();
-
-    // Sort metrics by date
-    const sortedMetrics = [...dailyMetrics].sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-
-    // Set up dimensions
-    const margin = { top: 20, right: 30, bottom: 50, left: 60 };
-    const width = 800;
-    const height = 400;
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    // Create SVG
-    const svg = d3.select(chartRef.current)
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Create scales
-    const xScale = d3.scaleTime()
-      .domain(d3.extent(sortedMetrics, (d: DailyMetric) => new Date(d.date)) as [Date, Date])
-      .range([0, innerWidth]);
-
-    const yScaleRevenue = d3.scaleLinear()
-      .domain([0, d3.max(sortedMetrics, (d: DailyMetric) => d.revenue) || 0])
-      .range([innerHeight, 0])
-      .nice();
-
-    const yScaleClicks = d3.scaleLinear()
-      .domain([0, d3.max(sortedMetrics, (d: DailyMetric) => d.clicks) || 0])
-      .range([innerHeight, 0])
-      .nice();
-
-    // Create axes
-    const xAxis = d3.axisBottom(xScale)
-      .ticks(d3.timeDay.every(Math.ceil(sortedMetrics.length / 10)))
-      .tickFormat(d3.timeFormat('%b %d') as any);
-
-    const yAxisRevenue = d3.axisLeft(yScaleRevenue)
-      .ticks(5)
-      .tickFormat((d: number) => `$${d}`);
-
-    const yAxisClicks = d3.axisRight(yScaleClicks)
-      .ticks(5);
-
-    // Add axes
-    svg.append('g')
-      .attr('transform', `translate(0,${innerHeight})`)
-      .call(xAxis)
-      .selectAll('text')
-      .style('text-anchor', 'end')
-      .attr('dx', '-.8em')
-      .attr('dy', '.15em')
-      .attr('transform', 'rotate(-45)');
-
-    svg.append('g')
-      .call(yAxisRevenue);
-
-    svg.append('g')
-      .attr('transform', `translate(${innerWidth},0)`)
-      .call(yAxisClicks);
-
-    // Add axis labels
-    svg.append('text')
-      .attr('x', -margin.left + 10)
-      .attr('y', -10)
-      .attr('fill', '#666')
-      .attr('text-anchor', 'start')
-      .style('font-size', '12px')
-      .text('Revenue ($)');
-
-    svg.append('text')
-      .attr('x', innerWidth + margin.right - 10)
-      .attr('y', -10)
-      .attr('fill', '#666')
-      .attr('text-anchor', 'end')
-      .style('font-size', '12px')
-      .text('Clicks');
-
-    // Create line generators
-    const lineRevenue = d3.line()
-      .x((d: DailyMetric) => xScale(new Date(d.date)))
-      .y((d: DailyMetric) => yScaleRevenue(d.revenue))
-      .curve(d3.curveMonotoneX);
-
-    const lineClicks = d3.line()
-      .x((d: DailyMetric) => xScale(new Date(d.date)))
-      .y((d: DailyMetric) => yScaleClicks(d.clicks))
-      .curve(d3.curveMonotoneX);
-
-    // Add revenue line
-    svg.append('path')
-      .datum(sortedMetrics)
-      .attr('fill', 'none')
-      .attr('stroke', '#4ade80')
-      .attr('stroke-width', 2)
-      .attr('d', lineRevenue(sortedMetrics) as string);
-
-    // Add clicks line
-    svg.append('path')
-      .datum(sortedMetrics)
-      .attr('fill', 'none')
-      .attr('stroke', '#60a5fa')
-      .attr('stroke-width', 2)
-      .attr('d', lineClicks(sortedMetrics) as string);
-
-    // Add tooltips
-    const tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'chart-tooltip')
-      .style('position', 'absolute')
-      .style('background', 'white')
-      .style('border', '1px solid #ddd')
-      .style('border-radius', '4px')
-      .style('padding', '8px')
-      .style('font-size', '12px')
-      .style('pointer-events', 'none')
-      .style('opacity', 0)
-      .style('z-index', 100);
-
-    // Add dots for each data point
-    svg.selectAll('.revenue-dot')
-      .data(sortedMetrics)
-      .enter()
-      .append('circle')
-      .attr('class', 'revenue-dot')
-      .attr('cx', (d: DailyMetric) => xScale(new Date(d.date)))
-      .attr('cy', (d: DailyMetric) => yScaleRevenue(d.revenue))
-      .attr('r', 4)
-      .attr('fill', '#4ade80')
-      .on('mouseover', function(this: SVGCircleElement, event: MouseEvent, d: DailyMetric) {
-        d3.select(this).attr('r', 6);
-        tooltip
-          .style('opacity', 1)
-          .html(`
-            <div><strong>${new Date(d.date).toLocaleDateString()}</strong></div>
-            <div>Revenue: $${d.revenue.toFixed(2)}</div>
-            <div>Clicks: ${d.clicks}</div>
-            <div>Conversions: ${d.conversions}</div>
-            <div>ROI: ${d.roi.toFixed(2)}%</div>
-          `)
-          .style('left', `${event.pageX + 10}px`)
-          .style('top', `${event.pageY - 28}px`);
-      })
-      .on('mouseout', function(this: SVGCircleElement) {
-        d3.select(this).attr('r', 4);
-        tooltip.style('opacity', 0);
-      });
-
-    // Add legend
-    const legend = svg.append('g')
-      .attr('transform', `translate(${innerWidth - 100}, 0)`);
-
-    // Revenue legend
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', 15)
-      .attr('height', 15)
-      .attr('fill', '#4ade80');
-
-    legend.append('text')
-      .attr('x', 20)
-      .attr('y', 12.5)
-      .attr('fill', '#666')
-      .style('font-size', '12px')
-      .text('Revenue');
-
-    // Clicks legend
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', 25)
-      .attr('width', 15)
-      .attr('height', 15)
-      .attr('fill', '#60a5fa');
-
-    legend.append('text')
-      .attr('x', 20)
-      .attr('y', 37.5)
-      .attr('fill', '#666')
-      .style('font-size', '12px')
-      .text('Clicks');
-
-    // Clean up on unmount
-    return () => {
-      d3.select('body').selectAll('.chart-tooltip').remove();
-    };
-  }, [dailyMetrics]);
-
+const AdRevenueChart: React.FC<AdRevenueChartProps> = ({ dailyMetrics, title }) => {
+  // Calculate summary metrics
+  const totalRevenue = dailyMetrics.reduce((sum, item) => sum + item.revenue, 0);
+  const totalCost = dailyMetrics.reduce((sum, item) => sum + item.cost, 0);
+  const totalROI = totalCost > 0 ? ((totalRevenue - totalCost) / totalCost) * 100 : 0;
+  const totalClicks = dailyMetrics.reduce((sum, item) => sum + item.clicks, 0);
+  const totalConversions = dailyMetrics.reduce((sum, item) => sum + item.conversions, 0);
+  
+  // Sort metrics by date for display
+  const sortedMetrics = [...dailyMetrics].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  // Get the first and last dates for range display
+  const firstDate = sortedMetrics.length > 0 ? new Date(sortedMetrics[0].date).toLocaleDateString() : 'N/A';
+  const lastDate = sortedMetrics.length > 0 ? 
+    new Date(sortedMetrics[sortedMetrics.length - 1].date).toLocaleDateString() : 'N/A';
+  
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Campaign Performance Over Time</h2>
-      <div className="overflow-x-auto">
-        <svg ref={chartRef} width="800" height="400" />
+      <h2 className="text-lg font-medium text-gray-900 mb-4">{title}</h2>
+      <div className="p-4 bg-gray-100 rounded-lg">
+        <p className="text-sm text-gray-500 mb-4">Date range: {firstDate} to {lastDate}</p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div className="p-3 bg-white rounded shadow-sm">
+            <p className="text-sm text-gray-500">Total Revenue</p>
+            <p className="text-xl font-medium">${totalRevenue.toFixed(2)}</p>
+          </div>
+          
+          <div className="p-3 bg-white rounded shadow-sm">
+            <p className="text-sm text-gray-500">Total Cost</p>
+            <p className="text-xl font-medium">${totalCost.toFixed(2)}</p>
+          </div>
+          
+          <div className="p-3 bg-white rounded shadow-sm">
+            <p className="text-sm text-gray-500">ROI</p>
+            <p className="text-xl font-medium">{totalROI.toFixed(2)}%</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="p-3 bg-white rounded shadow-sm">
+            <p className="text-sm text-gray-500">Total Clicks</p>
+            <p className="text-xl font-medium">{totalClicks.toLocaleString()}</p>
+          </div>
+          
+          <div className="p-3 bg-white rounded shadow-sm">
+            <p className="text-sm text-gray-500">Total Conversions</p>
+            <p className="text-xl font-medium">{totalConversions.toLocaleString()}</p>
+          </div>
+          
+          <div className="p-3 bg-white rounded shadow-sm">
+            <p className="text-sm text-gray-500">Conversion Rate</p>
+            <p className="text-xl font-medium">
+              {totalClicks > 0 ? (totalConversions / totalClicks * 100).toFixed(2) : '0.00'}%
+            </p>
+          </div>
+        </div>
+        
+        {dailyMetrics.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-md font-medium mb-2">Recent Daily Performance</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {sortedMetrics.slice(-5).map((metric, index) => (
+                    <tr key={index}>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(metric.date).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
+                        ${metric.revenue.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
+                        ${metric.cost.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-right">
+                        {metric.roi.toFixed(2)}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
