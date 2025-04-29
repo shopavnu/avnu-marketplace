@@ -33,7 +33,14 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import axios from 'axios';
+// Mock heatmap image URLs for different pages and device types
+const MOCK_HEATMAP_IMAGES: Record<string, string> = {
+  '/': 'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Homepage+Heatmap',
+  '/shop': 'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Shop+Page+Heatmap',
+  '/product/product-1': 'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Product+Detail+Heatmap',
+  '/checkout': 'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Checkout+Heatmap',
+  '/cart': 'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Cart+Heatmap',
+};
 
 import { HeatmapAnalyticsData } from './types';
 import { Grid as GridContainer, Grid as GridItem } from '../ui/MuiGrid';
@@ -65,28 +72,32 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
     }
   }, [data]);
 
-  // Load heatmap image for selected page and device
-  const loadHeatmapImage = async () => {
+  // Load mock heatmap image for selected page and device
+  const loadHeatmapImage = () => {
     if (!selectedPage) return;
     
     setIsLoadingHeatmap(true);
-    try {
-      const response = await axios.get(`/analytics/behavior/heatmap/image`, {
-        params: {
-          pagePath: selectedPage,
-          deviceType: selectedDevice === 'all' ? undefined : selectedDevice
-        },
-        responseType: 'blob'
-      });
-      
-      const imageUrl = URL.createObjectURL(response.data);
-      setHeatmapImage(imageUrl);
-    } catch (error) {
-      console.error('Failed to load heatmap image:', error);
-      setHeatmapImage(null);
-    } finally {
-      setIsLoadingHeatmap(false);
-    }
+    
+    // Simulate API delay
+    setTimeout(() => {
+      try {
+        // Get mock image URL based on selected page
+        const baseImageUrl = MOCK_HEATMAP_IMAGES[selectedPage] || 
+          'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Page+Heatmap';
+        
+        // Add device type to image URL if specified
+        const imageUrl = selectedDevice !== 'all' 
+          ? `${baseImageUrl}+(${selectedDevice})` 
+          : baseImageUrl;
+        
+        setHeatmapImage(imageUrl);
+      } catch (error) {
+        console.error('Failed to load mock heatmap image:', error);
+        setHeatmapImage(null);
+      } finally {
+        setIsLoadingHeatmap(false);
+      }
+    }, 800); // Simulate network delay
   };
 
   // Effect to load heatmap image when selected page or device changes
