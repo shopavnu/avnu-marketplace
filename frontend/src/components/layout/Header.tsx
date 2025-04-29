@@ -79,21 +79,20 @@ export default function Header() {
                   className="p-2 text-charcoal hover:text-sage transition-colors duration-200"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   aria-label="Open user menu"
+                  aria-expanded={isProfileOpen}
+                  aria-controls="user-menu-dropdown"
                 >
                   <div className="w-6 h-6 rounded-full bg-sage/10 flex items-center justify-center">
                     <UserIcon className="w-4 h-4 text-sage" />
                   </div>
                 </button>
                 
-                <AnimatePresence>
-                  {isProfileOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg overflow-hidden z-50"
-                    >
+                {/* Simplified dropdown without AnimatePresence for better compatibility */}
+                {isProfileOpen && (
+                  <div 
+                    id="user-menu-dropdown"
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg overflow-hidden z-50"
+                  >
                       <div className="p-4 border-b border-gray-100">
                         <div className="flex items-center">
                           <div className="w-10 h-10 rounded-full bg-sage/10 flex items-center justify-center mr-3">
@@ -167,9 +166,8 @@ export default function Header() {
                           Admin Dashboard
                         </Link>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                )}
               </div>
 
               {/* Mobile Menu Button */}
