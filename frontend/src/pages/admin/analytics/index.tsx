@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout';
-import AnalyticsNavigation from '../../../components/admin/AnalyticsNavigation';
+import AnalyticsNav from '../../../components/admin/AnalyticsNav';
 import GridContainer from '../../../components/analytics/GridContainer';
 import GridItem from '../../../components/analytics/GridItem';
 import {
@@ -76,7 +76,7 @@ const AdminAnalytics: React.FC = () => {
   if (loading) {
     return (
       <AdminLayout title="Analytics Dashboard">
-        <AnalyticsNavigation />
+        <AnalyticsNav />
         <Box display="flex" justifyContent="center" alignItems="center" height="400px">
           <CircularProgress />
         </Box>
@@ -88,15 +88,13 @@ const AdminAnalytics: React.FC = () => {
   if (error) {
     return (
       <AdminLayout title="Analytics Dashboard">
-        <AnalyticsNavigation />
-        <Box p={3}>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            Error loading analytics data. Please try again later.
-          </Alert>
-          <Typography color="textSecondary">
-            {error.message || 'Unknown error'}
-          </Typography>
-        </Box>
+        <AnalyticsNav />
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
+          <p>Error loading analytics data. Please try again later.</p>
+          <p className="text-sm mt-2">
+            {error?.message || 'Unknown error'}
+          </p>
+        </div>
       </AdminLayout>
     );
   }
@@ -105,7 +103,7 @@ const AdminAnalytics: React.FC = () => {
   if (!analyticsData) {
     return (
       <AdminLayout title="Analytics Dashboard">
-        <AnalyticsNavigation />
+        <AnalyticsNav />
         <Box p={3}>
           <Alert severity="info">
             No analytics data available. Please try again later.
@@ -117,7 +115,7 @@ const AdminAnalytics: React.FC = () => {
 
   return (
     <AdminLayout title="Analytics Dashboard">
-      <AnalyticsNavigation />
+      <AnalyticsNav />
       
       {/* Period selector */}
       <Box display="flex" justifyContent="flex-end" mb={3}>
