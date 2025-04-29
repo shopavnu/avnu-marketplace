@@ -24,6 +24,19 @@ const AnalyticsNav: React.FC = () => {
       name: 'Overview',
       href: '/admin/analytics',
       icon: HomeIcon,
+      current: currentPath === '/admin/analytics'
+    },
+    {
+      name: 'Performance Metrics',
+      href: '/admin/analytics/performance-metrics',
+      icon: ChartBarIcon,
+      current: currentPath === '/admin/analytics/performance-metrics'
+    },
+    {
+      name: 'User Behavior',
+      href: '/admin/analytics/user-behavior',
+      icon: UserIcon,
+      current: currentPath === '/admin/analytics/user-behavior'
     },
     {
       name: 'Search Performance',

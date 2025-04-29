@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNav from '../../../components/admin/AnalyticsNav';
+import { Grid as GridContainer, Grid as GridItem } from '../../../components/ui/MuiGrid';
 import {
   Chart as ChartJS,
   CategoryScale,
