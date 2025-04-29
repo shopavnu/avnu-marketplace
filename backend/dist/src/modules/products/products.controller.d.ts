@@ -2,14 +2,22 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { DataNormalizationService } from './services/data-normalization.service';
+import { CursorPaginationDto } from '../../common/dto/cursor-pagination.dto';
 export declare class ProductsController {
     private readonly productsService;
-    constructor(productsService: ProductsService);
+    private readonly dataNormalizationService;
+    private readonly logger;
+    constructor(productsService: ProductsService, dataNormalizationService: DataNormalizationService);
     create(createProductDto: CreateProductDto): Promise<import(".").Product>;
     findAll(paginationDto: PaginationDto): Promise<{
         items: import(".").Product[];
         total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     }>;
+    findWithCursor(cursorPaginationDto: CursorPaginationDto): Promise<import("../../common/dto/cursor-pagination.dto").PaginatedResponseDto<import(".").Product>>;
     search(query: string, paginationDto: PaginationDto, categories?: string[], priceMin?: number, priceMax?: number, merchantId?: string, inStock?: boolean, values?: string[]): Promise<{
         items: import(".").Product[];
         total: number;

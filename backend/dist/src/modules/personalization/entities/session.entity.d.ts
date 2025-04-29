@@ -12,6 +12,8 @@ export declare class SessionEntity {
     viewedBrands: string[];
     filters: Record<string, any>[];
     userId?: string;
+    anonymousUserId?: string;
+    duration?: number;
     interactions: SessionInteractionEntity[];
     createdAt: Date;
     updatedAt: Date;

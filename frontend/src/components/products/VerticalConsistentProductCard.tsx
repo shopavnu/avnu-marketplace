@@ -85,7 +85,8 @@ const VerticalConsistentProductCard: React.FC<VerticalConsistentProductCardProps
         display: 'flex',
         flexDirection: 'column',
         transition: 'box-shadow 0.3s ease, transform 0.3s ease',
-        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)'
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        willChange: 'transform, box-shadow' // Optimize for animations
       }}
     >
       <Link href={`/product/${product.id}`} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -96,10 +97,15 @@ const VerticalConsistentProductCard: React.FC<VerticalConsistentProductCardProps
           style={{ 
             position: 'relative', 
             height: '200px', // Fixed height for all images
+            minHeight: '200px', // Enforce minimum height
+            maxHeight: '200px', // Enforce maximum height
             width: '100%',
             overflow: 'hidden',
             backgroundColor: '#f5f5f5',
-            flexShrink: 0 // Prevent image from shrinking
+            flexShrink: 0, // Prevent image from shrinking
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}
         >
           <Image
@@ -124,19 +130,24 @@ const VerticalConsistentProductCard: React.FC<VerticalConsistentProductCardProps
           className="product-content"
           style={{ 
             padding: '16px',
-            height: '160px', // Fixed height for content
             display: 'flex',
             flexDirection: 'column',
-            flexGrow: 1,
-            overflow: 'hidden' // Hide any overflow
+            flex: '1 1 auto',
+            overflow: 'hidden',
+            position: 'relative', // For absolute positioning of elements if needed
+            height: '160px', // Fixed height for content area
+            minHeight: '160px', // Enforce minimum height
+            maxHeight: '160px' // Enforce maximum height
           }}
         >
-          {/* Brand name - fixed 20px height */}
+          {/* Brand name - fixed 32px height */}
           <div 
             className="product-brand"
             style={{ 
-              height: '20px',
-              marginBottom: '4px',
+              height: '32px',
+              minHeight: '32px', // Enforce minimum height
+              maxHeight: '32px', // Enforce maximum height
+              marginBottom: '8px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -181,6 +192,8 @@ const VerticalConsistentProductCard: React.FC<VerticalConsistentProductCardProps
             className="product-description"
             style={{ 
               height: '40px',
+              minHeight: '40px', // Enforce minimum height
+              maxHeight: '40px', // Enforce maximum height
               marginBottom: '8px',
               overflow: 'hidden'
             }}
@@ -207,6 +220,8 @@ const VerticalConsistentProductCard: React.FC<VerticalConsistentProductCardProps
               justifyContent: 'space-between',
               alignItems: 'center',
               height: '24px',
+              minHeight: '24px', // Enforce minimum height
+              maxHeight: '24px', // Enforce maximum height
               marginTop: 'auto'
             }}
           >

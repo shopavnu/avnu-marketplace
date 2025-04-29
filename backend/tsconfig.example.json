@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["scripts/**/*"],
+  "compilerOptions": {
+    "jsx": "react",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "target": "ES2020"
+  }
+}

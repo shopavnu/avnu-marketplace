@@ -50,6 +50,12 @@ export class SessionEntity {
   @Column({ nullable: true })
   userId?: string;
 
+  @Column({ nullable: true })
+  anonymousUserId?: string;
+
+  @Column({ type: 'integer', nullable: true })
+  duration?: number;
+
   @OneToMany(() => SessionInteractionEntity, interaction => interaction.session, { eager: false })
   interactions: SessionInteractionEntity[];
 

@@ -132,7 +132,7 @@ let AdPlacementResolver = class AdPlacementResolver {
             return false;
         }
     }
-    async getRecommendedAdPlacements(merchantId, user) {
+    async getRecommendedAdPlacements(merchantId, _user) {
         return this.adPlacementService.getRecommendedPlacements(merchantId);
     }
 };

@@ -71,6 +71,20 @@ __decorate([
     __metadata("design:type", Array)
 ], UpdateProductDto.prototype, "categories", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => Object, { nullable: true }),
+    (0, swagger_1.ApiProperty)({ required: false, description: 'Accessibility metadata for the product' }),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], UpdateProductDto.prototype, "accessibilityMetadata", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Object, { nullable: true }),
+    (0, swagger_1.ApiProperty)({ required: false, description: 'Map of image URLs to alt texts' }),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], UpdateProductDto.prototype, "imageAltTexts", void 0);
+__decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
     (0, swagger_1.ApiProperty)({ required: false, description: 'Product tags' }),
     (0, class_validator_1.IsArray)(),

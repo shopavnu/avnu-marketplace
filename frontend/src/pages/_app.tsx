@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/product-card.css'; // Import product card consistent styling
 import type { AppProps } from 'next/app';
 import ApolloProvider from '../providers/ApolloProvider';
 import { Layout, EnhancedLayout } from '../components/layout';

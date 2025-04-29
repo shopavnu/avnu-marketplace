@@ -42,6 +42,11 @@ __decorate([
     __metadata("design:type", String)
 ], Merchant.prototype, "website", void 0);
 __decorate([
+    (0, graphql_1.Field)(),
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Merchant.prototype, "email", void 0);
+__decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
     (0, typeorm_1.Column)('simple-array', { nullable: true }),
     __metadata("design:type", Array)

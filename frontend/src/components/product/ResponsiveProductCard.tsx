@@ -89,7 +89,7 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
       imageHeight: '180px',
       titleLines: 2,
       titleLineHeight: 1.2,
-      descriptionLines: 3,
+      descriptionLines: 2,  // Reduced from 3 to 2 for consistent height
       descriptionLineHeight: 1.4,
       padding: '12px',
       fontSize: {
@@ -104,7 +104,7 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
       imageHeight: '200px',
       titleLines: 2,
       titleLineHeight: 1.2,
-      descriptionLines: 3,
+      descriptionLines: 2,  // Reduced from 3 to 2 for consistent height
       descriptionLineHeight: 1.4,
       padding: '16px',
       fontSize: {
@@ -135,27 +135,37 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
   return (
     <div 
       className="product-card"
-      style={{
+      style={{ 
         width: '100%',
         height: currentDimensions.height,
+        minHeight: currentDimensions.height, // Enforce minimum height
+        maxHeight: currentDimensions.height, // Enforce maximum height
         backgroundColor: 'white',
-        borderRadius: '12px',
+        borderRadius: '8px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         overflow: 'hidden',
-        contain: 'strict',
-        position: 'relative',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        position: 'relative',
+        contain: 'strict' // CSS containment for better performance and layout isolation
       }}
       data-testid="product-card"
     >
-      {/* Product Image */}
+      {/* Image container */}
       <div 
+        className="product-image-container"
         style={{ 
           position: 'relative',
-          flex: '0 0 auto',
+          width: '100%',
           height: currentDimensions.imageHeight,
-          overflow: 'hidden'
+          minHeight: currentDimensions.imageHeight, // Enforce minimum height
+          maxHeight: currentDimensions.imageHeight, // Enforce maximum height
+          overflow: 'hidden',
+          backgroundColor: '#f5f5f5',
+          flexShrink: 0, // Prevent image from shrinking
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}
       >
         <Link to={`/product/${product.slug || product.id}`}>
@@ -267,7 +277,10 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
           flexDirection: 'column',
           flex: '1 1 auto',
           overflow: 'hidden',
-          position: 'relative' // For absolute positioning of elements if needed
+          position: 'relative', // For absolute positioning of elements if needed
+          height: `calc(${currentDimensions.height} - ${currentDimensions.imageHeight})`,
+          minHeight: `calc(${currentDimensions.height} - ${currentDimensions.imageHeight})`,
+          maxHeight: `calc(${currentDimensions.height} - ${currentDimensions.imageHeight})`
         }}
       >
         {/* Brand */}
@@ -299,6 +312,8 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
               fontWeight: 600,
               lineHeight: currentDimensions.titleLineHeight,
               height: `calc(${currentDimensions.titleLineHeight}em * ${currentDimensions.titleLines})`,
+              minHeight: `calc(${currentDimensions.titleLineHeight}em * ${currentDimensions.titleLines})`, // Enforce minimum height
+              maxHeight: `calc(${currentDimensions.titleLineHeight}em * ${currentDimensions.titleLines})`, // Enforce maximum height
               overflow: 'hidden',
               display: '-webkit-box',
               WebkitLineClamp: currentDimensions.titleLines,
@@ -320,6 +335,8 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
             color: '#666',
             lineHeight: currentDimensions.descriptionLineHeight,
             height: `calc(${currentDimensions.descriptionLineHeight}em * ${currentDimensions.descriptionLines})`,
+            minHeight: `calc(${currentDimensions.descriptionLineHeight}em * ${currentDimensions.descriptionLines})`, // Enforce minimum height
+            maxHeight: `calc(${currentDimensions.descriptionLineHeight}em * ${currentDimensions.descriptionLines})`, // Enforce maximum height
             overflow: 'hidden',
             display: '-webkit-box',
             WebkitLineClamp: currentDimensions.descriptionLines,
@@ -332,7 +349,7 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
         </p>
         
         {/* Price */}
-        <div style={{ marginTop: 'auto', height: '24px' }}>
+        <div style={{ marginTop: 'auto', height: '24px', minHeight: '24px', maxHeight: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span 
               style={{ 

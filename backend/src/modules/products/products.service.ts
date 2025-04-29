@@ -304,6 +304,28 @@ export class ProductsService {
     return this.productsRepository.save(product);
   }
 
+  /**
+   * Find products that don't have alt text for their images
+   * @param limit Maximum number of products to return
+   * @returns Array of products without alt text
+   */
+  async findProductsWithoutAltText(limit = 10): Promise<Product[]> {
+    this.logger.log(`Finding up to ${limit} products without alt text`);
+
+    // Find products that have images but no imageAltTexts or accessibilityMetadata
+    const products = await this.productsRepository
+      .createQueryBuilder('product')
+      .where('product.images IS NOT NULL')
+      .andWhere('product.images != :emptyArray', { emptyArray: '{}' })
+      .andWhere('(product.imageAltTexts IS NULL OR product.accessibilityMetadata IS NULL)')
+      .orderBy('product.updatedAt', 'DESC')
+      .take(limit)
+      .getMany();
+
+    this.logger.log(`Found ${products.length} products without alt text`);
+    return products;
+  }
+
   async bulkCreate(products: CreateProductDto[]): Promise<Product[]> {
     const newProducts = products.map(product => this.productsRepository.create(product));
     const savedProducts = await this.productsRepository.save(newProducts);

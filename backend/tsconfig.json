@@ -18,11 +18,14 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "useDefineForClassFields": false,
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@app/*": ["src/*"],
       "@config/*": ["src/config/*"],
       "@modules/*": ["src/modules/*"],
       "@common/*": ["src/common/*"]
     }
-  }
+  },
+  "exclude": ["scripts/**/*", "node_modules", "dist"]
 }

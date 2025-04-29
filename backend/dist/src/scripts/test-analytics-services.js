@@ -45,10 +45,10 @@ class MockMerchantAnalyticsRepository {
         ];
         return record;
     }
-    async find(options) {
+    async find(_options) {
         let results = [...this.mockData];
-        if (options?.where) {
-            const where = options.where;
+        if (_options?.where) {
+            const where = _options.where;
             if (where.merchantId) {
                 results = results.filter(r => r.merchantId === where.merchantId);
             }
@@ -70,8 +70,8 @@ class MockMerchantAnalyticsRepository {
         }
         return results;
     }
-    async findOne(options) {
-        const results = await this.find(options);
+    async findOne(_options) {
+        const results = await this.find(_options);
         return results.length > 0 ? results[0] : null;
     }
     create(entityLike) {
@@ -79,7 +79,7 @@ class MockMerchantAnalyticsRepository {
         Object.assign(entity, entityLike);
         return entity;
     }
-    async save(entityOrEntities, options) {
+    async save(entityOrEntities, _options) {
         if (Array.isArray(entityOrEntities)) {
             return Promise.all(entityOrEntities.map(entity => this.saveEntity(entity)));
         }

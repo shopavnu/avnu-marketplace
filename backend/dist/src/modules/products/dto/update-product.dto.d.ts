@@ -8,6 +8,13 @@ export declare class UpdateProductDto extends UpdateProductDto_base {
     images?: string[];
     thumbnail?: string;
     categories?: string[];
+    accessibilityMetadata?: {
+        altText?: string;
+        ariaLabel?: string;
+        role?: string;
+        longDescription?: string;
+    };
+    imageAltTexts?: Record<string, string>;
     tags?: string[];
     brandName?: string;
     isActive?: boolean;

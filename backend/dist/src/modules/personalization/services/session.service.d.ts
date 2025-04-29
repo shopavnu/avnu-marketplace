@@ -10,7 +10,9 @@ export declare enum SessionInteractionType {
     IMPRESSION = "impression",
     DWELL = "dwell",
     ADD_TO_CART = "add_to_cart",
-    PURCHASE = "purchase"
+    PURCHASE = "purchase",
+    SCROLL_DEPTH = "scroll_depth",
+    PRODUCT_VIEW = "product_view"
 }
 export declare class SessionService {
     private readonly sessionRepository;
@@ -20,5 +22,6 @@ export declare class SessionService {
     getOrCreateSession(sessionId: string): Promise<SessionEntity>;
     trackInteraction(sessionId: string, type: SessionInteractionType, data: Record<string, any>, durationMs?: number): Promise<void>;
     getRecentInteractions(sessionId: string, type?: SessionInteractionType, limit?: number): Promise<SessionInteractionEntity[]>;
+    getInteractionsByType(type: SessionInteractionType, limit?: number): Promise<SessionInteractionEntity[]>;
     calculateSessionWeights(sessionId: string): Promise<Record<string, any>>;
 }

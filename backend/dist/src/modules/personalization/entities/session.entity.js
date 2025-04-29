@@ -64,6 +64,14 @@ __decorate([
     __metadata("design:type", String)
 ], SessionEntity.prototype, "userId", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], SessionEntity.prototype, "anonymousUserId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'integer', nullable: true }),
+    __metadata("design:type", Number)
+], SessionEntity.prototype, "duration", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => session_interaction_entity_1.SessionInteractionEntity, interaction => interaction.session, { eager: false }),
     __metadata("design:type", Array)
 ], SessionEntity.prototype, "interactions", void 0);

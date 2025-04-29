@@ -30,6 +30,6 @@ export declare class AdPlacementResolver {
     constructor(adPlacementService: AdPlacementService);
     getAdsForDiscoveryFeed(options?: AdPlacementOptionsInput, user?: User): Promise<AdPlacement[]>;
     recordAdClick(campaignId: string, user?: User): Promise<boolean>;
-    getRecommendedAdPlacements(merchantId: string, user: User): Promise<ProductAdRecommendation[]>;
+    getRecommendedAdPlacements(merchantId: string, _user: User): Promise<ProductAdRecommendation[]>;
 }
 export {};

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import AdminLayout from '../../../components/admin/AdminLayout';
+import AnalyticsNav from '../../../components/admin/AnalyticsNav';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -170,6 +171,7 @@ const AdminAnalytics: React.FC = () => {
   if (overviewError || personalizationError) {
     return (
       <AdminLayout title="Analytics Dashboard">
+        <AnalyticsNav />
         <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
           <p>Error loading analytics data. Please try again later.</p>
           {(overviewError || personalizationError) && (
@@ -274,6 +276,7 @@ const AdminAnalytics: React.FC = () => {
 
   return (
     <AdminLayout title="Analytics Dashboard">
+      <AnalyticsNav />
       {/* Period selector */}
       <div className="mb-6 flex justify-end">
         <select

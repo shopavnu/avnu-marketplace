@@ -18,12 +18,12 @@ exports.createRepositoryProvider = createRepositoryProvider;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-function SafeInjectRepository(entity) {
-    return function (target, key, index) {
+function SafeInjectRepository(_entity) {
+    return function (target, key, _index) {
         return Reflect.metadata('design:type', typeorm_2.Repository)(target, key);
     };
 }
-function createRepositoryFactory(entity) {
+function createRepositoryFactory(_entity) {
     let RepositoryFactory = class RepositoryFactory {
         constructor(repository) {
             this.repository = repository;
@@ -34,16 +34,16 @@ function createRepositoryFactory(entity) {
     };
     RepositoryFactory = __decorate([
         (0, common_1.Injectable)(),
-        __param(0, (0, typeorm_1.InjectRepository)(entity)),
+        __param(0, (0, typeorm_1.InjectRepository)(_entity)),
         __metadata("design:paramtypes", [typeorm_2.Repository])
     ], RepositoryFactory);
     return RepositoryFactory;
 }
-function createRepositoryProvider(entity) {
+function createRepositoryProvider(_entity) {
     return {
-        provide: `${entity.name}Repository`,
+        provide: `${_entity.name}Repository`,
         useFactory: (factory) => factory.getRepository(),
-        inject: [createRepositoryFactory(entity)],
+        inject: [createRepositoryFactory(_entity)],
     };
 }
 //# sourceMappingURL=decorator-compatibility.js.map

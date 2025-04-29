@@ -7,8 +7,37 @@ import { UserRole } from '../../users/entities/user.entity';
 import { CachePerformanceMonitorService } from '../services/cache-performance-monitor.service';
 import { CacheWarmingService } from '../services/cache-warming.service';
 import { ProductCacheService } from '../services/product-cache.service';
+import { ResilientCacheService } from '../../../common/services';
 
 // Define GraphQL types
+class FallbackCacheStats {
+  keys: number;
+  hits: number;
+  misses: number;
+  ksize: number;
+  vsize: number;
+}
+
+class CircuitBreakerOptions {
+  failureThreshold: number;
+  resetTimeout: number;
+  maxRetries: number;
+  retryDelay: number;
+  monitorInterval: number;
+}
+
+class CircuitBreakerMetrics {
+  state: string;
+  failures: number;
+  lastFailureTime: Date | null;
+  options: CircuitBreakerOptions;
+}
+
+class CacheStats {
+  fallback: FallbackCacheStats;
+  circuitBreaker: CircuitBreakerMetrics;
+}
+
 class CachePerformanceMetrics {
   cacheHits: number;
   cacheMisses: number;
@@ -19,6 +48,7 @@ class CachePerformanceMetrics {
   responseTimeImprovement: number;
   cacheWarmingTime: number;
   lastResetTime: Date;
+  cacheStats: CacheStats;
 }
 
 @Resolver()
@@ -29,11 +59,18 @@ export class CachePerformanceResolver {
     private readonly cachePerformanceMonitorService: CachePerformanceMonitorService,
     private readonly cacheWarmingService: CacheWarmingService,
     private readonly productCacheService: ProductCacheService,
+    private readonly resilientCacheService: ResilientCacheService,
   ) {}
 
   @Query(() => CachePerformanceMetrics, { name: 'cachePerformanceMetrics' })
   async getCachePerformanceMetrics(): Promise<CachePerformanceMetrics> {
-    return this.cachePerformanceMonitorService.getMetrics();
+    const metrics = this.cachePerformanceMonitorService.getMetrics();
+    const cacheStats = this.resilientCacheService.getStats();
+
+    return {
+      ...metrics,
+      cacheStats,
+    };
   }
 
   @Mutation(() => Boolean, { name: 'resetCachePerformanceMetrics' })
