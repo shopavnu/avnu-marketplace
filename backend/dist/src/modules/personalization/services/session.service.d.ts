@@ -1,19 +1,7 @@
 import { Repository } from 'typeorm';
 import { SessionEntity } from '../entities/session.entity';
 import { SessionInteractionEntity } from '../entities/session-interaction.entity';
-export declare enum SessionInteractionType {
-    SEARCH = "search",
-    CLICK = "click",
-    VIEW = "view",
-    FILTER = "filter",
-    SORT = "sort",
-    IMPRESSION = "impression",
-    DWELL = "dwell",
-    ADD_TO_CART = "add_to_cart",
-    PURCHASE = "purchase",
-    SCROLL_DEPTH = "scroll_depth",
-    PRODUCT_VIEW = "product_view"
-}
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 export declare class SessionService {
     private readonly sessionRepository;
     private readonly interactionRepository;
