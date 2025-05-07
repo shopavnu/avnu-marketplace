@@ -1,9 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DataNormalizationService, DataSource } from './data-normalization.service';
-import { ProductsService } from '../products.service';
+import { DataNormalizationService } from './data-normalization.service';
+import { ProductService } from './product.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { Product } from '../entities/product.entity';
+import * as ProductSchema from '../utils/product-schema';
+
+/**
+ * Data source enum for import sources
+ */
+export enum DataSource {
+  MANUAL = 'manual',
+  CSV = 'csv',
+  SHOPIFY = 'shopify',
+  API = 'api'
+}
 
 /**
  * Import result statistics
@@ -17,7 +28,7 @@ export interface ImportResult {
     externalId?: string;
     error: string;
   }>;
-  products: string[]; // IDs of successfully imported products
+  products: Array<string>; // IDs of successfully imported products
 }
 
 /**
@@ -34,14 +45,15 @@ export interface BulkImportOptions {
 
 /**
  * Service for bulk importing and normalizing products
+ * Uses schema compatibility utilities for safe property access
  */
 @Injectable()
 export class BulkImportService {
   private readonly logger = new Logger(BulkImportService.name);
-
+  
   constructor(
     private readonly dataNormalizationService: DataNormalizationService,
-    private readonly productsService: ProductsService,
+    private readonly productService: ProductService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -64,9 +76,9 @@ export class BulkImportService {
       validateOnly: false,
       processImages: true,
     };
-
+    
     const importOptions: BulkImportOptions = { ...defaultOptions, ...options };
-
+    
     // Initialize result
     const result: ImportResult = {
       total: products.length,
@@ -75,36 +87,44 @@ export class BulkImportService {
       errors: [],
       products: [],
     };
-
+    
     // Process in batches to avoid overwhelming the server
     const batches = this.chunkArray(products, importOptions.batchSize);
-
+    
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex];
+      
       this.logger.log(
         `Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} products)`,
       );
-
+      
       // Process each product in the batch concurrently
       const batchPromises = batch.map(async (rawProduct, index) => {
         const originalIndex = batchIndex * importOptions.batchSize + index;
-
+        
         try {
           // Check if product already exists (if skipExisting is true)
           if (importOptions.skipExisting && rawProduct.externalId) {
-            const existingProduct = await this.productsService.findByExternalId(
-              rawProduct.externalId,
-              importOptions.source,
-            );
-
-            if (existingProduct) {
-              this.logger.log(
-                `Skipping existing product with externalId: ${rawProduct.externalId}`,
+            try {
+              const existingProduct = await this.productService.findByExternalId(
+                rawProduct.externalId,
+                importOptions.source,
               );
-              return null;
+              
+              if (existingProduct) {
+                this.logger.log(
+                  `Skipping existing product with externalId: ${rawProduct.externalId}`,
+                );
+                return null;
+              }
+            } catch (error: any) {
+              // If product not found, continue with import
+              if (error.status !== 404) {
+                throw error;
+              }
             }
           }
-
+          
           // Normalize product data
           const normalizedProduct = await this.dataNormalizationService.normalizeProductData(
             rawProduct,
@@ -116,55 +136,71 @@ export class BulkImportService {
               enforceRequiredFields: true,
             },
           );
-
-          // Add merchantId if provided
-          if (importOptions.merchantId) {
-            normalizedProduct.merchantId = importOptions.merchantId;
-          }
-
-          // If validateOnly, don't actually create the product
+          
+          // In validate-only mode, don't actually create the product
           if (importOptions.validateOnly) {
-            return { validated: true, product: normalizedProduct };
+            return {
+              success: true,
+              productId: null,
+              index: originalIndex,
+            };
           }
-
-          // Create the product
-          const createdProduct = await this.productsService.create(normalizedProduct);
-
-          return { created: true, product: createdProduct, id: createdProduct.id };
-        } catch (error) {
-          // Log the error and add to result errors
-          this.logger.error(`Error importing product at index ${originalIndex}: ${error.message}`);
-          result.errors.push({
-            index: originalIndex,
-            externalId: rawProduct.externalId || rawProduct.id,
-            error: error.message,
+          
+          // Create product in database
+          const createdProduct = await this.productService.create({
+            ...normalizedProduct,
+            merchantId: importOptions.merchantId,
+            externalSource: importOptions.source,
+            externalId: rawProduct.id || rawProduct.externalId || null,
           });
-
-          return { error: true, message: error.message };
+          
+          return {
+            success: true,
+            productId: createdProduct.id,
+            index: originalIndex,
+          };
+        } catch (error: any) {
+          this.logger.error(
+            `Error importing product at index ${originalIndex}: ${error.message}`,
+            error.stack,
+          );
+          
+          return {
+            success: false,
+            error: error.message || 'Unknown error',
+            index: originalIndex,
+            externalId: rawProduct.id || rawProduct.externalId,
+          };
         }
       });
-
-      // Wait for all products in the batch to be processed
+      
       const batchResults = await Promise.all(batchPromises);
-
-      // Update statistics
-      batchResults.forEach(batchResult => {
+      
+      // Update result statistics
+      batchResults.forEach((batchResult) => {
         if (!batchResult) {
-          // Skip existing product
+          // Skip null results (existing products that were skipped)
           return;
         }
-
-        if (batchResult.error) {
-          result.failed++;
-        } else {
-          result.successful++;
-          if (batchResult.created && batchResult.product && 'id' in batchResult.product) {
-            result.products.push(batchResult.product.id);
+        
+        if (batchResult.success) {
+          // Count as successful
+          if (batchResult.productId) {
+            result.products.push(batchResult.productId.toString());
           }
+          result.successful++;
+        } else {
+          // Count as failed
+          result.failed++;
+          result.errors.push({
+            index: batchResult.index,
+            externalId: batchResult.externalId || '',
+            error: batchResult.error || 'Unknown error',
+          });
         }
       });
     }
-
+    
     return result;
   }
 
@@ -178,34 +214,59 @@ export class BulkImportService {
     shopifyData: any,
     options: Partial<BulkImportOptions> = {},
   ): Promise<ImportResult> {
-    // Ensure we have an array of products
-    const shopifyProducts = Array.isArray(shopifyData) ? shopifyData : shopifyData.products || [];
-
-    return this.importProducts(shopifyProducts, {
-      ...options,
-      source: DataSource.SHOPIFY,
+    this.logger.log(`Importing ${shopifyData.length} products from Shopify`);
+    
+    // Add Shopify as the data source
+    options.source = DataSource.SHOPIFY;
+    
+    // Process the data to match our normalized format
+    const processedProducts = shopifyData.map((item: any) => {
+      // Extract variant information for price and inventory
+      const variants = item.variants || [];
+      const firstVariant = variants.length > 0 ? variants[0] : {};
+      
+      // Extract main image URL
+      const images = item.images || [];
+      const mainImage = images.length > 0 ? images[0].src : null;
+      
+      // Get product tags as an array
+      const tags = Array.isArray(item.tags) ? item.tags : 
+                  (typeof item.tags === 'string' ? item.tags.split(',').map((tag: string) => tag.trim()) : []);
+      
+      return {
+        externalId: `shopify_${item.id}`,
+        title: item.title,
+        description: item.body_html,
+        slug: item.handle,
+        price: parseFloat(firstVariant.price) || 0,
+        compareAtPrice: parseFloat(firstVariant.compare_at_price) || null,
+        sku: firstVariant.sku || '',
+        barcode: firstVariant.barcode || '',
+        inventoryQuantity: parseInt(firstVariant.inventory_quantity, 10) || 0,
+        weight: parseFloat(firstVariant.weight) || 0,
+        weightUnit: firstVariant.weight_unit || 'kg',
+        vendor: item.vendor,
+        productType: item.product_type,
+        tags: tags,
+        published: item.published_at ? true : false,
+        images: images.map((img: any) => ({
+          src: img.src,
+          position: img.position || 1,
+          alt: img.alt || item.title
+        })),
+        mainImage: mainImage,
+        platformType: 'shopify',
+        metadata: {
+          shopifyId: item.id,
+          shopifyStatus: item.status,
+          publishedAt: item.published_at,
+          productUrl: `https://${item.shop?.shop_domain || 'shop.myshopify.com'}/products/${item.handle}`,
+          integrationType: 'shopify'
+        }
+      };
     });
-  }
-
-  /**
-   * Import products from WooCommerce export JSON
-   * @param wooCommerceData WooCommerce products JSON
-   * @param options Import options
-   * @returns Import result
-   */
-  async importFromWooCommerce(
-    wooCommerceData: any,
-    options: Partial<BulkImportOptions> = {},
-  ): Promise<ImportResult> {
-    // Ensure we have an array of products
-    const wooProducts = Array.isArray(wooCommerceData)
-      ? wooCommerceData
-      : wooCommerceData.products || [];
-
-    return this.importProducts(wooProducts, {
-      ...options,
-      source: DataSource.WOOCOMMERCE,
-    });
+    
+    return this.importProducts(processedProducts, options);
   }
 
   /**
@@ -214,22 +275,11 @@ export class BulkImportService {
    * @param options Import options
    * @returns Import result
    */
-  async importFromEtsy(
-    etsyData: any,
-    options: Partial<BulkImportOptions> = {},
-  ): Promise<ImportResult> {
-    // Ensure we have an array of products
-    const etsyProducts = Array.isArray(etsyData) ? etsyData : etsyData.results || [];
 
-    return this.importProducts(etsyProducts, {
-      ...options,
-      source: DataSource.ETSY,
-    });
-  }
 
   /**
    * Validate products without importing them
-   * @param products Raw product data array
+   * @param products Products to validate
    * @param source Data source
    * @returns Validation result with normalized products
    */
@@ -237,12 +287,12 @@ export class BulkImportService {
     products: any[],
     source: DataSource = DataSource.MANUAL,
   ): Promise<{
-    valid: CreateProductDto[];
+    valid: Array<CreateProductDto>;
     invalid: Array<{ index: number; errors: string[] }>;
   }> {
     const valid: CreateProductDto[] = [];
     const invalid: Array<{ index: number; errors: string[] }> = [];
-
+    
     // Process each product
     for (let i = 0; i < products.length; i++) {
       try {
@@ -256,16 +306,16 @@ export class BulkImportService {
             enforceRequiredFields: true,
           },
         );
-
+        
         valid.push(normalizedProduct);
-      } catch (error) {
+      } catch (error: any) {
         invalid.push({
           index: i,
           errors: [error.message],
         });
       }
     }
-
+    
     return { valid, invalid };
   }
 
@@ -288,59 +338,57 @@ export class BulkImportService {
     failed: number;
     errors: Array<{ id: string; error: string }>;
   }> {
-    // Default options
     const processingOptions = {
       processImages: options?.processImages ?? true,
       updateSlug: options?.updateSlug ?? true,
       batchSize: options?.batchSize ?? 20,
     };
-
+    
     // Get products to process
     let productsToProcess: Product[] = [];
-
+    
     try {
       if (productIds && productIds.length > 0) {
-        // Find products by IDs one by one if bulk find is not available
-        const productPromises = productIds.map(id => this.productsService.findOne(id));
-        const products = await Promise.all(productPromises);
-        productsToProcess = products.filter(product => product !== null) as Product[];
+        // Find products by IDs
+        productsToProcess = await this.productService.findByIds(productIds);
       } else {
         // Get all products
         const paginationDto = { page: 1, limit: 1000 }; // Use pagination to get all products
-        const result = await this.productsService.findAll(paginationDto);
-        productsToProcess = Array.isArray(result) ? result : result.items;
+        const result = await this.productService.findAll(paginationDto);
+        productsToProcess = result.items;
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error fetching products: ${error.message}`);
       throw new Error(`Failed to fetch products: ${error.message}`);
     }
-
+    
     const result = {
       total: productsToProcess.length,
       processed: 0,
       failed: 0,
       errors: [] as Array<{ id: string; error: string }>,
     };
-
+    
     // Process in batches
     const batches = this.chunkArray(productsToProcess, processingOptions.batchSize);
-
+    
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex];
+      
       this.logger.log(`Processing existing products batch ${batchIndex + 1}/${batches.length}`);
-
-      // Process each product in the batch concurrently
+      
       const batchPromises = batch.map(async product => {
         try {
           // Normalize the product
           const normalizedProduct = await this.dataNormalizationService.normalizeProduct(product);
-
+          
           // Update the product
-          await this.productsService.update(product.id, normalizedProduct);
-
+          await this.productService.update(product.id, normalizedProduct);
+          
           return { success: true };
-        } catch (error) {
+        } catch (error: any) {
           this.logger.error(`Error processing product ${product.id}: ${error.message}`);
+          
           return {
             error: true,
             id: product.id,
@@ -348,13 +396,11 @@ export class BulkImportService {
           };
         }
       });
-
-      // Wait for all products in the batch to be processed
+      
       const batchResults = await Promise.all(batchPromises);
-
-      // Update statistics
+      
       batchResults.forEach(batchResult => {
-        if (batchResult.error) {
+        if ('error' in batchResult && batchResult.error) {
           result.failed++;
           result.errors.push({
             id: batchResult.id,
@@ -365,8 +411,17 @@ export class BulkImportService {
         }
       });
     }
-
+    
     return result;
+  }
+
+  /**
+   * Get product brand name using schema compatibility utilities
+   * @param product Product entity
+   * @returns Brand name
+   */
+  getBrandName(product: Product): string {
+    return ProductSchema.getBrandName(product);
   }
 
   /**
@@ -377,9 +432,11 @@ export class BulkImportService {
    */
   private chunkArray<T>(array: T[], chunkSize: number): T[][] {
     const chunks: T[][] = [];
+    
     for (let i = 0; i < array.length; i += chunkSize) {
       chunks.push(array.slice(i, i + chunkSize));
     }
+    
     return chunks;
   }
 }
