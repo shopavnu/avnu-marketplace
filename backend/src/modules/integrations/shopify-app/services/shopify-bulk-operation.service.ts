@@ -12,9 +12,7 @@ import {
   IShopifyBulkOperationService,
   IShopifyClientService,
 } from '../../../common/interfaces/shopify-services.interfaces';
-import {
-  ShopifyBulkOperation,
-} from '../../../common/types/shopify-models.types';
+import { ShopifyBulkOperation } from '../../../common/types/shopify-models.types';
 import { SHOPIFY_CONSTANTS } from '../../../common/config/shopify-config';
 
 /**

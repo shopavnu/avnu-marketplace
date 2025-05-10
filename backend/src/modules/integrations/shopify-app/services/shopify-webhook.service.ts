@@ -3,10 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MerchantPlatformConnection } from '../../entities/merchant-platform-connection.entity';
 import { PlatformType } from '../../enums/platform-type.enum';
-import {
-  ShopifyProduct,
-  ShopifyOrder,
-} from '../../../common/types/shopify-models.types';
+import { ShopifyProduct, ShopifyOrder } from '../../../common/types/shopify-models.types';
 import * as crypto from 'crypto';
 
 @Injectable()

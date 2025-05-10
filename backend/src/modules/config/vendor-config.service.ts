@@ -12,7 +12,10 @@ export class VendorConfigService {
    * Get the upload directory for vendor documents
    */
   getDocumentUploadDir(): string {
-    return this.configService.get<string>('VENDOR_DOCUMENT_UPLOAD_DIR', './uploads/vendor-documents');
+    return this.configService.get<string>(
+      'VENDOR_DOCUMENT_UPLOAD_DIR',
+      './uploads/vendor-documents',
+    );
   }
 
   /**

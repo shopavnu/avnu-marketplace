@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { VendorEventTypes, ApplicationStatusChangedEvent, DocumentStatusChangedEvent } from './vendor-event-types';
+import {
+  VendorEventTypes,
+  ApplicationStatusChangedEvent,
+  DocumentStatusChangedEvent,
+} from './vendor-event-types';
 
 /**
  * Event types for vendor-related events

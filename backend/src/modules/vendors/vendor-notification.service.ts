@@ -10,7 +10,7 @@ import {
   ApplicationStatusChangedEvent,
   DocumentStatusChangedEvent,
   VendorEventTypes,
-  VendorApplicationCreatedEvent
+  VendorApplicationCreatedEvent,
 } from '../../events/vendor-event-types';
 
 /**
