@@ -29,6 +29,7 @@ const navigation = [
   { name: 'Advertising', href: '/merchant/advertising', icon: MegaphoneIcon },
   { name: 'Analytics', href: '/merchant/analytics', icon: ChartBarIcon },
   { name: 'Customers', href: '/merchant/customers', icon: UserGroupIcon },
+  { name: 'Integrations', href: '/merchant/integrations', icon: BuildingStorefrontIcon },
   { name: 'Settings', href: '/merchant/settings', icon: Cog6ToothIcon },
 ];
 

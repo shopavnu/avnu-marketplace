@@ -1,21 +1,36 @@
+// @ts-strict-mode: enabled
+
 // Export main module
 export * from './integrations.module';
 
 // Export services for merchant platform integrations
-// export * from './services/shopify.service';
-// export * from './services/woocommerce.service';
-// export * from './services/integration-sync.service';
-// export * from './services/webhook-handler.service';
+export {
+  IntegrationsService as IntegrationsServiceImpl,
+  IntegrationCredentials as IntegrationCredentialsImpl,
+  SyncResult as SyncResultImpl,
+} from './integrations.service';
+export * from './services/shopify.service';
+export * from './services/woocommerce.service';
+export * from './services/base-integration.service';
+export * from './services/order-sync.service';
 
 // Export controllers
-// export * from './controllers/integrations.controller';
-// export * from './controllers/webhooks.controller';
+export * from './integrations.controller';
+export * from './controllers/merchant-auth.controller';
+export * from './controllers/sync.controller';
 
 // Export interfaces and types
-// export * from './interfaces/integration-config.interface';
-// export * from './interfaces/webhook-payload.interface';
-// export * from './interfaces/product-mapping.interface';
+export {
+  IntegrationsService,
+  IntegrationCredentials,
+  SyncResult,
+  ShopifyCredentials,
+  WooCommerceCredentials,
+} from './integrations.service.interface';
+export * from './types/integration-type.enum';
 
-// Export DTOs
-// export * from './dto/integration-setup.dto';
-// export * from './dto/sync-request.dto';
+// Export entities
+export * from './entities/merchant-platform-connection.entity';
+
+// Export enums
+export * from './enums';
