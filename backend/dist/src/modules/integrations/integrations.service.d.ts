@@ -1,6 +1,5 @@
 import { ShopifyService } from './services/shopify.service';
-import { WooCommerceService } from './services/woocommerce.service';
-export type IntegrationType = 'shopify' | 'woocommerce';
+import { IntegrationType } from './types/integration-type.enum';
 export interface IntegrationCredentials {
     shopify?: {
         shopDomain: string;
@@ -8,22 +7,22 @@ export interface IntegrationCredentials {
         apiSecret: string;
         accessToken: string;
     };
-    woocommerce?: {
-        storeUrl: string;
-        consumerKey: string;
-        consumerSecret: string;
-    };
+    shopDomain?: string;
+    apiKey?: string;
+    apiSecret?: string;
+    accessToken?: string;
+}
+export interface SyncResult {
+    added: number;
+    updated: number;
+    failed: number;
+    errors?: string[];
 }
 export declare class IntegrationsService {
     private readonly shopifyService;
-    private readonly wooCommerceService;
     private readonly logger;
-    constructor(shopifyService: ShopifyService, wooCommerceService: WooCommerceService);
+    constructor(shopifyService: ShopifyService);
     authenticate(type: IntegrationType, credentials: IntegrationCredentials): Promise<boolean>;
-    syncProducts(type: IntegrationType, credentials: IntegrationCredentials, merchantId: string): Promise<{
-        created: number;
-        updated: number;
-        failed: number;
-    }>;
-    handleWebhook(type: IntegrationType, payload: any, topic: string, merchantId: string): Promise<void>;
+    syncProducts(type: IntegrationType, credentials: IntegrationCredentials, merchantId: string): Promise<SyncResult>;
+    handleWebhook(type: IntegrationType, payload: Record<string, unknown>, topic: string, merchantId: string): Promise<boolean>;
 }
