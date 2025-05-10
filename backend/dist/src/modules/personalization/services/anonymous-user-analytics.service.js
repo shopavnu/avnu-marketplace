@@ -19,7 +19,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const session_entity_1 = require("../entities/session.entity");
 const session_interaction_entity_1 = require("../entities/session-interaction.entity");
-const session_service_1 = require("./session.service");
+const session_interaction_type_enum_1 = require("../enums/session-interaction-type.enum");
 const products_service_1 = require("../../products/products.service");
 const category_service_1 = require("../../products/services/category.service");
 const merchant_service_1 = require("../../merchants/services/merchant.service");
@@ -68,12 +68,12 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
             throw error;
         }
     }
-    async calculateOverviewMetrics(sessions, interactions, startDate) {
+    async calculateOverviewMetrics(sessions, interactions, _startDate) {
         const totalAnonymousUsers = sessions.length;
         const activeSessionIds = new Set(interactions.map(interaction => interaction.session.sessionId));
         const activeAnonymousUsers = activeSessionIds.size;
-        const conversionInteractions = interactions.filter(interaction => interaction.type === session_service_1.SessionInteractionType.ADD_TO_CART ||
-            interaction.type === session_service_1.SessionInteractionType.PURCHASE);
+        const conversionInteractions = interactions.filter(interaction => interaction.type === session_interaction_type_enum_1.SessionInteractionType.ADD_TO_CART ||
+            interaction.type === session_interaction_type_enum_1.SessionInteractionType.PURCHASE);
         const conversionSessionIds = new Set(conversionInteractions.map(interaction => interaction.session.sessionId));
         const conversionRate = activeAnonymousUsers > 0 ? conversionSessionIds.size / activeAnonymousUsers : 0;
         let totalDuration = 0;
@@ -135,26 +135,26 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
         return result.sort((a, b) => b.count - a.count);
     }
     async calculateTopCategoryPreferences(interactions) {
-        const categoryInteractions = interactions.filter(interaction => (interaction.type === session_service_1.SessionInteractionType.VIEW &&
+        const categoryInteractions = interactions.filter(interaction => (interaction.type === session_interaction_type_enum_1.SessionInteractionType.VIEW &&
             interaction.data?.type === 'category') ||
-            (interaction.type === session_service_1.SessionInteractionType.FILTER &&
+            (interaction.type === session_interaction_type_enum_1.SessionInteractionType.FILTER &&
                 interaction.data?.filterType === 'category') ||
-            (interaction.type === session_service_1.SessionInteractionType.PRODUCT_VIEW && interaction.data?.categoryId));
+            (interaction.type === session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW && interaction.data?.categoryId));
         const categoryData = new Map();
         for (const interaction of categoryInteractions) {
             let categoryId = '';
             let categoryName = '';
-            if (interaction.type === session_service_1.SessionInteractionType.VIEW &&
+            if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.VIEW &&
                 interaction.data?.type === 'category') {
                 categoryId = interaction.data.categoryId;
                 categoryName = interaction.data.categoryName || (await this.getCategoryName(categoryId));
             }
-            else if (interaction.type === session_service_1.SessionInteractionType.FILTER &&
+            else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.FILTER &&
                 interaction.data?.filterType === 'category') {
                 categoryId = interaction.data.filterValue;
                 categoryName = await this.getCategoryName(categoryId);
             }
-            else if (interaction.type === session_service_1.SessionInteractionType.PRODUCT_VIEW &&
+            else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW &&
                 interaction.data?.categoryId) {
                 categoryId = interaction.data.categoryId;
                 categoryName = await this.getCategoryName(categoryId);
@@ -168,13 +168,13 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
                 };
                 existingData.count += 1;
                 let interactionWeight = 0;
-                if (interaction.type === session_service_1.SessionInteractionType.PRODUCT_VIEW) {
+                if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW) {
                     interactionWeight = 0.8;
                 }
-                else if (interaction.type === session_service_1.SessionInteractionType.FILTER) {
+                else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.FILTER) {
                     interactionWeight = 0.6;
                 }
-                else if (interaction.type === session_service_1.SessionInteractionType.VIEW) {
+                else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.VIEW) {
                     interactionWeight = 0.4;
                 }
                 existingData.weight += interactionWeight;
@@ -190,24 +190,24 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
         return result.sort((a, b) => b.weight - a.weight).slice(0, 10);
     }
     async calculateTopBrandPreferences(interactions) {
-        const brandInteractions = interactions.filter(interaction => (interaction.type === session_service_1.SessionInteractionType.VIEW && interaction.data?.type === 'brand') ||
-            (interaction.type === session_service_1.SessionInteractionType.FILTER &&
+        const brandInteractions = interactions.filter(interaction => (interaction.type === session_interaction_type_enum_1.SessionInteractionType.VIEW && interaction.data?.type === 'brand') ||
+            (interaction.type === session_interaction_type_enum_1.SessionInteractionType.FILTER &&
                 interaction.data?.filterType === 'brand') ||
-            (interaction.type === session_service_1.SessionInteractionType.PRODUCT_VIEW && interaction.data?.brandId));
+            (interaction.type === session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW && interaction.data?.brandId));
         const brandData = new Map();
         for (const interaction of brandInteractions) {
             let brandId = '';
             let brandName = '';
-            if (interaction.type === session_service_1.SessionInteractionType.VIEW && interaction.data?.type === 'brand') {
+            if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.VIEW && interaction.data?.type === 'brand') {
                 brandId = interaction.data.brandId;
                 brandName = interaction.data.brandName || (await this.getMerchantName(brandId));
             }
-            else if (interaction.type === session_service_1.SessionInteractionType.FILTER &&
+            else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.FILTER &&
                 interaction.data?.filterType === 'brand') {
                 brandId = interaction.data.filterValue;
                 brandName = await this.getMerchantName(brandId);
             }
-            else if (interaction.type === session_service_1.SessionInteractionType.PRODUCT_VIEW &&
+            else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW &&
                 interaction.data?.brandId) {
                 brandId = interaction.data.brandId;
                 brandName = await this.getMerchantName(brandId);
@@ -221,13 +221,13 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
                 };
                 existingData.count += 1;
                 let interactionWeight = 0;
-                if (interaction.type === session_service_1.SessionInteractionType.PRODUCT_VIEW) {
+                if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.PRODUCT_VIEW) {
                     interactionWeight = 0.8;
                 }
-                else if (interaction.type === session_service_1.SessionInteractionType.FILTER) {
+                else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.FILTER) {
                     interactionWeight = 0.6;
                 }
-                else if (interaction.type === session_service_1.SessionInteractionType.VIEW) {
+                else if (interaction.type === session_interaction_type_enum_1.SessionInteractionType.VIEW) {
                     interactionWeight = 0.4;
                 }
                 existingData.weight += interactionWeight;
@@ -243,7 +243,7 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
         return result.sort((a, b) => b.weight - a.weight).slice(0, 10);
     }
     async calculateTopSearchTerms(interactions) {
-        const searchInteractions = interactions.filter(interaction => interaction.type === session_service_1.SessionInteractionType.SEARCH);
+        const searchInteractions = interactions.filter(interaction => interaction.type === session_interaction_type_enum_1.SessionInteractionType.SEARCH);
         const searchData = new Map();
         searchInteractions.forEach(interaction => {
             const query = interaction.data?.query?.toLowerCase();
@@ -262,8 +262,8 @@ let AnonymousUserAnalyticsService = AnonymousUserAnalyticsService_1 = class Anon
         for (const [query, data] of searchData.entries()) {
             const searchSessionIds = data.sessions;
             const conversionInteractions = interactions.filter(interaction => searchSessionIds.has(interaction.session.sessionId) &&
-                (interaction.type === session_service_1.SessionInteractionType.ADD_TO_CART ||
-                    interaction.type === session_service_1.SessionInteractionType.PURCHASE));
+                (interaction.type === session_interaction_type_enum_1.SessionInteractionType.ADD_TO_CART ||
+                    interaction.type === session_interaction_type_enum_1.SessionInteractionType.PURCHASE));
             const conversionSessionIds = new Set(conversionInteractions.map(interaction => interaction.session.sessionId));
             const conversionRate = searchSessionIds.size > 0 ? conversionSessionIds.size / searchSessionIds.size : 0;
             result.push({

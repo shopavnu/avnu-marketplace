@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Req, Res, Query, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AnonymousUserService } from '../services/anonymous-user.service';
-import { SessionInteractionType } from '../services/session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 import { ProductsService } from '../../products/products.service';
 import { OptionalAuthGuard } from '../../auth/guards/optional-auth.guard';
 

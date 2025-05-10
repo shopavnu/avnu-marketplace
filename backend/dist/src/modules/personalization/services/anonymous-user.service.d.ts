@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { SessionService, SessionInteractionType } from './session.service';
+import { SessionService } from './session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 export declare class AnonymousUserService {
     private readonly configService;
     private readonly sessionService;

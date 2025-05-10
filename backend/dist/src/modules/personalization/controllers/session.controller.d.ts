@@ -1,4 +1,5 @@
-import { SessionService, SessionInteractionType } from '../services/session.service';
+import { SessionService } from '../services/session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 declare class TrackSessionInteractionDto {
     sessionId: string;
     type: SessionInteractionType;

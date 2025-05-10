@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Logger } from '@nestjs/common';
-import { SessionService, SessionInteractionType } from '../services/session.service';
+import { SessionService } from '../services/session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 
 /**
  * DTO for tracking session interactions

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { SessionEntity } from '../../personalization/entities/session.entity';
 import { SessionInteractionEntity } from '../../personalization/entities/session-interaction.entity';
-import { SessionInteractionType } from '../../personalization/services/session.service';
+import { SessionInteractionType } from '../../personalization/enums/session-interaction-type.enum';
 
 /**
  * Service for analyzing session-based personalization metrics
