@@ -6,14 +6,10 @@ export declare class IntegrationsController {
     syncProducts(type: IntegrationType, body: {
         credentials: any;
         merchantId: string;
-    }): Promise<{
-        created: number;
-        updated: number;
-        failed: number;
-    }>;
+    }): Promise<import("./integrations.service").SyncResult>;
     handleWebhook(type: IntegrationType, body: {
         payload: any;
         topic: string;
         merchantId: string;
-    }): Promise<void>;
+    }): Promise<boolean>;
 }

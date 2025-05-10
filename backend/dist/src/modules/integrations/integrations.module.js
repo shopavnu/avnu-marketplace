@@ -9,20 +9,62 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IntegrationsModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
-const products_module_1 = require("../products/products.module");
+const typeorm_1 = require("@nestjs/typeorm");
+const orders_module_1 = require("../orders/orders.module");
+const merchants_module_1 = require("../merchants/merchants.module");
+const common_module_1 = require("../common/common.module");
 const shopify_service_1 = require("./services/shopify.service");
-const woocommerce_service_1 = require("./services/woocommerce.service");
+const base_integration_service_1 = require("./services/base-integration.service");
+const merchant_auth_service_1 = require("./services/merchant-auth.service");
 const integrations_controller_1 = require("./integrations.controller");
+const merchant_auth_controller_1 = require("./controllers/merchant-auth.controller");
 const integrations_service_1 = require("./integrations.service");
+const order_sync_service_1 = require("./services/order-sync.service");
+const sync_controller_1 = require("./controllers/sync.controller");
+const merchant_platform_connection_entity_1 = require("./entities/merchant-platform-connection.entity");
+const shopify_app_module_1 = require("./shopify-app/shopify-app.module");
+const platform_integration_service_1 = require("./services/platform-integration.service");
+const shared_module_1 = require("../shared/shared.module");
+const sync_service_fixed_1 = require("./services/sync.service.fixed");
+const shopify_sync_service_1 = require("./services/shopify-sync.service");
 let IntegrationsModule = class IntegrationsModule {
 };
 exports.IntegrationsModule = IntegrationsModule;
 exports.IntegrationsModule = IntegrationsModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule, products_module_1.ProductsModule],
-        controllers: [integrations_controller_1.IntegrationsController],
-        providers: [integrations_service_1.IntegrationsService, shopify_service_1.ShopifyService, woocommerce_service_1.WooCommerceService],
-        exports: [integrations_service_1.IntegrationsService, shopify_service_1.ShopifyService, woocommerce_service_1.WooCommerceService],
+        imports: [
+            config_1.ConfigModule,
+            typeorm_1.TypeOrmModule.forFeature([merchant_platform_connection_entity_1.MerchantPlatformConnection]),
+            shared_module_1.SharedModule,
+            common_module_1.CommonModule,
+            orders_module_1.OrdersModule,
+            merchants_module_1.MerchantsModule,
+            shopify_app_module_1.ShopifyAppModule,
+        ],
+        controllers: [integrations_controller_1.IntegrationsController, merchant_auth_controller_1.MerchantAuthController, sync_controller_1.SyncController],
+        providers: [
+            integrations_service_1.IntegrationsService,
+            {
+                provide: 'PlatformIntegrationService',
+                useClass: platform_integration_service_1.PlatformIntegrationService,
+            },
+            base_integration_service_1.BaseIntegrationService,
+            shopify_service_1.ShopifyService,
+            merchant_auth_service_1.MerchantAuthService,
+            order_sync_service_1.OrderSyncService,
+            shopify_sync_service_1.ShopifySyncService,
+            sync_service_fixed_1.SyncService,
+        ],
+        exports: [
+            integrations_service_1.IntegrationsService,
+            'PlatformIntegrationService',
+            base_integration_service_1.BaseIntegrationService,
+            shopify_service_1.ShopifyService,
+            merchant_auth_service_1.MerchantAuthService,
+            order_sync_service_1.OrderSyncService,
+            shopify_sync_service_1.ShopifySyncService,
+            sync_service_fixed_1.SyncService,
+        ],
     })
 ], IntegrationsModule);
 //# sourceMappingURL=integrations.module.js.map

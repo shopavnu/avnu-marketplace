@@ -13,78 +13,69 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IntegrationsService = void 0;
 const common_1 = require("@nestjs/common");
 const shopify_service_1 = require("./services/shopify.service");
-const woocommerce_service_1 = require("./services/woocommerce.service");
+const integration_type_enum_1 = require("./types/integration-type.enum");
 let IntegrationsService = IntegrationsService_1 = class IntegrationsService {
-    constructor(shopifyService, wooCommerceService) {
+    constructor(shopifyService) {
         this.shopifyService = shopifyService;
-        this.wooCommerceService = wooCommerceService;
         this.logger = new common_1.Logger(IntegrationsService_1.name);
     }
     async authenticate(type, credentials) {
         try {
-            switch (type) {
-                case 'shopify':
-                    if (!credentials.shopify) {
-                        throw new Error('Shopify credentials are required');
-                    }
-                    return this.shopifyService.authenticate(credentials.shopify.shopDomain, credentials.shopify.apiKey, credentials.shopify.apiSecret, credentials.shopify.accessToken);
-                case 'woocommerce':
-                    if (!credentials.woocommerce) {
-                        throw new Error('WooCommerce credentials are required');
-                    }
-                    return this.wooCommerceService.authenticate(credentials.woocommerce.storeUrl, credentials.woocommerce.consumerKey, credentials.woocommerce.consumerSecret);
-                default:
-                    throw new Error(`Unsupported integration type: ${type}`);
+            if (type !== integration_type_enum_1.IntegrationType.SHOPIFY) {
+                throw new Error(`Unsupported integration type: ${type}`);
             }
+            const shopDomain = credentials.shopify?.shopDomain || credentials.shopDomain || '';
+            const accessToken = credentials.shopify?.accessToken || credentials.accessToken || '';
+            if (!shopDomain || !accessToken) {
+                throw new Error('Shopify domain and access token are required');
+            }
+            const result = await this.shopifyService.authenticate(shopDomain, accessToken);
+            return result !== null;
         }
         catch (error) {
-            this.logger.error(`Failed to authenticate with ${type}: ${error.message}`);
+            this.logger.error(`Failed to authenticate with ${type}: ${error instanceof Error ? error.message : String(error)}`);
             return false;
         }
     }
     async syncProducts(type, credentials, merchantId) {
         try {
-            switch (type) {
-                case 'shopify':
-                    if (!credentials.shopify) {
-                        throw new Error('Shopify credentials are required');
-                    }
-                    return this.shopifyService.syncProducts(credentials.shopify.shopDomain, credentials.shopify.accessToken, merchantId);
-                case 'woocommerce':
-                    if (!credentials.woocommerce) {
-                        throw new Error('WooCommerce credentials are required');
-                    }
-                    return this.wooCommerceService.syncProducts(credentials.woocommerce.storeUrl, credentials.woocommerce.consumerKey, credentials.woocommerce.consumerSecret, merchantId);
-                default:
-                    throw new Error(`Unsupported integration type: ${type}`);
+            if (type !== integration_type_enum_1.IntegrationType.SHOPIFY) {
+                throw new Error(`Unsupported integration type: ${type}`);
             }
+            const result = await this.shopifyService.syncProducts(merchantId);
+            return {
+                added: result.added || 0,
+                updated: result.updated || 0,
+                failed: result.failed || 0,
+                errors: result.errors || [],
+            };
         }
         catch (error) {
-            this.logger.error(`Failed to sync products from ${type}: ${error.message}`);
-            throw error;
+            this.logger.error(`Failed to sync products from ${type}: ${error instanceof Error ? error.message : String(error)}`);
+            return { added: 0, updated: 0, failed: 0, errors: [`${error}`] };
         }
     }
     async handleWebhook(type, payload, topic, merchantId) {
         try {
-            switch (type) {
-                case 'shopify':
-                    return this.shopifyService.handleWebhook(payload, topic, merchantId);
-                case 'woocommerce':
-                    return this.wooCommerceService.handleWebhook(payload, topic, merchantId);
-                default:
-                    throw new Error(`Unsupported integration type: ${type}`);
+            if (type !== integration_type_enum_1.IntegrationType.SHOPIFY) {
+                throw new Error(`Unsupported integration type: ${type}`);
             }
+            const connection = await this.shopifyService.getMerchantConnection(merchantId, 'shopify');
+            if (!connection) {
+                throw new Error(`No Shopify connection found for merchant ${merchantId}`);
+            }
+            await this.shopifyService.handleWebhook(topic, connection.platformStoreUrl, payload);
+            return true;
         }
         catch (error) {
-            this.logger.error(`Failed to handle webhook from ${type}: ${error.message}`);
-            throw error;
+            this.logger.error(`Failed to handle webhook from ${type}: ${error instanceof Error ? error.message : String(error)}`);
+            return false;
         }
     }
 };
 exports.IntegrationsService = IntegrationsService;
 exports.IntegrationsService = IntegrationsService = IntegrationsService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [shopify_service_1.ShopifyService,
-        woocommerce_service_1.WooCommerceService])
+    __metadata("design:paramtypes", [shopify_service_1.ShopifyService])
 ], IntegrationsService);
 //# sourceMappingURL=integrations.service.js.map

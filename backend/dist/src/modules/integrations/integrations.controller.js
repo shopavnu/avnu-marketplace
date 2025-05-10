@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IntegrationsController = void 0;
 const common_1 = require("@nestjs/common");
@@ -43,7 +44,7 @@ __decorate([
     __param(0, (0, common_1.Param)('type')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [typeof (_a = typeof integrations_service_1.IntegrationType !== "undefined" && integrations_service_1.IntegrationType) === "function" ? _a : Object, Object]),
     __metadata("design:returntype", void 0)
 ], IntegrationsController.prototype, "authenticate", null);
 __decorate([
@@ -56,7 +57,7 @@ __decorate([
     __param(0, (0, common_1.Param)('type')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof integrations_service_1.IntegrationType !== "undefined" && integrations_service_1.IntegrationType) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", void 0)
 ], IntegrationsController.prototype, "syncProducts", null);
 __decorate([
@@ -68,7 +69,7 @@ __decorate([
     __param(0, (0, common_1.Param)('type')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof integrations_service_1.IntegrationType !== "undefined" && integrations_service_1.IntegrationType) === "function" ? _c : Object, Object]),
     __metadata("design:returntype", void 0)
 ], IntegrationsController.prototype, "handleWebhook", null);
 exports.IntegrationsController = IntegrationsController = __decorate([
