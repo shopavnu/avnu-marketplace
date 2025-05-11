@@ -1,14 +1,17 @@
 # Avnu Marketplace API Documentation
 
 ## Base URL
+
 ```
 http://localhost:8080/api/v1
 ```
 
 ## Authentication
+
 All API endpoints require authentication unless marked as `[Public]`.
 
 Include the JWT token in the Authorization header:
+
 ```
 Authorization: Bearer <your-jwt-token>
 ```
@@ -18,11 +21,13 @@ Authorization: Bearer <your-jwt-token>
 ### Products
 
 #### [Public] List Products
+
 ```http
 GET /products
 ```
 
 Query Parameters:
+
 - `page` (integer): Page number (default: 1)
 - `limit` (integer): Items per page (default: 20)
 - `search` (string): Search query
@@ -33,6 +38,7 @@ Query Parameters:
 - `inStock` (boolean): Filter in-stock items only
 
 Response:
+
 ```json
 {
   "data": [
@@ -66,6 +72,7 @@ Response:
 ```
 
 #### [Public] Get Product
+
 ```http
 GET /products/:id
 ```
@@ -75,11 +82,13 @@ Response: Single product object
 ### Authentication
 
 #### [Public] Register
+
 ```http
 POST /auth/register
 ```
 
 Request Body:
+
 ```json
 {
   "email": "string",
@@ -89,11 +98,13 @@ Request Body:
 ```
 
 #### [Public] Login
+
 ```http
 POST /auth/login
 ```
 
 Request Body:
+
 ```json
 {
   "email": "string",
@@ -102,6 +113,7 @@ Request Body:
 ```
 
 Response:
+
 ```json
 {
   "token": "string",
@@ -116,16 +128,19 @@ Response:
 ### User Profile
 
 #### Get Profile
+
 ```http
 GET /users/me
 ```
 
 #### Update Profile
+
 ```http
 PUT /users/me
 ```
 
 Request Body:
+
 ```json
 {
   "name": "string",
@@ -140,11 +155,13 @@ Request Body:
 ### Orders
 
 #### Create Order
+
 ```http
 POST /orders
 ```
 
 Request Body:
+
 ```json
 {
   "items": [
@@ -164,11 +181,13 @@ Request Body:
 ```
 
 #### List Orders
+
 ```http
 GET /orders
 ```
 
 Response:
+
 ```json
 {
   "data": [
@@ -195,6 +214,7 @@ Response:
 ## Error Responses
 
 All error responses follow this format:
+
 ```json
 {
   "error": {
@@ -206,6 +226,7 @@ All error responses follow this format:
 ```
 
 Common Error Codes:
+
 - `400`: Bad Request
 - `401`: Unauthorized
 - `403`: Forbidden

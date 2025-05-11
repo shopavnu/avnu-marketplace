@@ -341,3 +341,6 @@ export class SearchOptionsInput {
   @IsOptional()
   highlightFragmentSize?: number = 150;
 }
+
+// Export SearchOptionsInput as SearchOptions for backward compatibility
+export { SearchOptionsInput as SearchOptions };

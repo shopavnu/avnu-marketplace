@@ -14,6 +14,7 @@ export enum VendorEventType {
   VENDOR_CREATED = 'vendor.created',
   VENDOR_UPDATED = 'vendor.updated',
   APPLICATION_SUBMITTED = 'vendor.application.submitted',
+  APPLICATION_CREATED = 'vendor.application.created',
   APPLICATION_APPROVED = 'vendor.application.approved',
   APPLICATION_REJECTED = 'vendor.application.rejected',
   DOCUMENT_UPLOADED = 'vendor.document.uploaded',
@@ -85,5 +86,21 @@ export class VendorEventBus {
    */
   publishDocumentStatusChanged(payload: DocumentStatusChangedEvent): boolean {
     return this.eventEmitter.emit(VendorEventTypes.DOCUMENT_STATUS_CHANGED, payload);
+  }
+
+  /**
+   * Publish a vendor application created event
+   * @param payload - Event data containing application details
+   */
+  publishVendorApplicationCreated(payload: {
+    applicationId: string;
+    businessEmail: string;
+    businessName: string;
+    timestamp: Date;
+  }): boolean {
+    return this.emit(VendorEventType.APPLICATION_CREATED, {
+      ...payload,
+      eventType: VendorEventType.APPLICATION_CREATED,
+    });
   }
 }

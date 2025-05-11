@@ -406,6 +406,7 @@ export interface ShopifyBulkOperation {
     | 'CANCELING'
     | 'CANCELED';
   errorCode?: string | null;
+  statusMessage?: string | null;
   createdAt: string;
   completedAt?: string | null;
   objectCount?: number;
@@ -442,6 +443,8 @@ export type ShopifyWebhookTopic =
   | 'customers/email_marketing_consent_update'
   | 'customers/marketing_consent_update'
   | 'customers/purchasing_summary'
+  | 'customers/data_request' // GDPR data request
+  | 'customers/redact' // GDPR data deletion
   | 'draft_orders/create'
   | 'draft_orders/update'
   | 'draft_orders/delete'
@@ -462,7 +465,8 @@ export type ShopifyWebhookTopic =
   | 'products/create'
   | 'products/update'
   | 'products/delete'
-  | 'refunds/create';
+  | 'refunds/create'
+  | 'shop/update'; // Shop update (for theme changes, etc)
 
 /**
  * Shopify webhook subscription

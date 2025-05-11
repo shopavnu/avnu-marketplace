@@ -112,7 +112,7 @@ this.analyticsService.trackSearch({
   metadata: {
     // Various metadata fields
     personalizationMetrics: response.personalizationMetrics,
-  }
+  },
 });
 ```
 
@@ -162,11 +162,13 @@ Personalization is implemented through integration with the `PersonalizationServ
 // Apply personalization if enabled and user is authenticated
 if (input.personalized && user) {
   // Get personalized filters based on user preferences
-  const personalizedFilters = await this.personalizationService.generatePersonalizedFilters(user.id);
-  
+  const personalizedFilters = await this.personalizationService.generatePersonalizedFilters(
+    user.id,
+  );
+
   // Get personalized boosts based on user behavior
   const personalizedBoosts = await this.personalizationService.generatePersonalizedBoosts(user.id);
-  
+
   // Apply filters and boosts to search options
   // ...
 }
@@ -239,14 +241,16 @@ Highlighting can be enabled in search queries by setting the following parameter
 
 ```graphql
 query {
-  multiEntitySearch(input: {
-    query: "organic cotton",
-    enableHighlighting: true,
-    highlightFields: ["title", "description", "brandName"],
-    highlightPreTag: "<mark>",
-    highlightPostTag: "</mark>",
-    highlightFragmentSize: 150
-  }) {
+  multiEntitySearch(
+    input: {
+      query: "organic cotton"
+      enableHighlighting: true
+      highlightFields: ["title", "description", "brandName"]
+      highlightPreTag: "<mark>"
+      highlightPostTag: "</mark>"
+      highlightFragmentSize: 150
+    }
+  ) {
     results {
       ... on ProductResultType {
         id

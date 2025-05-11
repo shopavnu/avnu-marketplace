@@ -61,7 +61,7 @@ describe('ServiceName', () => {
   beforeEach(() => {
     // Setup mocks
     dependencyMock = { method: jest.fn() };
-    
+
     // Create service
     service = new ServiceName(dependencyMock);
   });
@@ -70,10 +70,10 @@ describe('ServiceName', () => {
     it('should do something', async () => {
       // Setup test case
       dependencyMock.method.mockResolvedValue('result');
-      
+
       // Call method
       const result = await service.methodName();
-      
+
       // Assert expected behavior
       expect(result).toEqual('expected result');
       expect(dependencyMock.method).toHaveBeenCalled();
@@ -95,7 +95,7 @@ jest.mock('./service-name.service', () => {
     ServiceName: jest.fn().mockImplementation(() => ({
       methodName: jest.fn(),
       // Add other methods as needed
-    }))
+    })),
   };
 });
 
@@ -124,12 +124,22 @@ const queryBuilderMock = {
   orderBy: jest.fn().mockReturnThis(),
   take: jest.fn().mockReturnThis(),
   skip: jest.fn().mockReturnThis(),
-  getManyAndCount: jest.fn().mockResolvedValue([[/* items */], 0]),
+  getManyAndCount: jest.fn().mockResolvedValue([
+    [
+      /* items */
+    ],
+    0,
+  ]),
 };
 
 const repositoryMock = {
   createQueryBuilder: jest.fn().mockReturnValue(queryBuilderMock),
-  findAndCount: jest.fn().mockResolvedValue([[/* items */], 0]),
+  findAndCount: jest.fn().mockResolvedValue([
+    [
+      /* items */
+    ],
+    0,
+  ]),
 };
 ```
 
@@ -151,7 +161,7 @@ jest.mock('./new-service.service', () => {
   return {
     NewService: jest.fn().mockImplementation(() => ({
       methodName: jest.fn(),
-    }))
+    })),
   };
 });
 

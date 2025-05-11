@@ -60,7 +60,7 @@ export class DocumentVerificationService {
     document.rejectionReason = data.rejectionReason || '';
 
     // Save updated document
-    const updatedDocument = await this._documentRepository.save(document);
+    const _updatedDocument = await this._documentRepository.save(document);
 
     // Publish event
     this._eventBus.publishDocumentStatusChanged({
@@ -74,7 +74,7 @@ export class DocumentVerificationService {
       reason: data.rejectionReason,
     });
 
-    return updatedDocument;
+    return _updatedDocument;
   }
 
   /**
@@ -156,7 +156,7 @@ export class DocumentVerificationService {
     document.rejectionReason = result.rejectionReason || '';
     document.autoVerifiedAt = new Date();
 
-    const updatedDocument = await this._documentRepository.save(document);
+    const _updatedDocument = await this._documentRepository.save(document);
 
     // Publish event for document status change
     this._eventBus.publishDocumentStatusChanged({

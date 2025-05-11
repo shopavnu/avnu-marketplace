@@ -1,2 +1,1 @@
-export declare class SearchModule {
-}
+export declare class SearchModule {}

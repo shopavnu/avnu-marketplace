@@ -64,6 +64,7 @@ We've created several test scripts to evaluate different aspects of the search f
 Basic search functionality is working as expected. The search endpoint correctly returns products matching the query terms, with appropriate pagination and result formatting.
 
 **Example Query:**
+
 ```graphql
 query {
   searchProducts(input: { query: "shoes", limit: 10 }) {
@@ -84,6 +85,7 @@ query {
 ### NLP-Enhanced Search
 
 The NLP processing capabilities are partially implemented. The mock server can:
+
 - Recognize entities like brands, colors, and product types
 - Expand queries with synonyms
 - Detect basic user intents
@@ -93,6 +95,7 @@ However, we encountered some schema mismatches between our test scripts and the 
 ### Faceted Search
 
 Faceted search is implemented but we encountered some issues with the facet schema in our test scripts. The mock server supports facets for:
+
 - Categories
 - Brands
 - Price ranges
@@ -101,6 +104,7 @@ Faceted search is implemented but we encountered some issues with the facet sche
 ### Filtered Search
 
 Filtered search works correctly, allowing products to be filtered by:
+
 - Brand
 - Price range
 - Category

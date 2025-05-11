@@ -102,10 +102,10 @@ Tests are defined with:
 ```typescript
 // Assign a user to a variant for a specific test
 assignUserToVariant(
-  testId: string, 
+  testId: string,
   userId: string,
   clientId: string
-): { 
+): {
   variantId: string;
   algorithm: RelevanceAlgorithm;
   params?: Record<string, any>;
@@ -148,6 +148,7 @@ async trackSearch(
 Here's how these services work together:
 
 1. When a user performs a search, the system:
+
    - Detects their intent using the NLP services
    - Fetches their preference profile
    - Determines which A/B test variant to use
@@ -157,6 +158,7 @@ Here's how these services work together:
 2. The enhanced query is sent to Elasticsearch, which returns more relevant results.
 
 3. When the user interacts with results, the system:
+
    - Records the interaction
    - Updates their preference profile
    - Tracks the interaction in Google Analytics

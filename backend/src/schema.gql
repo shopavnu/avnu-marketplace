@@ -93,19 +93,29 @@ type BusinessMetrics {
 }
 
 type BusinessMetricsSummaryDto {
-  """Number of active users"""
+  """
+  Number of active users
+  """
   activeUsers: Int
 
-  """Average Order Value (AOV)"""
+  """
+  Average Order Value (AOV)
+  """
   averageOrderValue: Float
 
-  """Overall conversion rate"""
+  """
+  Overall conversion rate
+  """
   conversionRate: Float
 
-  """Total orders"""
+  """
+  Total orders
+  """
   totalOrders: Int
 
-  """Total revenue"""
+  """
+  Total revenue
+  """
   totalRevenue: Float
 }
 
@@ -253,7 +263,9 @@ type DiscoverySuggestionsType {
   suggestions: [String!]!
 }
 
-"""The type of user engagement being tracked"""
+"""
+The type of user engagement being tracked
+"""
 enum EngagementType {
   ACCOUNT_UPDATE
   ADD_TO_CART
@@ -552,13 +564,19 @@ type Mutation {
   archiveExperiment(id: String!): Experiment!
   bulkCreateProducts(products: [CreateProductDto!]!): [Product!]!
 
-  """Bulk index brands by IDs"""
+  """
+  Bulk index brands by IDs
+  """
   bulkIndexBrands(brandIds: [String!]!): Boolean!
 
-  """Bulk index merchants by IDs"""
+  """
+  Bulk index merchants by IDs
+  """
   bulkIndexMerchants(merchantIds: [String!]!): Boolean!
 
-  """Bulk index products by IDs"""
+  """
+  Bulk index products by IDs
+  """
   bulkIndexProducts(productIds: [String!]!): Boolean!
   bulkUpdateProducts(products: [UpdateProductInput!]!): [Product!]!
   calculateSimilarity(text1: String!, text2: String!): SimilarityResult!
@@ -569,34 +587,83 @@ type Mutation {
   createUserPreferences(input: CreateUserPreferencesDto!): UserPreferences!
   declareWinner(experimentId: String!, variantId: String!): Experiment!
   extractKeywords(maxKeywords: Int, text: String!): KeywordsResult!
-  getPersonalizedSearchResults(pagination: PaginationDto, query: String!, userPreferences: UserPreferencesInput!): NlpSearchResult!
+  getPersonalizedSearchResults(
+    pagination: PaginationDto
+    query: String!
+    userPreferences: UserPreferencesInput!
+  ): NlpSearchResult!
   getRecommendationsFromDescription(description: String!, limit: Int): [Product!]!
   login(loginInput: LoginDto!): AuthResponse!
   pauseExperiment(id: String!): Experiment!
   refreshToken: AuthResponse!
   register(registerInput: RegisterDto!): AuthResponse!
 
-  """Reindex all entities or a specific entity type"""
+  """
+  Reindex all entities or a specific entity type
+  """
   reindexAll(entityType: String = "all"): Boolean!
   removeExperiment(id: String!): Boolean!
   removeProduct(id: ID!): Boolean!
   removeUser(id: ID!): Boolean!
   startExperiment(id: String!): Experiment!
-  trackAddToCart(deviceType: String, pagePath: String!, platform: String, productId: String!, quantity: Int!, sessionId: String!, userId: String): UserEngagement!
-  trackCheckoutComplete(deviceType: String, merchantId: String, orderId: String!, orderItems: [OrderItemInput!]!, pagePath: String!, platform: String, sessionId: String!, totalAmount: Float!, userId: String): Boolean!
+  trackAddToCart(
+    deviceType: String
+    pagePath: String!
+    platform: String
+    productId: String!
+    quantity: Int!
+    sessionId: String!
+    userId: String
+  ): UserEngagement!
+  trackCheckoutComplete(
+    deviceType: String
+    merchantId: String
+    orderId: String!
+    orderItems: [OrderItemInput!]!
+    pagePath: String!
+    platform: String
+    sessionId: String!
+    totalAmount: Float!
+    userId: String
+  ): Boolean!
   trackConversion(assignmentId: String!, context: String, metadata: String, value: Float): Boolean!
-  trackCustomEvent(assignmentId: String!, context: String, eventType: String!, metadata: String, value: Float): Boolean!
+  trackCustomEvent(
+    assignmentId: String!
+    context: String
+    eventType: String!
+    metadata: String
+    value: Float
+  ): Boolean!
   trackEngagement(data: TrackEngagementInput!): UserEngagement!
   trackEntityFavorite(entityId: String!, entityType: String!): Boolean!
   trackEntityView(entityId: String!, entityType: String!): Boolean!
   trackImpression(assignmentId: String!): Boolean!
   trackInteraction(assignmentId: String!, context: String, metadata: String): Boolean!
-  trackPageView(deviceType: String, pagePath: String!, platform: String, referrer: String, sessionId: String!, userId: String): UserEngagement!
-  trackProductView(deviceType: String, pagePath: String!, platform: String, productId: String!, referrer: String, sessionId: String!, userId: String): UserEngagement!
+  trackPageView(
+    deviceType: String
+    pagePath: String!
+    platform: String
+    referrer: String
+    sessionId: String!
+    userId: String
+  ): UserEngagement!
+  trackProductView(
+    deviceType: String
+    pagePath: String!
+    platform: String
+    productId: String!
+    referrer: String
+    sessionId: String!
+    userId: String
+  ): UserEngagement!
   trackPurchase(price: Float, productId: String!, quantity: Int): Boolean!
   trackSearch(data: TrackSearchInput!): SearchAnalytics!
   trackSearchEvent(event: SearchEventInput!): TrackSearchEventResponse!
-  trackSuggestionSelection(query: String!, selectedSuggestion: String!, suggestionType: String!): Boolean!
+  trackSuggestionSelection(
+    query: String!
+    selectedSuggestion: String!
+    suggestionType: String!
+  ): Boolean!
   updateExperiment(id: String!, updateExperimentDto: UpdateExperimentDto!): Experiment!
   updateProduct(id: ID!, updateProductInput: UpdateProductDto!): Product!
   updateProductStock(id: ID!, inStock: Boolean!, quantity: Int): Product!
@@ -793,7 +860,10 @@ type ProductSearchResult {
 
 type Query {
   analyzeQuery(query: String!): ProcessedQueryResult!
-  autocompleteSuggestions(options: AutocompleteOptionsInput, query: String!): AutocompleteSuggestionsType!
+  autocompleteSuggestions(
+    options: AutocompleteOptionsInput
+    query: String!
+  ): AutocompleteSuggestionsType!
   businessMetricsAnalytics(period: Int = 30): JSONObject!
   businessMetricsSummary(period: Int = 30): JSONObject!
   classifyQuery(query: String!): ClassificationResult!
@@ -817,7 +887,9 @@ type Query {
   getPersonalizedRecommendations(limit: Float): [String!]!
   getRecentSearches: [UserBehavior!]!
 
-  """Get reindexing status"""
+  """
+  Get reindexing status
+  """
   getReindexingStatus(entityType: String): String!
   getUserEngagementByTypeQuery(period: Int = 30): [EngagementTypeCount!]!
   getUserPreferences: UserPreferences!
@@ -829,11 +901,17 @@ type Query {
   personalizationExperiments: VariantConfigurationType
   personalizedRecommendations(limit: Int): SearchResponseType!
   personalizedSearch(options: SearchOptionsInput, query: String!): SearchResponseType!
-  personalizedSimilarProducts(limit: Int, options: SearchOptionsInput, productId: String!): SearchResponseType!
+  personalizedSimilarProducts(
+    limit: Int
+    options: SearchOptionsInput
+    productId: String!
+  ): SearchResponseType!
   personalizedVsRegularSearchAnalytics(period: Int = 30): JSONObject!
   popularSearches(limit: Int = 10, timeframe: String): [PopularSearchType!]!
 
-  """Process a query with NLP"""
+  """
+  Process a query with NLP
+  """
   processQuery(query: String!): SearchResponse!
   product(id: ID!): Product!
   productSuggestions(limit: Int, query: String!): [String!]!
@@ -843,15 +921,24 @@ type Query {
   recommendedProducts(limit: Int, userId: ID!): [Product!]!
   reindexAllProducts: Boolean!
   relatedProducts(limit: Float, productId: String!): SearchResponseType!
-  requiredSampleSize(baselineConversionRate: Float!, minimumDetectableEffect: Float!, power: Float, significanceLevel: Float): Int!
+  requiredSampleSize(
+    baselineConversionRate: Float!
+    minimumDetectableEffect: Float!
+    power: Float
+    significanceLevel: Float
+  ): Int!
   revenueMetrics(granularity: String = "daily", period: Int = 30): [BusinessMetrics!]!
   search(cursor: String, limit: Float = 20, query: String): CursorSearchResponseType!
 
-  """Search all entity types"""
+  """
+  Search all entity types
+  """
   searchAll(input: SearchOptionsInput!): SearchResponse!
   searchAnalytics(period: Int = 30): SearchAnalyticsSummaryDto!
 
-  """Search brands only"""
+  """
+  Search brands only
+  """
   searchBrands(input: SearchOptionsInput!): SearchResponse!
   searchConversionRate(timeframe: String = "day"): ConversionRateType!
   searchEntityDistribution(timeframe: String): DashboardEntityDistributionType!
@@ -860,11 +947,15 @@ type Query {
   searchExperiments: VariantConfigurationType
   searchHealthStatus: HealthStatusType!
 
-  """Search merchants only"""
+  """
+  Search merchants only
+  """
   searchMerchants(input: SearchOptionsInput!): SearchResponse!
   searchPerformanceMetrics(timeframe: String): PerformanceMetricsType!
 
-  """Search products only"""
+  """
+  Search products only
+  """
   searchProducts(input: SearchOptionsInput!): SearchResponse!
   searchRelevanceMetrics(timeframe: String): RelevanceMetricsType!
   searchSuggestions(limit: Int, query: String!): [String!]!
@@ -958,7 +1049,9 @@ type SearchAnalyticsSummaryDto {
   zeroResultQueries: [QueryCount!]
 }
 
-"""The type of entity to search for (Product, Merchant, Brand, All)"""
+"""
+The type of entity to search for (Product, Merchant, Brand, All)
+"""
 enum SearchEntityType {
   ALL
   BRAND
@@ -995,7 +1088,9 @@ input SearchOptionsInput {
   enableHighlighting: Boolean! = false
   enableNlp: Boolean! = false
 
-  """Specifies the primary entity type for the search"""
+  """
+  Specifies the primary entity type for the search
+  """
   entityType: SearchEntityType = PRODUCT
   experimentId: String
   filters: [FilterOptionInput!]
@@ -1078,7 +1173,9 @@ input SortOptionInput {
   order: SortOrder! = DESC
 }
 
-"""Sort order direction"""
+"""
+Sort order direction
+"""
 enum SortOrder {
   ASC
   DESC
@@ -1335,7 +1432,9 @@ input UserPreferencesInput {
   priceSensitivity: String
 }
 
-"""Defines the roles a user can have"""
+"""
+Defines the roles a user can have
+"""
 enum UserRole {
   ADMIN
   MERCHANT

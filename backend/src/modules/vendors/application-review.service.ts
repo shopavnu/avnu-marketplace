@@ -6,7 +6,7 @@ import { VendorApplication } from './entities/vendor-application.entity';
 import { VendorStatus } from './entities/vendor.entity';
 import { TransactionService } from '../../common/transaction.service';
 import { VendorEventBus } from '../../events/vendor-event-bus.service';
-import { ApplicationStatusChangedEvent } from '../../events/vendor-event-types';
+import { ApplicationStatusChangedEvent as _ApplicationStatusChangedEvent } from '../../events/vendor-event-types';
 
 /**
  * Service specifically for application review processes

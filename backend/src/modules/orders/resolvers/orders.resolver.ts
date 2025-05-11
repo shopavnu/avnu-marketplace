@@ -7,6 +7,21 @@ import { OrderType, PaginatedOrdersType } from '../dto/order.types';
 import { CreateOrderInput, UpdateOrderInput, PaginationInput } from '../dto/order.inputs';
 import { OrderStatus, PaymentStatus, FulfillmentStatus, SyncStatus } from '../enums';
 
+/**
+ * Utility function to adapt pagination input for service methods
+ * Converts GraphQL pagination input to a format compatible with service methods
+ */
+const _paginationToFilters = (pagination?: PaginationInput): Record<string, any> => {
+  if (!pagination) return {};
+
+  // Basic pagination data that could be used for filtering or limiting results
+  // Each service method may handle this differently
+  return {
+    _page: pagination.page || 1,
+    _limit: pagination.limit || 10,
+  };
+};
+
 @Resolver(() => OrderType)
 @UseGuards(GqlAuthGuard)
 export class OrdersResolver {
@@ -15,7 +30,31 @@ export class OrdersResolver {
   @Query(() => PaginatedOrdersType, { name: 'orders' })
   async findAll(@Args('pagination', { nullable: true }) pagination?: PaginationInput) {
     try {
-      return await this.ordersService.findAll(pagination);
+      // The OrdersService.findAll expects Partial<Order> not PaginationInput
+      // So we use an empty filter object instead
+      const orders = await this.ordersService.findAll({});
+
+      // Apply basic pagination manually if needed
+      if (pagination) {
+        const page = pagination.page || 1;
+        const limit = pagination.limit || 10;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        return {
+          items: orders.slice(startIndex, endIndex),
+          total: orders.length,
+          page: page,
+          pageSize: limit,
+        };
+      }
+
+      return {
+        items: orders,
+        total: orders.length,
+        page: 1,
+        pageSize: orders.length,
+      };
     } catch (error) {
       throw new BadRequestException(
         `Failed to retrieve orders: ${error instanceof Error ? error.message : String(error)}`,
@@ -41,7 +80,29 @@ export class OrdersResolver {
     @Args('pagination', { nullable: true }) pagination?: PaginationInput,
   ) {
     try {
-      return await this.ordersService.findByCustomer(customerId, pagination);
+      const orders = await this.ordersService.findByCustomer(customerId);
+
+      // Apply basic pagination manually if needed
+      if (pagination) {
+        const page = pagination.page || 1;
+        const limit = pagination.limit || 10;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        return {
+          items: orders.slice(startIndex, endIndex),
+          total: orders.length,
+          page: page,
+          pageSize: limit,
+        };
+      }
+
+      return {
+        items: orders,
+        total: orders.length,
+        page: 1,
+        pageSize: orders.length,
+      };
     } catch (error) {
       throw new BadRequestException(
         `Failed to retrieve customer orders: ${error instanceof Error ? error.message : String(error)}`,
@@ -55,7 +116,29 @@ export class OrdersResolver {
     @Args('pagination', { nullable: true }) pagination?: PaginationInput,
   ) {
     try {
-      return await this.ordersService.findByMerchant(merchantId, pagination);
+      const orders = await this.ordersService.findByMerchant(merchantId);
+
+      // Apply basic pagination manually if needed
+      if (pagination) {
+        const page = pagination.page || 1;
+        const limit = pagination.limit || 10;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        return {
+          items: orders.slice(startIndex, endIndex),
+          total: orders.length,
+          page: page,
+          pageSize: limit,
+        };
+      }
+
+      return {
+        items: orders,
+        total: orders.length,
+        page: 1,
+        pageSize: orders.length,
+      };
     } catch (error) {
       throw new BadRequestException(
         `Failed to retrieve merchant orders: ${error instanceof Error ? error.message : String(error)}`,
@@ -66,9 +149,16 @@ export class OrdersResolver {
   @Mutation(() => OrderType, { name: 'createOrder' })
   async create(@Args('input') createOrderInput: CreateOrderInput) {
     try {
-      return await this.ordersService.create(
-        createOrderInput as unknown as Record<string, unknown>,
-      );
+      // Convert GraphQL input to CreateOrderDto explicitly to satisfy TypeScript
+      const orderDto = {
+        userId: createOrderInput.userId,
+        items: createOrderInput.items,
+        shippingAddress: createOrderInput.shippingAddress,
+        notes: createOrderInput.notes,
+        isPriority: createOrderInput.isPriority,
+      };
+
+      return await this.ordersService.create(orderDto);
     } catch (error) {
       throw new BadRequestException(
         `Failed to create order: ${error instanceof Error ? error.message : String(error)}`,
@@ -130,13 +220,13 @@ export class OrdersResolver {
     }
   }
 
-  @Mutation(() => OrderType, { name: 'updateFulfillmentStatus' })
+  @Mutation(() => OrderType, { name: 'updateOrderFulfillmentStatus' })
   async updateFulfillmentStatus(
     @Args('id', { type: () => ID }) id: string,
-    @Args('fulfillmentStatus', { type: () => String }) fulfillmentStatus: FulfillmentStatus,
+    @Args('status', { type: () => String }) status: FulfillmentStatus,
   ) {
     try {
-      return await this.ordersService.updateFulfillmentStatus(id, fulfillmentStatus);
+      return await this.ordersService.updateFulfillmentStatus(id, status.toString());
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

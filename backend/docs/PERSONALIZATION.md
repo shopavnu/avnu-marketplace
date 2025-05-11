@@ -98,7 +98,7 @@ enum BehaviorType {
   SEARCH = 'search',
   FAVORITE = 'favorite',
   ADD_TO_CART = 'add_to_cart',
-  PURCHASE = 'purchase'
+  PURCHASE = 'purchase',
 }
 ```
 

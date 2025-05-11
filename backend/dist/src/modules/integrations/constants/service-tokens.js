@@ -1,6 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WOOCOMMERCE_SERVICE = exports.SHOPIFY_SERVICE = exports.ORDER_SYNC_SERVICE = exports.SYNC_SERVICE = exports.MERCHANT_AUTH_SERVICE = exports.BASE_INTEGRATION_SERVICE = exports.INTEGRATIONS_SERVICE = void 0;
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+exports.WOOCOMMERCE_SERVICE =
+  exports.SHOPIFY_SERVICE =
+  exports.ORDER_SYNC_SERVICE =
+  exports.SYNC_SERVICE =
+  exports.MERCHANT_AUTH_SERVICE =
+  exports.BASE_INTEGRATION_SERVICE =
+  exports.INTEGRATIONS_SERVICE =
+    void 0;
 exports.INTEGRATIONS_SERVICE = 'INTEGRATIONS_SERVICE';
 exports.BASE_INTEGRATION_SERVICE = 'BASE_INTEGRATION_SERVICE';
 exports.MERCHANT_AUTH_SERVICE = 'MERCHANT_AUTH_SERVICE';

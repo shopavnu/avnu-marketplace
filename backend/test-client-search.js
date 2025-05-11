@@ -35,27 +35,27 @@ async function fetchAllProducts() {
 
 function searchProducts(products, searchTerm) {
   if (!searchTerm) return products;
-  
+
   const lowerSearchTerm = searchTerm.toLowerCase();
   return products.filter(product => {
     return (
       product.title.toLowerCase().includes(lowerSearchTerm) ||
       product.description.toLowerCase().includes(lowerSearchTerm) ||
       product.brandName.toLowerCase().includes(lowerSearchTerm) ||
-      (product.categories && product.categories.some(cat => 
-        cat.toLowerCase().includes(lowerSearchTerm)
-      ))
+      (product.categories &&
+        product.categories.some(cat => cat.toLowerCase().includes(lowerSearchTerm)))
     );
   });
 }
 
 function filterProductsByCategory(products, category) {
   if (!category) return products;
-  
+
   const lowerCategory = category.toLowerCase();
   return products.filter(product => {
-    return product.categories && product.categories.some(cat => 
-      cat.toLowerCase().includes(lowerCategory)
+    return (
+      product.categories &&
+      product.categories.some(cat => cat.toLowerCase().includes(lowerCategory))
     );
   });
 }
@@ -96,7 +96,9 @@ async function runTests() {
   const maxPrice = 100;
   const priceRangeProducts = filterProductsByPriceRange(allProducts, minPrice, maxPrice);
   console.log(`\n===== Test 3: Filter by price range $${minPrice}-$${maxPrice} =====`);
-  console.log(`Found ${priceRangeProducts.length} products in price range $${minPrice}-$${maxPrice}`);
+  console.log(
+    `Found ${priceRangeProducts.length} products in price range $${minPrice}-$${maxPrice}`,
+  );
   priceRangeProducts.forEach((product, index) => {
     console.log(`${index + 1}. ${product.title} - $${product.price} (${product.brandName})`);
   });

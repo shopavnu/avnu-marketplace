@@ -2,18 +2,18 @@ declare module 'chart.js' {
   export const Chart: any;
   export const registerables: any[];
   export function register(...items: any[]): void;
-  
+
   export interface ChartConfiguration {
     type: string;
     data: ChartData;
     options?: ChartOptions;
   }
-  
+
   export interface ChartData {
     labels?: (string | string[])[];
     datasets: ChartDataset[];
   }
-  
+
   export interface ChartDataset {
     label?: string;
     data: (number | null | undefined)[];
@@ -24,7 +24,7 @@ declare module 'chart.js' {
     tension?: number;
     [key: string]: any;
   }
-  
+
   export interface ChartOptions {
     responsive?: boolean;
     maintainAspectRatio?: boolean;

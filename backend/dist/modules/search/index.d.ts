@@ -1,7 +1,13 @@
 export * from './search.module';
 export * from './dto/search-response.dto';
 export { SearchEntityType } from './enums/search-entity-type.enum';
-export { SearchOptionsInput, FilterOption, RangeFilterOption, SortOption, SortOrder, } from './dto/search-options.dto';
+export {
+  SearchOptionsInput,
+  FilterOption,
+  RangeFilterOption,
+  SortOption,
+  SortOrder,
+} from './dto/search-options.dto';
 export * from './services/search-cache.service';
 export * from './services/search-experiment.service';
 export * from './services/search-monitoring.service';

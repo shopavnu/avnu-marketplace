@@ -1,13 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { CommonModule } from '../../common/common.module';
+import { HttpModule } from '@nestjs/axios';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Existing services
 import { ShopifyAppService } from './services/shopify-app.service';
 import { ShopifyAuthService } from './services/shopify-auth.service';
 import { ShopifyWebhookService } from './services/shopify-webhook.service';
-import { ShopifyWebhookValidator } from './utils/webhook-validator';
+
+// New webhook registry system
+import { ShopifyWebhooksModule } from './webhooks/webhooks.module';
+import { ShopifyWebhookRegistryService } from './webhooks/shopify-webhook-registry.service';
+import { WebhookRegistry } from './webhooks/webhook-registry';
+import { WebhookValidator } from './webhooks/webhook-validator';
+
+// Controllers
+import { ShopifyControllersModule } from './controllers/controllers.module';
 
 // Enhanced services that implement our interfaces
 import { ShopifyClientService } from './services/shopify-client.service';
@@ -16,6 +25,7 @@ import { ShopifyWebhookEnhancedService } from './services/shopify-webhook-enhanc
 import { ShopifyProductService } from './services/shopify-product.service';
 import { ShopifyBulkOperationService } from './services/shopify-bulk-operation.service';
 import { ShopifyFulfillmentService } from './services/shopify-fulfillment.service';
+import { ShopifyVersionManagerService } from './services/shopify-version-manager.service';
 
 // Entities
 import { MerchantPlatformConnection } from '../entities/merchant-platform-connection.entity';
@@ -40,15 +50,16 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
   imports: [
     TypeOrmModule.forFeature([MerchantPlatformConnection]),
     ConfigModule.forFeature(shopifyConfig),
-    CommonModule,
+    HttpModule,
+    ScheduleModule.forRoot(),
+    ShopifyWebhooksModule,
+    ShopifyControllersModule,
   ],
-  controllers: [],
   providers: [
     // Original services (for backward compatibility)
     ShopifyAppService,
     ShopifyAuthService,
     ShopifyWebhookService,
-    ShopifyWebhookValidator,
 
     // Enhanced services implementing our interfaces
     ShopifyClientService,
@@ -57,6 +68,8 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     ShopifyProductService,
     ShopifyBulkOperationService,
     ShopifyFulfillmentService,
+    ShopifyVersionManagerService,
+    ShopifyWebhookRegistryService,
 
     // Register services with interface tokens for dependency injection
     {
@@ -69,7 +82,7 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     },
     {
       provide: SHOPIFY_CONSTANTS.INJECTION_TOKENS.SHOPIFY_WEBHOOK_SERVICE,
-      useExisting: ShopifyWebhookEnhancedService,
+      useExisting: ShopifyWebhookRegistryService,
     },
     {
       provide: SHOPIFY_CONSTANTS.INJECTION_TOKENS.SHOPIFY_PRODUCT_SERVICE,
@@ -89,7 +102,9 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     ShopifyAppService,
     ShopifyAuthService,
     ShopifyWebhookService,
-    ShopifyWebhookValidator,
+    WebhookRegistry,
+    WebhookValidator,
+    ShopifyWebhookRegistryService,
 
     // Enhanced services
     ShopifyClientService,
@@ -98,6 +113,7 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     ShopifyProductService,
     ShopifyBulkOperationService,
     ShopifyFulfillmentService,
+    ShopifyVersionManagerService,
 
     // Export services by their interface tokens
     SHOPIFY_CONSTANTS.INJECTION_TOKENS.SHOPIFY_CLIENT_SERVICE,

@@ -1,12 +1,20 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import axios from 'axios';
+import _axios from 'axios';
 import {
   IShopifyClientService,
   ShopifyGraphQLError,
   ShopifyUserError,
 } from '../../../common/interfaces/shopify-services.interfaces';
 import { shopifyConfig } from '../../../common/config/shopify-config';
+import { ShopifyVersionManagerService } from './shopify-version-manager.service';
+import { ShopifyConnectionPoolManager } from '../utils/connection-pool-manager';
+import { ShopifyCircuitBreaker } from '../utils/circuit-breaker';
+import { ShopifyStructuredLogger } from '../utils/structured-logger';
+import { ShopifyCacheManager } from '../utils/cache-manager';
+
+// Define type alias for axios config to avoid direct import
+type AxiosRequestConfig = any;
 
 /**
  * ShopifyClientService - Real implementation of IShopifyClientService interface
@@ -18,56 +26,23 @@ import { shopifyConfig } from '../../../common/config/shopify-config';
  */
 @Injectable()
 export class ShopifyClientService implements IShopifyClientService {
-  private readonly logger = new Logger(ShopifyClientService.name);
-  private restClient: any; // Using any type to bypass TypeScript errors with axios
+  private readonly logger: ShopifyStructuredLogger;
 
   constructor(
     @Inject(shopifyConfig.KEY)
     private readonly config: ConfigType<typeof shopifyConfig>,
+    private readonly versionManager: ShopifyVersionManagerService,
+    private readonly connectionPool: ShopifyConnectionPoolManager,
+    private readonly circuitBreaker: ShopifyCircuitBreaker,
+    private readonly cacheManager: ShopifyCacheManager,
+    logger: ShopifyStructuredLogger,
   ) {
-    // Initialize REST API client with base configuration
-    this.restClient = axios.create({
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      timeout: 10000, // 10 second timeout
-    });
+    // Use the structured logger for better error tracking
+    this.logger = logger;
 
-    // Add request interceptor for logging
-    if (this.config.monitoring.logApiCalls) {
-      this.restClient.interceptors.request.use((request: any) => {
-        this.logger.debug(`[Shopify API Request] ${request.method?.toUpperCase()} ${request.url}`);
-        return request;
-      });
-    }
-
-    // Add response interceptor for error handling and rate limiting
-    this.restClient.interceptors.response.use(
-      (response: any) => response,
-      async (error: any) => {
-        // Handle rate limiting
-        if (error.response && error.response.status === 429) {
-          const retryAfter =
-            error.response.headers && error.response.headers['retry-after']
-              ? parseInt(error.response.headers['retry-after'] as string, 10) * 1000
-              : 1000; // Default to 1 second if not in headers
-
-          this.logger.warn(`[Shopify API] Rate limited, retrying after ${retryAfter}ms`);
-
-          // Wait for the retry-after period
-          await new Promise(resolve => setTimeout(resolve, retryAfter));
-
-          // Retry the request
-          if (error.config) {
-            return this.restClient(error.config as any);
-          }
-        }
-
-        this.handleApiError(error);
-        throw error;
-      },
-    );
+    // The connection pool manager now handles all API requests
+    // with built-in rate limiting, retries, and prioritization
+    this.logger.log('ShopifyClientService initialized with scalability enhancements');
   }
 
   /**
@@ -79,24 +54,106 @@ export class ShopifyClientService implements IShopifyClientService {
     query: string,
     variables?: Record<string, any>,
   ): Promise<T> {
+    // Extract query name for circuit breaker and logging
+    const queryName = query.match(/(?:query|mutation)\s+(\w+)/)?.[1] || 'AnonymousQuery';
+    const circuitKey = `shop:${shop}:graphql:${queryName}`;
+
+    // Log the query
+    this.logger.logApiRequest('graphql', shop, {
+      queryName,
+      operationType: query.includes('mutation') ? 'mutation' : 'query',
+    });
+
+    // Determine priority based on operation type
+    // Mutations are generally more important than queries
+    const priorities = this.connectionPool.getPriorities();
+    const priority = query.includes('mutation') ? priorities.HIGH : priorities.MEDIUM;
+
     try {
-      // Log the query if monitoring is enabled
-      if (this.config.monitoring.logApiCalls) {
-        const queryName = query.match(/(?:query|mutation)\s+(\w+)/)?.[1] || 'AnonymousQuery';
-        this.logger.debug(`[Shopify GraphQL] ${queryName} for shop ${shop}`);
+      // First try to get from cache for queries (not mutations)
+      if (!query.includes('mutation')) {
+        // Generate a cache key based on the query and variables
+        const cacheResult = await this.cacheManager.getOrFetch<T>(
+          {
+            namespace: 'graphql',
+            merchantId: shop,
+            resource: queryName,
+            id: JSON.stringify(variables || {}),
+          },
+          async () => {
+            // This function is called on cache miss
+            return this.executeGraphQLQuery(
+              shop,
+              accessToken,
+              query,
+              variables,
+              circuitKey,
+              priority,
+            );
+          },
+          { ttl: 300 }, // 5 minute cache for most queries
+        );
+
+        return cacheResult;
       }
 
-      // Make the GraphQL request
-      const response = await this.restClient({
+      // For mutations or non-cacheable queries, execute directly
+      return await this.executeGraphQLQuery(
+        shop,
+        accessToken,
+        query,
+        variables,
+        circuitKey,
+        priority,
+      );
+    } catch (error) {
+      // Enhanced error logging with the structured logger
+      this.logger.error(`GraphQL query failed: ${queryName}`, {
+        shopDomain: shop,
+        errorMessage: error.message,
+        errorCode: error.code,
+        queryName,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Execute a GraphQL query with circuit breaker protection
+   * (Internal method used by query)
+   */
+  private async executeGraphQLQuery<T>(
+    shop: string,
+    accessToken: string,
+    query: string,
+    variables: Record<string, any> | undefined,
+    circuitKey: string,
+    priority: number,
+  ): Promise<T> {
+    // Use circuit breaker to protect against cascading failures
+    return this.circuitBreaker.executeWithCircuitBreaker(circuitKey, async () => {
+      // Prepare request configuration
+      const config: AxiosRequestConfig = {
         method: 'POST',
-        url: `https://${shop}/admin/api/${this.config.api.version}/graphql.json`,
+        url: this.versionManager.getVersionedEndpoint(shop, '/graphql.json'),
         headers: {
           'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json',
         },
         data: {
           query,
           variables,
         },
+      };
+
+      // Execute request through connection pool with proper rate limiting
+      const startTime = Date.now();
+      const response = await this.connectionPool.executeRequest(shop, config, priority);
+      const duration = Date.now() - startTime;
+
+      // Log the response timing
+      this.logger.logApiResponse('graphql', shop, response.status, duration, {
+        queryName: query.match(/(?:query|mutation)\s+(\w+)/)?.[1] || 'AnonymousQuery',
       });
 
       // Check for GraphQL errors
@@ -115,11 +172,8 @@ export class ShopifyClientService implements IShopifyClientService {
         }
       }
 
-      return response.data && response.data.data ? (response.data.data as T) : ({} as T);
-    } catch (error) {
-      this.handleApiError(error, shop, query);
-      throw error;
-    }
+      return response.data;
+    });
   }
 
   /**
@@ -132,38 +186,135 @@ export class ShopifyClientService implements IShopifyClientService {
     method: string = 'GET',
     data?: any,
   ): Promise<T> {
+    // Create a circuit breaker key based on endpoint and method
+    const normalizedEndpoint = endpoint.split('?')[0].replace(/\d+/g, ':id'); // Normalize IDs in URL
+    const circuitKey = `shop:${shop}:rest:${method}:${normalizedEndpoint}`;
+
+    // Log the request
+    this.logger.logApiRequest(`rest:${method}`, shop, { endpoint });
+
+    // Determine priority based on method and endpoint
+    const priorities = this.connectionPool.getPriorities();
+    let priority = priorities.MEDIUM;
+
+    // Orders and inventory endpoints get higher priority
+    if (endpoint.includes('/orders') || endpoint.includes('/inventory')) {
+      priority = priorities.HIGH;
+    }
+    // Checkout endpoints get highest priority
+    else if (endpoint.includes('/checkouts')) {
+      priority = priorities.CRITICAL;
+    }
+    // Analytics and reporting get lower priority
+    else if (endpoint.includes('/reports') || endpoint.includes('/analytics')) {
+      priority = priorities.LOW;
+    }
+
     try {
-      // Ensure endpoint starts with a slash
-      if (!endpoint.startsWith('/')) {
-        endpoint = `/${endpoint}`;
+      // For GET requests, we can use caching
+      if (method === 'GET') {
+        // Generate cache key parts
+        const cacheResult = await this.cacheManager.getOrFetch<T>(
+          {
+            namespace: 'rest',
+            merchantId: shop,
+            resource: normalizedEndpoint,
+            id: JSON.stringify(data || {}),
+          },
+          async () => {
+            // This function is called on cache miss
+            return this.executeRestRequest(
+              shop,
+              accessToken,
+              endpoint,
+              method,
+              data,
+              circuitKey,
+              priority,
+            );
+          },
+          {
+            ttl: 300, // 5 minute cache for most GET requests
+            // Don't cache certain frequently changing resources as long
+            ...(endpoint.includes('/inventory') ? { ttl: 60 } : {}),
+            ...(endpoint.includes('/orders/') ? { ttl: 30 } : {}),
+          },
+        );
+
+        return cacheResult;
       }
 
-      // Build request config
-      const config: any = {
-        method: method,
-        url: `https://${shop}/admin/api/${this.config.api.version}${endpoint}`,
-        headers: {
-          'X-Shopify-Access-Token': accessToken,
-        },
-      };
-
-      // Add data for POST/PUT/PATCH requests
-      if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && data) {
-        config.data = data;
-      }
-
-      // Add query parameters for GET requests
-      if (method.toUpperCase() === 'GET' && data) {
-        config.params = data;
-      }
-
-      // Execute request
-      const response = await this.restClient(config);
-      return response.data as T;
+      // For non-GET requests, execute directly
+      return await this.executeRestRequest(
+        shop,
+        accessToken,
+        endpoint,
+        method,
+        data,
+        circuitKey,
+        priority,
+      );
     } catch (error) {
-      this.handleApiError(error, shop, endpoint);
+      // Enhanced error logging with structured logger
+      this.logger.error(`REST request failed: ${method} ${endpoint}`, {
+        shopDomain: shop,
+        endpoint,
+        method,
+        errorMessage: error.message,
+        errorCode: error.response?.status || error.code,
+      });
       throw error;
     }
+  }
+
+  /**
+   * Execute a REST API request with circuit breaker protection
+   * (Internal method used by request)
+   */
+  private async executeRestRequest<T>(
+    shop: string,
+    accessToken: string,
+    endpoint: string,
+    method: string,
+    data: any,
+    circuitKey: string,
+    priority: number,
+  ): Promise<T> {
+    // Use circuit breaker to protect against cascading failures
+    return this.circuitBreaker.executeWithCircuitBreaker(circuitKey, async () => {
+      // Prepare request configuration
+      const config: AxiosRequestConfig = {
+        method,
+        url: this.versionManager.getVersionedEndpoint(shop, endpoint),
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json',
+        },
+        data: method !== 'GET' ? data : undefined,
+        params: method === 'GET' ? data : undefined,
+      };
+
+      // Execute request through connection pool with proper rate limiting
+      const startTime = Date.now();
+      const response = await this.connectionPool.executeRequest(shop, config, priority);
+      const duration = Date.now() - startTime;
+
+      // Log the response timing
+      this.logger.logApiResponse(`rest:${method}`, shop, response.status, duration, {
+        endpoint,
+      });
+
+      // For non-GET methods that modify data, invalidate related caches
+      if (method !== 'GET') {
+        // Extract the resource type from the endpoint
+        const resourceType = endpoint.split('/')[1]; // e.g., "products" from "/products/123"
+        if (resourceType) {
+          this.cacheManager.invalidateResource(shop, resourceType);
+        }
+      }
+
+      return response.data;
+    });
   }
 
   /**
@@ -304,6 +455,7 @@ export class ShopifyClientService implements IShopifyClientService {
   private handleApiError(error: any, shop?: string, endpoint?: string): void {
     // Safe shop masking for logging
     const maskedShop = shop ? this.maskShopDomain(shop) : 'unknown-shop';
+    const apiVersion = this.versionManager.getApiVersion();
 
     if (error.response && typeof error.response === 'object') {
       // The request was made and the server responded with an error status
@@ -312,18 +464,28 @@ export class ShopifyClientService implements IShopifyClientService {
         status: status,
         statusText: error.response.statusText || 'Unknown Error',
         endpoint: endpoint || 'unknown-endpoint',
+        apiVersion: apiVersion,
         data: error.response.data || {},
       });
+
+      // Check if error is related to API version and log appropriate message
+      if (status === 400 && error.response.data?.errors?.includes('version')) {
+        this.logger.error(
+          `API version ${apiVersion} might be causing compatibility issues. Consider updating version.`,
+        );
+      }
     } else if (error.request) {
       // The request was made but no response was received
       this.logger.error(`[Shopify API] No response from ${maskedShop}:`, {
         endpoint: endpoint || 'unknown-endpoint',
+        apiVersion: apiVersion,
         message: error.message,
       });
     } else {
       // Something happened in setting up the request
       this.logger.error(`[Shopify API] Request setup error for ${maskedShop}:`, {
         endpoint: endpoint || 'unknown-endpoint',
+        apiVersion: apiVersion,
         message: error.message,
       });
     }

@@ -3,6 +3,7 @@
 This document outlines the database query optimizations implemented for product listing endpoints in the Avnu Marketplace platform.
 
 ## Table of Contents
+
 1. [Database Indexing Strategy](#database-indexing-strategy)
 2. [Query Optimization Service](#query-optimization-service)
 3. [Result Caching for Common Filters](#result-caching-for-common-filters)
@@ -14,6 +15,7 @@ This document outlines the database query optimizations implemented for product 
 We've implemented a comprehensive indexing strategy for the Product entity to optimize the most common query patterns:
 
 ### Single Column Indexes
+
 - `price`: Optimizes price range filtering and sorting
 - `merchantId`: Speeds up merchant-specific product listings
 - `inStock`: Improves filtering for available products
@@ -24,11 +26,13 @@ We've implemented a comprehensive indexing strategy for the Product entity to op
 - `slug`: Optimizes URL-friendly lookups
 
 ### Composite Indexes
+
 - `merchantId, inStock, isActive`: Optimizes the common pattern of filtering active, in-stock products for a specific merchant
 - `price, inStock, isActive`: Improves price range queries on active, available products
 - `createdAt, id`: Ensures stable sorting for cursor-based pagination
 
 ### Full-Text Indexes
+
 - `categories`: Enables efficient text search within product categories
 
 ## Query Optimization Service
@@ -36,11 +40,13 @@ We've implemented a comprehensive indexing strategy for the Product entity to op
 The `ProductQueryOptimizerService` implements several optimization techniques:
 
 1. **Optimized Query Building**
+
    - Uses TypeORM's QueryBuilder for efficient query construction
    - Applies appropriate WHERE clauses based on filter combinations
    - Ensures consistent ordering for stable pagination
 
 2. **Smart Join Strategy**
+
    - Avoids unnecessary joins for simple queries
    - Uses LEFT JOINs only when needed for related data
 
@@ -53,10 +59,12 @@ The `ProductQueryOptimizerService` implements several optimization techniques:
 The query optimization service implements a multi-level caching strategy:
 
 1. **Cache Key Generation**
+
    - Creates consistent cache keys based on filter parameters
    - Normalizes filter objects to ensure cache hits for equivalent queries
 
 2. **Cache TTL Strategy**
+
    - Frequently accessed combinations: 5 minutes
    - Less common combinations: 2 minutes
    - Highly volatile data: 30 seconds
@@ -71,10 +79,12 @@ The query optimization service implements a multi-level caching strategy:
 To ensure optimal performance for common queries, we've implemented automatic cache warming:
 
 1. **Scheduled Warmup**
+
    - Hourly cache warming for common filter combinations
    - Pre-caches first few pages of popular product listings
 
 2. **Post-Update Warming**
+
    - Automatically refreshes cache for affected query patterns after product updates
    - Prioritizes high-traffic query combinations
 
@@ -89,11 +99,13 @@ To ensure optimal performance for common queries, we've implemented automatic ca
 The optimization system includes comprehensive monitoring:
 
 1. **Query Performance Metrics**
+
    - Tracks execution time for each query pattern
    - Monitors cache hit/miss ratios
    - Records query frequency by filter combination
 
 2. **GraphQL Monitoring Endpoints**
+
    - Exposes cache performance metrics via GraphQL
    - Provides admin tools for cache inspection and management
 

@@ -1,2 +1,1 @@
-export declare class VendorDocumentModule {
-}
+export declare class VendorDocumentModule {}

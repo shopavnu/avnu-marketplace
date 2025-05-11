@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryRunner, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 /**
  * Interface for application form data
@@ -80,12 +80,12 @@ export class VendorCreationService {
     }
 
     // Create vendor within transaction
-    return this._transactionService.executeInTransaction(async (queryRunner: QueryRunner) => {
-      const savedVendor = await this._createVendorEntity(queryRunner, application);
-      await this._createBankingDetails(queryRunner, savedVendor, application.formData);
-      await this._createAddressIfProvided(queryRunner, savedVendor, application.formData);
-      await this._linkDocumentsToVendor(queryRunner, savedVendor.id, application.id);
-      await this._updateApplicationWithVendorId(queryRunner, application, savedVendor.id);
+    return this._transactionService.executeInTransaction(async entityManager => {
+      const savedVendor = await this._createVendorEntity(entityManager, application);
+      await this._createBankingDetails(entityManager, savedVendor, application.formData);
+      await this._createAddressIfProvided(entityManager, savedVendor, application.formData);
+      await this._linkDocumentsToVendor(entityManager, savedVendor.id, application.id);
+      await this._updateApplicationWithVendorId(entityManager, application, savedVendor.id);
 
       // Publish vendor created event
       this._eventBus.publishVendorCreated({
@@ -138,7 +138,7 @@ export class VendorCreationService {
    * Create the vendor entity from application data
    */
   private async _createVendorEntity(
-    queryRunner: QueryRunner,
+    entityManager: EntityManager,
     application: VendorApplication,
   ): Promise<Vendor> {
     const formData = application.formData;
@@ -155,14 +155,14 @@ export class VendorCreationService {
     // Set default commission rate based on business type
     vendor.commissionRate = this._getDefaultCommissionRate(formData.businessType);
 
-    return queryRunner.manager.save(vendor);
+    return entityManager.save(vendor);
   }
 
   /**
    * Create banking details for the vendor
    */
   private async _createBankingDetails(
-    queryRunner: QueryRunner,
+    entityManager: EntityManager,
     vendor: Vendor,
     formData: IVendorFormData,
   ): Promise<void> {
@@ -173,14 +173,14 @@ export class VendorCreationService {
     bankingDetails.accountNumber = formData.accountNumber;
     bankingDetails.routingNumber = formData.routingNumber;
 
-    await queryRunner.manager.save(bankingDetails);
+    await entityManager.save(bankingDetails);
   }
 
   /**
    * Create an address for the vendor if address data is provided
    */
   private async _createAddressIfProvided(
-    queryRunner: QueryRunner,
+    entityManager: EntityManager,
     vendor: Vendor,
     formData: IVendorFormData,
   ): Promise<void> {
@@ -196,7 +196,7 @@ export class VendorCreationService {
       address.country = formData.country || '';
       address.isDefault = true;
 
-      await queryRunner.manager.save(address);
+      await entityManager.save(address);
     }
   }
 
@@ -204,7 +204,7 @@ export class VendorCreationService {
    * Link documents from the application to the vendor
    */
   private async _linkDocumentsToVendor(
-    queryRunner: QueryRunner,
+    entityManager: EntityManager,
     vendorId: string,
     applicationId: string,
   ): Promise<void> {
@@ -214,7 +214,7 @@ export class VendorCreationService {
 
     for (const document of documents) {
       document.vendorId = vendorId;
-      await queryRunner.manager.save(document);
+      await entityManager.save(document);
     }
   }
 
@@ -222,12 +222,12 @@ export class VendorCreationService {
    * Update application with vendor ID
    */
   private async _updateApplicationWithVendorId(
-    queryRunner: QueryRunner,
+    entityManager: EntityManager,
     application: VendorApplication,
     vendorId: string,
   ): Promise<void> {
     application.vendorId = vendorId;
-    await queryRunner.manager.save(application);
+    await entityManager.save(application);
   }
 
   /**

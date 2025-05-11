@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { Repository, FindOptionsWhere, FindOperator } from 'typeorm';
 import { MerchantPlatformConnection } from '../entities/merchant-platform-connection.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Order } from '../../orders/entities/order.entity';
-import { PlatformType, SyncResult } from '../../shared';
+import { SyncResult } from '../../shared';
+import { PlatformType } from '../enums/platform-type.enum';
 import { ShopifyService } from './shopify.service';
 
 /**
@@ -154,7 +155,7 @@ export class ShopifySyncService {
           // Find existing product
           const existingProduct = await this.productRepository.findOne({
             where: {
-              externalId: shopifyProduct.id.toString(), // Convert number to string for query
+              externalId: externalProduct.id.toString(), // Convert number to string for query
               platformType: PlatformType.SHOPIFY,
             } as FindOptionsWhere<Product>,
           });
@@ -325,7 +326,9 @@ export class ShopifySyncService {
         ? await this.merchantPlatformConnectionRepository.findOne({
             where: {
               merchantId,
-              platformType: PlatformType.SHOPIFY,
+              platformType: PlatformType.SHOPIFY as unknown as
+                | PlatformType
+                | FindOperator<PlatformType>,
             },
           })
         : null;
@@ -364,8 +367,8 @@ export class ShopifySyncService {
    */
   private async handleProductWebhook(
     event: string,
-    data: Record<string, unknown>,
-    connection: MerchantPlatformConnection | null,
+    _data: Record<string, unknown>,
+    _connection: MerchantPlatformConnection | null,
   ): Promise<void> {
     // Implement product webhook logic based on event type
     this.logger.log(`Handling Shopify product webhook: ${event}`);
@@ -387,8 +390,8 @@ export class ShopifySyncService {
    */
   private async handleOrderWebhook(
     event: string,
-    data: Record<string, unknown>,
-    connection: MerchantPlatformConnection | null,
+    _data: Record<string, unknown>,
+    _connection: MerchantPlatformConnection | null,
   ): Promise<void> {
     // Implement order webhook logic based on event type
     this.logger.log(`Handling Shopify order webhook: ${event}`);

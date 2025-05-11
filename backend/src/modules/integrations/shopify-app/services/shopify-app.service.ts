@@ -9,7 +9,10 @@ import {
   SyncResult,
   PlatformType,
 } from '../../../shared';
-import { ShopifyProduct, ShopifyOrder } from '../../../common/types/shopify-models.types';
+import {
+  ShopifyProduct as _ShopifyProduct,
+  ShopifyOrder as _ShopifyOrder,
+} from '../../../common/types/shopify-models.types';
 import { IShopifyClientService } from '../../../common/interfaces/shopify-services.interfaces';
 import { shopifyConfig } from '../../../common/config/shopify-config';
 import { SHOPIFY_CONSTANTS } from '../../../common/config/shopify-config';
@@ -201,7 +204,7 @@ export class ShopifyAppService implements ProductIntegrationService {
       });
 
       // Transform images
-      const images = product.images.edges.map((edge: any) => {
+      const _images = product.images.edges.map((edge: any) => {
         const node = edge.node;
         return {
           id: node.id.split('/').pop(),
@@ -352,7 +355,7 @@ export class ShopifyAppService implements ProductIntegrationService {
         });
 
         // Transform images
-        const images = product.images.edges.map((edge: any) => {
+        const _images = product.images.edges.map((edge: any) => {
           const node = edge.node;
           return {
             id: node.id.split('/').pop(),
@@ -565,7 +568,7 @@ export class ShopifyAppService implements ProductIntegrationService {
 
       // Handle variant updates if provided
       if (data.variants && data.variants.length > 0) {
-        await this.updateProductVariants(productId, data.variants, merchantId);
+        await this.updateProductInventory(productId, data.variants, merchantId);
       }
 
       // Handle image updates if provided
@@ -663,7 +666,7 @@ export class ShopifyAppService implements ProductIntegrationService {
       }
 
       // Calculate sync duration
-      const syncDuration = Date.now() - startTime;
+      const _syncDuration = Date.now() - startTime;
 
       return {
         created: 0, // We don't know the exact breakdown, so use total
@@ -742,13 +745,45 @@ export class ShopifyAppService implements ProductIntegrationService {
   /**
    * Helper method to update product variants
    */
-  private async updateProductVariants(
+  private async updateProductInventory(
     productId: string,
     variants: any[],
     merchantId: string,
   ): Promise<void> {
-    // Implement variant updates here
-    // This would include handling existing variants and creating new ones
+    const { shop, accessToken } = await this.getShopifyConnection(merchantId);
+
+    for (const variant of variants) {
+      if (!variant.id) continue; // Skip variants without IDs
+
+      const mutation = `
+        mutation productVariantUpdate($input: ProductVariantInput!) {
+          productVariantUpdate(input: $input) {
+            productVariant {
+              id
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+
+      const variables = {
+        input: {
+          id: variant.id,
+          price: variant.price?.toString() || '0',
+          compareAtPrice: variant.compareAtPrice ? variant.compareAtPrice.toString() : null,
+          sku: variant.sku || '',
+          inventoryQuantities: {
+            availableQuantity: variant.inventoryQuantity || 0,
+            locationId: 'gid://shopify/Location/1', // Default location
+          },
+        },
+      };
+
+      await this.shopifyClientService.query<any>(shop, accessToken, mutation, variables);
+    }
   }
 
   /**
@@ -794,12 +829,85 @@ export class ShopifyAppService implements ProductIntegrationService {
   /**
    * Helper method to update product images
    */
+  /**
+   * Get all images for a product
+   * @param productId The product ID
+   * @param merchantId The merchant ID
+   * @returns Array of product images
+   */
+  private async getProductImages(productId: string, merchantId: string): Promise<any[]> {
+    const { shop, accessToken } = await this.getShopifyConnection(merchantId);
+
+    const query = `
+      query getProductImages($id: ID!) {
+        product(id: $id) {
+          images(first: 20) {
+            edges {
+              node {
+                id
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      id: `gid://shopify/Product/${productId}`,
+    };
+
+    const response = await this.shopifyClientService.query<any>(
+      shop,
+      accessToken,
+      query,
+      variables,
+    );
+    return response.product?.images?.edges?.map(edge => edge.node) || [];
+  }
+
   private async updateProductImages(
     productId: string,
     images: any[],
     merchantId: string,
   ): Promise<void> {
-    // Implement image updates here
-    // This would include removing old images and adding new ones
+    const { shop, accessToken } = await this.getShopifyConnection(merchantId);
+
+    // First, get current images
+    const _existingImages = await this.getProductImages(productId, merchantId);
+
+    // Remove existing images not in the new set
+    for (const image of _existingImages) {
+      // Check if this image is not in the new set
+      const shouldKeep = images.some(img => img.id === image.id || img.url === image.url);
+
+      if (!shouldKeep) {
+        const deleteMutation = `
+          mutation productImageDelete($id: ID!) {
+            productImageDelete(id: $id) {
+              deletedImageId
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `;
+
+        await this.shopifyClientService.query<any>(shop, accessToken, deleteMutation, {
+          id: image.id,
+        });
+      }
+    }
+
+    // Add new images
+    for (const image of images) {
+      // Skip if no URL or if image already exists
+      if (!image.url || _existingImages.some(existingImg => existingImg.url === image.url))
+        continue;
+
+      await this.uploadProductImages(productId, [image], merchantId);
+    }
   }
 }

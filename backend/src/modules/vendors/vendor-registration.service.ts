@@ -93,7 +93,7 @@ export class VendorRegistrationService {
       application.submittedAt = new Date();
 
       // Save the application
-      const savedApplication = await queryRunner.manager.save(application);
+      const savedApplication = await queryRunner.save(application);
 
       // Save documents
       if (applicationData.businessLicensePath) {
@@ -103,7 +103,7 @@ export class VendorRegistrationService {
         document.filePath = applicationData.businessLicensePath;
         document.application = savedApplication;
 
-        await queryRunner.manager.save(document);
+        await queryRunner.save(document);
       }
 
       if (applicationData.identityDocumentPath) {
@@ -113,7 +113,7 @@ export class VendorRegistrationService {
         document.filePath = applicationData.identityDocumentPath;
         document.application = savedApplication;
 
-        await queryRunner.manager.save(document);
+        await queryRunner.save(document);
       }
 
       // Publish application created event - notification service will handle emails

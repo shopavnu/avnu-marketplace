@@ -1,4 +1,4 @@
 export declare class DiscoverySuggestionsType {
-    suggestions: string[];
-    metadata?: any;
+  suggestions: string[];
+  metadata?: any;
 }
