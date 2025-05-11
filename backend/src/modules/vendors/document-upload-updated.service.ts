@@ -13,6 +13,18 @@ import { VendorDocument, DocumentType, DocumentStatus } from './entities/vendor-
 import { VendorConfigService } from '../../config/vendor-config.service';
 
 /**
+ * Interface defining the expected structure of uploaded files.
+ * This standardizes file properties across different file upload mechanisms (Multer, Express, etc.)
+ * Provides better type safety and consistency in file handling throughout the application.
+ */
+interface UploadedFile {
+  buffer: Buffer;         // Raw file content
+  originalname: string;   // Original filename from the client
+  size: number;           // File size in bytes
+  mimetype: string;       // MIME type of the file
+}
+
+/**
  * Service for handling document uploads with centralized configuration access
  */
 @Injectable()
@@ -26,7 +38,7 @@ export class DocumentUploadService {
     private readonly _configService: VendorConfigService, // Using the centralized config service
   ) {
     // Get configuration values from the centralized service
-    this._uploadDir = this._configService.getDocumentUploadPath();
+    this._uploadDir = this._configService.documentsUploadDir;
 
     // Create uploads directory if it doesn't exist
     if (!fs.existsSync(this._uploadDir)) {
@@ -38,7 +50,7 @@ export class DocumentUploadService {
    * Upload a document file
    */
   async uploadDocument(
-    file: Express.Multer.File,
+    file: UploadedFile,
     documentType: DocumentType,
     applicationId: string,
     documentName: string,
@@ -82,10 +94,10 @@ export class DocumentUploadService {
   /**
    * Validate file type and size using centralized configuration
    */
-  private _validateFile(file: Express.Multer.File): void {
+  private _validateFile(file: UploadedFile): void {
     // Get configuration from the config service
-    const allowedMimeTypes = this._configService.getAllowedDocumentMimeTypes();
-    const maxFileSize = this._configService.getMaxDocumentFileSize();
+    const allowedMimeTypes = this._configService.allowedDocumentTypes;
+    const maxFileSize = this._configService.maxDocumentSizeBytes;
 
     // Check file type
     if (!allowedMimeTypes.includes(file.mimetype)) {

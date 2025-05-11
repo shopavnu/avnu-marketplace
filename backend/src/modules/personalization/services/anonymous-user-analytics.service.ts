@@ -152,7 +152,7 @@ export class AnonymousUserAnalyticsService {
     const uniqueSessionIds = new Set<string>();
     let returningSessionCount = 0;
 
-    sessionsByDay.forEach((sessionsInDay, day) => {
+    sessionsByDay.forEach((sessionsInDay, _day) => {
       sessionsInDay.forEach(sessionId => {
         if (uniqueSessionIds.has(sessionId)) {
           returningSessionCount++;
@@ -401,7 +401,7 @@ export class AnonymousUserAnalyticsService {
     // Calculate conversion rate for each search term
     const result = [];
 
-    for (const [query, data] of searchData.entries()) {
+    for (const [_query, data] of searchData.entries()) {
       // Find sessions that searched for this term
       // query variable is not used in the current implementation
       // const _query = data.query;

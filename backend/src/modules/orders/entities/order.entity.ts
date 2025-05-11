@@ -213,6 +213,16 @@ export class Order {
   syncStatus: SyncStatus = SyncStatus.PENDING;
 
   /**
+   * Platform type
+   * Type of the external platform this order is associated with (e.g., Shopify)
+   */
+  @Field(() => String, { nullable: true, description: 'External platform type' })
+  @Column({ nullable: true, length: 50 })
+  @IsOptional()
+  @IsString()
+  platformType?: string;
+
+  /**
    * Platform action capabilities
    * Indicates which actions are available for this order in the external platform
    */

@@ -24,6 +24,14 @@ import { DocumentType, DocumentStatus, VendorDocument } from '../entities/vendor
 import { DocumentUploadService } from '../document-upload-updated.service';
 import { DocumentVerificationService, VerificationResult } from '../document-verification.service';
 
+// Import the UploadedFile interface we defined
+interface UploadedFile {
+  buffer: Buffer;
+  originalname: string;
+  size: number;
+  mimetype: string;
+}
+
 /**
  * Controller for vendor document operations
  * Updated to use the refactored service architecture
@@ -47,7 +55,7 @@ export class VendorDocumentsController {
   @ApiOperation({ summary: 'Upload vendor document' })
   @ApiBearerAuth()
   async uploadDocument(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: UploadedFile,
     @Body()
     body: {
       documentType: DocumentType;

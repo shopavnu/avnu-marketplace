@@ -144,7 +144,7 @@ export class ShopifyAuthEnhancedService implements IShopifyAuthService {
       }
 
       // Now we can safely cast to our expected type
-      const shopData = data as ShopifyShopResponse;
+      const _shopData = data as ShopifyShopResponse;
 
       this.logger.log(`Successfully verified access token for shop: ${shop}`);
     } catch (error) {

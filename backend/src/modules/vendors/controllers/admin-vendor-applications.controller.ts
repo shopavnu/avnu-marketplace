@@ -20,6 +20,20 @@ class AdminGuard {}
 import { DocumentStatus } from '../entities/vendor-document.entity';
 import { VendorStatus } from '../entities/vendor.entity';
 
+// Inline interface definition to avoid module resolution errors
+// This would normally be imported from '../entities/review-metadata.entity'
+// Using underscore prefix to indicate it's declared but not directly used
+interface _ReviewMetadata {
+  id: string;
+  adminId: string;
+  notes?: string;
+  rejectionReason?: string;
+  reviewedAt: Date;
+  entityId: string;
+  entityType: string;
+  status: string;
+}
+
 // Import refactored services
 import { ApplicationReviewService } from '../application-review.service';
 import { DocumentVerificationService } from '../document-verification.service';
@@ -44,7 +58,8 @@ interface DocumentReviewDto {
   rejectionReason?: string;
 }
 
-interface ReviewMetadata {
+// Using underscore prefix to indicate it's declared but not directly used
+interface _ReviewMetadata2 {
   adminId: string;
   notes?: string;
   reason?: string;
