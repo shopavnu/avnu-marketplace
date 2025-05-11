@@ -45,10 +45,7 @@ export class SyncController {
   async syncShopifyOrders(
     @Request() req: { user: { merchantId: string } },
   ): Promise<{ created: number; updated: number; failed: number }> {
-    return this.orderSyncService.syncOrders(
-      IntegrationType.SHOPIFY,
-      req.user.merchantId,
-    );
+    return this.orderSyncService.syncOrders(IntegrationType.SHOPIFY, req.user.merchantId);
   }
 
   /**
@@ -61,20 +58,20 @@ export class SyncController {
     @Body() payload: Record<string, unknown>,
     @Request() req: { headers: Record<string, string> },
   ): Promise<{ success: boolean }> {
-    // Get the topic and shop from headers
+    // Get the topic and shop domain from headers
     const topic = req.headers['x-shopify-topic'] || '';
-    const shop = req.headers['x-shopify-shop-domain'] || '';
-    
+    const _shop = req.headers['x-shopify-shop-domain'] || ''; // Prefix with underscore since it's unused
+
     // Extract merchant ID - in a real implementation this would be determined from the shop domain
     const merchantId = 'merchant-id-placeholder';
-    
+
     const result = await this.integrationsService.handleWebhook(
       IntegrationType.SHOPIFY,
       payload,
       topic as string,
       merchantId,
     );
-    
+
     return { success: result };
   }
 }

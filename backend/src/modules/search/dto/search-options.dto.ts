@@ -97,7 +97,6 @@ export class RangeFilterOption {
 // which should ideally be defined closer to its usage (e.g., resolver or specific input file).
 @InputType('SearchOptionsInput') // Explicitly name the InputType
 export class SearchOptionsInput {
-
   // Renamed class to align with InputType convention
   @ApiProperty({
     description: 'Search query',

@@ -1,11 +1,27 @@
 import { Product } from '../entities/product.entity';
-export declare function getBrandName(product: Product | Partial<Product> | null | undefined): string;
-export declare function getCategories(product: Product | Partial<Product> | null | undefined): string[];
-export declare function getPrimaryImage(product: Product | Partial<Product> | null | undefined): string;
+export declare function getBrandName(
+  product: Product | Partial<Product> | null | undefined,
+): string;
+export declare function getCategories(
+  product: Product | Partial<Product> | null | undefined,
+): string[];
+export declare function getPrimaryImage(
+  product: Product | Partial<Product> | null | undefined,
+): string;
 export declare function getPrice(product: Product | Partial<Product> | null | undefined): number;
 export declare function getTitle(product: Product | Partial<Product> | null | undefined): string;
-export declare function getDescription(product: Product | Partial<Product> | null | undefined): string;
-export declare function getInStockStatus(product: Product | Partial<Product> | null | undefined): boolean;
-export declare function getOnSaleStatus(product: Product | Partial<Product> | null | undefined): boolean;
-export declare function getDiscountPercentage(product: Product | Partial<Product> | null | undefined): number;
-export declare function getCompareAtPrice(product: Product | Partial<Product> | null | undefined): number;
+export declare function getDescription(
+  product: Product | Partial<Product> | null | undefined,
+): string;
+export declare function getInStockStatus(
+  product: Product | Partial<Product> | null | undefined,
+): boolean;
+export declare function getOnSaleStatus(
+  product: Product | Partial<Product> | null | undefined,
+): boolean;
+export declare function getDiscountPercentage(
+  product: Product | Partial<Product> | null | undefined,
+): number;
+export declare function getCompareAtPrice(
+  product: Product | Partial<Product> | null | undefined,
+): number;

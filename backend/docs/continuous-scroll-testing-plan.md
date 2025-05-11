@@ -178,6 +178,7 @@ This document outlines a comprehensive testing plan for the continuous scroll im
 ## Reporting
 
 Document any issues found during testing with:
+
 - Clear steps to reproduce
 - Environment details (browser, device, network conditions)
 - Screenshots or videos demonstrating the issue
@@ -187,6 +188,7 @@ Document any issues found during testing with:
 ## Success Criteria
 
 The continuous scroll implementation will be considered successful when:
+
 1. No layout shifts occur during scrolling
 2. All product cards maintain consistent heights (360px)
 3. Scrolling performance maintains 60fps on modern devices

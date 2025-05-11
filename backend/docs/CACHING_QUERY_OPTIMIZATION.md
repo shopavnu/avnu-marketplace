@@ -24,6 +24,7 @@ The caching and query optimization layer consists of several specialized service
 - **QueryAnalyticsService**: Analytics for query performance monitoring
 
 The architecture follows these principles:
+
 - Layered caching (memory, Redis)
 - Adaptive TTL based on usage patterns
 - Partial cache invalidation
@@ -77,6 +78,7 @@ Central service for optimizing product queries.
 - Warms up cache for common query patterns
 
 Key optimizations:
+
 - PostgreSQL-specific full-text search using `to_tsvector` and `ts_rank`
 - Index-aware query generation
 - Optimized sorting and filtering
@@ -94,6 +96,7 @@ Collects and analyzes query performance metrics.
 - Provides insights for optimization
 
 Key features:
+
 - Real-time slow query detection
 - Query pattern analysis
 - Frequency tracking
@@ -109,6 +112,7 @@ Comprehensive test coverage for all caching and query optimization services:
 - **Performance Tests**: Verify optimization effectiveness
 
 Test files:
+
 - `resilient-cache.service.spec.ts`
 - `product-cache.service.spec.ts`
 - `pagination-cache.service.spec.ts`
@@ -146,20 +150,24 @@ When working with the caching and query optimization layer:
 Recent work has focused on:
 
 1. **Linting and Compilation Fixes**:
+
    - Fixed all TypeScript lint errors and warnings
    - Ensured all files compile cleanly with TypeScript
 
 2. **Test Infrastructure Improvements**:
+
    - Refactored tests to use direct instantiation with simple Jest mocks
    - Fixed dependency injection issues in test files
    - Added comprehensive test coverage for all services
 
 3. **Query Optimization Enhancements**:
+
    - Implemented adaptive cache TTL based on query patterns
    - Added PostgreSQL-specific optimizations for text search
    - Improved cache key generation for better hit rates
 
 4. **Analytics Improvements**:
+
    - Enhanced slow query detection
    - Added query frequency analysis
    - Improved analytics data structure for better insights

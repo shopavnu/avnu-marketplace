@@ -4,8 +4,20 @@ export { OrderItem } from './entities/order-item.entity';
 export { OrderFulfillment } from './entities/order-fulfillment.entity';
 export { CreateOrderDto } from './dto/create-order.dto';
 export { UpdateOrderDto } from './dto/update-order.dto';
-export { OrderType, OrderItemType, OrderFulfillmentType, ShippingAddressType, PaginatedOrdersType, } from './dto/order.types';
-export { CreateOrderInput, UpdateOrderInput, OrderItemInput, ShippingAddressInput, PaginationInput, } from './dto/order.inputs';
+export {
+  OrderType,
+  OrderItemType,
+  OrderFulfillmentType,
+  ShippingAddressType,
+  PaginatedOrdersType,
+} from './dto/order.types';
+export {
+  CreateOrderInput,
+  UpdateOrderInput,
+  OrderItemInput,
+  ShippingAddressInput,
+  PaginationInput,
+} from './dto/order.inputs';
 export { OrdersService } from './services/orders.service';
 export { OrdersController } from './controllers/orders.controller';
 export { OrdersResolver } from './resolvers/orders.resolver';

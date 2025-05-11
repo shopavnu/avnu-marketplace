@@ -3,10 +3,10 @@ import { IntegrationType } from './types/integration-type.enum';
 
 /**
  * Interface definitions for the integrations module
- * 
+ *
  * This file defines the core interfaces used throughout the integrations module,
  * providing a single source of truth for type definitions related to platform integrations.
- * 
+ *
  * These interfaces ensure consistent type usage across the codebase and improve type safety
  * when working with third-party platform integrations like Shopify and WooCommerce.
  */
@@ -66,7 +66,7 @@ export interface IntegrationsService {
   syncProducts(
     type: IntegrationType,
     credentials: IntegrationCredentials,
-    merchantId: string
+    merchantId: string,
   ): Promise<SyncResult>;
 
   /**
@@ -76,6 +76,6 @@ export interface IntegrationsService {
     type: IntegrationType,
     payload: Record<string, unknown>,
     topic: string,
-    merchantId: string
+    merchantId: string,
   ): Promise<boolean>;
 }

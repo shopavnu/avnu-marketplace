@@ -124,7 +124,7 @@ interface ShopifyOrder {
  *
  * This class provides type-safe conversion between Shopify's API responses and our internal data models.
  * It has been updated to use proper TypeScript interfaces and type conversion to ensure type safety.
- * 
+ *
  * Key features:
  * - Strongly typed interfaces for Shopify entities (ShopifyProduct, ShopifyOrder, etc.)
  * - Safe handling of string/number conversions for IDs and other fields
@@ -135,7 +135,7 @@ interface ShopifyOrder {
  */
 export class ShopifyAdapter {
   private static readonly logger = new Logger(ShopifyAdapter.name);
-  
+
   // Helper function to ensure string conversion
   private static ensureString(value: unknown, defaultValue: string = ''): string {
     if (value === null || value === undefined) return defaultValue;
@@ -147,7 +147,10 @@ export class ShopifyAdapter {
    * @param shopifyProduct Product from Shopify API
    * @param merchantId Our internal merchant ID
    */
-  public static fromShopifyProduct(shopifyProduct: ShopifyProduct, merchantId: string): Record<string, any> {
+  public static fromShopifyProduct(
+    shopifyProduct: ShopifyProduct,
+    merchantId: string,
+  ): Record<string, any> {
     try {
       if (!shopifyProduct) return null;
 
@@ -155,43 +158,46 @@ export class ShopifyAdapter {
       const images = shopifyProduct.images?.map(img => img.src) || [];
 
       // Extract product variants with explicit type handling for each property
-      const variants = shopifyProduct.variants?.map(variant => {
-        // Handle each property separately with explicit type conversions
-        const variantId = variant.id ? String(variant.id) : '';
-        const sku = variant.sku || '';
-        const price = variant.price ? parseFloat(variant.price) : 0;
-        const compareAtPrice = variant.compare_at_price ? parseFloat(variant.compare_at_price) : 0;
-        const weight = variant.weight ? parseFloat(String(variant.weight)) : 0;
-        
-        // Handle weight_unit explicitly as a string
-        let weightUnit = 'kg';
-        if (variant.weight_unit !== undefined && variant.weight_unit !== null) {
-          weightUnit = String(variant.weight_unit);
-        }
-        
-        const inventoryQuantity = variant.inventory_quantity || 0;
-        const requiresShipping = variant.requires_shipping || false;
-        const title = variant.title || '';
-        const option1 = variant.option1 || '';
-        const option2 = variant.option2 || '';
-        const option3 = variant.option3 || '';
-        
-        // Return a properly typed object
-        return {
-          id: variantId,
-          sku,
-          price,
-          compareAtPrice,
-          weight,
-          weightUnit,
-          inventoryQuantity,
-          requiresShipping,
-          title,
-          option1,
-          option2,
-          option3
-        };
-      }) || [];
+      const variants =
+        shopifyProduct.variants?.map(variant => {
+          // Handle each property separately with explicit type conversions
+          const variantId = variant.id ? String(variant.id) : '';
+          const sku = variant.sku || '';
+          const price = variant.price ? parseFloat(variant.price) : 0;
+          const compareAtPrice = variant.compare_at_price
+            ? parseFloat(variant.compare_at_price)
+            : 0;
+          const weight = variant.weight ? parseFloat(String(variant.weight)) : 0;
+
+          // Handle weight_unit explicitly as a string
+          let weightUnit = 'kg';
+          if (variant.weight_unit !== undefined && variant.weight_unit !== null) {
+            weightUnit = String(variant.weight_unit);
+          }
+
+          const inventoryQuantity = variant.inventory_quantity || 0;
+          const requiresShipping = variant.requires_shipping || false;
+          const title = variant.title || '';
+          const option1 = variant.option1 || '';
+          const option2 = variant.option2 || '';
+          const option3 = variant.option3 || '';
+
+          // Return a properly typed object
+          return {
+            id: variantId,
+            sku,
+            price,
+            compareAtPrice,
+            weight,
+            weightUnit,
+            inventoryQuantity,
+            requiresShipping,
+            title,
+            option1,
+            option2,
+            option3,
+          };
+        }) || [];
 
       // Extract product options
       const options =
@@ -328,7 +334,10 @@ export class ShopifyAdapter {
    * @param shopifyOrder Order from Shopify API
    * @param merchantId Our internal merchant ID
    */
-  public static fromShopifyOrder(shopifyOrder: ShopifyOrder, merchantId: string): Record<string, any> {
+  public static fromShopifyOrder(
+    shopifyOrder: ShopifyOrder,
+    merchantId: string,
+  ): Record<string, any> {
     try {
       if (!shopifyOrder) return null;
 
@@ -377,7 +386,10 @@ export class ShopifyAdapter {
       return {
         externalId: String(shopifyOrder.id),
         externalSource: 'shopify',
-        orderNumber: shopifyOrder.name || (shopifyOrder.order_number ? String(shopifyOrder.order_number) : '') || '',
+        orderNumber:
+          shopifyOrder.name ||
+          (shopifyOrder.order_number ? String(shopifyOrder.order_number) : '') ||
+          '',
         status: shopifyOrder.financial_status || 'pending',
         fulfillmentStatus: shopifyOrder.fulfillment_status || 'unfulfilled',
         total: parseFloat(shopifyOrder.total_price || '0'),

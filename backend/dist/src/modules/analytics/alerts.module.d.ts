@@ -1,2 +1,1 @@
-export declare class AlertsModule {
-}
+export declare class AlertsModule {}

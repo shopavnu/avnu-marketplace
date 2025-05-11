@@ -19,8 +19,9 @@ export class MerchantGuard implements CanActivate {
     }
 
     // Check if the user has the merchant role
-    const hasMerchantRole = user.roles && Array.isArray(user.roles) && user.roles.includes('merchant');
-    
+    const hasMerchantRole =
+      user.roles && Array.isArray(user.roles) && user.roles.includes('merchant');
+
     // Check if the user has a merchantId
     const hasMerchantId = !!user.merchantId;
 

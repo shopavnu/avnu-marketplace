@@ -6,16 +6,31 @@ import { SearchAnalyticsService } from '../../analytics/services/search-analytic
 import { SearchOptionsInput } from '../dto/search-options.dto';
 import { SearchResponseType } from '../graphql/search-response.type';
 export declare class DiscoverySearchService {
-    private readonly elasticsearchService;
-    private readonly naturalLanguageSearchService;
-    private readonly personalizationService;
-    private readonly abTestingService;
-    private readonly searchAnalyticsService;
-    private readonly logger;
-    constructor(elasticsearchService: ElasticsearchService, naturalLanguageSearchService: NaturalLanguageSearchService, personalizationService: PersonalizationService, abTestingService: AbTestingService, searchAnalyticsService: SearchAnalyticsService);
-    discoverySearch(query: string, userId?: string, sessionId?: string, options?: SearchOptionsInput): Promise<SearchResponseType>;
-    private getEmergingBrandsProducts;
-    private getSponsoredProducts;
-    getDiscoverySuggestions(query: string, userId?: string, limit?: number): Promise<any>;
-    getDiscoveryHomepage(userId?: string, sessionId?: string, options?: SearchOptionsInput): Promise<any>;
+  private readonly elasticsearchService;
+  private readonly naturalLanguageSearchService;
+  private readonly personalizationService;
+  private readonly abTestingService;
+  private readonly searchAnalyticsService;
+  private readonly logger;
+  constructor(
+    elasticsearchService: ElasticsearchService,
+    naturalLanguageSearchService: NaturalLanguageSearchService,
+    personalizationService: PersonalizationService,
+    abTestingService: AbTestingService,
+    searchAnalyticsService: SearchAnalyticsService,
+  );
+  discoverySearch(
+    query: string,
+    userId?: string,
+    sessionId?: string,
+    options?: SearchOptionsInput,
+  ): Promise<SearchResponseType>;
+  private getEmergingBrandsProducts;
+  private getSponsoredProducts;
+  getDiscoverySuggestions(query: string, userId?: string, limit?: number): Promise<any>;
+  getDiscoveryHomepage(
+    userId?: string,
+    sessionId?: string,
+    options?: SearchOptionsInput,
+  ): Promise<any>;
 }

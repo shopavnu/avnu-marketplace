@@ -140,7 +140,7 @@ export class Product {
   @Field()
   @Column()
   brandName: string;
-  
+
   @Field(() => String, { nullable: true })
   @Column('json', { nullable: true })
   brandInfo?: { name: string; id: string } | string;

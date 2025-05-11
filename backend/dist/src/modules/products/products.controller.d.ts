@@ -5,39 +5,60 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { DataNormalizationService } from './services/data-normalization.service';
 import { CursorPaginationDto } from '../../common/dto/cursor-pagination.dto';
 export declare class ProductsController {
-    private readonly productsService;
-    private readonly dataNormalizationService;
-    private readonly logger;
-    constructor(productsService: ProductsService, dataNormalizationService: DataNormalizationService);
-    create(createProductDto: CreateProductDto): Promise<import(".").Product>;
-    findAll(paginationDto: PaginationDto): Promise<{
-        items: import(".").Product[];
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-    }>;
-    findWithCursor(cursorPaginationDto: CursorPaginationDto): Promise<import("../../common/dto/cursor-pagination.dto").PaginatedResponseDto<import(".").Product>>;
-    search(query: string, paginationDto: PaginationDto, categories?: string[], priceMin?: number, priceMax?: number, merchantId?: string, inStock?: boolean, values?: string[]): Promise<{
-        items: import(".").Product[];
-        total: number;
-    }>;
-    getRecommendedProducts(userId: string, limit?: number): Promise<import(".").Product[]>;
-    getDiscoveryProducts(limit?: number): Promise<import(".").Product[]>;
-    findByMerchant(merchantId: string, paginationDto: PaginationDto): Promise<{
-        items: import(".").Product[];
-        total: number;
-    }>;
-    findOne(id: string): Promise<import(".").Product>;
-    update(id: string, updateProductDto: UpdateProductDto): Promise<import(".").Product>;
-    remove(id: string): Promise<void>;
-    updateStock(id: string, body: {
-        inStock: boolean;
-        quantity?: number;
-    }): Promise<import(".").Product>;
-    bulkCreate(products: CreateProductDto[]): Promise<import(".").Product[]>;
-    bulkUpdate(products: {
-        id: string;
-        data: UpdateProductDto;
-    }[]): Promise<import(".").Product[]>;
+  private readonly productsService;
+  private readonly dataNormalizationService;
+  private readonly logger;
+  constructor(productsService: ProductsService, dataNormalizationService: DataNormalizationService);
+  create(createProductDto: CreateProductDto): Promise<import('.').Product>;
+  findAll(paginationDto: PaginationDto): Promise<{
+    items: import('.').Product[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }>;
+  findWithCursor(
+    cursorPaginationDto: CursorPaginationDto,
+  ): Promise<
+    import('../../common/dto/cursor-pagination.dto').PaginatedResponseDto<import('.').Product>
+  >;
+  search(
+    query: string,
+    paginationDto: PaginationDto,
+    categories?: string[],
+    priceMin?: number,
+    priceMax?: number,
+    merchantId?: string,
+    inStock?: boolean,
+    values?: string[],
+  ): Promise<{
+    items: import('.').Product[];
+    total: number;
+  }>;
+  getRecommendedProducts(userId: string, limit?: number): Promise<import('.').Product[]>;
+  getDiscoveryProducts(limit?: number): Promise<import('.').Product[]>;
+  findByMerchant(
+    merchantId: string,
+    paginationDto: PaginationDto,
+  ): Promise<{
+    items: import('.').Product[];
+    total: number;
+  }>;
+  findOne(id: string): Promise<import('.').Product>;
+  update(id: string, updateProductDto: UpdateProductDto): Promise<import('.').Product>;
+  remove(id: string): Promise<void>;
+  updateStock(
+    id: string,
+    body: {
+      inStock: boolean;
+      quantity?: number;
+    },
+  ): Promise<import('.').Product>;
+  bulkCreate(products: CreateProductDto[]): Promise<import('.').Product[]>;
+  bulkUpdate(
+    products: {
+      id: string;
+      data: UpdateProductDto;
+    }[],
+  ): Promise<import('.').Product[]>;
 }

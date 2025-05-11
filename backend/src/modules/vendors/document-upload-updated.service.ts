@@ -18,10 +18,10 @@ import { VendorConfigService } from '../../config/vendor-config.service';
  * Provides better type safety and consistency in file handling throughout the application.
  */
 interface UploadedFile {
-  buffer: Buffer;         // Raw file content
-  originalname: string;   // Original filename from the client
-  size: number;           // File size in bytes
-  mimetype: string;       // MIME type of the file
+  buffer: Buffer; // Raw file content
+  originalname: string; // Original filename from the client
+  size: number; // File size in bytes
+  mimetype: string; // MIME type of the file
 }
 
 /**

@@ -1,20 +1,29 @@
 declare module '@apollo/client' {
   export function gql(template: TemplateStringsArray, ...expressions: any[]): any;
-  export function useQuery(query: any, options?: any): {
+  export function useQuery(
+    query: any,
+    options?: any,
+  ): {
     loading: boolean;
     error?: Error;
     data?: any;
     refetch: (variables?: any) => Promise<any>;
   };
-  export function useMutation(mutation: any, options?: any): [
+  export function useMutation(
+    mutation: any,
+    options?: any,
+  ): [
     (variables?: any) => Promise<any>,
     {
       loading: boolean;
       error?: Error;
       data?: any;
-    }
+    },
   ];
-  export function useSubscription(subscription: any, options?: any): {
+  export function useSubscription(
+    subscription: any,
+    options?: any,
+  ): {
     loading: boolean;
     error?: Error;
     data?: any;

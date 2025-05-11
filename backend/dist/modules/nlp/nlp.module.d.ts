@@ -1,2 +1,1 @@
-export declare class NlpModule {
-}
+export declare class NlpModule {}

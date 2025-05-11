@@ -20,10 +20,10 @@ module.exports = {
             1241, // Unable to resolve signature of method decorator
             2307, // Cannot find module
             2749, // Cannot find namespace
-          ]
-        }
-      }
-    ]
+          ],
+        },
+      },
+    ],
   },
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: './coverage',
@@ -31,6 +31,6 @@ module.exports = {
     '^@app/(.*)$': '<rootDir>/src/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
-    '^@common/(.*)$': '<rootDir>/src/common/$1'
-  }
+    '^@common/(.*)$': '<rootDir>/src/common/$1',
+  },
 };

@@ -1,8 +1,8 @@
 export declare class VariantAssignmentType {
-    variantId: string;
-    configuration: any;
-    assignmentId: string;
+  variantId: string;
+  configuration: any;
+  assignmentId: string;
 }
 export declare class VariantConfigurationType {
-    experiments: Record<string, VariantAssignmentType>;
+  experiments: Record<string, VariantAssignmentType>;
 }

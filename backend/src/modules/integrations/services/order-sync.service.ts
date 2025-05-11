@@ -9,11 +9,11 @@ import { PlatformType } from '../enums/platform-type.enum';
 
 /**
  * Service for syncing orders from e-commerce platforms
- * 
+ *
  * This service handles synchronization of orders from various platform integrations (primarily Shopify).
  * It includes proper type handling for platform connections and uses the PlatformType enum
  * for better type safety when querying connections.
- * 
+ *
  * Key features:
  * - Type-safe repository queries using proper entity field names
  * - Error handling with detailed logging
@@ -91,7 +91,7 @@ export class OrderSyncService {
 
       // Placeholder: In a real implementation, we would:
       // Process the webhook data based on the topic
-      
+
       return true;
     } catch (error) {
       this.logger.error(

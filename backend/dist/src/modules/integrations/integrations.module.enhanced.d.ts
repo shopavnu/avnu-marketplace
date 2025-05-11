@@ -1,2 +1,1 @@
-export declare class IntegrationsModule {
-}
+export declare class IntegrationsModule {}

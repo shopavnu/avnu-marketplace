@@ -1,8 +1,8 @@
 export declare class HighlightField {
-    field: string;
-    snippets: string[];
+  field: string;
+  snippets: string[];
 }
 export declare class HighlightResult {
-    fields: HighlightField[];
-    matchedTerms?: string[];
+  fields: HighlightField[];
+  matchedTerms?: string[];
 }

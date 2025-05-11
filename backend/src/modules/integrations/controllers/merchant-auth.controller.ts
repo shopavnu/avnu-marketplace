@@ -28,17 +28,14 @@ export class MerchantAuthController {
       accessToken: string;
     },
   ): Promise<{ success: boolean }> {
-    const result = await this.integrationsService.authenticate(
-      IntegrationType.SHOPIFY,
-      {
-        shopify: {
-          shopDomain: body.shopDomain,
-          accessToken: body.accessToken,
-          apiKey: '', // Not used for this authentication flow
-          apiSecret: '', // Not used for this authentication flow
-        },
+    const result = await this.integrationsService.authenticate(IntegrationType.SHOPIFY, {
+      shopify: {
+        shopDomain: body.shopDomain,
+        accessToken: body.accessToken,
+        apiKey: '', // Not used for this authentication flow
+        apiSecret: '', // Not used for this authentication flow
       },
-    );
+    });
 
     return { success: result };
   }

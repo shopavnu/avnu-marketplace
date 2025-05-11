@@ -27,7 +27,9 @@ function isProductImageDto(image: any): image is ProductImageDto {
  * @param images Array of ProductImageDto objects or string URLs
  * @returns Array of image URLs
  */
-export function transformProductImages(images?: ProductImageDto[] | string[]): string[] | undefined {
+export function transformProductImages(
+  images?: ProductImageDto[] | string[],
+): string[] | undefined {
   if (!images || !Array.isArray(images)) {
     return undefined;
   }
@@ -55,7 +57,7 @@ function extractImageMetadata(images: (ProductImageDto | string)[]): ImageMetada
         // For string images, just provide the URL
         return { url: image };
       }
-      
+
       if (isProductImageDto(image)) {
         // For ProductImageDto objects, extract all metadata
         return {
@@ -63,10 +65,10 @@ function extractImageMetadata(images: (ProductImageDto | string)[]): ImageMetada
           width: image.width,
           height: image.height,
           altText: image.altText,
-          position: image.position
+          position: image.position,
         };
       }
-      
+
       return null; // Skip invalid items
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
@@ -91,7 +93,7 @@ export function transformCreateProductDto(dto: CreateProductDto): DeepPartial<Pr
   // Transform images from ProductImageDto[] to string[]
   if (dto.images && Array.isArray(dto.images)) {
     result.images = transformProductImages(dto.images);
-    
+
     // Extract image metadata safely
     const metadata = extractImageMetadata(dto.images);
     if (metadata.length > 0) {
@@ -119,7 +121,7 @@ export function transformUpdateProductDto(dto: UpdateProductDto): DeepPartial<Pr
   // Transform images from ProductImageDto[] to string[]
   if (dto.images && Array.isArray(dto.images)) {
     result.images = transformProductImages(dto.images);
-    
+
     // Extract image metadata safely
     const metadata = extractImageMetadata(dto.images);
     if (metadata.length > 0) {

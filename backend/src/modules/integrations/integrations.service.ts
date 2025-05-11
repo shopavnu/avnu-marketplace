@@ -89,10 +89,10 @@ export class IntegrationsService {
 
       // Convert between SyncResult interfaces - adjust property names
       return {
-        added: result.created || 0,    // map 'created' to 'added'
+        added: result.created || 0, // map 'created' to 'added'
         updated: result.updated || 0,
         failed: result.failed || 0,
-        errors: [],  // errors property doesn't exist in the result
+        errors: [], // errors property doesn't exist in the result
       };
     } catch (error) {
       this.logger.error(
@@ -124,7 +124,7 @@ export class IntegrationsService {
       // Commenting out this line since the getMerchantConnection method doesn't exist
       // We'll use a direct approach instead
       // const connection = await this.shopifyService.getMerchantConnection(merchantId, 'shopify');
-      
+
       // Get connection details directly
       const connection = { platformStoreUrl: `shop.myshopify.com` }; // Default value
 

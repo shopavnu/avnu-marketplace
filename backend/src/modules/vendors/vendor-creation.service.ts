@@ -80,7 +80,7 @@ export class VendorCreationService {
     }
 
     // Create vendor within transaction
-    return this._transactionService.executeInTransaction(async (entityManager) => {
+    return this._transactionService.executeInTransaction(async entityManager => {
       const savedVendor = await this._createVendorEntity(entityManager, application);
       await this._createBankingDetails(entityManager, savedVendor, application.formData);
       await this._createAddressIfProvided(entityManager, savedVendor, application.formData);
