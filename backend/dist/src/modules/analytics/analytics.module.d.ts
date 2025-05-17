@@ -1,1 +1,2 @@
-export declare class AnalyticsModule {}
+export declare class AnalyticsModule {
+}
