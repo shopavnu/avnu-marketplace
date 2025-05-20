@@ -8,7 +8,14 @@ export interface Category {
 }
 
 export interface SearchFilters {
-  [key: string]: string | string[] | number | undefined;
+  [key: string]: string | string[] | number | boolean | { [categoryId: string]: { [attributeName: string]: string[] } } | undefined;
+
+  // Canonical fields
+  categories?: string[];
+  causes?: string[];
+  attributes?: { [categoryId: string]: { [attributeName: string]: string[] } };
+  isLocal?: boolean;
+  isNew?: boolean;
 
   category?: string;
   subCategory?: string;

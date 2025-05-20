@@ -4,7 +4,15 @@ import { Brand } from '../brand';
 export interface SearchFilters {
   categories?: string[];
   causes?: string[];
-  attributes?: Record<string, Record<string, string[]>>;
+  /**
+   * Attribute filters, organized by categoryId -> attributeName -> string[]
+   * Always defined as an object, never undefined.
+   */
+  attributes: {
+    [categoryId: string]: {
+      [attributeName: string]: string[];
+    };
+  };
   isLocal?: boolean;
   isNew?: boolean;
 }
