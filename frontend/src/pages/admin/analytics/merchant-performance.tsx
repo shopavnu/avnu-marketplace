@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 // Removed MUI icon imports to fix deployment issues
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNav from '../../../components/admin/AnalyticsNav';
@@ -6,29 +6,29 @@ import { Box, Typography, Alert } from '@mui/material';
 import { Grid, GridContainer, GridItem } from '../../../components/ui/Grid';
 
 /**
- * User Behavior Dashboard
- * Analyzes user behavior patterns across the marketplace
+ * Merchant Performance Dashboard
+ * Tracks and analyzes merchant performance metrics
  */
-const UserBehaviorDashboard: React.FC = () => {
+const MerchantPerformanceDashboard: React.FC = () => {
   return (
-    <AdminLayout title="User Behavior Analytics">
+    <AdminLayout title="Merchant Performance">
       <AnalyticsNav />
       
       <Box className="p-6">
         <Alert severity="info" sx={{ mb: 4 }}>
-          This dashboard is currently under development. Check back soon for user behavior analytics.
+          This dashboard is currently under development. Check back soon for merchant performance metrics.
         </Alert>
         
         <Typography variant="h5" gutterBottom>
-          User Behavior Dashboard
+          Merchant Performance Dashboard
         </Typography>
         <Typography variant="body1">
-          This page will analyze user behavior patterns, including browsing habits, engagement metrics,
-          and conversion funnels across the marketplace.
+          This page will track merchant performance metrics, including sales volumes, return rates, customer satisfaction,
+          and fulfillment times.
         </Typography>
       </Box>
     </AdminLayout>
   );
 };
 
-export default UserBehaviorDashboard;
+export default MerchantPerformanceDashboard;
