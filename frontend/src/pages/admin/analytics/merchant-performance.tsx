@@ -1,2 +1,2 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 // Removed MUI icon imports to fix deployment issues
