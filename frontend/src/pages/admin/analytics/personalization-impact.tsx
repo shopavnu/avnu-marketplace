@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Typography, Paper, Grid, CircularProgress, Alert, LinearProgress } from '@mui/material';
-import AdminLayout from '../../../components/layouts/AdminLayout';
+import { Box, Typography, Paper, CircularProgress, Alert, LinearProgress } from '@mui/material';
+import { Grid, GridContainer, GridItem } from '../../../components/ui/Grid';
+import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNav from '../../../components/admin/AnalyticsNav';
 import MetricCard from '../../../components/admin/MetricCard';
 // Import Recharts components
@@ -54,7 +55,7 @@ const PersonalizationImpact: React.FC = () => {
   };
   
   return (
-    <AdminLayout>
+    <AdminLayout title="Personalization Impact Analytics">
       <AnalyticsNav />
       
       <Box className="p-6">
@@ -138,7 +139,7 @@ const PersonalizationImpact: React.FC = () => {
                     <Typography variant="subtitle2" gutterBottom>
                       Conversion Rate Comparison
                     </Typography>
-                    <Grid container spacing={2} alignItems="center">
+                    <Grid container spacing={2} >
                       <Grid item xs={3}>
                         <Typography variant="body2" color="textSecondary">Control</Typography>
                       </Grid>
@@ -154,7 +155,7 @@ const PersonalizationImpact: React.FC = () => {
                       </Grid>
                     </Grid>
                     
-                    <Grid container spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                    <Grid container spacing={2}  sx={{ mt: 1 }}>
                       <Grid item xs={3}>
                         <Typography variant="body2" color="textSecondary">Personalized</Typography>
                       </Grid>
@@ -174,7 +175,7 @@ const PersonalizationImpact: React.FC = () => {
                     <Typography variant="subtitle2" gutterBottom sx={{ mt: 4 }}>
                       Average Order Value
                     </Typography>
-                    <Grid container spacing={2} alignItems="center">
+                    <Grid container spacing={2} >
                       <Grid item xs={3}>
                         <Typography variant="body2" color="textSecondary">Control</Typography>
                       </Grid>
@@ -190,7 +191,7 @@ const PersonalizationImpact: React.FC = () => {
                       </Grid>
                     </Grid>
                     
-                    <Grid container spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                    <Grid container spacing={2}  sx={{ mt: 1 }}>
                       <Grid item xs={3}>
                         <Typography variant="body2" color="textSecondary">Personalized</Typography>
                       </Grid>
@@ -248,7 +249,7 @@ const PersonalizationImpact: React.FC = () => {
                     {mockData.userSegments.map((segment, index) => (
                       <Grid item xs={12} sm={6} key={index}>
                         <Paper className="p-3" elevation={0} sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Box display="flex" justifyContent="space-between"  mb={1}>
                             <Typography variant="subtitle2">{segment.segment}</Typography>
                             <Typography 
                               variant="subtitle2" 
