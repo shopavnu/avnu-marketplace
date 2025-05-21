@@ -1,0 +1,844 @@
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  CircularProgress, 
+  Alert, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Chip,
+  Tabs,
+  Tab,
+  LinearProgress,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Button
+} from '@mui/material';
+import {
+  ShoppingCart as ShopifyIcon,
+  Sync as SyncIcon,
+  Error as ErrorIcon,
+  Check as CheckIcon,
+  Warning as WarningIcon,
+  Settings as SettingsIcon,
+  Timeline as TimelineIcon
+} from '@mui/icons-material';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import AnalyticsNav from '../../../components/admin/AnalyticsNav';
+import { Grid, GridContainer, GridItem } from '../../../components/ui/Grid';
+import MetricCard from '../../../components/admin/MetricCard';
+// Recharts components
+import { PieChartComponent, LineChartComponent, BarChartComponent, CompositeChartComponent } from '../../../components/charts';
+// Remove MockChart import as we're replacing it with Recharts components
+import AnalyticsFilters, { AnalyticsFilterValues } from '../../../components/admin/AnalyticsFilters';
+import AnomalyAlerts, { Anomaly, AnomalyType, AnomalySeverity } from '../../../components/admin/AnomalyAlerts';
+
+/**
+ * Shopify Integration Dashboard
+ * Monitors the health and performance of merchant Shopify integrations
+ */
+// Mock anomaly data for Shopify integration dashboard
+const mockAnomalies: Anomaly[] = [
+  {
+    id: 'anomaly-1',
+    type: AnomalyType.SPIKE,
+    metric: 'API Error Rate',
+    value: 2.87,
+    expectedValue: 0.38,
+    deviation: 655.3,
+    timestamp: '2025-05-20T08:45:00Z',
+    severity: AnomalySeverity.CRITICAL,
+    description: 'Significant spike in Shopify API error rate',
+    affectedSegment: 'Order Processing API Endpoints',
+    recommendation: 'Check for Shopify API status and review credential configurations',
+  },
+  {
+    id: 'anomaly-2',
+    type: AnomalyType.THRESHOLD_BREACH,
+    metric: 'Data Consistency Score',
+    value: 86.4,
+    expectedValue: 98.7,
+    deviation: -12.5,
+    timestamp: '2025-05-20T07:15:00Z',
+    severity: AnomalySeverity.HIGH,
+    description: 'Data consistency score below acceptable threshold',
+    affectedSegment: 'Product Inventory Syncing',
+    recommendation: 'Investigate sync failures and revalidate product mapping configurations',
+  },
+  {
+    id: 'anomaly-3',
+    type: AnomalyType.DROP,
+    metric: 'Sync Completion Rate',
+    value: 82.3,
+    expectedValue: 97.8,
+    deviation: -15.8,
+    timestamp: '2025-05-19T22:30:00Z',
+    severity: AnomalySeverity.MEDIUM,
+    description: 'Drop in successful sync completion rate',
+    affectedSegment: 'Multiple Merchants',
+    recommendation: 'Review network connectivity and sync scheduling for affected merchants',
+  },
+];
+
+const ShopifyIntegration: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [timeRange, setTimeRange] = useState('30');
+  const [anomalies, setAnomalies] = useState<Anomaly[]>(mockAnomalies);
+  const [filters, setFilters] = useState<AnalyticsFilterValues>({
+    dateRange: '30days',
+    category: 'all',
+    platform: 'shopify',
+    merchant: 'all',
+    comparisonType: 'previous'
+  });
+  
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+  
+  const handleTimeRangeChange = (event: SelectChangeEvent) => {
+    setTimeRange(event.target.value);
+  };
+  
+  // Handle filter changes
+  const handleFilterChange = (newFilters: AnalyticsFilterValues) => {
+    setFilters(newFilters);
+    console.log('Filters updated:', newFilters);
+    // Apply filters to data
+    if (newFilters.dateRange === '30days') setTimeRange('30');
+    else if (newFilters.dateRange === '90days') setTimeRange('90');
+    else if (newFilters.dateRange === '7days') setTimeRange('7');
+  };
+
+  // Handle anomaly dismissal
+  const handleAnomalyDismiss = (id: string) => {
+    setAnomalies(anomalies.filter(anomaly => anomaly.id !== id));
+  };
+
+  // Mock data - to be replaced with API call
+  const mockData = {
+    totalIntegrations: 87,
+    activeIntegrations: 82,
+    avgSyncTime: 4.8,
+    syncFailureRate: 1.2,
+    dataConsistencyScore: 98.7,
+    apiMetrics: {
+      dailyCallVolume: 124756,
+      avgResponseTime: 267, // ms
+      errorRate: 0.38, // percent
+      rateLimitHits: 17,
+      topEndpoints: [
+        { endpoint: "/products", calls: 42360, avgTime: 312 },
+        { endpoint: "/orders", calls: 38745, avgTime: 385 },
+        { endpoint: "/customers", calls: 21543, avgTime: 248 },
+        { endpoint: "/inventory", calls: 18650, avgTime: 187 },
+        { endpoint: "/collections", calls: 3458, avgTime: 176 }
+      ]
+    },
+    syncActivity: {
+      totalSyncsDaily: 487,
+      avgSyncSize: 2.4, // MB
+      peakSyncTime: "02:00 UTC"
+    },
+    integrationHealth: [
+      { merchant: "Eco Apparel Co.", lastSync: "2025-05-20T12:32:41", syncFrequency: 6, consistencyScore: 99.8, status: "Healthy", failureRate: 0.2, dataQualityIssues: 3 },
+      { merchant: "Green Living", lastSync: "2025-05-20T10:18:22", syncFrequency: 12, consistencyScore: 98.7, status: "Healthy", failureRate: 0.5, dataQualityIssues: 7 },
+      { merchant: "Sustainable Beauty", lastSync: "2025-05-20T08:45:10", syncFrequency: 8, consistencyScore: 97.4, status: "Healthy", failureRate: 0.7, dataQualityIssues: 12 },
+      { merchant: "Planet Friendly Foods", lastSync: "2025-05-19T22:10:35", syncFrequency: 12, consistencyScore: 94.8, status: "Warning", failureRate: 2.4, dataQualityIssues: 28 },
+      { merchant: "Ethical Wares", lastSync: "2025-05-20T14:22:17", syncFrequency: 24, consistencyScore: 92.3, status: "Warning", failureRate: 3.2, dataQualityIssues: 35 },
+      { merchant: "Eco Essentials", lastSync: "2025-05-19T18:05:22", syncFrequency: 4, consistencyScore: 88.6, status: "Error", failureRate: 5.7, dataQualityIssues: 42 },
+      { merchant: "Earth Friendly Goods", lastSync: "2025-05-20T02:15:36", syncFrequency: 6, consistencyScore: 86.2, status: "Error", failureRate: 6.8, dataQualityIssues: 58 }
+    ],
+    failureReasons: [
+      { reason: "API Rate Limiting", count: 32, percentage: 42 },
+      { reason: "Network Timeout", count: 18, percentage: 24 },
+      { reason: "Authorization Error", count: 12, percentage: 16 },
+      { reason: "Data Format Error", count: 8, percentage: 11 },
+      { reason: "Other", count: 5, percentage: 7 }
+    ],
+    onboardingMetrics: {
+      avgTimeToOnboard: 24, // minutes
+      completionRate: 94.2,
+      dropOffPoints: [
+        { step: "API Key Generation", percentage: 2.4 },
+        { step: "Initial Sync", percentage: 1.8 },
+        { step: "Product Mapping", percentage: 1.6 }
+      ],
+      onboardingSteps: [
+        { step: "API Connection", avgTime: 4.2, successRate: 98.3 },
+        { step: "Store Verification", avgTime: 2.5, successRate: 99.7 },
+        { step: "Initial Product Sync", avgTime: 8.3, successRate: 97.5 },
+        { step: "Category Mapping", avgTime: 5.8, successRate: 96.4 },
+        { step: "Inventory Update", avgTime: 3.2, successRate: 99.1 }
+      ],
+      recentOnboarding: [
+        { merchant: "Wild Eco Shop", started: "2025-05-18T14:20:11", completed: "2025-05-18T14:42:35", status: "Complete" },
+        { merchant: "Green Home Essentials", started: "2025-05-19T09:15:08", completed: "2025-05-19T09:36:42", status: "Complete" },
+        { merchant: "Sustainable Fashion Outlet", started: "2025-05-20T11:32:27", completed: null, status: "In Progress" }
+      ]
+    },
+    dataConsistencyDetails: {
+      overallScore: 96.7,
+      byDataType: [
+        { type: "Product Information", score: 98.3, volume: 124578 },
+        { type: "Inventory Levels", score: 99.2, volume: 87652 },
+        { type: "Pricing Data", score: 97.8, volume: 124578 },
+        { type: "Customer Data", score: 94.5, volume: 36547 },
+        { type: "Order Information", score: 93.6, volume: 52489 }
+      ],
+      trends: [
+        { date: "2025-05-14", score: 95.8 },
+        { date: "2025-05-15", score: 96.1 },
+        { date: "2025-05-16", score: 96.4 },
+        { date: "2025-05-17", score: 96.2 },
+        { date: "2025-05-18", score: 96.5 },
+        { date: "2025-05-19", score: 96.6 },
+        { date: "2025-05-20", score: 96.7 }
+      ]
+    }
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  // Helper function for status color
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case "Healthy": return "success";
+      case "Warning": return "warning";
+      case "Error": return "error";
+      case "Complete": return "success";
+      case "In Progress": return "info";
+      default: return "default";
+    }
+  };
+  
+  return (
+    <AdminLayout title="Shopify Integration">
+      <AnalyticsNav />
+      
+      <Box p={3}>
+        <Typography variant="h4" gutterBottom>
+          Shopify Integration
+        </Typography>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          Monitor the health and performance of Shopify integrations across the marketplace
+        </Typography>
+        
+        {/* Analytics Filters Component */}
+        <AnalyticsFilters 
+          onFilterChange={handleFilterChange}
+          availableFilters={{
+            dateRanges: true,
+            merchants: true,
+            comparison: true,
+            exportFormats: ['CSV', 'Excel', 'PDF']
+          }}
+          initialValues={filters}
+        />
+        
+        {/* Anomaly Alerts Component */}
+        {anomalies.length > 0 && (
+          <AnomalyAlerts 
+            anomalies={anomalies} 
+            onDismiss={handleAnomalyDismiss}
+            onViewAll={() => alert('Viewing all Shopify integration anomalies')}
+          />
+        )}
+        
+        {loading ? (
+          <Box display="flex" justifyContent="center" my={8}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ my: 4 }}>
+            {error}
+          </Alert>
+        ) : (
+          <>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange} 
+              textColor="primary" 
+              indicatorColor="primary"
+              sx={{ mb: 4 }}
+            >
+              <Tab label="Integration Health" />
+              <Tab label="Data Consistency" />
+              <Tab label="API Performance" />
+              <Tab label="Merchant Onboarding" />
+            </Tabs>
+            
+            <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel id="time-range-label">Time Range</InputLabel>
+                <Select
+                  labelId="time-range-label"
+                  value={timeRange}
+                  label="Time Range"
+                  onChange={handleTimeRangeChange}
+                >
+                  <MenuItem value="7">Last 7 Days</MenuItem>
+                  <MenuItem value="30">Last 30 Days</MenuItem>
+                  <MenuItem value="90">Last 90 Days</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            {activeTab === 0 && (
+              <>
+                <GridContainer spacing={3} className="mb-6">
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Total Integrations" 
+                      value={mockData.totalIntegrations.toString()}
+                      icon="link"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Active Integrations" 
+                      value={mockData.activeIntegrations.toString()}
+                      icon="check_circle"
+                      subtitle={`${((mockData.activeIntegrations / mockData.totalIntegrations) * 100).toFixed(1)}% active`}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Sync Failure Rate" 
+                      value={`${mockData.syncFailureRate}%`}
+                      icon="error"
+                      subtitle="Across all merchants"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Data Consistency" 
+                      value={`${mockData.dataConsistencyScore}%`}
+                      icon="verified"
+                      subtitle="Overall score"
+                    />
+                  </GridItem>
+                </GridContainer>
+
+                <GridContainer spacing={3}>
+                  <GridItem xs={12} md={7}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Integration Health by Merchant
+                      </Typography>
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Merchant</TableCell>
+                              <TableCell>Last Sync</TableCell>
+                              <TableCell align="right">Failure Rate</TableCell>
+                              <TableCell align="right">Consistency Score</TableCell>
+                              <TableCell align="center">Status</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {mockData.integrationHealth.map((merchant) => (
+                              <TableRow key={merchant.merchant}>
+                                <TableCell component="th" scope="row">
+                                  {merchant.merchant}
+                                </TableCell>
+                                <TableCell>{formatDate(merchant.lastSync)}</TableCell>
+                                <TableCell align="right">{merchant.failureRate}%</TableCell>
+                                <TableCell align="right">{merchant.consistencyScore}%</TableCell>
+                                <TableCell align="center">
+                                  <Chip 
+                                    label={merchant.status} 
+                                    color={getStatusColor(merchant.status) as any} 
+                                    size="small" 
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Paper>
+                  </GridItem>
+                  <GridItem xs={12} md={5}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Sync Failure Reasons
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" paragraph>
+                        Primary causes of integration failures
+                      </Typography>
+                      <Box height={300}>
+                        <PieChartComponent
+                          data={mockData.failureReasons.map(item => ({
+                            name: item.reason,
+                            value: item.count
+                          }))}
+                          nameKey="name"
+                          valueKey="value"
+                          height={260}
+                          donut={true}
+                          tooltipFormatter={(value: number) => `${value} occurrences`}
+                        />
+                      </Box>
+                      <TableContainer sx={{ mt: 2 }}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Reason</TableCell>
+                              <TableCell align="right">Count</TableCell>
+                              <TableCell align="right">Percentage</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {mockData.failureReasons.map((reason) => (
+                              <TableRow key={reason.reason}>
+                                <TableCell>{reason.reason}</TableCell>
+                                <TableCell align="right">{reason.count}</TableCell>
+                                <TableCell align="right">{reason.percentage}%</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Paper>
+                  </GridItem>
+                </GridContainer>
+              </>
+            )}
+            
+            {activeTab === 1 && (
+              <>
+                <GridContainer spacing={3} className="mb-6">
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Overall Consistency" 
+                      value={`${mockData.dataConsistencyDetails.overallScore}%`}
+                      icon="fact_check"
+                      subtitle="All data types"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Best Data Type" 
+                      value="Inventory Levels"
+                      icon="inventory"
+                      subtitle="99.2% consistency"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Needs Attention" 
+                      value="Order Information"
+                      icon="shopping_cart"
+                      subtitle="93.6% consistency"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Weekly Trend" 
+                      value="+0.9%"
+                      icon="trending_up"
+                      subtitle="Improvement in 7 days"
+                    />
+                  </GridItem>
+                </GridContainer>
+                
+                <GridContainer spacing={3}>
+                  <GridItem xs={12} md={7}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Data Consistency by Type
+                      </Typography>
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Data Type</TableCell>
+                              <TableCell align="right">Volume</TableCell>
+                              <TableCell align="right">Consistency Score</TableCell>
+                              <TableCell align="center">Status</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {mockData.dataConsistencyDetails.byDataType.map((dataType) => {
+                              const getDataStatus = () => {
+                                if (dataType.score >= 98) return { label: "Excellent", color: "success" };
+                                if (dataType.score >= 95) return { label: "Good", color: "info" };
+                                if (dataType.score >= 90) return { label: "Fair", color: "warning" };
+                                return { label: "Needs Attention", color: "error" };
+                              };
+                              
+                              const status = getDataStatus();
+                              
+                              return (
+                                <TableRow key={dataType.type}>
+                                  <TableCell component="th" scope="row">
+                                    {dataType.type}
+                                  </TableCell>
+                                  <TableCell align="right">{dataType.volume.toLocaleString()}</TableCell>
+                                  <TableCell align="right">{dataType.score}%</TableCell>
+                                  <TableCell align="center">
+                                    <Chip 
+                                      label={status.label} 
+                                      color={status.color as any} 
+                                      size="small" 
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Paper>
+                  </GridItem>
+                  <GridItem xs={12} md={5}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Consistency Score Trend
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" paragraph>
+                        Data consistency evolution over the last 7 days
+                      </Typography>
+                      <Box height={300}>
+                        <LineChartComponent
+                          data={mockData.dataConsistencyDetails.trends}
+                          xKey="date"
+                          yKey="score"
+                          height={260}
+                          xAxisLabel="Date"
+                          yAxisLabel="Score (%)"
+                          tooltipFormatter={(value: number) => `${value.toFixed(1)}%`}
+                        />
+                      </Box>
+                    </Paper>
+                  </GridItem>
+                </GridContainer>
+              </>
+            )}
+            
+            {activeTab === 2 && (
+              <>
+                <GridContainer spacing={3} className="mb-6">
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Daily API Calls" 
+                      value={mockData.apiMetrics.dailyCallVolume.toLocaleString()}
+                      icon="api"
+                      subtitle="Last 24 hours"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Avg Response Time" 
+                      value={`${mockData.apiMetrics.avgResponseTime} ms`}
+                      icon="speed"
+                      subtitle="Across all endpoints"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Error Rate" 
+                      value={`${mockData.apiMetrics.errorRate}%`}
+                      icon="error_outline"
+                      subtitle="Failed API calls"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Rate Limit Hits" 
+                      value={mockData.apiMetrics.rateLimitHits.toString()}
+                      icon="schedule"
+                      subtitle="Last 24 hours"
+                    />
+                  </GridItem>
+                </GridContainer>
+                
+                <GridContainer spacing={3}>
+                  <GridItem xs={12} md={6}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        API Call Volume by Hour
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" paragraph>
+                        Distribution of API calls throughout the day
+                      </Typography>
+                      <Box height={300}>
+                        <BarChartComponent
+                          data={[
+                            { hour: '00:00', calls: 3240 },
+                            { hour: '01:00', calls: 2150 },
+                            { hour: '02:00', calls: 1840 },
+                            { hour: '03:00', calls: 1260 },
+                            { hour: '04:00', calls: 980 },
+                            { hour: '05:00', calls: 1120 },
+                            { hour: '06:00', calls: 2340 },
+                            { hour: '07:00', calls: 4670 },
+                            { hour: '08:00', calls: 7890 },
+                            { hour: '09:00', calls: 9450 },
+                            { hour: '10:00', calls: 8760 },
+                            { hour: '11:00', calls: 7650 },
+                            { hour: '12:00', calls: 8540 },
+                            { hour: '13:00', calls: 9210 },
+                            { hour: '14:00', calls: 11240 },
+                            { hour: '15:00', calls: 12450 },
+                            { hour: '16:00', calls: 10870 },
+                            { hour: '17:00', calls: 9230 },
+                            { hour: '18:00', calls: 7640 },
+                            { hour: '19:00', calls: 6530 },
+                            { hour: '20:00', calls: 5420 },
+                            { hour: '21:00', calls: 4780 },
+                            { hour: '22:00', calls: 4210 },
+                            { hour: '23:00', calls: 3520 }
+                          ]}
+                          xKey="hour"
+                          yKey="calls"
+                          height={260}
+                          xAxisLabel="Hour of Day (UTC)"
+                          yAxisLabel="Number of API Calls"
+                          tooltipFormatter={(value: number) => `${value.toLocaleString()} calls`}
+                        />
+                      </Box>
+                    </Paper>
+                  </GridItem>
+                  <GridItem xs={12} md={6}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        API Call Distribution by Endpoint
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" paragraph>
+                        Percentage of calls by endpoint type
+                      </Typography>
+                      <Box height={300}>
+                        <PieChartComponent
+                          data={mockData.failureReasons.map(item => ({
+                            name: item.reason,
+                            value: item.count
+                          }))}
+                          nameKey="name"
+                          valueKey="value"
+                          height={260}
+                          donut={true}
+                          tooltipFormatter={(value: number) => `${value} occurrences`}
+                        />
+                      </Box>
+                    </Paper>
+                  </GridItem>
+                  <GridItem xs={12}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Endpoint Performance Details
+                      </Typography>
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Endpoint</TableCell>
+                              <TableCell align="right">Call Volume</TableCell>
+                              <TableCell align="right">Avg Response Time</TableCell>
+                              <TableCell align="right">% of Total</TableCell>
+                              <TableCell align="right">Action</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {mockData.apiMetrics.topEndpoints.map((endpoint) => {
+                              const percentOfTotal = ((endpoint.calls / mockData.apiMetrics.dailyCallVolume) * 100).toFixed(1);
+                              const needsOptimization = endpoint.avgTime > 300; // ms threshold
+                              
+                              return (
+                                <TableRow key={endpoint.endpoint}>
+                                  <TableCell component="th" scope="row">
+                                    {endpoint.endpoint}
+                                  </TableCell>
+                                  <TableCell align="right">{endpoint.calls.toLocaleString()}</TableCell>
+                                  <TableCell align="right" sx={{
+                                    color: endpoint.avgTime > 300 ? 'error.main' : 
+                                           endpoint.avgTime > 200 ? 'warning.main' : 'success.main'
+                                  }}>
+                                    {endpoint.avgTime} ms
+                                  </TableCell>
+                                  <TableCell align="right">{percentOfTotal}%</TableCell>
+                                  <TableCell align="right">
+                                    {needsOptimization ? 
+                                      <Chip label="Optimize" color="warning" size="small" /> : 
+                                      <Chip label="Good" color="success" size="small" />
+                                    }
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Paper>
+                  </GridItem>
+                </GridContainer>
+              </>
+            )}
+            
+            {activeTab === 3 && (
+              <>
+                <GridContainer spacing={3} className="mb-6">
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Avg Time to Onboard" 
+                      value={`${mockData.onboardingMetrics.avgTimeToOnboard} min`}
+                      icon="timer"
+                      subtitle="From start to finish"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Completion Rate" 
+                      value={`${mockData.onboardingMetrics.completionRate}%`}
+                      icon="task_alt"
+                      subtitle="Successfully onboarded"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Slowest Step" 
+                      value="Initial Product Sync"
+                      icon="schedule"
+                      subtitle="8.3 min average"
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={6} md={3}>
+                    <MetricCard 
+                      title="Top Drop-off Point" 
+                      value="API Key Generation"
+                      icon="not_interested"
+                      subtitle="2.4% drop-off rate"
+                    />
+                  </GridItem>
+                </GridContainer>
+                
+                <GridContainer spacing={3}>
+                  <GridItem xs={12} md={6}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Onboarding Step Performance
+                      </Typography>
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Step</TableCell>
+                              <TableCell align="right">Avg Time (min)</TableCell>
+                              <TableCell align="right">Success Rate</TableCell>
+                              <TableCell align="center">Status</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {mockData.onboardingMetrics.onboardingSteps.map((step) => {
+                              const getStepStatus = () => {
+                                if (step.successRate >= 99) return { label: "Excellent", color: "success" };
+                                if (step.successRate >= 97) return { label: "Good", color: "info" };
+                                if (step.successRate >= 95) return { label: "Fair", color: "warning" };
+                                return { label: "Needs Attention", color: "error" };
+                              };
+                              
+                              const status = getStepStatus();
+                              
+                              return (
+                                <TableRow key={step.step}>
+                                  <TableCell component="th" scope="row">
+                                    {step.step}
+                                  </TableCell>
+                                  <TableCell align="right">{step.avgTime}</TableCell>
+                                  <TableCell align="right">{step.successRate}%</TableCell>
+                                  <TableCell align="center">
+                                    <Chip 
+                                      label={status.label} 
+                                      color={status.color as any} 
+                                      size="small" 
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Paper>
+                  </GridItem>
+                  <GridItem xs={12} md={6}>
+                    <Paper className="p-4">
+                      <Typography variant="h6" gutterBottom>
+                        Recent Merchant Onboarding
+                      </Typography>
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Merchant</TableCell>
+                              <TableCell>Started</TableCell>
+                              <TableCell>Completed</TableCell>
+                              <TableCell align="center">Status</TableCell>
+                              <TableCell align="right">Duration</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {mockData.onboardingMetrics.recentOnboarding.map((merchant) => {
+                              const startTime = new Date(merchant.started);
+                              const endTime = merchant.completed ? new Date(merchant.completed) : new Date();
+                              const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
+                              
+                              return (
+                                <TableRow key={merchant.merchant}>
+                                  <TableCell component="th" scope="row">
+                                    {merchant.merchant}
+                                  </TableCell>
+                                  <TableCell>{formatDate(merchant.started)}</TableCell>
+                                  <TableCell>{formatDate(merchant.completed)}</TableCell>
+                                  <TableCell align="center">
+                                    <Chip 
+                                      label={merchant.status} 
+                                      color={getStatusColor(merchant.status) as any} 
+                                      size="small" 
+                                    />
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    {merchant.status === "Complete" ? `${durationMinutes} min` : "—"}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Paper>
+                  </GridItem>
+                </GridContainer>
+              </>
+            )}
+          </>
+        )}
+      </Box>
+    </AdminLayout>
+  );
+};
+
+export default ShopifyIntegration;
