@@ -13,6 +13,19 @@ const nextConfig = {
       // These will be rendered at runtime instead
     };
   },
+  // Ensure admin routes are properly handled
+  async rewrites() {
+    return [
+      {
+        source: '/admin',
+        destination: '/admin',
+      },
+      {
+        source: '/admin/:path*',
+        destination: '/admin/:path*',
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
