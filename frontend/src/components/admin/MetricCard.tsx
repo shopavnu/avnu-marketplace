@@ -1,30 +1,25 @@
-import React, { ReactNode } from 'react';
-import { Paper, Typography, Box, Tooltip, Icon } from '@mui/material';
+import React from 'react';
+import { Paper, Typography, Box } from '@mui/material';
 import { brandColors } from '../../utils/chartTheme';
-import { 
-  Groups as GroupsIcon,
-  Repeat as RepeatIcon,
-  AttachMoney as AttachMoneyIcon,
-  ShoppingCart as ShoppingCartIcon,
-  Devices as DevicesIcon,
-  Timeline as TimelineIcon,
-  TrendingUp as TrendingUpIcon
-} from '@mui/icons-material';
 
 interface MetricCardProps {
   title: string;
   value: string;
   subtitle?: string;
-  icon?: string;
+  icon?: string; // Kept for compatibility with existing code, but not used
   trend?: number;
   trendLabel?: string;
 }
 
+/**
+ * MetricCard component for displaying key metrics on admin dashboards
+ * Simplified version without icons to avoid deployment issues
+ */
 const MetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   subtitle,
-  icon,
+  icon, // Added back but unused
   trend,
   trendLabel
 }) => {
@@ -83,41 +78,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
             </Typography>
           )}
         </div>
-        {icon && (
-          <Box 
-            sx={{ 
-              p: 2,
-              borderRadius: '50%',
-              bgcolor: `${brandColors.cream}`,
-              color: brandColors.terracotta,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {(() => {
-              // Render the appropriate icon based on the icon string
-              switch(icon) {
-                case 'group':
-                  return <GroupsIcon />;
-                case 'repeat':
-                  return <RepeatIcon />;
-                case 'attach_money':
-                  return <AttachMoneyIcon />;
-                case 'shopping_cart':
-                  return <ShoppingCartIcon />;
-                case 'devices':
-                  return <DevicesIcon />;
-                case 'timeline':
-                  return <TimelineIcon />;
-                case 'trending_up':
-                  return <TrendingUpIcon />;
-                default:
-                  return <Icon>{icon}</Icon>; // Fallback to text-based icon
-              }
-            })()} 
-          </Box>
-        )}
       </div>
       
       {trend !== undefined && (
@@ -137,10 +97,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
               fontWeight: 600
             }}
           >
-            <Icon sx={{ fontSize: '0.875rem', mr: 0.5 }}>
-              {trend >= 0 ? 'arrow_upward' : 'arrow_downward'}
-            </Icon>
-            {Math.abs(trend).toFixed(1)}%
+            {/* Trend indicator without icon */}
+            {trend >= 0 ? '↑' : '↓'} {Math.abs(trend).toFixed(1)}%
           </Box>
           {trendLabel && (
             <Typography 
