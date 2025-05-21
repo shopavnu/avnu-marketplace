@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // Removed MUI icon imports to fix deployment issues
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNav from '../../../components/admin/AnalyticsNav';
@@ -6,29 +6,28 @@ import { Box, Typography, Alert } from '@mui/material';
 import { Grid, GridContainer, GridItem } from '../../../components/ui/Grid';
 
 /**
- * User Behavior Dashboard
- * Analyzes user behavior patterns across the marketplace
+ * Payment Analytics Dashboard
+ * Displays payment metrics, transactions, and financial data
  */
-const UserBehaviorDashboard: React.FC = () => {
+const PaymentAnalyticsDashboard: React.FC = () => {
   return (
-    <AdminLayout title="User Behavior Analytics">
+    <AdminLayout title="Payment Analytics">
       <AnalyticsNav />
       
       <Box className="p-6">
         <Alert severity="info" sx={{ mb: 4 }}>
-          This dashboard is currently under development. Check back soon for user behavior analytics.
+          This dashboard is currently under development. Check back soon for payment analytics data.
         </Alert>
         
         <Typography variant="h5" gutterBottom>
-          User Behavior Dashboard
+          Payment Analytics Dashboard
         </Typography>
         <Typography variant="body1">
-          This page will analyze user behavior patterns, including browsing habits, engagement metrics,
-          and conversion funnels across the marketplace.
+          This page will show payment processing metrics, transaction volumes, and financial performance data.
         </Typography>
       </Box>
     </AdminLayout>
   );
 };
 
-export default UserBehaviorDashboard;
+export default PaymentAnalyticsDashboard;

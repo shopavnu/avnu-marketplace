@@ -43,19 +43,105 @@ export default function DiscoverPage() {
   const [sort, setSort] = useState<string>('relevance');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Generate brands and products (type-safe)
+  // Generate brands and products once on component mount
   useEffect(() => {
     setMounted(true);
-    const generatedBrands = generateMockBrands();
-    setBrands(getPersonalizedBrands(generatedBrands));
-    // Generate products for each brand/category
-    let allProducts: Product[] = [];
-    generatedBrands.forEach(brand => {
-      (Array.isArray(brand.categories) ? brand.categories : []).forEach(category => {
-        allProducts = allProducts.concat(generateBrandProducts({ ...brand, values: brand.values ?? [] }, category));
-      });
-    });
-    setProducts(getPersonalizedProducts(allProducts));
+
+    try {
+      // Create fallback data for stability with all required Brand properties
+      const fallbackBrands: Brand[] = Array.from({ length: 8 }, (_, i) => ({
+        id: `brand-${i+1}`,
+        name: `Brand ${i+1}`,
+        description: `Sustainable ethical brand with high-quality products.`,
+        location: 'Portland, OR',
+        rating: 4.5,
+        isVerified: true,
+        categories: ['Apparel'],
+        primaryCategory: 'Apparel' as Brand['primaryCategory'], // Required property
+        secondaryCategories: ['Sports'] as Brand['secondaryCategories'], // Required property
+        values: ['sustainable', 'ethical'],
+        coverImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
+        logo: 'https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&w=200&q=80',
+        productCount: 25,
+        joinedDate: new Date().toISOString()
+      }));
+
+      // Try to generate data, fall back if needed
+      let generatedBrands;
+      try {
+        generatedBrands = generateMockBrands() || fallbackBrands;
+      } catch (e) {
+        console.error('Error generating brands:', e);
+        generatedBrands = fallbackBrands;
+      }
+
+      setBrands(getPersonalizedBrands(generatedBrands));
+      
+      // Generate initial product data with all required Product properties
+      const fallbackProducts: Product[] = Array.from({ length: 24 }, (_, i) => ({
+        id: `product-${i+1}`,
+        title: `Product ${i+1}`,
+        description: 'Premium sustainable product made with eco-friendly materials.',
+        price: 49.99 + (i % 10) * 10,
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+        images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'],
+        brand: `Brand ${(i % 8) + 1}`,
+        category: 'Apparel',
+        subCategory: 'Tops', // Required property
+        attributes: { // Required property
+          material: 'Organic Cotton',
+          fit: 'Regular'
+        },
+        isNew: i < 4,
+        rating: {
+          avnuRating: { average: 4.5, count: 15 + i },
+          shopifyRating: { average: 4.5, count: 30 }
+        },
+        vendor: {
+          id: `brand-${(i % 8) + 1}`,
+          name: `Brand ${(i % 8) + 1}`,
+          isLocal: true,
+          causes: ['sustainable', 'ethical'],
+          shippingInfo: {
+            isFree: true,
+            minimumForFree: 75,
+            baseRate: 7.99
+          }
+        },
+        inStock: true,
+        tags: ['sustainable', 'ethical'],
+        createdAt: new Date().toISOString()
+      }));
+      
+      // Try to generate products from brands, fall back if needed
+      let allProducts: Product[] = [];
+      
+      try {
+        generatedBrands.forEach(brand => {
+          if (brand?.categories) {
+            (Array.isArray(brand.categories) ? brand.categories : []).forEach(category => {
+              if (brand && category) {
+                const brandProducts = generateBrandProducts({ ...brand, values: brand.values ?? [] }, category);
+                if (Array.isArray(brandProducts) && brandProducts.length > 0) {
+                  allProducts = allProducts.concat(brandProducts);
+                }
+              }
+            });
+          }
+        });
+      } catch (e) {
+        console.error('Error generating products:', e);
+      }
+      
+      // Use fallback if we couldn't generate products
+      if (allProducts.length === 0) {
+        allProducts = fallbackProducts;
+      }
+      
+      setProducts(getPersonalizedProducts(allProducts));
+    } catch (e) {
+      console.error('Discover page error:', e);
+    }
   }, []);
 
   // Helper: available values for filters
@@ -252,9 +338,6 @@ export default function DiscoverPage() {
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
               }, [visibleCount, filteredProducts.length]);
-              if (!mounted) return <div className="text-center py-16 text-lg text-gray-400">Loading products...</div>;
-              if (filteredProducts.length === 0) return <div className="text-center py-16 text-lg text-gray-400">No products match your filters.</div>;
-              // Sort products with useMemo
               const sortedProducts = React.useMemo(() => {
                 if (sort === 'price-low') return [...filteredProducts].sort((a, b) => a.price - b.price);
                 if (sort === 'price-high') return [...filteredProducts].sort((a, b) => b.price - a.price);
@@ -264,6 +347,9 @@ export default function DiscoverPage() {
 
               // Skeleton loader count
               const skeletonCount = Math.min(visibleCount, 20);
+
+              if (!mounted) return <div className="text-center py-16 text-lg text-gray-400">Loading products...</div>;
+              if (sortedProducts.length === 0) return <div className="text-center py-16 text-lg text-gray-400">No products match your filters.</div>;
 
               return (
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 transition-all duration-300">

@@ -1,0 +1,319 @@
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  CircularProgress, 
+  Alert, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Chip,
+  Tabs,
+  Tab,
+  Divider,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  InputLabel
+} from '@mui/material';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import AnalyticsNav from '../../../components/admin/AnalyticsNav';
+import { Grid, GridContainer, GridItem } from '../../../components/ui/Grid';
+import MetricCard from '../../../components/admin/MetricCard';
+import MockChart from '../../../components/charts/MockChart';
+
+/**
+ * Platform Metrics Dashboard
+ * Tracks performance metrics across web and mobile platforms
+ * Includes mobile app performance, feature usage comparisons, and browser/device compatibility
+ */
+const PlatformMetrics: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [timeRange, setTimeRange] = useState('30');
+  
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+  
+  const handleTimeRangeChange = (event: SelectChangeEvent) => {
+    setTimeRange(event.target.value);
+  };
+
+  // Mock data - to be replaced with API call
+  const mockData = {
+    webTraffic: 87543,
+    mobileTraffic: 63458,
+    avgPageLoadWeb: 1.87,
+    avgPageLoadMobile: 1.42,
+    platformDistribution: {
+      web: 58,
+      ios: 24,
+      android: 18
+    },
+    deviceBreakdown: [
+      { device: "Desktop", percentage: 42, avgSessionDuration: 8.4 },
+      { device: "Mobile Web", percentage: 16, avgSessionDuration: 5.7 },
+      { device: "iOS App", percentage: 24, avgSessionDuration: 12.3 },
+      { device: "Android App", percentage: 18, avgSessionDuration: 10.8 }
+    ],
+    errorRates: [
+      { platform: "Web", errorRate: 0.32, changeWeekly: -0.08 },
+      { platform: "iOS", errorRate: 0.18, changeWeekly: -0.12 },
+      { platform: "Android", errorRate: 0.27, changeWeekly: -0.05 }
+    ],
+    browserCompatibility: [
+      { browser: "Chrome", sharePercentage: 58, conversionRate: 4.7 },
+      { browser: "Safari", sharePercentage: 22, conversionRate: 4.9 },
+      { browser: "Firefox", sharePercentage: 12, conversionRate: 4.2 },
+      { browser: "Edge", sharePercentage: 6, conversionRate: 3.8 },
+      { browser: "Other", sharePercentage: 2, conversionRate: 3.1 }
+    ]
+  };
+  
+  return (
+    <AdminLayout title="Platform-Specific Metrics">
+      <AnalyticsNav />
+      
+      <Box className="p-6">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Platform Metrics
+        </Typography>
+        <Typography variant="body1" color="textSecondary" paragraph>
+          Monitor performance across web browsers and mobile apps
+        </Typography>
+        
+        {loading ? (
+          <Box display="flex" justifyContent="center" my={8}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ my: 4 }}>
+            {error}
+          </Alert>
+        ) : (
+          <>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange} 
+              textColor="primary" 
+              indicatorColor="primary"
+              sx={{ mb: 4 }}
+            >
+              <Tab label="Mobile App Performance" />
+              <Tab label="Browser/Device Compatibility" />
+            </Tabs>
+            
+            <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel id="time-range-label">Time Range</InputLabel>
+                <Select
+                  labelId="time-range-label"
+                  value={timeRange}
+                  label="Time Range"
+                  onChange={handleTimeRangeChange}
+                >
+                  <MenuItem value="7">Last 7 Days</MenuItem>
+                  <MenuItem value="30">Last 30 Days</MenuItem>
+                  <MenuItem value="90">Last 90 Days</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            {activeTab === 0 && (
+              <>
+                <GridContainer spacing={3} className="mb-6">
+                  <GridItem xs={12} sm={6} md={3}>
+                <MetricCard 
+                  title="Web Traffic" 
+                  value={mockData.webTraffic.toLocaleString()}
+                  icon="laptop"
+                  subtitle="monthly sessions"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <MetricCard 
+                  title="Mobile Traffic" 
+                  value={mockData.mobileTraffic.toLocaleString()}
+                  icon="smartphone"
+                  subtitle="monthly sessions"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <MetricCard 
+                  title="Web Page Load Time" 
+                  value={`${mockData.avgPageLoadWeb}s`}
+                  icon="speed"
+                  trend={-0.12}
+                  trendLabel="Faster than last month"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <MetricCard 
+                  title="App Page Load Time" 
+                  value={`${mockData.avgPageLoadMobile}s`}
+                  icon="speed"
+                  trend={-0.08}
+                  trendLabel="Faster than last month"
+                />
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Paper className="p-4">
+                  <Typography variant="h6" gutterBottom>
+                    Platform Usage Distribution
+                  </Typography>
+                  <Box height={300}>
+                    <MockChart type="pie" data={[
+                      { name: "Web", value: mockData.platformDistribution.web },
+                      { name: "iOS", value: mockData.platformDistribution.ios },
+                      { name: "Android", value: mockData.platformDistribution.android }
+                    ]} />
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Paper className="p-4">
+                  <Typography variant="h6" gutterBottom>
+                    Session Duration by Platform
+                  </Typography>
+                  <Box height={300}>
+                    <MockChart type="bar" />
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Paper className="p-4">
+                  <Typography variant="h6" gutterBottom>
+                    Browser Compatibility
+                  </Typography>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Browser</TableCell>
+                          <TableCell align="right">Share</TableCell>
+                          <TableCell align="right">Conversion Rate</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {mockData.browserCompatibility.map((browser) => (
+                          <TableRow key={browser.browser}>
+                            <TableCell component="th" scope="row">
+                              {browser.browser}
+                            </TableCell>
+                            <TableCell align="right">{browser.sharePercentage}%</TableCell>
+                            <TableCell align="right">{browser.conversionRate}%</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Paper className="p-4">
+                  <Typography variant="h6" gutterBottom>
+                    Error Rates by Platform
+                  </Typography>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Platform</TableCell>
+                          <TableCell align="right">Error Rate</TableCell>
+                          <TableCell align="right">Weekly Change</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {mockData.errorRates.map((platform) => (
+                          <TableRow key={platform.platform}>
+                            <TableCell component="th" scope="row">
+                              {platform.platform}
+                            </TableCell>
+                            <TableCell align="right">{platform.errorRate}%</TableCell>
+                            <TableCell 
+                              align="right"
+                              sx={{
+                                color: platform.changeWeekly < 0 ? 'success.main' : 
+                                       platform.changeWeekly > 0 ? 'error.main' : 'inherit'
+                              }}
+                            >
+                              {platform.changeWeekly > 0 ? '+' : ''}
+                              {platform.changeWeekly}%
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </Grid>
+              <Grid item xs={12}>
+                <Paper className="p-4">
+                  <Typography variant="h6" gutterBottom>
+                    Device Usage Analysis
+                  </Typography>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Device Type</TableCell>
+                          <TableCell align="right">Percentage</TableCell>
+                          <TableCell align="right">Avg. Session Duration (min)</TableCell>
+                          <TableCell align="center">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {mockData.deviceBreakdown.map((device) => {
+                          const getStatusInfo = () => {
+                            if (device.avgSessionDuration > 10) return { label: "Excellent", color: "success" };
+                            if (device.avgSessionDuration > 7) return { label: "Good", color: "primary" };
+                            if (device.avgSessionDuration > 4) return { label: "Average", color: "warning" };
+                            return { label: "Below Average", color: "error" };
+                          };
+                          
+                          const statusInfo = getStatusInfo();
+                          
+                          return (
+                            <TableRow key={device.device}>
+                              <TableCell component="th" scope="row">
+                                {device.device}
+                              </TableCell>
+                              <TableCell align="right">{device.percentage}%</TableCell>
+                              <TableCell align="right">{device.avgSessionDuration} min</TableCell>
+                              <TableCell align="center">
+                                <Chip 
+                                  label={statusInfo.label} 
+                                  color={statusInfo.color as any} 
+                                  size="small" 
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </Grid>
+            </Grid>
+          </>
+        )}
+      </Box>
+    </AdminLayout>
+  );
+};
+
+export default PlatformMetrics;
