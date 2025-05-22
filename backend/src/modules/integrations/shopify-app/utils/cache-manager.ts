@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import NodeCache from 'node-cache';
-import { RedisService } from 'nestjs-redis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
 
 /**
@@ -42,7 +42,6 @@ interface CacheKeyParts {
 export class ShopifyCacheManager {
   private readonly logger = new Logger(ShopifyCacheManager.name);
   private memoryCache: NodeCache;
-  private redisClient: Redis;
 
   // Default TTL values in seconds
   private readonly DEFAULT_MEMORY_TTL = 60; // 1 minute
@@ -53,7 +52,7 @@ export class ShopifyCacheManager {
 
   constructor(
     private configService: ConfigService,
-    private redisService: RedisService,
+    @InjectRedis() private readonly redisClient: Redis,
   ) {
     // Initialize memory cache
     this.memoryCache = new NodeCache({
@@ -68,7 +67,6 @@ export class ShopifyCacheManager {
 
     if (this.useRedis) {
       try {
-        this.redisClient = this.redisService.getClient();
         this.logger.log('Redis cache initialized');
       } catch (error) {
         this.logger.error(`Failed to initialize Redis cache: ${error.message}`);
