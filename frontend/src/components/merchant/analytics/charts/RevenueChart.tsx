@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,9 +9,9 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { format, parseISO } from 'date-fns';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+import { format, parseISO } from "date-fns";
 
 // Register ChartJS components
 ChartJS.register(
@@ -21,7 +21,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 interface TimeSeriesDataPoint {
@@ -34,9 +34,9 @@ interface RevenueChartProps {
   title?: string;
 }
 
-const RevenueChart: React.FC<RevenueChartProps> = ({ 
+const RevenueChart: React.FC<RevenueChartProps> = ({
   performanceData,
-  title = 'Revenue Over Time'
+  title = "Revenue Over Time",
 }) => {
   if (!performanceData || performanceData.length === 0) {
     return (
@@ -47,18 +47,18 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   }
 
   // Format dates and prepare data for the chart
-  const labels = performanceData.map(item => 
-    format(parseISO(item.date), 'MMM d')
+  const labels = performanceData.map((item) =>
+    format(parseISO(item.date), "MMM d"),
   );
-  
+
   const chartData = {
     labels,
     datasets: [
       {
-        label: 'Revenue',
-        data: performanceData.map(item => item.value),
-        borderColor: '#65a30d', // sage green
-        backgroundColor: 'rgba(101, 163, 13, 0.1)',
+        label: "Revenue",
+        data: performanceData.map((item) => item.value),
+        borderColor: "#65a30d", // sage green
+        backgroundColor: "rgba(101, 163, 13, 0.1)",
         borderWidth: 2,
         fill: true,
         tension: 0.4,
@@ -66,12 +66,12 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
     ],
   };
 
-  const options: ChartOptions<'line'> = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: "top" as const,
       },
       title: {
         display: true,
@@ -82,24 +82,24 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
-            return `Revenue: $${context.parsed.y.toLocaleString('en-US', {
+          label: function (context) {
+            return `Revenue: $${context.parsed.y.toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
-            return '$' + value.toLocaleString('en-US');
-          }
-        }
-      }
+          callback: function (value) {
+            return "$" + value.toLocaleString("en-US");
+          },
+        },
+      },
     },
   };
 

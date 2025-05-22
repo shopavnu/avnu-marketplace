@@ -1,16 +1,14 @@
-import { Product } from '@/types/products';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useCallback } from 'react';
-import { analyticsService } from '@/services/analytics.service';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
+import { Product } from "@/types/products";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { analyticsService } from "@/services/analytics.service";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 interface ProductGridProps {
   products: Product[];
 }
-
-
 
 const ITEMS_PER_PAGE = 12;
 
@@ -28,7 +26,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
     setTimeout(() => {
       const nextProducts = products.slice(
         displayedProducts.length,
-        displayedProducts.length + ITEMS_PER_PAGE
+        displayedProducts.length + ITEMS_PER_PAGE,
       );
       setDisplayedProducts((prev: Product[]) => [...prev, ...nextProducts]);
       setPage((prev: number) => prev + 1);
@@ -45,15 +43,18 @@ export default function ProductGrid({ products }: ProductGridProps) {
     if (!mounted) return;
 
     const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 1000) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 1000
+      ) {
         if (!loading && displayedProducts.length < products.length) {
           loadMore();
         }
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [displayedProducts, loading, products, mounted, loadMore]);
 
   if (!mounted) {
@@ -61,7 +62,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="columns-1 xs:columns-2 md:columns-3 lg:columns-4 gap-2 sm:gap-4 p-2 sm:p-4 safe-left safe-right safe-bottom"
       initial="hidden"
       whileInView="visible"
@@ -78,7 +79,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <Link href={`/product/${product.id}`}>
-              <motion.div 
+              <motion.div
                 className="relative rounded-lg overflow-hidden bg-warm-white shadow-sm hover:shadow-xl transition-all duration-300"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -86,12 +87,12 @@ export default function ProductGrid({ products }: ProductGridProps) {
                   // Track product click with position based on index in grid
                   const position = index + 1; // Use index + 1 as position (1-based indexing)
                   const searchQuery = Array.isArray(query) ? query[0] : query;
-                  
+
                   if (searchQuery) {
                     analyticsService.trackSearchResultClick(
                       product.id,
                       position,
-                      searchQuery
+                      searchQuery,
                     );
                   }
                 }}
@@ -105,7 +106,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                     sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     priority={index < 4}
                   />
-                  <motion.div 
+                  <motion.div
                     className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
@@ -120,9 +121,24 @@ export default function ProductGrid({ products }: ProductGridProps) {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
                     </motion.button>
                     <motion.button
@@ -130,19 +146,30 @@ export default function ProductGrid({ products }: ProductGridProps) {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                        />
                       </svg>
                     </motion.button>
                   </motion.div>
                 </div>
-                <motion.div 
+                <motion.div
                   className="p-3 sm:p-4"
                   initial={{ y: 10, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   viewport={{ once: true }}
                 >
-                  <motion.h3 
+                  <motion.h3
                     className="font-montserrat text-base sm:text-lg font-medium text-charcoal mb-1"
                     whileHover={{ x: 5 }}
                   >
@@ -151,7 +178,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                   <p className="font-inter text-xs sm:text-sm text-neutral-gray mb-2">
                     {product.brand}
                   </p>
-                  <motion.p 
+                  <motion.p
                     className="font-montserrat font-medium text-sage text-sm sm:text-base"
                     whileHover={{ scale: 1.05 }}
                   >

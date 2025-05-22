@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState } from "react";
 import {
   LineChart,
   Line,
@@ -7,8 +7,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
-} from 'recharts';
+  ResponsiveContainer,
+} from "recharts";
 
 interface DailyData {
   date: string;
@@ -27,20 +27,23 @@ const AnalyticsChart: FC<AnalyticsChartProps> = ({ data }) => {
     impressions: true,
     clicks: true,
     conversions: true,
-    spent: false
+    spent: false,
   });
 
   const toggleMetric = (metric: keyof typeof metrics) => {
-    setMetrics(prev => ({
+    setMetrics((prev) => ({
       ...prev,
-      [metric]: !prev[metric]
+      [metric]: !prev[metric],
     }));
   };
 
   // Format date for display
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
   };
 
   // Custom tooltip to show all values
@@ -51,8 +54,15 @@ const AnalyticsChart: FC<AnalyticsChartProps> = ({ data }) => {
           <p className="font-medium text-gray-900">{formatDate(label)}</p>
           <div className="mt-2">
             {payload.map((entry: any, index: number) => (
-              <p key={`item-${index}`} style={{ color: entry.color }} className="text-sm">
-                {entry.name}: {entry.name === 'Spent' ? `$${entry.value.toFixed(2)}` : entry.value.toLocaleString()}
+              <p
+                key={`item-${index}`}
+                style={{ color: entry.color }}
+                className="text-sm"
+              >
+                {entry.name}:{" "}
+                {entry.name === "Spent"
+                  ? `$${entry.value.toFixed(2)}`
+                  : entry.value.toLocaleString()}
               </p>
             ))}
           </div>
@@ -67,36 +77,44 @@ const AnalyticsChart: FC<AnalyticsChartProps> = ({ data }) => {
       <div className="flex flex-wrap gap-3 mb-4">
         <button
           type="button"
-          onClick={() => toggleMetric('impressions')}
+          onClick={() => toggleMetric("impressions")}
           className={`px-3 py-1 text-xs font-medium rounded-full ${
-            metrics.impressions ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
+            metrics.impressions
+              ? "bg-blue-100 text-blue-800"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
           Impressions
         </button>
         <button
           type="button"
-          onClick={() => toggleMetric('clicks')}
+          onClick={() => toggleMetric("clicks")}
           className={`px-3 py-1 text-xs font-medium rounded-full ${
-            metrics.clicks ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+            metrics.clicks
+              ? "bg-green-100 text-green-800"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
           Clicks
         </button>
         <button
           type="button"
-          onClick={() => toggleMetric('conversions')}
+          onClick={() => toggleMetric("conversions")}
           className={`px-3 py-1 text-xs font-medium rounded-full ${
-            metrics.conversions ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-600'
+            metrics.conversions
+              ? "bg-purple-100 text-purple-800"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
           Conversions
         </button>
         <button
           type="button"
-          onClick={() => toggleMetric('spent')}
+          onClick={() => toggleMetric("spent")}
           className={`px-3 py-1 text-xs font-medium rounded-full ${
-            metrics.spent ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'
+            metrics.spent
+              ? "bg-red-100 text-red-800"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
           Spent
@@ -113,20 +131,13 @@ const AnalyticsChart: FC<AnalyticsChartProps> = ({ data }) => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis 
-            dataKey="date" 
+          <XAxis
+            dataKey="date"
             tickFormatter={formatDate}
             tick={{ fontSize: 12 }}
           />
-          <YAxis 
-            yAxisId="left"
-            tick={{ fontSize: 12 }}
-          />
-          <YAxis 
-            yAxisId="right"
-            orientation="right"
-            tick={{ fontSize: 12 }}
-          />
+          <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           {metrics.impressions && (

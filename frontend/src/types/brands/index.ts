@@ -1,4 +1,4 @@
-import { Brand } from '@/types/brand';
+import { Brand } from "@/types/brand";
 
 // Re-export the Brand interface for backward compatibility
 export type { Brand };

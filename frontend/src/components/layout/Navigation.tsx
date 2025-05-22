@@ -1,9 +1,15 @@
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+const NavLink = ({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) => {
   const router = useRouter();
   const isActive = router.pathname === href;
 
@@ -11,7 +17,7 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       className={`relative px-4 py-2 text-base font-medium transition-colors duration-200
-                ${isActive ? 'text-sage' : 'text-charcoal hover:text-sage'}`}
+                ${isActive ? "text-sage" : "text-charcoal hover:text-sage"}`}
     >
       {children}
       {isActive && (

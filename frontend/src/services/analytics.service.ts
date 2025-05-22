@@ -1,7 +1,7 @@
 // Analytics service for tracking user interactions
-import { gql } from '@apollo/client';
-import apolloClient from '../lib/apollo-client';
-import { sessionService } from './session.service';
+import { gql } from "@apollo/client";
+import apolloClient from "../lib/apollo-client";
+import { sessionService } from "./session.service";
 
 // GraphQL mutation for tracking search events
 const TRACK_SEARCH_EVENT = gql`
@@ -14,19 +14,19 @@ const TRACK_SEARCH_EVENT = gql`
 
 // Event types
 export enum SearchEventType {
-  SEARCH_QUERY = 'SEARCH_QUERY',
-  SUGGESTION_CLICK = 'SUGGESTION_CLICK',
-  SUGGESTION_IMPRESSION = 'SUGGESTION_IMPRESSION',
-  SEARCH_RESULT_CLICK = 'SEARCH_RESULT_CLICK',
-  SEARCH_RESULT_IMPRESSION = 'SEARCH_RESULT_IMPRESSION',
-  SEARCH_RESULT_DWELL_TIME = 'SEARCH_RESULT_DWELL_TIME',
-  FILTER_APPLY = 'FILTER_APPLY',
-  SORT_APPLY = 'SORT_APPLY',
-  CATEGORY_CLICK = 'CATEGORY_CLICK',
-  CAUSE_CLICK = 'CAUSE_CLICK',
-  PRODUCT_VIEW = 'PRODUCT_VIEW',
-  ADD_TO_CART = 'ADD_TO_CART',
-  PRODUCT_ATTRIBUTE_SELECT = 'PRODUCT_ATTRIBUTE_SELECT',
+  SEARCH_QUERY = "SEARCH_QUERY",
+  SUGGESTION_CLICK = "SUGGESTION_CLICK",
+  SUGGESTION_IMPRESSION = "SUGGESTION_IMPRESSION",
+  SEARCH_RESULT_CLICK = "SEARCH_RESULT_CLICK",
+  SEARCH_RESULT_IMPRESSION = "SEARCH_RESULT_IMPRESSION",
+  SEARCH_RESULT_DWELL_TIME = "SEARCH_RESULT_DWELL_TIME",
+  FILTER_APPLY = "FILTER_APPLY",
+  SORT_APPLY = "SORT_APPLY",
+  CATEGORY_CLICK = "CATEGORY_CLICK",
+  CAUSE_CLICK = "CAUSE_CLICK",
+  PRODUCT_VIEW = "PRODUCT_VIEW",
+  ADD_TO_CART = "ADD_TO_CART",
+  PRODUCT_ATTRIBUTE_SELECT = "PRODUCT_ATTRIBUTE_SELECT",
 }
 
 // Event data interface
@@ -43,16 +43,16 @@ export interface SearchEventData {
   startPosition?: number;
   count?: number;
   timestamp?: number;
-  dwellTimeMs?: number;  // Dwell time in milliseconds
-  entryTime?: number;    // Time when user entered the page
-  exitTime?: number;     // Time when user left the page
-  sessionId?: string;    // Current user session ID
+  dwellTimeMs?: number; // Dwell time in milliseconds
+  entryTime?: number; // Time when user entered the page
+  exitTime?: number; // Time when user left the page
+  sessionId?: string; // Current user session ID
   sessionDuration?: number; // Current session duration in milliseconds
   previousQueries?: string[]; // Previous search queries in this session
   filterType?: string;
   filterValue?: string | number | boolean | { min?: number; max?: number };
   sortField?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: "asc" | "desc";
   categoryId?: string;
   causeId?: string;
   productId?: string;
@@ -76,7 +76,7 @@ class AnalyticsService {
       // Add session information to all events
       const sessionId = sessionService.getSessionId();
       const sessionData = sessionService.getSessionData();
-      
+
       // Enrich event data with session information
       const enrichedData = {
         ...data,
@@ -85,18 +85,27 @@ class AnalyticsService {
         previousQueries: sessionData?.searchQueries || [],
         timestamp: Date.now(),
       };
-      
+
       // Track specific events in the session service
       if (eventType === SearchEventType.SEARCH_QUERY && data.query) {
         sessionService.trackSearchQuery(data.query);
-      } else if (eventType === SearchEventType.SEARCH_RESULT_CLICK && data.resultId) {
+      } else if (
+        eventType === SearchEventType.SEARCH_RESULT_CLICK &&
+        data.resultId
+      ) {
         sessionService.trackResultClick(data.resultId);
-      } else if (eventType === SearchEventType.CATEGORY_CLICK && data.categoryId) {
+      } else if (
+        eventType === SearchEventType.CATEGORY_CLICK &&
+        data.categoryId
+      ) {
         sessionService.trackCategoryView(data.categoryId);
-      } else if (eventType === SearchEventType.FILTER_APPLY && data.filterType) {
+      } else if (
+        eventType === SearchEventType.FILTER_APPLY &&
+        data.filterType
+      ) {
         sessionService.trackFilter(data.filterType, data.filterValue);
       }
-      
+
       const response = await apolloClient.mutate({
         mutation: TRACK_SEARCH_EVENT,
         variables: {
@@ -107,10 +116,10 @@ class AnalyticsService {
           },
         },
       });
-      
+
       return response.data?.trackSearchEvent?.success || false;
     } catch (error) {
-      console.error('Failed to track search event:', error);
+      console.error("Failed to track search event:", error);
       return false;
     }
   }
@@ -165,7 +174,11 @@ class AnalyticsService {
   /**
    * Track when search results are shown to the user
    */
-  trackSearchResultImpression(resultIds: string[], query: string, startPosition: number = 0) {
+  trackSearchResultImpression(
+    resultIds: string[],
+    query: string,
+    startPosition: number = 0,
+  ) {
     return this.trackSearchEvent(SearchEventType.SEARCH_RESULT_IMPRESSION, {
       resultIds,
       query,
@@ -182,7 +195,12 @@ class AnalyticsService {
    * @param dwellTimeMs Time spent on the page in milliseconds
    * @param position Position of the result in search results
    */
-  trackSearchResultDwellTime(resultId: string, query: string, dwellTimeMs: number, position?: number) {
+  trackSearchResultDwellTime(
+    resultId: string,
+    query: string,
+    dwellTimeMs: number,
+    position?: number,
+  ) {
     return this.trackSearchEvent(SearchEventType.SEARCH_RESULT_DWELL_TIME, {
       resultId,
       query,
@@ -206,7 +224,11 @@ class AnalyticsService {
   /**
    * Track when a user applies a sort option
    */
-  trackSortApply(sortField: string, sortDirection: 'asc' | 'desc', query?: string) {
+  trackSortApply(
+    sortField: string,
+    sortDirection: "asc" | "desc",
+    query?: string,
+  ) {
     return this.trackSearchEvent(SearchEventType.SORT_APPLY, {
       sortField,
       sortDirection,
@@ -237,13 +259,16 @@ class AnalyticsService {
   /**
    * Track when a user views a product detail page
    */
-  trackProductView(product: {
-    id: string;
-    title: string;
-    brand: string;
-    category: string;
-    price: number;
-  }, referrer?: string) {
+  trackProductView(
+    product: {
+      id: string;
+      title: string;
+      brand: string;
+      category: string;
+      price: number;
+    },
+    referrer?: string,
+  ) {
     return this.trackSearchEvent(SearchEventType.PRODUCT_VIEW, {
       productId: product.id,
       productName: product.title,
@@ -257,13 +282,17 @@ class AnalyticsService {
   /**
    * Track when a user adds a product to cart
    */
-  trackAddToCart(product: {
-    id: string;
-    title: string;
-    brand: string;
-    category: string;
-    price: number;
-  }, quantity: number = 1, selectedAttributes?: Record<string, string>) {
+  trackAddToCart(
+    product: {
+      id: string;
+      title: string;
+      brand: string;
+      category: string;
+      price: number;
+    },
+    quantity: number = 1,
+    selectedAttributes?: Record<string, string>,
+  ) {
     return this.trackSearchEvent(SearchEventType.ADD_TO_CART, {
       productId: product.id,
       productName: product.title,
@@ -278,7 +307,11 @@ class AnalyticsService {
   /**
    * Track when a user selects a product attribute (size, color, etc.)
    */
-  trackProductAttributeSelect(productId: string, attributeKey: string, attributeValue: string) {
+  trackProductAttributeSelect(
+    productId: string,
+    attributeKey: string,
+    attributeValue: string,
+  ) {
     return this.trackSearchEvent(SearchEventType.PRODUCT_ATTRIBUTE_SELECT, {
       productId,
       attributeKey,

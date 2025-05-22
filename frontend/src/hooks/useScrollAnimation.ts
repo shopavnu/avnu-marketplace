@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject, useCallback } from 'react';
+import { useState, useEffect, RefObject, useCallback } from "react";
 
 interface ScrollAnimationOptions {
   threshold?: number;
@@ -8,7 +8,7 @@ interface ScrollAnimationOptions {
 
 interface ScrollPosition {
   scrollY: number;
-  scrollDirection: 'up' | 'down' | 'none';
+  scrollDirection: "up" | "down" | "none";
   isScrolled: boolean;
   isAtTop: boolean;
   isAtBottom: boolean;
@@ -20,10 +20,10 @@ interface ScrollPosition {
  */
 export function useInView(
   ref: RefObject<HTMLElement>,
-  options: ScrollAnimationOptions = {}
+  options: ScrollAnimationOptions = {},
 ) {
   const [isInView, setIsInView] = useState(false);
-  const { threshold = 0.1, rootMargin = '0px', triggerOnce = false } = options;
+  const { threshold = 0.1, rootMargin = "0px", triggerOnce = false } = options;
 
   useEffect(() => {
     const element = ref.current;
@@ -41,7 +41,7 @@ export function useInView(
       {
         threshold,
         rootMargin,
-      }
+      },
     );
 
     observer.observe(element);
@@ -60,7 +60,7 @@ export function useInView(
 export function useScrollPosition(): ScrollPosition {
   const [scrollPosition, setScrollPosition] = useState<ScrollPosition>({
     scrollY: 0,
-    scrollDirection: 'none',
+    scrollDirection: "none",
     isScrolled: false,
     isAtTop: true,
     isAtBottom: false,
@@ -70,24 +70,28 @@ export function useScrollPosition(): ScrollPosition {
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
     const previousScrollY = scrollPosition.scrollY;
-    const scrollDirection = 
-      currentScrollY > previousScrollY ? 'down' : 
-      currentScrollY < previousScrollY ? 'up' : 'none';
-    
+    const scrollDirection =
+      currentScrollY > previousScrollY
+        ? "down"
+        : currentScrollY < previousScrollY
+          ? "up"
+          : "none";
+
     const documentHeight = Math.max(
       document.body.scrollHeight,
       document.body.offsetHeight,
       document.documentElement.clientHeight,
       document.documentElement.scrollHeight,
-      document.documentElement.offsetHeight
+      document.documentElement.offsetHeight,
     );
-    
+
     const windowHeight = window.innerHeight;
     const scrollableHeight = documentHeight - windowHeight;
-    const scrollPercentage = scrollableHeight > 0 
-      ? Math.min(Math.max(currentScrollY / scrollableHeight, 0), 1) * 100
-      : 0;
-    
+    const scrollPercentage =
+      scrollableHeight > 0
+        ? Math.min(Math.max(currentScrollY / scrollableHeight, 0), 1) * 100
+        : 0;
+
     setScrollPosition({
       scrollY: currentScrollY,
       scrollDirection,
@@ -99,8 +103,8 @@ export function useScrollPosition(): ScrollPosition {
   }, [scrollPosition.scrollY]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
   return scrollPosition;
@@ -111,18 +115,20 @@ export function useScrollPosition(): ScrollPosition {
  */
 export function useScrollAnimation(
   ref: RefObject<HTMLElement>,
-  options: ScrollAnimationOptions = {}
+  options: ScrollAnimationOptions = {},
 ) {
   const isInView = useInView(ref, options);
   const { scrollY, scrollDirection, scrollPercentage } = useScrollPosition();
-  
+
   return {
     isInView,
     scrollY,
     scrollDirection,
     scrollPercentage,
     // Calculate animation progress based on element position
-    animationProgress: isInView ? Math.min(Math.max((scrollPercentage - 10) / 80, 0), 1) : 0,
+    animationProgress: isInView
+      ? Math.min(Math.max((scrollPercentage - 10) / 80, 0), 1)
+      : 0,
   };
 }
 

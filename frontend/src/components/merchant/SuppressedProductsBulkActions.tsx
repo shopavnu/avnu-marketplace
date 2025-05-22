@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { 
-  ArrowPathIcon, 
+import { useState } from "react";
+import {
+  ArrowPathIcon,
   CheckCircleIcon,
   XMarkIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
-import { Product } from '@/types/product';
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import { Product } from "@/types/product";
 
 interface SuppressedProductsBulkActionsProps {
   selectedProducts: Product[];
@@ -14,12 +14,9 @@ interface SuppressedProductsBulkActionsProps {
   onClearSelection: () => void;
 }
 
-const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps> = ({
-  selectedProducts,
-  onRevalidate,
-  onBulkEdit,
-  onClearSelection
-}) => {
+const SuppressedProductsBulkActions: React.FC<
+  SuppressedProductsBulkActionsProps
+> = ({ selectedProducts, onRevalidate, onBulkEdit, onClearSelection }) => {
   const [isActionInProgress, setIsActionInProgress] = useState(false);
   const [actionResult, setActionResult] = useState<{
     success: boolean;
@@ -28,20 +25,20 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
 
   const handleRevalidate = async () => {
     if (selectedProducts.length === 0) return;
-    
+
     setIsActionInProgress(true);
     setActionResult(null);
-    
+
     try {
-      await onRevalidate(selectedProducts.map(p => p.id));
+      await onRevalidate(selectedProducts.map((p) => p.id));
       setActionResult({
         success: true,
-        message: `${selectedProducts.length} product(s) revalidated successfully.`
+        message: `${selectedProducts.length} product(s) revalidated successfully.`,
       });
     } catch (error) {
       setActionResult({
         success: false,
-        message: 'Failed to revalidate products. Please try again.'
+        message: "Failed to revalidate products. Please try again.",
       });
     } finally {
       setIsActionInProgress(false);
@@ -50,7 +47,7 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
 
   const handleBulkEdit = () => {
     if (selectedProducts.length === 0) return;
-    onBulkEdit(selectedProducts.map(p => p.id));
+    onBulkEdit(selectedProducts.map((p) => p.id));
   };
 
   // If no products are selected, don't render the component
@@ -65,7 +62,10 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
           <div className="flex items-center justify-between flex-wrap">
             <div className="flex-1 flex items-center">
               <span className="flex p-2 rounded-lg bg-sage-800">
-                <CheckCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                <CheckCircleIcon
+                  className="h-6 w-6 text-white"
+                  aria-hidden="true"
+                />
               </span>
               <p className="ml-3 font-medium text-white truncate">
                 <span className="md:hidden">
@@ -76,12 +76,16 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
                 </span>
               </p>
             </div>
-            
+
             <div className="flex-shrink-0 flex items-center space-x-2">
               {actionResult && (
-                <div className={`flex items-center px-3 py-1 rounded-md text-sm ${
-                  actionResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <div
+                  className={`flex items-center px-3 py-1 rounded-md text-sm ${
+                    actionResult.success
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
                   {actionResult.success ? (
                     <CheckCircleIcon className="h-4 w-4 mr-1" />
                   ) : (
@@ -90,7 +94,7 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
                   <span>{actionResult.message}</span>
                 </div>
               )}
-              
+
               <button
                 type="button"
                 onClick={handleRevalidate}
@@ -104,7 +108,7 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
                 )}
                 Revalidate
               </button>
-              
+
               <button
                 type="button"
                 onClick={handleBulkEdit}
@@ -113,7 +117,7 @@ const SuppressedProductsBulkActions: React.FC<SuppressedProductsBulkActionsProps
               >
                 Bulk Edit
               </button>
-              
+
               <button
                 type="button"
                 onClick={onClearSelection}

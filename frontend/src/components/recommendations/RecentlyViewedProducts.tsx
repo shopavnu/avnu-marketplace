@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Product } from '../../types/product';
-import ProductCard from '../product/ProductCard';
-import ProductCardSkeleton from '../product/ProductCardSkeleton';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
-import { useSession } from '../../hooks/useSession';
+import React, { useEffect, useState } from "react";
+import { Product } from "../../types/product";
+import ProductCard from "../product/ProductCard";
+import ProductCardSkeleton from "../product/ProductCardSkeleton";
+import { useUserPreferences } from "../../hooks/useUserPreferences";
+import { useSession } from "../../hooks/useSession";
 // Import ProductService as a class
-import { ProductService } from '../../services/product.service';
+import { ProductService } from "../../services/product.service";
 
 interface RecentlyViewedProductsProps {
   limit?: number;
@@ -18,7 +18,7 @@ interface RecentlyViewedProductsProps {
  */
 const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
   limit = 4,
-  title = 'Recently viewed',
+  title = "Recently viewed",
   excludeProductId,
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -33,57 +33,71 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
       try {
         // Filter out the current product if excludeProductId is provided
         const filteredProductIds = excludeProductId
-          ? userPreferences.recentlyViewedProducts.filter(id => id !== excludeProductId)
+          ? userPreferences.recentlyViewedProducts.filter(
+              (id) => id !== excludeProductId,
+            )
           : userPreferences.recentlyViewedProducts;
-        
+
         // Get the most recent products up to the limit
         const recentProductIds = filteredProductIds.slice(0, limit);
-        
+
         if (recentProductIds.length === 0) {
           setProducts([]);
           return;
         }
-        
+
         // Fetch product details for the IDs
-        const fetchedProducts = await ProductService.getProductsByIds(recentProductIds);
-        
+        const fetchedProducts =
+          await ProductService.getProductsByIds(recentProductIds);
+
         // Filter out suppressed products
-        const validProducts = fetchedProducts.filter((product: Product) => !product.isSuppressed);
-        
+        const validProducts = fetchedProducts.filter(
+          (product: Product) => !product.isSuppressed,
+        );
+
         // Preserve the original order of recently viewed products
         const orderedProducts = recentProductIds
-          .map(id => validProducts.find((product: Product) => product.id === id))
+          .map((id) =>
+            validProducts.find((product: Product) => product.id === id),
+          )
           .filter((product): product is Product => !!product);
-          
+
         // If we have fewer products than the limit after filtering, try to fetch more
-        if (orderedProducts.length < limit && userPreferences.recentlyViewedProducts.length > recentProductIds.length) {
+        if (
+          orderedProducts.length < limit &&
+          userPreferences.recentlyViewedProducts.length >
+            recentProductIds.length
+        ) {
           // Get additional product IDs beyond the initial limit
           const additionalIds = userPreferences.recentlyViewedProducts
-            .filter(id => id !== excludeProductId && !recentProductIds.includes(id))
+            .filter(
+              (id) => id !== excludeProductId && !recentProductIds.includes(id),
+            )
             .slice(0, limit - orderedProducts.length + 3); // Fetch a few extra to account for possible suppressed products
-            
+
           if (additionalIds.length > 0) {
             // Fetch additional products
-            const additionalProducts = await ProductService.getProductsByIds(additionalIds);
-            
+            const additionalProducts =
+              await ProductService.getProductsByIds(additionalIds);
+
             // Filter out suppressed products
             const validAdditionalProducts = additionalProducts
               .filter((product: Product) => !product.isSuppressed)
               .slice(0, limit - orderedProducts.length);
-              
+
             // Add to ordered products
             orderedProducts.push(...validAdditionalProducts);
           }
         }
-        
+
         setProducts(orderedProducts);
       } catch (error) {
-        console.error('Error fetching recently viewed products:', error);
+        console.error("Error fetching recently viewed products:", error);
         setError(true);
       } finally {
         setLoading(false);
@@ -96,31 +110,36 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
   // Track impression when products are displayed
   useEffect(() => {
     if (products.length > 0) {
-      trackInteraction('RECOMMENDATION_IMPRESSION', {
-        recommendationType: 'recently_viewed',
-        recommendedProducts: products.map(p => p.id),
+      trackInteraction("RECOMMENDATION_IMPRESSION", {
+        recommendationType: "recently_viewed",
+        recommendedProducts: products.map((p) => p.id),
       });
     }
   }, [products, trackInteraction]);
 
   // Handle product click
   const handleProductClick = (product: Product) => {
-    trackInteraction('RECOMMENDATION_CLICK', {
+    trackInteraction("RECOMMENDATION_CLICK", {
       targetProductId: product.id,
-      recommendationType: 'recently_viewed',
+      recommendationType: "recently_viewed",
     });
   };
 
   if (loading) {
     return (
-      <div className="recently-viewed-container" data-testid="recently-viewed-loading">
+      <div
+        className="recently-viewed-container"
+        data-testid="recently-viewed-loading"
+      >
         <h2 className="recently-viewed-title">{title}</h2>
         <div className="recently-viewed-grid">
-          {Array(limit).fill(0).map((_, index) => (
-            <div key={`skeleton-${index}`} className="recently-viewed-item">
-              <ProductCardSkeleton />
-            </div>
-          ))}
+          {Array(limit)
+            .fill(0)
+            .map((_, index) => (
+              <div key={`skeleton-${index}`} className="recently-viewed-item">
+                <ProductCardSkeleton />
+              </div>
+            ))}
         </div>
       </div>
     );
@@ -128,7 +147,10 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
 
   if (error) {
     return (
-      <div className="recently-viewed-error" data-testid="recently-viewed-error">
+      <div
+        className="recently-viewed-error"
+        data-testid="recently-viewed-error"
+      >
         <p>Unable to load recently viewed products</p>
       </div>
     );
@@ -136,25 +158,33 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
 
   if (products.length === 0) {
     return (
-      <div className="recently-viewed-empty" data-testid="recently-viewed-empty">
+      <div
+        className="recently-viewed-empty"
+        data-testid="recently-viewed-empty"
+      >
         <p>No recently viewed products</p>
       </div>
     );
   }
 
   return (
-    <div className="recently-viewed-container" data-testid="recently-viewed-container">
+    <div
+      className="recently-viewed-container"
+      data-testid="recently-viewed-container"
+    >
       <h2 className="recently-viewed-title">{title}</h2>
       <div className="recently-viewed-grid">
         {products.map((product) => (
           <div key={product.id} className="recently-viewed-item">
-            <ProductCard 
-              product={product} 
+            <ProductCard
+              product={product}
               onClick={handleProductClick}
-              trackImpression={() => trackInteraction('RECOMMENDATION_IMPRESSION', {
-                recommendationType: 'recently_viewed',
-                recommendedProductId: product.id,
-              })}
+              trackImpression={() =>
+                trackInteraction("RECOMMENDATION_IMPRESSION", {
+                  recommendationType: "recently_viewed",
+                  recommendedProductId: product.id,
+                })
+              }
               testId={`recently-viewed-${product.id}`}
             />
           </div>
@@ -166,28 +196,28 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
           padding: 1rem 0;
           border-top: 1px solid #f0f0f0;
         }
-        
+
         .recently-viewed-title {
           font-size: 1.5rem;
           font-weight: 600;
           margin-bottom: 1rem;
         }
-        
+
         .recently-viewed-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
           gap: 1.5rem;
         }
-        
+
         .recently-viewed-item {
           cursor: pointer;
           transition: transform 0.2s ease-in-out;
         }
-        
+
         .recently-viewed-item:hover {
           transform: translateY(-5px);
         }
-        
+
         .recently-viewed-loading {
           width: 100%;
           height: 300px;
@@ -195,16 +225,21 @@ const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
           align-items: center;
           justify-content: center;
         }
-        
+
         .loading-skeleton {
           width: 100%;
           height: 200px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background: linear-gradient(
+            90deg,
+            #f0f0f0 25%,
+            #e0e0e0 50%,
+            #f0f0f0 75%
+          );
           background-size: 200% 100%;
           animation: loading 1.5s infinite;
           border-radius: 8px;
         }
-        
+
         @keyframes loading {
           0% {
             background-position: 200% 0;

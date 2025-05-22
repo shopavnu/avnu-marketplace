@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import { GetServerSideProps } from 'next';
-import { products } from '@/data/products';
-import { discoverySections, getSectionsInOrder, Section, SectionType } from '@/data/sections';
-import { categories, Category } from '@/data/categories';
-import ContentRow from '@/components/common/ContentRow';
-import CategoryPills from '@/components/common/CategoryPills';
-import OptimizedPersonalizedGrid from '@/components/discovery/OptimizedPersonalizedGrid';
-import useProgressiveLoading from '@/hooks/useProgressiveLoading';
-import PriorityContentLoader from '@/components/common/PriorityContentLoader';
-import { ProductGridSkeleton } from '@/components/common/SkeletonLoader';
+import React, { useState, useEffect } from "react";
+import Head from "next/head";
+import { GetServerSideProps } from "next";
+import { products } from "@/data/products";
+import {
+  discoverySections,
+  getSectionsInOrder,
+  Section,
+  SectionType,
+} from "@/data/sections";
+import { categories, Category } from "@/data/categories";
+import ContentRow from "@/components/common/ContentRow";
+import CategoryPills from "@/components/common/CategoryPills";
+import OptimizedPersonalizedGrid from "@/components/discovery/OptimizedPersonalizedGrid";
+import useProgressiveLoading from "@/hooks/useProgressiveLoading";
+import PriorityContentLoader from "@/components/common/PriorityContentLoader";
+import { ProductGridSkeleton } from "@/components/common/SkeletonLoader";
 
 interface EnhancedDiscoveryPageProps {
   initialSections: Section[];
@@ -20,74 +25,80 @@ interface EnhancedDiscoveryPageProps {
  * Enhanced discovery page with Netflix-inspired horizontal rows
  * and Airbnb-inspired category navigation
  */
-const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({ 
+const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({
   initialSections,
-  allCategories
+  allCategories,
 }) => {
   const [sections, setSections] = useState<Section[]>(initialSections);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [mounted, setMounted] = useState(false);
-  
+
   // Set mounted state on client-side
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   // Populate sections with products
   useEffect(() => {
     if (!mounted) return;
-    
+
     // Add products to each section
-    const sectionsWithProducts = sections.map(section => {
+    const sectionsWithProducts = sections.map((section) => {
       // Filter products based on section type
-      let sectionProducts = products.filter(product => 
-        product.sectionTypes?.includes(section.type)
+      let sectionProducts = products.filter((product) =>
+        product.sectionTypes?.includes(section.type),
       );
-      
+
       // Apply category filter if selected
       if (selectedCategoryId) {
-        sectionProducts = sectionProducts.filter(product => 
-          product.categories?.includes(selectedCategoryId)
+        sectionProducts = sectionProducts.filter((product) =>
+          product.categories?.includes(selectedCategoryId),
         );
       }
-      
+
       // Limit to the specified product count
-      const limitedProducts = sectionProducts.slice(0, section.productCount || 12);
-      
+      const limitedProducts = sectionProducts.slice(
+        0,
+        section.productCount || 12,
+      );
+
       // Return section with products
       return {
         ...section,
-        items: limitedProducts
+        items: limitedProducts,
       };
     });
-    
+
     setSections(sectionsWithProducts);
   }, [sections, selectedCategoryId, mounted]);
-  
+
   // Handle category selection
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
   };
-  
+
   // Prepare priority content (above the fold)
   const priorityContent = (
     <>
       {/* Hero Section */}
       <section className="mb-12">
         <div className="relative rounded-xl overflow-hidden h-[50vh] min-h-[400px]">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ 
-              backgroundImage: 'url(https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)',
-              filter: 'brightness(0.85)'
+            style={{
+              backgroundImage:
+                "url(https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)",
+              filter: "brightness(0.85)",
             }}
           />
-          
+
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-          
+
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white z-10">
             <div className="container mx-auto max-w-6xl">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">Discover Sustainable Products</h1>
+              <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+                Discover Sustainable Products
+              </h1>
               <p className="text-xl md:text-2xl mb-6 max-w-2xl drop-shadow-md">
                 Shop from ethical brands that align with your values
               </p>
@@ -98,65 +109,72 @@ const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({
           </div>
         </div>
       </section>
-      
+
       {/* Category Pills - Airbnb Style */}
       <section className="mb-12">
-        <CategoryPills 
+        <CategoryPills
           categories={allCategories}
           selectedCategoryId={selectedCategoryId}
           onSelectCategory={handleCategorySelect}
         />
       </section>
-      
+
       {/* Personalized "For You" Section */}
       <section className="mb-16">
-        <OptimizedPersonalizedGrid 
+        <OptimizedPersonalizedGrid
           title="For You"
           maxItems={12}
           columns={4}
           gap={24}
         />
       </section>
-      
+
       {/* First Netflix-style Row */}
-      {sections.length > 0 && sections[0].items && sections[0].items.length > 0 && (
-        <ContentRow 
-          title={sections[0].title}
-          subtitle={sections[0].description || ''}
-          products={sections[0].items}
-          showSeeAll={true}
-          seeAllUrl={`/category/${sections[0].type.toLowerCase()}`}
-        />
-      )}
+      {sections.length > 0 &&
+        sections[0].items &&
+        sections[0].items.length > 0 && (
+          <ContentRow
+            title={sections[0].title}
+            subtitle={sections[0].description || ""}
+            products={sections[0].items}
+            showSeeAll={true}
+            seeAllUrl={`/category/${sections[0].type.toLowerCase()}`}
+          />
+        )}
     </>
   );
-  
+
   // Prepare deferred content (below the fold)
   const deferredContent = (
     <>
       {/* Remaining Netflix-style Rows */}
-      {sections.slice(1).map((section, index) => (
-        section.items && section.items.length > 0 ? (
-          <ContentRow 
-            key={section.id}
-            title={section.title}
-            subtitle={section.description || ''}
-            products={section.items}
-            showSeeAll={true}
-            seeAllUrl={`/category/${section.type.toLowerCase()}`}
-          />
-        ) : null
-      ))}
+      {sections
+        .slice(1)
+        .map((section, index) =>
+          section.items && section.items.length > 0 ? (
+            <ContentRow
+              key={section.id}
+              title={section.title}
+              subtitle={section.description || ""}
+              products={section.items}
+              showSeeAll={true}
+              seeAllUrl={`/category/${section.type.toLowerCase()}`}
+            />
+          ) : null,
+        )}
     </>
   );
-  
+
   return (
     <>
       <Head>
         <title>Enhanced Discovery | Avnu Marketplace</title>
-        <meta name="description" content="Discover sustainable and ethical products" />
+        <meta
+          name="description"
+          content="Discover sustainable and ethical products"
+        />
       </Head>
-      
+
       <main className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <PriorityContentLoader
@@ -165,7 +183,9 @@ const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({
             placeholder={
               <div className="space-y-16">
                 <div>
-                  <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
+                  <h2 className="text-2xl font-semibold mb-6">
+                    Featured Products
+                  </h2>
                   <ProductGridSkeleton count={4} columns={4} gap="1.5rem" />
                 </div>
                 <div>
@@ -177,18 +197,20 @@ const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({
             threshold={400}
           />
         </div>
-        
+
         {/* Scroll Progress Indicator */}
         <div className="fixed bottom-0 left-0 w-full h-1 bg-gray-200">
-          <div 
-            id="scroll-progress" 
+          <div
+            id="scroll-progress"
             className="h-full bg-sage transition-all duration-100 ease-out"
-            style={{ width: '0%' }}
+            style={{ width: "0%" }}
           ></div>
         </div>
-        
+
         {/* Script to update scroll progress */}
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           document.addEventListener('DOMContentLoaded', function() {
             const progressBar = document.getElementById('scroll-progress');
             
@@ -204,7 +226,9 @@ const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({
               });
             }
           });
-        `}} />
+        `,
+          }}
+        />
       </main>
     </>
   );
@@ -215,11 +239,11 @@ const EnhancedDiscoveryPage: React.FC<EnhancedDiscoveryPageProps> = ({
 export const getServerSideProps = async () => {
   // Get sections in priority order
   const orderedSections = getSectionsInOrder();
-  
+
   return {
     props: {
       initialSections: orderedSections,
-      allCategories: categories
+      allCategories: categories,
     },
     // No revalidate needed for server-side rendering
   };

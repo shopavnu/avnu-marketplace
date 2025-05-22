@@ -1,16 +1,23 @@
-import React from 'react';
-import Head from 'next/head';
-import { motion } from 'framer-motion';
-import { ScrollSection, ScrollItem, ScrollProgressBar } from '@/components/common';
-import { products } from '@/data/products';
-import MasonryProductCard from '@/components/products/MasonryProductCard';
+import React from "react";
+import Head from "next/head";
+import { motion } from "framer-motion";
+import {
+  ScrollSection,
+  ScrollItem,
+  ScrollProgressBar,
+} from "@/components/common";
+import { products } from "@/data/products";
+import MasonryProductCard from "@/components/products/MasonryProductCard";
 
 export default function ScrollAnimationsExample() {
   return (
     <div className="min-h-screen bg-warm-white">
       <Head>
         <title>Scroll Animations | Avnu Marketplace</title>
-        <meta name="description" content="Demonstration of scroll-based animations and interactions" />
+        <meta
+          name="description"
+          content="Demonstration of scroll-based animations and interactions"
+        />
       </Head>
 
       {/* Scroll Progress Indicator */}
@@ -28,7 +35,8 @@ export default function ScrollAnimationsExample() {
             Scroll Animations
           </h1>
           <p className="text-lg md:text-xl text-neutral-gray max-w-2xl mx-auto">
-            Explore how scroll-based animations enhance the vertical discovery experience
+            Explore how scroll-based animations enhance the vertical discovery
+            experience
           </p>
           <motion.div
             className="mt-8 animate-bounce"
@@ -52,7 +60,7 @@ export default function ScrollAnimationsExample() {
             </svg>
           </motion.div>
         </motion.div>
-        
+
         {/* Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           {Array.from({ length: 20 }).map((_, i) => (
@@ -71,7 +79,7 @@ export default function ScrollAnimationsExample() {
                 duration: 2,
                 delay: i * 0.1,
                 repeat: Infinity,
-                repeatType: 'reverse',
+                repeatType: "reverse",
                 repeatDelay: Math.random() * 5,
               }}
             />
@@ -94,7 +102,7 @@ export default function ScrollAnimationsExample() {
             Elements fade in and slide up as they enter the viewport
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[1, 2, 3].map((item) => (
             <ScrollItem key={item} delay={item * 0.1}>
@@ -106,8 +114,9 @@ export default function ScrollAnimationsExample() {
                   Feature {item}
                 </h3>
                 <p className="text-neutral-gray">
-                  This element fades in and slides up when it enters the viewport.
-                  The animation is staggered based on the item's position.
+                  This element fades in and slides up when it enters the
+                  viewport. The animation is staggered based on the item's
+                  position.
                 </p>
               </div>
             </ScrollItem>
@@ -116,10 +125,7 @@ export default function ScrollAnimationsExample() {
       </ScrollSection>
 
       {/* Parallax Section */}
-      <ScrollSection
-        bgColor="bg-sage/10"
-        className="py-20 overflow-hidden"
-      >
+      <ScrollSection bgColor="bg-sage/10" className="py-20 overflow-hidden">
         <div className="relative">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-montserrat font-medium text-charcoal mb-4">
@@ -129,7 +135,7 @@ export default function ScrollAnimationsExample() {
               Elements move at different speeds as you scroll
             </p>
           </div>
-          
+
           <div className="relative h-[60vh] overflow-hidden">
             {[1, 2, 3, 4, 5].map((layer) => (
               <motion.div
@@ -141,15 +147,15 @@ export default function ScrollAnimationsExample() {
                 initial={{ y: 0 }}
                 whileInView={{
                   y: layer * 20,
-                  transition: { duration: 0.8, ease: "easeOut" }
+                  transition: { duration: 0.8, ease: "easeOut" },
                 }}
                 viewport={{ once: false, margin: "-100px" }}
               >
-                <div 
+                <div
                   className="w-40 h-40 rounded-full bg-white/80 flex items-center justify-center"
                   style={{
-                    transform: `scale(${1 + (layer * 0.5)})`,
-                    opacity: 1 - (layer * 0.15),
+                    transform: `scale(${1 + layer * 0.5})`,
+                    opacity: 1 - layer * 0.15,
                   }}
                 >
                   <span className="text-sage font-montserrat font-medium text-2xl">
@@ -163,10 +169,7 @@ export default function ScrollAnimationsExample() {
       </ScrollSection>
 
       {/* Masonry Grid with Scroll Reveal */}
-      <ScrollSection
-        bgColor="bg-white"
-        className="py-20"
-      >
+      <ScrollSection bgColor="bg-white" className="py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-montserrat font-medium text-charcoal mb-4">
             Masonry Grid with Scroll Reveal
@@ -175,7 +178,7 @@ export default function ScrollAnimationsExample() {
             Products appear as you scroll down the page
           </p>
         </div>
-        
+
         <div className="masonry-grid">
           <style jsx>{`
             .masonry-grid {
@@ -193,12 +196,22 @@ export default function ScrollAnimationsExample() {
               }
             }
           `}</style>
-          
+
           {products.slice(0, 6).map((product, index) => (
-            <ScrollItem key={product.id} delay={index * 0.1} className="break-inside-avoid mb-6">
-              <MasonryProductCard 
+            <ScrollItem
+              key={product.id}
+              delay={index * 0.1}
+              className="break-inside-avoid mb-6"
+            >
+              <MasonryProductCard
                 product={product}
-                size={index % 3 === 0 ? 'large' : index % 3 === 1 ? 'medium' : 'small'}
+                size={
+                  index % 3 === 0
+                    ? "large"
+                    : index % 3 === 1
+                      ? "medium"
+                      : "small"
+                }
                 showDescription={index % 3 === 0}
               />
             </ScrollItem>
@@ -207,16 +220,14 @@ export default function ScrollAnimationsExample() {
       </ScrollSection>
 
       {/* Conclusion Section */}
-      <ScrollSection
-        bgColor="bg-sage/5"
-        className="py-20"
-      >
+      <ScrollSection bgColor="bg-sage/5" className="py-20">
         <div className="text-center">
           <h2 className="text-3xl font-montserrat font-medium text-charcoal mb-4">
             Ready to Implement
           </h2>
           <p className="text-neutral-gray max-w-2xl mx-auto mb-8">
-            These scroll-based animations are ready to be integrated into the Avnu Marketplace homepage
+            These scroll-based animations are ready to be integrated into the
+            Avnu Marketplace homepage
           </p>
           <ScrollItem>
             <motion.a

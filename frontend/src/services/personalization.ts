@@ -1,15 +1,15 @@
-import { Product } from '@/data/products';
-import { Category } from '@/data/categories';
-import { SectionType } from '@/data/sections';
+import { Product } from "@/data/products";
+import { Category } from "@/data/categories";
+import { SectionType } from "@/data/sections";
 
 // Constants
 const STORAGE_KEYS = {
-  VIEWED_PRODUCTS: 'avnu_viewed_products',
-  VIEWED_CATEGORIES: 'avnu_viewed_categories',
-  FAVORITE_PRODUCTS: 'avnu_favorite_products',
-  FAVORITE_CATEGORIES: 'avnu_favorite_categories',
-  LAST_VISIT: 'avnu_last_visit',
-  USER_PREFERENCES: 'avnu_user_preferences',
+  VIEWED_PRODUCTS: "avnu_viewed_products",
+  VIEWED_CATEGORIES: "avnu_viewed_categories",
+  FAVORITE_PRODUCTS: "avnu_favorite_products",
+  FAVORITE_CATEGORIES: "avnu_favorite_categories",
+  LAST_VISIT: "avnu_last_visit",
+  USER_PREFERENCES: "avnu_user_preferences",
 };
 
 const MAX_HISTORY_ITEMS = 100;
@@ -64,7 +64,7 @@ const defaultUserPreferences: UserPreferences = {
 // Initialize personalization data from localStorage
 const initializePersonalizationData = (): PersonalizationData => {
   // Only run in browser environment
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return {
       viewedProducts: [],
       viewedCategories: [],
@@ -76,13 +76,25 @@ const initializePersonalizationData = (): PersonalizationData => {
   }
 
   try {
-    const viewedProducts = JSON.parse(localStorage.getItem(STORAGE_KEYS.VIEWED_PRODUCTS) || '[]');
-    const viewedCategories = JSON.parse(localStorage.getItem(STORAGE_KEYS.VIEWED_CATEGORIES) || '[]');
-    const favoriteProducts = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITE_PRODUCTS) || '[]');
-    const favoriteCategories = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITE_CATEGORIES) || '[]');
-    const lastVisit = parseInt(localStorage.getItem(STORAGE_KEYS.LAST_VISIT) || Date.now().toString(), 10);
+    const viewedProducts = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.VIEWED_PRODUCTS) || "[]",
+    );
+    const viewedCategories = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.VIEWED_CATEGORIES) || "[]",
+    );
+    const favoriteProducts = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.FAVORITE_PRODUCTS) || "[]",
+    );
+    const favoriteCategories = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.FAVORITE_CATEGORIES) || "[]",
+    );
+    const lastVisit = parseInt(
+      localStorage.getItem(STORAGE_KEYS.LAST_VISIT) || Date.now().toString(),
+      10,
+    );
     const userPreferences = JSON.parse(
-      localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES) || JSON.stringify(defaultUserPreferences)
+      localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES) ||
+        JSON.stringify(defaultUserPreferences),
     );
 
     return {
@@ -94,7 +106,7 @@ const initializePersonalizationData = (): PersonalizationData => {
       userPreferences,
     };
   } catch (error) {
-    console.error('Error initializing personalization data:', error);
+    console.error("Error initializing personalization data:", error);
     return {
       viewedProducts: [],
       viewedCategories: [],
@@ -108,7 +120,7 @@ const initializePersonalizationData = (): PersonalizationData => {
 
 /**
  * Personalization Service
- * 
+ *
  * A service for tracking user behavior and generating personalized recommendations
  * for the "For You" section of the Avnu Marketplace.
  */
@@ -132,14 +144,17 @@ class PersonalizationService {
    * This should be called when the app starts
    */
   public initialize(): void {
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return;
+
     this.data = initializePersonalizationData();
     this.initialized = true;
-    
+
     // Update last visit timestamp
     this.data.lastVisit = Date.now();
-    localStorage.setItem(STORAGE_KEYS.LAST_VISIT, this.data.lastVisit.toString());
+    localStorage.setItem(
+      STORAGE_KEYS.LAST_VISIT,
+      this.data.lastVisit.toString(),
+    );
   }
 
   /**
@@ -149,7 +164,7 @@ class PersonalizationService {
    */
   public trackProductView(productId: string, duration?: number): void {
     if (!this.initialized) this.initialize();
-    
+
     const viewedItem: ViewedItem = {
       id: productId,
       timestamp: Date.now(),
@@ -158,14 +173,20 @@ class PersonalizationService {
 
     // Add to the beginning of the array for recency
     this.data.viewedProducts.unshift(viewedItem);
-    
+
     // Limit the array size
     if (this.data.viewedProducts.length > MAX_HISTORY_ITEMS) {
-      this.data.viewedProducts = this.data.viewedProducts.slice(0, MAX_HISTORY_ITEMS);
+      this.data.viewedProducts = this.data.viewedProducts.slice(
+        0,
+        MAX_HISTORY_ITEMS,
+      );
     }
 
     // Save to localStorage
-    this.saveToLocalStorage(STORAGE_KEYS.VIEWED_PRODUCTS, this.data.viewedProducts);
+    this.saveToLocalStorage(
+      STORAGE_KEYS.VIEWED_PRODUCTS,
+      this.data.viewedProducts,
+    );
   }
 
   /**
@@ -175,7 +196,7 @@ class PersonalizationService {
    */
   public trackCategoryView(categoryId: string, duration?: number): void {
     if (!this.initialized) this.initialize();
-    
+
     const viewedItem: ViewedItem = {
       id: categoryId,
       timestamp: Date.now(),
@@ -184,14 +205,20 @@ class PersonalizationService {
 
     // Add to the beginning of the array for recency
     this.data.viewedCategories.unshift(viewedItem);
-    
+
     // Limit the array size
     if (this.data.viewedCategories.length > MAX_HISTORY_ITEMS) {
-      this.data.viewedCategories = this.data.viewedCategories.slice(0, MAX_HISTORY_ITEMS);
+      this.data.viewedCategories = this.data.viewedCategories.slice(
+        0,
+        MAX_HISTORY_ITEMS,
+      );
     }
 
     // Save to localStorage
-    this.saveToLocalStorage(STORAGE_KEYS.VIEWED_CATEGORIES, this.data.viewedCategories);
+    this.saveToLocalStorage(
+      STORAGE_KEYS.VIEWED_CATEGORIES,
+      this.data.viewedCategories,
+    );
   }
 
   /**
@@ -201,18 +228,24 @@ class PersonalizationService {
    */
   public toggleFavoriteProduct(productId: string): boolean {
     if (!this.initialized) this.initialize();
-    
+
     const index = this.data.favoriteProducts.indexOf(productId);
-    
+
     if (index === -1) {
       // Add to favorites
       this.data.favoriteProducts.push(productId);
-      this.saveToLocalStorage(STORAGE_KEYS.FAVORITE_PRODUCTS, this.data.favoriteProducts);
+      this.saveToLocalStorage(
+        STORAGE_KEYS.FAVORITE_PRODUCTS,
+        this.data.favoriteProducts,
+      );
       return true;
     } else {
       // Remove from favorites
       this.data.favoriteProducts.splice(index, 1);
-      this.saveToLocalStorage(STORAGE_KEYS.FAVORITE_PRODUCTS, this.data.favoriteProducts);
+      this.saveToLocalStorage(
+        STORAGE_KEYS.FAVORITE_PRODUCTS,
+        this.data.favoriteProducts,
+      );
       return false;
     }
   }
@@ -234,18 +267,24 @@ class PersonalizationService {
    */
   public toggleFavoriteCategory(categoryId: string): boolean {
     if (!this.initialized) this.initialize();
-    
+
     const index = this.data.favoriteCategories.indexOf(categoryId);
-    
+
     if (index === -1) {
       // Add to favorites
       this.data.favoriteCategories.push(categoryId);
-      this.saveToLocalStorage(STORAGE_KEYS.FAVORITE_CATEGORIES, this.data.favoriteCategories);
+      this.saveToLocalStorage(
+        STORAGE_KEYS.FAVORITE_CATEGORIES,
+        this.data.favoriteCategories,
+      );
       return true;
     } else {
       // Remove from favorites
       this.data.favoriteCategories.splice(index, 1);
-      this.saveToLocalStorage(STORAGE_KEYS.FAVORITE_CATEGORIES, this.data.favoriteCategories);
+      this.saveToLocalStorage(
+        STORAGE_KEYS.FAVORITE_CATEGORIES,
+        this.data.favoriteCategories,
+      );
       return false;
     }
   }
@@ -256,13 +295,16 @@ class PersonalizationService {
    */
   public updateUserPreferences(preferences: Partial<UserPreferences>): void {
     if (!this.initialized) this.initialize();
-    
+
     this.data.userPreferences = {
       ...this.data.userPreferences,
       ...preferences,
     };
 
-    this.saveToLocalStorage(STORAGE_KEYS.USER_PREFERENCES, this.data.userPreferences);
+    this.saveToLocalStorage(
+      STORAGE_KEYS.USER_PREFERENCES,
+      this.data.userPreferences,
+    );
   }
 
   /**
@@ -281,10 +323,8 @@ class PersonalizationService {
    */
   public getRecentlyViewedProducts(limit: number = 10): string[] {
     if (!this.initialized) this.initialize();
-    
-    return this.data.viewedProducts
-      .slice(0, limit)
-      .map(item => item.id);
+
+    return this.data.viewedProducts.slice(0, limit).map((item) => item.id);
   }
 
   /**
@@ -294,11 +334,11 @@ class PersonalizationService {
    */
   public getFrequentlyViewedProducts(limit: number = 10): string[] {
     if (!this.initialized) this.initialize();
-    
+
     // Count product views
     const productCounts: { [key: string]: number } = {};
-    
-    this.data.viewedProducts.forEach(item => {
+
+    this.data.viewedProducts.forEach((item) => {
       productCounts[item.id] = (productCounts[item.id] || 0) + 1;
     });
 
@@ -316,21 +356,21 @@ class PersonalizationService {
    */
   public getPreferredCategories(limit: number = 5): string[] {
     if (!this.initialized) this.initialize();
-    
+
     // Count category views
     const categoryCounts: { [key: string]: number } = {};
-    
-    this.data.viewedCategories.forEach(item => {
+
+    this.data.viewedCategories.forEach((item) => {
       categoryCounts[item.id] = (categoryCounts[item.id] || 0) + 1;
     });
 
     // Add explicit preferences
-    this.data.userPreferences.preferredCategories.forEach(categoryId => {
+    this.data.userPreferences.preferredCategories.forEach((categoryId) => {
       categoryCounts[categoryId] = (categoryCounts[categoryId] || 0) + 5; // Give higher weight to explicit preferences
     });
 
     // Add favorite categories
-    this.data.favoriteCategories.forEach(categoryId => {
+    this.data.favoriteCategories.forEach((categoryId) => {
       categoryCounts[categoryId] = (categoryCounts[categoryId] || 0) + 3; // Give higher weight to favorites
     });
 
@@ -351,21 +391,20 @@ class PersonalizationService {
   public generateRecommendations(
     allProducts: Product[],
     limit: number = 24,
-    offset: number = 0
+    offset: number = 0,
   ): Product[] {
     if (!this.initialized) this.initialize();
-    
+
     // Calculate scores for each product
     const productScores = this.calculateProductScores(allProducts);
-    
+
     // Sort products by score (descending)
-    const sortedProducts = [...allProducts]
-      .sort((a, b) => {
-        const scoreA = productScores[a.id] || 0;
-        const scoreB = productScores[b.id] || 0;
-        return scoreB - scoreA;
-      });
-    
+    const sortedProducts = [...allProducts].sort((a, b) => {
+      const scoreA = productScores[a.id] || 0;
+      const scoreB = productScores[b.id] || 0;
+      return scoreB - scoreA;
+    });
+
     // Return paginated results
     return sortedProducts.slice(offset, offset + limit);
   }
@@ -380,7 +419,7 @@ class PersonalizationService {
   public loadMoreRecommendations(
     allProducts: Product[],
     currentCount: number,
-    increment: number = 12
+    increment: number = 12,
   ): Product[] {
     return this.generateRecommendations(allProducts, increment, currentCount);
   }
@@ -390,41 +429,44 @@ class PersonalizationService {
    * @param products Array of products to score
    * @returns Object mapping product IDs to scores
    */
-  private calculateProductScores(products: Product[]): { [key: string]: number } {
+  private calculateProductScores(products: Product[]): {
+    [key: string]: number;
+  } {
     const scores: { [key: string]: number } = {};
     const now = Date.now();
-    
+
     // Get user data for scoring
     const recentlyViewed = new Set(this.getRecentlyViewedProducts(20));
     const frequentlyViewed = new Set(this.getFrequentlyViewedProducts(20));
     const preferredCategories = new Set(this.getPreferredCategories());
     const favoriteProducts = new Set(this.data.favoriteProducts);
-    const { preferredBrands, preferredPriceRange, preferredAttributes } = this.data.userPreferences;
-    
+    const { preferredBrands, preferredPriceRange, preferredAttributes } =
+      this.data.userPreferences;
+
     // Calculate a score for each product
-    products.forEach(product => {
+    products.forEach((product) => {
       let score = 0;
-      
+
       // Recency factor
       if (recentlyViewed.has(product.id)) {
         score += RECENCY_WEIGHT;
       }
-      
+
       // Frequency factor
       if (frequentlyViewed.has(product.id)) {
         score += FREQUENCY_WEIGHT;
       }
-      
+
       // Category preference
       if (preferredCategories.has(product.category)) {
         score += CATEGORY_WEIGHT;
       }
-      
+
       // Brand preference
       if (preferredBrands.includes(product.brand)) {
         score += BRAND_WEIGHT;
       }
-      
+
       // Price range preference
       if (
         product.price >= preferredPriceRange.min &&
@@ -432,32 +474,32 @@ class PersonalizationService {
       ) {
         score += PRICE_RANGE_WEIGHT;
       }
-      
+
       // Attribute preferences
       Object.entries(preferredAttributes).forEach(([key, values]) => {
         const attrKey = key as keyof typeof product.attributes;
         const attrValue = product.attributes[attrKey];
         if (
-          attrValue && 
-          typeof attrValue === 'string' &&
+          attrValue &&
+          typeof attrValue === "string" &&
           values.includes(attrValue)
         ) {
           score += ATTRIBUTE_WEIGHT;
         }
       });
-      
+
       // Favorite bonus
       if (favoriteProducts.has(product.id)) {
         score += 3.0; // High bonus for favorites
       }
-      
+
       // Add some randomness to avoid showing the same products
       score += Math.random() * 0.2;
-      
+
       // Store the score
       scores[product.id] = score;
     });
-    
+
     return scores;
   }
 
@@ -467,8 +509,8 @@ class PersonalizationService {
    * @param data Data to save
    */
   private saveToLocalStorage(key: string, data: any): void {
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return;
+
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
@@ -480,12 +522,12 @@ class PersonalizationService {
    * Clear all personalization data
    */
   public clearAllData(): void {
-    if (typeof window === 'undefined') return;
-    
-    Object.values(STORAGE_KEYS).forEach(key => {
+    if (typeof window === "undefined") return;
+
+    Object.values(STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key);
     });
-    
+
     this.data = {
       viewedProducts: [],
       viewedCategories: [],
@@ -502,64 +544,70 @@ class PersonalizationService {
    */
   public inferPreferences(allProducts: Product[]): void {
     if (!this.initialized) this.initialize();
-    
+
     // Skip if not enough data
     if (this.data.viewedProducts.length < 5) return;
-    
-    const viewedProductIds = new Set(this.data.viewedProducts.map(item => item.id));
-    const viewedProducts = allProducts.filter(product => viewedProductIds.has(product.id));
-    
+
+    const viewedProductIds = new Set(
+      this.data.viewedProducts.map((item) => item.id),
+    );
+    const viewedProducts = allProducts.filter((product) =>
+      viewedProductIds.has(product.id),
+    );
+
     if (viewedProducts.length === 0) return;
-    
+
     // Infer category preferences
     const categoryFrequency: { [key: string]: number } = {};
-    viewedProducts.forEach(product => {
-      product.categories.forEach(category => {
+    viewedProducts.forEach((product) => {
+      product.categories.forEach((category) => {
         categoryFrequency[category] = (categoryFrequency[category] || 0) + 1;
       });
     });
-    
+
     // Infer brand preferences
     const brandFrequency: { [key: string]: number } = {};
-    viewedProducts.forEach(product => {
+    viewedProducts.forEach((product) => {
       brandFrequency[product.brand] = (brandFrequency[product.brand] || 0) + 1;
     });
-    
+
     // Infer price range
-    const prices = viewedProducts.map(product => product.price);
+    const prices = viewedProducts.map((product) => product.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
-    const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
-    
+    const avgPrice =
+      prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
     // Infer attribute preferences
     const attributeFrequency: Record<string, Record<string, number>> = {};
-    viewedProducts.forEach(product => {
+    viewedProducts.forEach((product) => {
       Object.entries(product.attributes).forEach(([key, value]) => {
         // Skip if value is undefined
         if (value === undefined) return;
-        
+
         // Ensure the key exists in the frequency object
         if (!attributeFrequency[key]) {
           attributeFrequency[key] = {};
         }
-        
+
         // Convert value to string to ensure it can be used as an index
         const valueStr = String(value);
-        attributeFrequency[key][valueStr] = (attributeFrequency[key][valueStr] || 0) + 1;
+        attributeFrequency[key][valueStr] =
+          (attributeFrequency[key][valueStr] || 0) + 1;
       });
     });
-    
+
     // Update user preferences with inferred data
     const preferredCategories = Object.entries(categoryFrequency)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([category]) => category);
-    
+
     const preferredBrands = Object.entries(brandFrequency)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([brand]) => brand);
-    
+
     const preferredAttributes: { [key: string]: string[] } = {};
     Object.entries(attributeFrequency).forEach(([key, values]) => {
       preferredAttributes[key] = Object.entries(values)
@@ -567,7 +615,7 @@ class PersonalizationService {
         .slice(0, 3)
         .map(([value]) => value);
     });
-    
+
     // Update preferences with inferred data
     this.updateUserPreferences({
       preferredCategories,

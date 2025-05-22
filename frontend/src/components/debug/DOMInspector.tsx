@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
 /**
  * DOMInspector component that adds a script to the page to inspect and diagnose DOM issues
@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 const DOMInspector: React.FC = () => {
   useEffect(() => {
     // This script will run once the component is mounted
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.innerHTML = `
       // Wait for the page to fully load
       window.addEventListener('load', function() {
@@ -108,9 +108,9 @@ const DOMInspector: React.FC = () => {
         }, 2000); // Wait 2 seconds after load to ensure everything is rendered
       });
     `;
-    
+
     document.head.appendChild(script);
-    
+
     // Cleanup function
     return () => {
       document.head.removeChild(script);

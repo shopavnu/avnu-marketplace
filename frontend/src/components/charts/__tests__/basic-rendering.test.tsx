@@ -1,18 +1,18 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import React from "react";
+import { render } from "@testing-library/react";
+import "@testing-library/jest-dom";
 
 // Import the components through the index to ensure we're using them as they'd be used in the app
-import { 
-  BarChartComponent, 
-  PieChartComponent, 
+import {
+  BarChartComponent,
+  PieChartComponent,
   LineChartComponent,
   CompositeChartComponent,
-  AreaChartComponent 
-} from '../';
+  AreaChartComponent,
+} from "../";
 
 // Mock the Recharts components to avoid rendering issues
-jest.mock('recharts', () => {
+jest.mock("recharts", () => {
   return {
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="responsive-container">{children}</div>
@@ -46,7 +46,7 @@ jest.mock('recharts', () => {
 });
 
 // Mock the MUI theme hook
-jest.mock('@mui/material', () => {
+jest.mock("@mui/material", () => {
   return {
     Box: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="mui-box">{children}</div>
@@ -56,111 +56,93 @@ jest.mock('@mui/material', () => {
     ),
     useTheme: () => ({
       palette: {
-        primary: { main: '#1976d2' },
-        secondary: { main: '#dc004e' },
-        text: { secondary: '#666666' },
-        divider: '#eeeeee',
-        background: { paper: '#ffffff' },
-        success: { main: '#4caf50' },
-        info: { main: '#2196f3' },
-        warning: { main: '#ff9800' },
-        error: { main: '#f44336' },
+        primary: { main: "#1976d2" },
+        secondary: { main: "#dc004e" },
+        text: { secondary: "#666666" },
+        divider: "#eeeeee",
+        background: { paper: "#ffffff" },
+        success: { main: "#4caf50" },
+        info: { main: "#2196f3" },
+        warning: { main: "#ff9800" },
+        error: { main: "#f44336" },
       },
-      shadows: [null, null, '0px 2px 4px rgba(0,0,0,0.1)'],
+      shadows: [null, null, "0px 2px 4px rgba(0,0,0,0.1)"],
     }),
   };
 });
 
 /**
  * Basic rendering tests for chart components
- * 
+ *
  * This test suite checks that all chart components can render without errors.
  * It does not test all functionality, just basic rendering with minimal props.
  */
-describe('Chart Components Basic Rendering', () => {
+describe("Chart Components Basic Rendering", () => {
   // Simple mock data for each chart type
   const barData = [
-    { category: 'A', value: 10 },
-    { category: 'B', value: 15 },
-    { category: 'C', value: 8 },
+    { category: "A", value: 10 },
+    { category: "B", value: 15 },
+    { category: "C", value: 8 },
   ];
 
   const pieData = [
-    { name: 'Category A', value: 30 },
-    { name: 'Category B', value: 40 },
-    { name: 'Category C', value: 30 },
+    { name: "Category A", value: 30 },
+    { name: "Category B", value: 40 },
+    { name: "Category C", value: 30 },
   ];
 
   const lineData = [
-    { month: 'Jan', value: 100 },
-    { month: 'Feb', value: 120 },
-    { month: 'Mar', value: 140 },
+    { month: "Jan", value: 100 },
+    { month: "Feb", value: 120 },
+    { month: "Mar", value: 140 },
   ];
 
-  test('BarChartComponent renders without crashing', () => {
+  test("BarChartComponent renders without crashing", () => {
     const { getByTestId } = render(
-      <BarChartComponent
-        data={barData}
-        xKey="category"
-        yKey="value"
-      />
+      <BarChartComponent data={barData} xKey="category" yKey="value" />,
     );
-    
-    expect(getByTestId('responsive-container')).toBeInTheDocument();
-    expect(getByTestId('bar-chart')).toBeInTheDocument();
+
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("bar-chart")).toBeInTheDocument();
   });
 
-  test('PieChartComponent renders without crashing', () => {
+  test("PieChartComponent renders without crashing", () => {
     const { getByTestId } = render(
-      <PieChartComponent
-        data={pieData}
-        nameKey="name"
-        valueKey="value"
-      />
+      <PieChartComponent data={pieData} nameKey="name" valueKey="value" />,
     );
-    
-    expect(getByTestId('responsive-container')).toBeInTheDocument();
-    expect(getByTestId('pie-chart')).toBeInTheDocument();
+
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("pie-chart")).toBeInTheDocument();
   });
 
-  test('LineChartComponent renders without crashing', () => {
+  test("LineChartComponent renders without crashing", () => {
     const { getByTestId } = render(
-      <LineChartComponent
-        data={lineData}
-        xKey="month"
-        yKey="value"
-      />
+      <LineChartComponent data={lineData} xKey="month" yKey="value" />,
     );
-    
-    expect(getByTestId('responsive-container')).toBeInTheDocument();
-    expect(getByTestId('line-chart')).toBeInTheDocument();
+
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("line-chart")).toBeInTheDocument();
   });
 
-  test('AreaChartComponent renders without crashing', () => {
+  test("AreaChartComponent renders without crashing", () => {
     const { getByTestId } = render(
-      <AreaChartComponent
-        data={lineData}
-        xKey="month"
-        yKey="value"
-      />
+      <AreaChartComponent data={lineData} xKey="month" yKey="value" />,
     );
-    
-    expect(getByTestId('responsive-container')).toBeInTheDocument();
-    expect(getByTestId('area-chart')).toBeInTheDocument();
+
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("area-chart")).toBeInTheDocument();
   });
 
-  test('CompositeChartComponent renders without crashing', () => {
+  test("CompositeChartComponent renders without crashing", () => {
     const { getByTestId } = render(
       <CompositeChartComponent
         data={lineData}
         xKey="month"
-        metrics={[
-          { key: 'value', type: 'bar', name: 'Value' }
-        ]}
-      />
+        metrics={[{ key: "value", type: "bar", name: "Value" }]}
+      />,
     );
-    
-    expect(getByTestId('responsive-container')).toBeInTheDocument();
-    expect(getByTestId('composite-chart')).toBeInTheDocument();
+
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("composite-chart")).toBeInTheDocument();
   });
 });

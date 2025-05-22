@@ -1,5 +1,5 @@
-import React from 'react';
-import AnalyticsNav from './AnalyticsNav';
+import React from "react";
+import AnalyticsNav from "./AnalyticsNav";
 
 /**
  * AnalyticsNavigation component
@@ -8,7 +8,6 @@ import AnalyticsNav from './AnalyticsNav';
 const AnalyticsNavigation: React.FC = () => {
   // Use the new AnalyticsNav component for consistency
   return <AnalyticsNav />;
-
 };
 
 export default AnalyticsNavigation;

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Product } from '@/types/products';
-import { causes } from '@/components/search/FilterPanel';
-import { analyticsService } from '@/services/analytics.service';
-import { useRouter } from 'next/router';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Product } from "@/types/products";
+import { causes } from "@/components/search/FilterPanel";
+import { analyticsService } from "@/services/analytics.service";
+import { useRouter } from "next/router";
 
 interface ProductCardProps {
   product: Product;
@@ -23,15 +23,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const [combinedRating, setCombinedRating] = useState({
     average: product.rating.avnuRating.average,
-    count: 0
+    count: 0,
   });
 
   useEffect(() => {
     setCombinedRating({
       average: product.rating.avnuRating.average,
-      count: product.rating.avnuRating.count +
+      count:
+        product.rating.avnuRating.count +
         (product.rating.shopifyRating?.count || 0) +
-        (product.rating.wooCommerceRating?.count || 0)
+        (product.rating.wooCommerceRating?.count || 0),
     });
   }, [product.rating]);
 
@@ -41,18 +42,18 @@ export default function ProductCard({ product }: ProductCardProps) {
                 transition-all duration-300"
       whileHover={{ y: -4 }}
     >
-      <Link 
-        href={`/product/${product.id}`} 
-        className="block" 
+      <Link
+        href={`/product/${product.id}`}
+        className="block"
         onClick={() => {
           // Track product click (position will be determined by the backend)
           const searchQuery = Array.isArray(query) ? query[0] : query;
-          
+
           if (searchQuery) {
             analyticsService.trackSearchResultClick(
               product.id,
               0, // We don't know the position, backend will handle this
-              searchQuery
+              searchQuery,
             );
           }
         }}
@@ -65,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {product.isNew && (
@@ -92,7 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              fill={isClient && isFavorited ? 'currentColor' : 'none'}
+              fill={isClient && isFavorited ? "currentColor" : "none"}
               stroke="currentColor"
               strokeWidth={2}
               className="w-5 h-5"
@@ -109,21 +110,22 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="p-3 sm:p-4">
           {/* Vendor & Causes */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
-            <span className="text-xs text-neutral-gray truncate max-w-[120px]">{product.vendor.name}</span>
+            <span className="text-xs text-neutral-gray truncate max-w-[120px]">
+              {product.vendor.name}
+            </span>
             <div className="flex gap-1.5">
               {product.vendor.causes.map((causeId, index) => {
-                const cause = causes.find(c => c.id === causeId);
+                const cause = causes.find((c) => c.id === causeId);
                 if (!cause) return null;
                 return (
-                  <div
-                    key={index}
-                    className="relative group"
-                  >
-                    <div 
+                  <div key={index} className="relative group">
+                    <div
                       className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 bg-sage/10 text-sage rounded-full hover:bg-sage/20 transition-colors duration-200"
                       title={cause.name}
                     >
-                      <div className="w-4 h-4 flex items-center justify-center">{cause.icon}</div>
+                      <div className="w-4 h-4 flex items-center justify-center">
+                        {cause.icon}
+                      </div>
                     </div>
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-charcoal text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
                       {cause.name}
@@ -147,7 +149,11 @@ export default function ProductCard({ product }: ProductCardProps) {
                   key={i}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill={isClient && i < Math.floor(combinedRating.average) ? 'currentColor' : 'none'}
+                  fill={
+                    isClient && i < Math.floor(combinedRating.average)
+                      ? "currentColor"
+                      : "none"
+                  }
                   stroke="currentColor"
                   className="w-4 h-4"
                 >
@@ -176,7 +182,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <p className="text-xs text-sage">Free Shipping</p>
               ) : product.vendor.shippingInfo.minimumForFree ? (
                 <p className="text-xs text-neutral-gray">
-                  Free shipping over ${product.vendor.shippingInfo.minimumForFree}
+                  Free shipping over $
+                  {product.vendor.shippingInfo.minimumForFree}
                 </p>
               ) : null}
             </div>

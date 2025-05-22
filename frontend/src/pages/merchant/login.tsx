@@ -1,43 +1,46 @@
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { motion } from 'framer-motion';
-import { BuildingStorefrontIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { motion } from "framer-motion";
+import {
+  BuildingStorefrontIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
 
 const MerchantLoginPage = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
+    email: "",
+    password: "",
+    rememberMe: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       // This would be replaced with an actual API call
-      console.log('Logging in merchant with:', formData);
-      
+      console.log("Logging in merchant with:", formData);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Redirect to merchant dashboard on success
-      router.push('/merchant/dashboard');
+      router.push("/merchant/dashboard");
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      setError("Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -64,10 +67,13 @@ const MerchantLoginPage = () => {
               {error}
             </div>
           )}
-          
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -85,7 +91,10 @@ const MerchantLoginPage = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1">
@@ -112,13 +121,19 @@ const MerchantLoginPage = () => {
                   onChange={handleChange}
                   className="h-4 w-4 text-sage focus:ring-sage border-gray-300 rounded"
                 />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
+                <label
+                  htmlFor="rememberMe"
+                  className="ml-2 block text-sm text-gray-700"
+                >
                   Remember me
                 </label>
               </div>
 
               <div className="text-sm">
-                <Link href="/merchant/forgot-password" className="font-medium text-sage hover:text-sage/80">
+                <Link
+                  href="/merchant/forgot-password"
+                  className="font-medium text-sage hover:text-sage/80"
+                >
                   Forgot your password?
                 </Link>
               </div>
@@ -130,7 +145,7 @@ const MerchantLoginPage = () => {
                 disabled={isLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sage hover:bg-sage/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>

@@ -1,6 +1,6 @@
 /**
  * User Behavior Analytics Collector
- * 
+ *
  * This utility collects user behavior data including vertical scrolling patterns
  * and interaction heatmap data, then sends it to the backend API for analysis.
  */
@@ -43,27 +43,32 @@ export class UserBehaviorAnalytics {
   private viewportDimensions: { width: number; height: number };
 
   constructor(options: UserBehaviorOptions = {}) {
-    this.scrollApiEndpoint = options.scrollApiEndpoint || '/analytics/user-behavior/scroll';
-    this.heatmapApiEndpoint = options.heatmapApiEndpoint || '/analytics/user-behavior/heatmap';
-    this.heatmapBatchApiEndpoint = options.heatmapBatchApiEndpoint || '/analytics/user-behavior/heatmap/batch';
+    this.scrollApiEndpoint =
+      options.scrollApiEndpoint || "/analytics/user-behavior/scroll";
+    this.heatmapApiEndpoint =
+      options.heatmapApiEndpoint || "/analytics/user-behavior/heatmap";
+    this.heatmapBatchApiEndpoint =
+      options.heatmapBatchApiEndpoint ||
+      "/analytics/user-behavior/heatmap/batch";
     this.scrollSampleRate = options.scrollSampleRate || 0.25; // 25% sampling by default
     this.heatmapSampleRate = options.heatmapSampleRate || 0.1; // 10% sampling by default
     this.scrollThrottleMs = options.scrollThrottleMs || 200; // Throttle scroll events
     this.heatmapThrottleMs = options.heatmapThrottleMs || 100; // Throttle heatmap events
     this.batchSize = options.batchSize || 20; // Number of heatmap events to batch
-    
+
     // Get session ID from localStorage or create a new one
-    this.sessionId = localStorage.getItem('sessionId') || this.generateSessionId();
-    
+    this.sessionId =
+      localStorage.getItem("sessionId") || this.generateSessionId();
+
     // Get user ID if available
-    this.userId = localStorage.getItem('userId');
-    
+    this.userId = localStorage.getItem("userId");
+
     // Detect device type
     this.deviceType = this.detectDeviceType();
-    
+
     // Detect platform
     this.platform = this.detectPlatform();
-    
+
     // Get viewport dimensions
     this.viewportDimensions = {
       width: window.innerWidth,
@@ -89,7 +94,7 @@ export class UserBehaviorAnalytics {
     this.isTracking = true;
 
     // Set up unload handler to send final data
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener("beforeunload", () => {
       this.sendFinalData();
     });
   }
@@ -103,15 +108,15 @@ export class UserBehaviorAnalytics {
 
     // Add scroll event listener with throttling
     let lastScrollTime = 0;
-    
-    window.addEventListener('scroll', () => {
+
+    window.addEventListener("scroll", () => {
       const now = Date.now();
-      
+
       // Throttle scroll events
       if (now - lastScrollTime < this.scrollThrottleMs) {
         return;
       }
-      
+
       lastScrollTime = now;
       this.trackScrollEvent();
     });
@@ -133,83 +138,99 @@ export class UserBehaviorAnalytics {
    */
   private initHeatmapTracking(): void {
     // Track clicks
-    document.addEventListener('click', event => {
-      this.trackInteraction(event, 'click');
+    document.addEventListener("click", (event) => {
+      this.trackInteraction(event, "click");
     });
 
     // Track hovers with throttling
     let lastHoverTime = 0;
-    
-    document.addEventListener('mousemove', event => {
+
+    document.addEventListener("mousemove", (event) => {
       const now = Date.now();
-      
+
       // Throttle hover events
       if (now - lastHoverTime < this.heatmapThrottleMs) {
         return;
       }
-      
+
       lastHoverTime = now;
-      
+
       // Only track hover if the mouse has been in the same area for a while
       setTimeout(() => {
-        const newEvent = document.createEvent('MouseEvents');
-        newEvent.initMouseEvent('mousemove', true, true, window, 0, 
-          event.screenX, event.screenY, event.clientX, event.clientY, 
-          event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, 
-          event.button, null);
-        
+        const newEvent = document.createEvent("MouseEvents");
+        newEvent.initMouseEvent(
+          "mousemove",
+          true,
+          true,
+          window,
+          0,
+          event.screenX,
+          event.screenY,
+          event.clientX,
+          event.clientY,
+          event.ctrlKey,
+          event.altKey,
+          event.shiftKey,
+          event.metaKey,
+          event.button,
+          null,
+        );
+
         if (
           Math.abs(event.clientX - (newEvent as MouseEvent).clientX) < 10 &&
           Math.abs(event.clientY - (newEvent as MouseEvent).clientY) < 10
         ) {
-          this.trackInteraction(event, 'hover');
+          this.trackInteraction(event, "hover");
         }
       }, 500); // Wait 500ms to confirm it's a hover
     });
 
     // Track form interactions
-    document.addEventListener('input', event => {
-      this.trackInteraction(event, 'form_interaction');
+    document.addEventListener("input", (event) => {
+      this.trackInteraction(event, "form_interaction");
     });
 
     // Track text selections
-    document.addEventListener('selectionchange', () => {
+    document.addEventListener("selectionchange", () => {
       const selection = window.getSelection();
       if (selection && selection.toString().trim().length > 0) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        
+
         // Create a partial MouseEvent-like object with the properties we need
         // Cast to unknown first and then to MouseEvent to avoid TypeScript errors
         const event = {
           clientX: rect.left + rect.width / 2,
           clientY: rect.top + rect.height / 2,
           target: range.commonAncestorContainer as Node,
-          type: 'selection',
-          bubbles: true
+          type: "selection",
+          bubbles: true,
         } as unknown as MouseEvent;
-        
-        this.trackInteraction(event, 'selection');
+
+        this.trackInteraction(event, "selection");
       }
     });
 
     // Track scroll pauses
     let scrollTimeout: any = null;
-    
-    window.addEventListener('scroll', () => {
+
+    window.addEventListener("scroll", () => {
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
-      
+
       scrollTimeout = setTimeout(() => {
         // Create a synthetic event at the center of the viewport
         const event = {
           clientX: window.innerWidth / 2,
           clientY: window.innerHeight / 2,
-          target: document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2),
+          target: document.elementFromPoint(
+            window.innerWidth / 2,
+            window.innerHeight / 2,
+          ),
         } as MouseEvent;
-        
-        this.trackInteraction(event, 'scroll_pause');
+
+        this.trackInteraction(event, "scroll_pause");
       }, 1000); // Wait 1 second after scrolling stops
     });
 
@@ -237,17 +258,17 @@ export class UserBehaviorAnalytics {
       document.body.offsetHeight,
       document.documentElement.offsetHeight,
       document.body.clientHeight,
-      document.documentElement.clientHeight
+      document.documentElement.clientHeight,
     );
-    
+
     // Update scroll data
     this.scrollData!.scrollCount++;
     this.scrollData!.pageHeight = pageHeight;
-    
+
     // Update max scroll depth
     if (scrollTop > this.scrollData!.maxScrollDepth) {
       this.scrollData!.maxScrollDepth = scrollTop;
-      
+
       // Record timestamp for this scroll depth
       this.scrollData!.scrollDepthTimestamps.push({
         depth: scrollTop,
@@ -259,7 +280,7 @@ export class UserBehaviorAnalytics {
     if (this.scrollTimeout) {
       clearTimeout(this.scrollTimeout);
     }
-    
+
     this.scrollTimeout = setTimeout(() => {
       if (this.scrollData!.scrollCount > 5) {
         this.sendScrollData();
@@ -270,36 +291,39 @@ export class UserBehaviorAnalytics {
   /**
    * Track user interaction for heatmap
    */
-  private trackInteraction(event: MouseEvent | any, interactionType: string): void {
+  private trackInteraction(
+    event: MouseEvent | any,
+    interactionType: string,
+  ): void {
     // Get coordinates relative to the document
     const x = event.clientX;
     const y = event.clientY + window.scrollY;
-    
+
     // Get target element
     const target = event.target;
-    
+
     if (!target) {
       return;
     }
-    
+
     // Get element details
-    let elementSelector = '';
-    let elementId = '';
-    let elementText = '';
-    
+    let elementSelector = "";
+    let elementId = "";
+    let elementText = "";
+
     try {
       // Try to get a CSS selector for the element
       elementSelector = this.getCssSelector(target);
-      
+
       // Get element ID if available
-      elementId = target.id || '';
-      
+      elementId = target.id || "";
+
       // Get element text content (truncated)
-      elementText = (target.textContent || '').trim().substring(0, 100);
+      elementText = (target.textContent || "").trim().substring(0, 100);
     } catch (error) {
-      console.error('Error getting element details:', error);
+      console.error("Error getting element details:", error);
     }
-    
+
     // Create heatmap data entry
     const heatmapData = {
       sessionId: this.sessionId,
@@ -316,10 +340,10 @@ export class UserBehaviorAnalytics {
       viewportDimensions: JSON.stringify(this.viewportDimensions),
       timestamp: new Date().toISOString(),
     };
-    
+
     // Add to buffer
     this.heatmapBuffer.push(heatmapData);
-    
+
     // Send data if buffer is full
     if (this.heatmapBuffer.length >= this.batchSize) {
       this.sendHeatmapData();
@@ -335,45 +359,52 @@ export class UserBehaviorAnalytics {
     }
 
     // Calculate dwell time
-    const dwellTimeSeconds = Math.round((Date.now() - this.scrollData.startTime) / 1000);
-    
+    const dwellTimeSeconds = Math.round(
+      (Date.now() - this.scrollData.startTime) / 1000,
+    );
+
     // Calculate max scroll percentage
-    const maxScrollPercentage = this.scrollData.pageHeight > 0
-      ? (this.scrollData.maxScrollDepth / this.scrollData.pageHeight) * 100
-      : 0;
-    
+    const maxScrollPercentage =
+      this.scrollData.pageHeight > 0
+        ? (this.scrollData.maxScrollDepth / this.scrollData.pageHeight) * 100
+        : 0;
+
     // Prepare data to send
     const data = {
       sessionId: this.sessionId,
       userId: this.userId,
       pagePath: this.scrollData.pagePath,
-      direction: 'vertical',
+      direction: "vertical",
       maxScrollDepth: this.scrollData.maxScrollDepth,
       pageHeight: this.scrollData.pageHeight,
       maxScrollPercentage,
       scrollCount: this.scrollData.scrollCount,
       dwellTimeSeconds,
-      scrollDepthTimestamps: JSON.stringify(this.scrollData.scrollDepthTimestamps),
+      scrollDepthTimestamps: JSON.stringify(
+        this.scrollData.scrollDepthTimestamps,
+      ),
       deviceType: this.deviceType,
       platform: this.platform,
       viewportDimensions: JSON.stringify(this.viewportDimensions),
     };
-    
+
     // Send data using sendBeacon if available
     if (navigator.sendBeacon) {
-      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(data)], {
+        type: "application/json",
+      });
       navigator.sendBeacon(this.scrollApiEndpoint, blob);
     } else {
       // Fall back to fetch API
       fetch(this.scrollApiEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
         keepalive: true,
-      }).catch(error => {
-        console.error('Failed to send scroll data:', error);
+      }).catch((error) => {
+        console.error("Failed to send scroll data:", error);
       });
     }
   }
@@ -389,22 +420,24 @@ export class UserBehaviorAnalytics {
     // Make a copy of the buffer and clear it
     const dataToSend = [...this.heatmapBuffer];
     this.heatmapBuffer = [];
-    
+
     // Send data using sendBeacon if available
     if (navigator.sendBeacon) {
-      const blob = new Blob([JSON.stringify(dataToSend)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(dataToSend)], {
+        type: "application/json",
+      });
       navigator.sendBeacon(this.heatmapBatchApiEndpoint, blob);
     } else {
       // Fall back to fetch API
       fetch(this.heatmapBatchApiEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(dataToSend),
         keepalive: true,
-      }).catch(error => {
-        console.error('Failed to send heatmap data:', error);
+      }).catch((error) => {
+        console.error("Failed to send heatmap data:", error);
       });
     }
   }
@@ -416,7 +449,7 @@ export class UserBehaviorAnalytics {
     if (this.isTracking) {
       // Send scroll data
       this.sendScrollData();
-      
+
       // Send heatmap data
       this.sendHeatmapData();
     }
@@ -435,7 +468,7 @@ export class UserBehaviorAnalytics {
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
         document.body.clientHeight,
-        document.documentElement.clientHeight
+        document.documentElement.clientHeight,
       ),
       scrollCount: 0,
       startTime: Date.now(),
@@ -447,13 +480,16 @@ export class UserBehaviorAnalytics {
    * Generate a unique session ID
    */
   private generateSessionId(): string {
-    const sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-    
-    localStorage.setItem('sessionId', sessionId);
+    const sessionId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      },
+    );
+
+    localStorage.setItem("sessionId", sessionId);
     return sessionId;
   }
 
@@ -462,13 +498,17 @@ export class UserBehaviorAnalytics {
    */
   private detectDeviceType(): string {
     const userAgent = navigator.userAgent;
-    
+
     if (/iPad|tablet|Kindle|PlayBook/i.test(userAgent)) {
-      return 'tablet';
-    } else if (/Mobile|Android|iPhone|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
-      return 'mobile';
+      return "tablet";
+    } else if (
+      /Mobile|Android|iPhone|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+        userAgent,
+      )
+    ) {
+      return "mobile";
     } else {
-      return 'desktop';
+      return "desktop";
     }
   }
 
@@ -477,19 +517,19 @@ export class UserBehaviorAnalytics {
    */
   private detectPlatform(): string {
     const userAgent = navigator.userAgent;
-    
+
     if (/Windows/i.test(userAgent)) {
-      return 'windows';
+      return "windows";
     } else if (/Macintosh|Mac OS X/i.test(userAgent)) {
-      return 'mac';
+      return "mac";
     } else if (/Linux/i.test(userAgent)) {
-      return 'linux';
+      return "linux";
     } else if (/Android/i.test(userAgent)) {
-      return 'android';
+      return "android";
     } else if (/iOS|iPhone|iPad|iPod/i.test(userAgent)) {
-      return 'ios';
+      return "ios";
     } else {
-      return 'other';
+      return "other";
     }
   }
 
@@ -497,41 +537,41 @@ export class UserBehaviorAnalytics {
    * Get CSS selector for an element
    */
   private getCssSelector(element: Element): string {
-    if (!element) return '';
+    if (!element) return "";
     if (element.id) return `#${element.id}`;
-    
+
     let selector = element.tagName.toLowerCase();
-    
+
     if (element.className) {
-      const classes = element.className.split(' ').filter(c => c);
+      const classes = element.className.split(" ").filter((c) => c);
       if (classes.length > 0) {
-        selector += `.${classes.join('.')}`;
+        selector += `.${classes.join(".")}`;
       }
     }
-    
+
     // Add parent context (up to 3 levels)
     let parent = element.parentElement;
     let depth = 0;
-    
+
     while (parent && depth < 3) {
       let parentSelector = parent.tagName.toLowerCase();
-      
+
       if (parent.id) {
         parentSelector = `#${parent.id}`;
         selector = `${parentSelector} > ${selector}`;
         break;
       } else if (parent.className) {
-        const classes = parent.className.split(' ').filter(c => c);
+        const classes = parent.className.split(" ").filter((c) => c);
         if (classes.length > 0) {
-          parentSelector += `.${classes.join('.')}`;
+          parentSelector += `.${classes.join(".")}`;
         }
       }
-      
+
       selector = `${parentSelector} > ${selector}`;
       parent = parent.parentElement;
       depth++;
     }
-    
+
     return selector;
   }
 }
@@ -540,6 +580,6 @@ export class UserBehaviorAnalytics {
 export const userBehaviorAnalytics = new UserBehaviorAnalytics();
 
 // Initialize user behavior tracking
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   userBehaviorAnalytics.init();
 }

@@ -1,23 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Product } from '@/types/products';
-import { causes } from '@/components/search/FilterPanel';
-import { analyticsService } from '@/services/analytics.service';
-import { useRouter } from 'next/router';
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Product } from "@/types/products";
+import { causes } from "@/components/search/FilterPanel";
+import { analyticsService } from "@/services/analytics.service";
+import { useRouter } from "next/router";
 
 interface ResponsiveProductCardProps {
   product: Product;
   priority?: boolean;
   badges?: React.ReactNode;
-  deviceType?: 'mobile' | 'tablet' | 'desktop';
+  deviceType?: "mobile" | "tablet" | "desktop";
 }
 
-export default function ResponsiveProductCard({ 
-  product, 
+export default function ResponsiveProductCard({
+  product,
   priority = false,
   badges,
-  deviceType = 'desktop'
+  deviceType = "desktop",
 }: ResponsiveProductCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -28,20 +28,20 @@ export default function ResponsiveProductCard({
   // Define dimensions for different device types
   const cardDimensions = {
     mobile: {
-      height: '280px',
-      imageHeight: '160px',
-      contentHeight: '120px'
+      height: "280px",
+      imageHeight: "160px",
+      contentHeight: "120px",
     },
     tablet: {
-      height: '320px',
-      imageHeight: '180px',
-      contentHeight: '140px'
+      height: "320px",
+      imageHeight: "180px",
+      contentHeight: "140px",
     },
     desktop: {
-      height: '360px',
-      imageHeight: '200px',
-      contentHeight: '160px'
-    }
+      height: "360px",
+      imageHeight: "200px",
+      contentHeight: "160px",
+    },
   };
 
   // Get current dimensions based on device type
@@ -53,60 +53,61 @@ export default function ResponsiveProductCard({
 
   const [combinedRating, setCombinedRating] = useState({
     average: product.rating.avnuRating.average,
-    count: 0
+    count: 0,
   });
 
   useEffect(() => {
     setCombinedRating({
       average: product.rating.avnuRating.average,
-      count: product.rating.avnuRating.count +
+      count:
+        product.rating.avnuRating.count +
         (product.rating.shopifyRating?.count || 0) +
-        (product.rating.wooCommerceRating?.count || 0)
+        (product.rating.wooCommerceRating?.count || 0),
     });
   }, [product.rating]);
 
   return (
-    <div 
+    <div
       ref={cardRef}
       className="product-card"
-      style={{ 
-        width: '100%',
+      style={{
+        width: "100%",
         height: currentDimensions.height,
         minHeight: currentDimensions.height,
         maxHeight: currentDimensions.height,
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        contain: 'strict'
+        backgroundColor: "white",
+        borderRadius: "8px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        contain: "strict",
       }}
       data-testid="product-card"
     >
-      <Link 
-        href={`/product/${product.id}`} 
-        className="block flex-grow flex flex-col" 
+      <Link
+        href={`/product/${product.id}`}
+        className="block flex-grow flex flex-col"
         onClick={() => {
           // Track product click
           const searchQuery = Array.isArray(query) ? query[0] : query;
-          
+
           if (searchQuery) {
             analyticsService.trackSearchResultClick(
               product.id,
               0, // Position will be determined by backend
-              searchQuery
+              searchQuery,
             );
           }
         }}
       >
-        <div 
-          className="relative overflow-hidden" 
-          style={{ 
+        <div
+          className="relative overflow-hidden"
+          style={{
             height: currentDimensions.imageHeight,
             minHeight: currentDimensions.imageHeight,
-            maxHeight: currentDimensions.imageHeight
+            maxHeight: currentDimensions.imageHeight,
           }}
         >
           <Image
@@ -117,7 +118,7 @@ export default function ResponsiveProductCard({
             className="object-cover transition-transform duration-500 hover:scale-105"
             sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {badges ? (
@@ -146,12 +147,14 @@ export default function ResponsiveProductCard({
             }}
             className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm
                      text-charcoal hover:text-sage transition-colors duration-200"
-            aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+            aria-label={
+              isFavorited ? "Remove from favorites" : "Add to favorites"
+            }
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              fill={isClient && isFavorited ? 'currentColor' : 'none'}
+              fill={isClient && isFavorited ? "currentColor" : "none"}
               stroke="currentColor"
               strokeWidth={2}
               className="w-5 h-5"
@@ -165,46 +168,54 @@ export default function ResponsiveProductCard({
           </button>
         </div>
 
-        <div 
+        <div
           className="p-3 flex flex-col"
-          style={{ 
+          style={{
             height: currentDimensions.contentHeight,
             minHeight: currentDimensions.contentHeight,
             maxHeight: currentDimensions.contentHeight,
-            overflow: 'hidden'
+            overflow: "hidden",
           }}
         >
           {/* Vendor & Causes - Simplified for smaller screens */}
           <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            <span className="text-xs text-neutral-gray truncate max-w-[120px]">{product.vendor.name}</span>
-            {deviceType !== 'mobile' && (
+            <span className="text-xs text-neutral-gray truncate max-w-[120px]">
+              {product.vendor.name}
+            </span>
+            {deviceType !== "mobile" && (
               <div className="flex gap-1">
-                {product.vendor.causes.slice(0, deviceType === 'tablet' ? 2 : 3).map((causeId, index) => {
-                  const cause = causes.find(c => c.id === causeId);
-                  if (!cause) return null;
-                  return (
-                    <div
-                      key={index}
-                      className="w-5 h-5 flex items-center justify-center bg-sage/10 text-sage rounded-full"
-                      title={cause.name}
-                    >
-                      <div className="w-3 h-3 flex items-center justify-center">{cause.icon}</div>
-                    </div>
-                  );
-                })}
+                {product.vendor.causes
+                  .slice(0, deviceType === "tablet" ? 2 : 3)
+                  .map((causeId, index) => {
+                    const cause = causes.find((c) => c.id === causeId);
+                    if (!cause) return null;
+                    return (
+                      <div
+                        key={index}
+                        className="w-5 h-5 flex items-center justify-center bg-sage/10 text-sage rounded-full"
+                        title={cause.name}
+                      >
+                        <div className="w-3 h-3 flex items-center justify-center">
+                          {cause.icon}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>
 
           {/* Title - Line clamp varies by device */}
-          <h3 className={`font-montserrat font-medium text-charcoal text-sm mb-1 ${
-            deviceType === 'mobile' ? 'line-clamp-1' : 'line-clamp-2'
-          }`}>
+          <h3
+            className={`font-montserrat font-medium text-charcoal text-sm mb-1 ${
+              deviceType === "mobile" ? "line-clamp-1" : "line-clamp-2"
+            }`}
+          >
             {product.title}
           </h3>
 
           {/* Rating - Simplified for mobile */}
-          {deviceType !== 'mobile' && (
+          {deviceType !== "mobile" && (
             <div className="flex items-center gap-1 mb-1">
               <div className="flex items-center text-yellow-400">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -212,7 +223,11 @@ export default function ResponsiveProductCard({
                     key={i}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill={isClient && i < Math.floor(combinedRating.average) ? 'currentColor' : 'none'}
+                    fill={
+                      isClient && i < Math.floor(combinedRating.average)
+                        ? "currentColor"
+                        : "none"
+                    }
                     stroke="currentColor"
                     className="w-3 h-3"
                   >
@@ -235,12 +250,14 @@ export default function ResponsiveProductCard({
           {/* Price & Shipping - This is at the bottom of the content area */}
           <div className="flex items-end justify-between mt-auto">
             <div>
-              <span className={`font-montserrat font-medium text-charcoal ${
-                deviceType === 'mobile' ? 'text-sm' : 'text-base'
-              }`}>
+              <span
+                className={`font-montserrat font-medium text-charcoal ${
+                  deviceType === "mobile" ? "text-sm" : "text-base"
+                }`}
+              >
                 ${product.price.toFixed(2)}
               </span>
-              {deviceType !== 'mobile' && (
+              {deviceType !== "mobile" && (
                 <>
                   {product.vendor.shippingInfo.isFree ? (
                     <p className="text-xs text-sage">Free Shipping</p>

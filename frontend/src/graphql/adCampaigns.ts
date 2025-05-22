@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 // Fragment for ad campaign fields
 export const AD_CAMPAIGN_FIELDS = gql`
@@ -76,7 +76,11 @@ export const CREATE_AD_CAMPAIGN = gql`
 
 // Mutation to update an existing ad campaign
 export const UPDATE_AD_CAMPAIGN = gql`
-  mutation UpdateAdCampaign($id: ID!, $merchantId: ID!, $input: UpdateAdCampaignInput!) {
+  mutation UpdateAdCampaign(
+    $id: ID!
+    $merchantId: ID!
+    $input: UpdateAdCampaignInput!
+  ) {
     updateAdCampaign(id: $id, merchantId: $merchantId, input: $input) {
       ...AdCampaignFields
     }
@@ -93,7 +97,11 @@ export const DELETE_AD_CAMPAIGN = gql`
 
 // Mutation to change campaign status (activate, pause, etc.)
 export const UPDATE_CAMPAIGN_STATUS = gql`
-  mutation UpdateCampaignStatus($id: ID!, $merchantId: ID!, $status: CampaignStatus!) {
+  mutation UpdateCampaignStatus(
+    $id: ID!
+    $merchantId: ID!
+    $status: CampaignStatus!
+  ) {
     updateCampaignStatus(id: $id, merchantId: $merchantId, status: $status) {
       id
       status
@@ -104,8 +112,16 @@ export const UPDATE_CAMPAIGN_STATUS = gql`
 
 // Query to get budget forecast for planning
 export const GET_BUDGET_FORECAST = gql`
-  query GetBudgetForecast($budget: Float!, $campaignType: String!, $targetAudience: String!) {
-    budgetForecast(budget: $budget, campaignType: $campaignType, targetAudience: $targetAudience) {
+  query GetBudgetForecast(
+    $budget: Float!
+    $campaignType: String!
+    $targetAudience: String!
+  ) {
+    budgetForecast(
+      budget: $budget
+      campaignType: $campaignType
+      targetAudience: $targetAudience
+    ) {
       recommendedBudget
       estimatedImpressions
       estimatedClicks
@@ -119,8 +135,16 @@ export const GET_BUDGET_FORECAST = gql`
 
 // Get campaign analytics data
 export const GET_CAMPAIGN_ANALYTICS = gql`
-  query GetCampaignAnalytics($merchantId: ID!, $startDate: String!, $endDate: String!) {
-    campaignAnalytics(merchantId: $merchantId, startDate: $startDate, endDate: $endDate) {
+  query GetCampaignAnalytics(
+    $merchantId: ID!
+    $startDate: String!
+    $endDate: String!
+  ) {
+    campaignAnalytics(
+      merchantId: $merchantId
+      startDate: $startDate
+      endDate: $endDate
+    ) {
       totalSpent
       totalImpressions
       totalClicks
@@ -161,7 +185,10 @@ export const GET_CAMPAIGN_ANALYTICS = gql`
 // Query to get ad placement recommendations
 export const GET_AD_PLACEMENT_RECOMMENDATIONS = gql`
   query GetAdPlacementRecommendations($merchantId: ID!, $productIds: [ID!]!) {
-    adPlacementRecommendations(merchantId: $merchantId, productIds: $productIds) {
+    adPlacementRecommendations(
+      merchantId: $merchantId
+      productIds: $productIds
+    ) {
       placementType
       recommendedBid
       estimatedImpressions

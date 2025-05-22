@@ -1,6 +1,6 @@
-import { FC, useState, useEffect, ChangeEvent } from 'react';
-import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
-import { BudgetForecast } from '@/types/adCampaigns';
+import { FC, useState, useEffect, ChangeEvent } from "react";
+import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { BudgetForecast } from "@/types/adCampaigns";
 
 interface BudgetAllocatorProps {
   budget: number;
@@ -13,7 +13,7 @@ const BudgetAllocator: FC<BudgetAllocatorProps> = ({
   budget,
   onBudgetChange,
   forecast,
-  loading = false
+  loading = false,
 }) => {
   const [localBudget, setLocalBudget] = useState<number>(budget);
 
@@ -43,9 +43,12 @@ const BudgetAllocator: FC<BudgetAllocatorProps> = ({
           <CurrencyDollarIcon className="h-5 w-5 text-gray-400 mr-2" />
           <h3 className="text-sm font-medium text-gray-700">Campaign Budget</h3>
         </div>
-        
+
         <div className="mt-2">
-          <label htmlFor="budget" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="budget"
+            className="block text-sm font-medium text-gray-700"
+          >
             Total Budget ($)
           </label>
           <div className="mt-1 relative rounded-md shadow-sm">
@@ -69,13 +72,16 @@ const BudgetAllocator: FC<BudgetAllocatorProps> = ({
             </div>
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            Minimum budget is $50. Recommended budget for best results is ${forecast?.recommendedBudget || 100}.
+            Minimum budget is $50. Recommended budget for best results is $
+            {forecast?.recommendedBudget || 100}.
           </p>
         </div>
 
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Budget Forecast</h4>
-          
+          <h4 className="text-sm font-medium text-gray-700 mb-3">
+            Budget Forecast
+          </h4>
+
           {loading ? (
             <div className="animate-pulse space-y-3">
               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -86,27 +92,35 @@ const BudgetAllocator: FC<BudgetAllocatorProps> = ({
             <div className="bg-gray-50 p-4 rounded-lg">
               <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Estimated Impressions</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Estimated Impressions
+                  </dt>
                   <dd className="mt-1 text-lg font-semibold text-gray-900">
-                    {forecast?.estimatedImpressions?.toLocaleString() || 'N/A'}
+                    {forecast?.estimatedImpressions?.toLocaleString() || "N/A"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Estimated Clicks</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Estimated Clicks
+                  </dt>
                   <dd className="mt-1 text-lg font-semibold text-gray-900">
-                    {forecast?.estimatedClicks?.toLocaleString() || 'N/A'}
+                    {forecast?.estimatedClicks?.toLocaleString() || "N/A"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Estimated Conversions</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Estimated Conversions
+                  </dt>
                   <dd className="mt-1 text-lg font-semibold text-gray-900">
-                    {forecast?.estimatedConversions?.toLocaleString() || 'N/A'}
+                    {forecast?.estimatedConversions?.toLocaleString() || "N/A"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Cost Per Click</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Cost Per Click
+                  </dt>
                   <dd className="mt-1 text-lg font-semibold text-gray-900">
-                    ${forecast?.estimatedCostPerClick?.toFixed(2) || 'N/A'}
+                    ${forecast?.estimatedCostPerClick?.toFixed(2) || "N/A"}
                   </dd>
                 </div>
               </dl>

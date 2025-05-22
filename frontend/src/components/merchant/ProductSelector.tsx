@@ -1,6 +1,6 @@
-import { FC } from 'react';
-import { TagIcon } from '@heroicons/react/24/outline';
-import { Product } from '@/types/adCampaigns';
+import { FC } from "react";
+import { TagIcon } from "@heroicons/react/24/outline";
+import { Product } from "@/types/adCampaigns";
 
 interface ProductSelectorProps {
   products: Product[];
@@ -13,7 +13,7 @@ const ProductSelector: FC<ProductSelectorProps> = ({
   products,
   selectedProductIds,
   onProductSelect,
-  loading = false
+  loading = false,
 }) => {
   if (loading) {
     return (
@@ -42,7 +42,9 @@ const ProductSelector: FC<ProductSelectorProps> = ({
     return (
       <div className="text-center py-6">
         <TagIcon className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No products found</h3>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">
+          No products found
+        </h3>
         <p className="mt-1 text-sm text-gray-500">
           You don't have any products available for campaigns.
         </p>
@@ -53,19 +55,23 @@ const ProductSelector: FC<ProductSelectorProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {products.map((product: Product) => (
-        <div 
+        <div
           key={product.id}
           className={`border rounded-lg p-4 cursor-pointer transition-all ${
-            selectedProductIds.includes(product.id) 
-              ? 'border-blue-500 bg-blue-50' 
-              : 'border-gray-200 hover:border-gray-300'
+            selectedProductIds.includes(product.id)
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-200 hover:border-gray-300"
           }`}
           onClick={() => onProductSelect(product.id)}
         >
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
               {product.image ? (
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <TagIcon className="w-8 h-8 text-gray-400" />
               )}
@@ -75,9 +81,9 @@ const ProductSelector: FC<ProductSelectorProps> = ({
               <p className="text-gray-500">${product.price.toFixed(2)}</p>
             </div>
             <div className="flex-shrink-0">
-              <input 
-                type="checkbox" 
-                checked={selectedProductIds.includes(product.id)} 
+              <input
+                type="checkbox"
+                checked={selectedProductIds.includes(product.id)}
                 onChange={() => onProductSelect(product.id)}
                 className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
               />

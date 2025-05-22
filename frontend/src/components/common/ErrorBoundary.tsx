@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -13,9 +13,9 @@ interface State {
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { 
+    this.state = {
       hasError: false,
-      error: null
+      error: null,
     };
   }
 
@@ -24,7 +24,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
   render(): ReactNode {
@@ -32,12 +32,15 @@ class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
+
       return (
         <div className="p-4 m-4 bg-white rounded-lg shadow-md">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+          <h2 className="text-xl font-bold text-red-600 mb-2">
+            Something went wrong
+          </h2>
           <p className="text-gray-700 mb-4">
-            We're experiencing some technical difficulties. Please try again later.
+            We're experiencing some technical difficulties. Please try again
+            later.
           </p>
           <details className="text-sm text-gray-500 mt-2">
             <summary>Technical details</summary>

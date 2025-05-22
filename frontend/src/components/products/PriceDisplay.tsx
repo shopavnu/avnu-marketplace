@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface PriceDisplayProps {
   price: number;
@@ -9,13 +9,16 @@ interface PriceDisplayProps {
  * A client-only price display component that prevents hydration mismatches
  * by only rendering the formatted price on the client side
  */
-const PriceDisplay: React.FC<PriceDisplayProps> = ({ price, className = '' }) => {
+const PriceDisplay: React.FC<PriceDisplayProps> = ({
+  price,
+  className = "",
+}) => {
   const [isClient, setIsClient] = useState(false);
-  
+
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
+
   return (
     <p className={className}>
       {isClient ? (

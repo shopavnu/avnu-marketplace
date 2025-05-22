@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
-import { format } from 'date-fns';
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import { format } from "date-fns";
 
 // GraphQL query to fetch product categories
 const GET_CATEGORIES = gql`
@@ -45,17 +45,26 @@ interface AdvancedFiltersProps {
   onFilterChange: (filters: FilterOptions) => void;
 }
 
-const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChange }) => {
+const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
+  filters,
+  onFilterChange,
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(filters.categoryIds || []);
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(filters.productIds || []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    filters.categoryIds || [],
+  );
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(
+    filters.productIds || [],
+  );
 
   // Fetch categories
   const { data: categoriesData } = useQuery(GET_CATEGORIES);
-  
+
   // Fetch products based on selected categories
   const { data: productsData } = useQuery(GET_PRODUCTS, {
-    variables: { categoryIds: selectedCategories.length > 0 ? selectedCategories : null },
+    variables: {
+      categoryIds: selectedCategories.length > 0 ? selectedCategories : null,
+    },
     skip: selectedCategories.length === 0 && !isExpanded,
   });
 
@@ -64,24 +73,24 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
 
   // Time frame options
   const timeFrameOptions = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'quarterly', label: 'Quarterly' },
-    { value: 'yearly', label: 'Yearly' },
+    { value: "daily", label: "Daily" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+    { value: "quarterly", label: "Quarterly" },
+    { value: "yearly", label: "Yearly" },
   ];
 
   // Sort options
   const sortByOptions = [
-    { value: 'revenue', label: 'Revenue' },
-    { value: 'orders', label: 'Orders' },
-    { value: 'views', label: 'Views' },
-    { value: 'conversionRate', label: 'Conversion Rate' },
+    { value: "revenue", label: "Revenue" },
+    { value: "orders", label: "Orders" },
+    { value: "views", label: "Views" },
+    { value: "conversionRate", label: "Conversion Rate" },
   ];
 
   const sortOrderOptions = [
-    { value: 'desc', label: 'Descending' },
-    { value: 'asc', label: 'Ascending' },
+    { value: "desc", label: "Descending" },
+    { value: "asc", label: "Ascending" },
   ];
 
   // Handle time frame change
@@ -109,7 +118,10 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
 
   // Handle category selection
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value,
+    );
     setSelectedCategories(selectedOptions);
     onFilterChange({
       ...filters,
@@ -121,7 +133,10 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
 
   // Handle product selection
   const handleProductChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value,
+    );
     setSelectedProducts(selectedOptions);
     onFilterChange({
       ...filters,
@@ -154,13 +169,16 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
           onClick={() => setIsExpanded(!isExpanded)}
           className="text-sage-600 hover:text-sage-800 focus:outline-none"
         >
-          {isExpanded ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
+          {isExpanded ? "Hide Advanced Filters" : "Show Advanced Filters"}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label htmlFor="timeFrame" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="timeFrame"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Time Frame
           </label>
           <select
@@ -177,25 +195,33 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
           </select>
         </div>
         <div>
-          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="startDate"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Start Date
           </label>
           <input
             type="date"
             id="startDate"
-            value={filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''}
+            value={
+              filters.startDate ? format(filters.startDate, "yyyy-MM-dd") : ""
+            }
             onChange={handleStartDateChange}
             className="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-sage focus:border-sage"
           />
         </div>
         <div>
-          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="endDate"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             End Date
           </label>
           <input
             type="date"
             id="endDate"
-            value={filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''}
+            value={filters.endDate ? format(filters.endDate, "yyyy-MM-dd") : ""}
             onChange={handleEndDateChange}
             className="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-sage focus:border-sage"
           />
@@ -206,7 +232,10 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
         <div className="border-t border-gray-200 pt-4 mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label htmlFor="categories" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="categories"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Categories
               </label>
               <select
@@ -222,10 +251,15 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Hold Ctrl/Cmd to select multiple
+              </p>
             </div>
             <div>
-              <label htmlFor="products" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="products"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Products
               </label>
               <select
@@ -244,15 +278,18 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
               </select>
               <p className="text-xs text-gray-500 mt-1">
                 {selectedCategories.length === 0
-                  ? 'Select categories first'
-                  : 'Hold Ctrl/Cmd to select multiple'}
+                  ? "Select categories first"
+                  : "Hold Ctrl/Cmd to select multiple"}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="sortBy"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Sort By
               </label>
               <select
@@ -269,7 +306,10 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFilterChan
               </select>
             </div>
             <div>
-              <label htmlFor="sortOrder" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="sortOrder"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Sort Order
               </label>
               <select

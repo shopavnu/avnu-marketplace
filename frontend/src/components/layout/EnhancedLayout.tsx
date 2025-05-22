@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Header from './Header';
-import { StickySearchBar } from '@/components/search';
-import { ScrollProgressBar } from '@/components/common';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Header from "./Header";
+import { StickySearchBar } from "@/components/search";
+import { ScrollProgressBar } from "@/components/common";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface EnhancedLayoutProps {
   children: React.ReactNode;
@@ -12,23 +12,23 @@ interface EnhancedLayoutProps {
 export default function EnhancedLayout({ children }: EnhancedLayoutProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Handle route change loading states
   useEffect(() => {
     const handleStart = () => setIsLoading(true);
     const handleComplete = () => setIsLoading(false);
 
-    router.events.on('routeChangeStart', handleStart);
-    router.events.on('routeChangeComplete', handleComplete);
-    router.events.on('routeChangeError', handleComplete);
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
 
     return () => {
-      router.events.off('routeChangeStart', handleStart);
-      router.events.off('routeChangeComplete', handleComplete);
-      router.events.off('routeChangeError', handleComplete);
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
     };
   }, [router]);
-  
+
   // Handle search
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -40,13 +40,13 @@ export default function EnhancedLayout({ children }: EnhancedLayoutProps) {
     <div className="min-h-screen bg-warm-white">
       {/* Scroll Progress Indicator */}
       <ScrollProgressBar color="bg-sage" height={3} position="top" />
-      
+
       {/* Header */}
       <Header />
-      
+
       {/* Sticky Search Bar */}
       <StickySearchBar onSearch={handleSearch} />
-      
+
       {/* Page Transition */}
       <AnimatePresence mode="wait">
         <motion.main
@@ -73,11 +73,11 @@ export default function EnhancedLayout({ children }: EnhancedLayoutProps) {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {children}
         </motion.main>
       </AnimatePresence>
-      
+
       {/* Back to Top Button */}
       <BackToTopButton />
     </div>
@@ -97,14 +97,14 @@ const BackToTopButton: React.FC = () => {
       }
     };
 
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 

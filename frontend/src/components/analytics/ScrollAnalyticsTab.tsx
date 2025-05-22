@@ -1,9 +1,9 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
+import React from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
   CardHeader,
   Table,
   TableBody,
@@ -11,26 +11,26 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
-} from '@mui/material';
-import { 
-  LineChart, 
-  Line, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  Paper,
+} from "@mui/material";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   AreaChart,
-  Area
-} from 'recharts';
-import { format } from 'date-fns';
-import { Grid as GridContainer, Grid as GridItem } from '../ui/MuiGrid';
+  Area,
+} from "recharts";
+import { format } from "date-fns";
+import { Grid as GridContainer, Grid as GridItem } from "../ui/MuiGrid";
 
-import { ScrollAnalyticsData } from './types';
+import { ScrollAnalyticsData } from "./types";
 
 // Define props interface
 interface ScrollAnalyticsTabProps {
@@ -42,7 +42,7 @@ interface ScrollAnalyticsTabProps {
 const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
   // Format percentage
   const formatPercentage = (value: number) => `${(value * 100).toFixed(1)}%`;
-  
+
   // Format time in seconds
   const formatTime = (seconds: number) => {
     if (seconds < 60) {
@@ -69,24 +69,33 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                   margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    type="number" 
-                    domain={[0, 1]} 
+                  <XAxis
+                    type="number"
+                    domain={[0, 1]}
                     tickFormatter={formatPercentage}
                   />
-                  <YAxis 
-                    dataKey="pagePath" 
-                    type="category" 
+                  <YAxis
+                    dataKey="pagePath"
+                    type="category"
                     width={150}
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => value.length > 25 ? `${value.substring(0, 25)}...` : value}
+                    tickFormatter={(value) =>
+                      value.length > 25 ? `${value.substring(0, 25)}...` : value
+                    }
                   />
-                  <Tooltip 
-                    formatter={(value: any) => [formatPercentage(value), 'Avg Scroll Depth']}
+                  <Tooltip
+                    formatter={(value: any) => [
+                      formatPercentage(value),
+                      "Avg Scroll Depth",
+                    ]}
                     labelFormatter={(label) => `Page: ${label}`}
                   />
                   <Legend />
-                  <Bar dataKey="avgScrollDepth" name="Avg Scroll Depth" fill="#8884d8" />
+                  <Bar
+                    dataKey="avgScrollDepth"
+                    name="Avg Scroll Depth"
+                    fill="#8884d8"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -108,19 +117,28 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" unit="s" />
-                  <YAxis 
-                    dataKey="pagePath" 
-                    type="category" 
+                  <YAxis
+                    dataKey="pagePath"
+                    type="category"
                     width={150}
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => value.length > 25 ? `${value.substring(0, 25)}...` : value}
+                    tickFormatter={(value) =>
+                      value.length > 25 ? `${value.substring(0, 25)}...` : value
+                    }
                   />
-                  <Tooltip 
-                    formatter={(value: any) => [formatTime(value), 'Avg Time Spent']}
+                  <Tooltip
+                    formatter={(value: any) => [
+                      formatTime(value),
+                      "Avg Time Spent",
+                    ]}
                     labelFormatter={(label) => `Page: ${label}`}
                   />
                   <Legend />
-                  <Bar dataKey="avgTimeSpent" name="Avg Time Spent" fill="#82ca9d" />
+                  <Bar
+                    dataKey="avgTimeSpent"
+                    name="Avg Time Spent"
+                    fill="#82ca9d"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -140,24 +158,28 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="depthPercentage" 
+                  <XAxis
+                    dataKey="depthPercentage"
                     tickFormatter={(value) => `${value}%`}
                   />
-                  <YAxis 
-                    label={{ value: 'Session Count', angle: -90, position: 'insideLeft' }}
+                  <YAxis
+                    label={{
+                      value: "Session Count",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
                   />
-                  <Tooltip 
-                    formatter={(value: any) => [value, 'Sessions']}
+                  <Tooltip
+                    formatter={(value: any) => [value, "Sessions"]}
                     labelFormatter={(label) => `Scroll Depth: ${label}%`}
                   />
                   <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="sessionCount" 
-                    name="Sessions" 
-                    stroke="#8884d8" 
-                    fill="#8884d8" 
+                  <Area
+                    type="monotone"
+                    dataKey="sessionCount"
+                    name="Sessions"
+                    stroke="#8884d8"
+                    fill="#8884d8"
                     fillOpacity={0.3}
                   />
                 </AreaChart>
@@ -179,13 +201,19 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="scrollPosition" 
+                  <XAxis
+                    dataKey="scrollPosition"
                     tickFormatter={(value) => `${value}%`}
                   />
-                  <YAxis label={{ value: 'Pause Count', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip 
-                    formatter={(value: any) => [value, 'Pauses']}
+                  <YAxis
+                    label={{
+                      value: "Pause Count",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value: any) => [value, "Pauses"]}
                     labelFormatter={(label) => `Scroll Position: ${label}%`}
                   />
                   <Legend />
@@ -210,23 +238,29 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                   margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    type="number" 
-                    unit="px/s" 
-                  />
-                  <YAxis 
-                    dataKey="pagePath" 
-                    type="category" 
+                  <XAxis type="number" unit="px/s" />
+                  <YAxis
+                    dataKey="pagePath"
+                    type="category"
                     width={150}
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => value.length > 25 ? `${value.substring(0, 25)}...` : value}
+                    tickFormatter={(value) =>
+                      value.length > 25 ? `${value.substring(0, 25)}...` : value
+                    }
                   />
-                  <Tooltip 
-                    formatter={(value: any) => [`${value.toFixed(1)} px/s`, 'Avg Scroll Velocity']}
+                  <Tooltip
+                    formatter={(value: any) => [
+                      `${value.toFixed(1)} px/s`,
+                      "Avg Scroll Velocity",
+                    ]}
                     labelFormatter={(label) => `Page: ${label}`}
                   />
                   <Legend />
-                  <Bar dataKey="avgScrollVelocity" name="Avg Scroll Velocity" fill="#FFBB28" />
+                  <Bar
+                    dataKey="avgScrollVelocity"
+                    name="Avg Scroll Velocity"
+                    fill="#FFBB28"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -246,55 +280,56 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tickFormatter={(value) => {
                       try {
-                        return format(new Date(value), 'MM/dd');
+                        return format(new Date(value), "MM/dd");
                       } catch (e) {
                         return value;
                       }
                     }}
                   />
-                  <YAxis 
+                  <YAxis
                     yAxisId="left"
-                    domain={[0, 1]} 
+                    domain={[0, 1]}
                     tickFormatter={formatPercentage}
                   />
-                  <YAxis 
-                    yAxisId="right" 
-                    orientation="right" 
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
                     dataKey="sessionCount"
                   />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: any, name: string) => {
-                      if (name === 'Avg Scroll Depth') return [formatPercentage(value), name];
-                      if (name === 'Session Count') return [value, name];
+                      if (name === "Avg Scroll Depth")
+                        return [formatPercentage(value), name];
+                      if (name === "Session Count") return [value, name];
                       return [value, name];
                     }}
                     labelFormatter={(label) => {
                       try {
-                        return format(new Date(label), 'MMM dd, yyyy');
+                        return format(new Date(label), "MMM dd, yyyy");
                       } catch (e) {
                         return label;
                       }
                     }}
                   />
                   <Legend />
-                  <Line 
+                  <Line
                     yAxisId="left"
-                    type="monotone" 
-                    dataKey="avgScrollDepth" 
-                    name="Avg Scroll Depth" 
-                    stroke="#8884d8" 
-                    activeDot={{ r: 8 }} 
+                    type="monotone"
+                    dataKey="avgScrollDepth"
+                    name="Avg Scroll Depth"
+                    stroke="#8884d8"
+                    activeDot={{ r: 8 }}
                   />
-                  <Line 
+                  <Line
                     yAxisId="right"
-                    type="monotone" 
-                    dataKey="sessionCount" 
-                    name="Session Count" 
-                    stroke="#82ca9d" 
+                    type="monotone"
+                    dataKey="sessionCount"
+                    name="Session Count"
+                    stroke="#82ca9d"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -321,22 +356,37 @@ const ScrollAnalyticsTab: React.FC<ScrollAnalyticsTabProps> = ({ data }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.detailedScrollData.slice(0, 15).map((item: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell 
-                        component="th" 
-                        scope="row"
-                        sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                      >
-                        {item.pagePath}
-                      </TableCell>
-                      <TableCell align="right">{formatPercentage(item.avgScrollDepth)}</TableCell>
-                      <TableCell align="right">{formatPercentage(item.maxScrollDepth)}</TableCell>
-                      <TableCell align="right">{formatTime(item.avgTimeSpent)}</TableCell>
-                      <TableCell align="right">{formatPercentage(item.bounceRate)}</TableCell>
-                      <TableCell align="right">{item.sessionCount}</TableCell>
-                    </TableRow>
-                  ))}
+                  {data.detailedScrollData
+                    .slice(0, 15)
+                    .map((item: any, index: number) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{
+                            maxWidth: 200,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {item.pagePath}
+                        </TableCell>
+                        <TableCell align="right">
+                          {formatPercentage(item.avgScrollDepth)}
+                        </TableCell>
+                        <TableCell align="right">
+                          {formatPercentage(item.maxScrollDepth)}
+                        </TableCell>
+                        <TableCell align="right">
+                          {formatTime(item.avgTimeSpent)}
+                        </TableCell>
+                        <TableCell align="right">
+                          {formatPercentage(item.bounceRate)}
+                        </TableCell>
+                        <TableCell align="right">{item.sessionCount}</TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,8 +8,8 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
 
 // Register ChartJS components
 ChartJS.register(
@@ -18,7 +18,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 interface TopProduct {
@@ -32,7 +32,7 @@ interface TopProduct {
 
 interface TopProductsChartProps {
   products: TopProduct[];
-  metric: 'revenue' | 'orders' | 'views' | 'conversionRate';
+  metric: "revenue" | "orders" | "views" | "conversionRate";
   title?: string;
 }
 
@@ -50,29 +50,31 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({
   }
 
   // Sort products by the selected metric
-  const sortedProducts = [...products].sort((a, b) => b[metric] - a[metric]).slice(0, 5);
+  const sortedProducts = [...products]
+    .sort((a, b) => b[metric] - a[metric])
+    .slice(0, 5);
 
   // Prepare data for the chart
-  const labels = sortedProducts.map(product => {
+  const labels = sortedProducts.map((product) => {
     // Truncate long product names
-    return product.productName.length > 20 
-      ? product.productName.substring(0, 20) + '...' 
+    return product.productName.length > 20
+      ? product.productName.substring(0, 20) + "..."
       : product.productName;
   });
 
   // Set colors based on metric
-  let backgroundColor = 'rgba(101, 163, 13, 0.7)'; // default sage green
-  let borderColor = 'rgb(101, 163, 13)';
-  
-  if (metric === 'orders') {
-    backgroundColor = 'rgba(59, 130, 246, 0.7)'; // blue
-    borderColor = 'rgb(59, 130, 246)';
-  } else if (metric === 'views') {
-    backgroundColor = 'rgba(245, 158, 11, 0.7)'; // amber
-    borderColor = 'rgb(245, 158, 11)';
-  } else if (metric === 'conversionRate') {
-    backgroundColor = 'rgba(139, 92, 246, 0.7)'; // purple
-    borderColor = 'rgb(139, 92, 246)';
+  let backgroundColor = "rgba(101, 163, 13, 0.7)"; // default sage green
+  let borderColor = "rgb(101, 163, 13)";
+
+  if (metric === "orders") {
+    backgroundColor = "rgba(59, 130, 246, 0.7)"; // blue
+    borderColor = "rgb(59, 130, 246)";
+  } else if (metric === "views") {
+    backgroundColor = "rgba(245, 158, 11, 0.7)"; // amber
+    borderColor = "rgb(245, 158, 11)";
+  } else if (metric === "conversionRate") {
+    backgroundColor = "rgba(139, 92, 246, 0.7)"; // purple
+    borderColor = "rgb(139, 92, 246)";
   }
 
   const chartData = {
@@ -80,7 +82,7 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({
     datasets: [
       {
         label: getMetricLabel(metric),
-        data: sortedProducts.map(product => product[metric]),
+        data: sortedProducts.map((product) => product[metric]),
         backgroundColor,
         borderColor,
         borderWidth: 1,
@@ -88,13 +90,13 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({
     ],
   };
 
-  const options: ChartOptions<'bar'> = {
+  const options: ChartOptions<"bar"> = {
     responsive: true,
     maintainAspectRatio: false,
-    indexAxis: 'y' as const, // Horizontal bar chart
+    indexAxis: "y" as const, // Horizontal bar chart
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: "top" as const,
       },
       title: {
         display: !!title,
@@ -105,37 +107,37 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const value = context.parsed.x;
-            if (metric === 'revenue') {
-              return `Revenue: $${value.toLocaleString('en-US', {
+            if (metric === "revenue") {
+              return `Revenue: $${value.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}`;
-            } else if (metric === 'conversionRate') {
+            } else if (metric === "conversionRate") {
               return `Conversion Rate: ${(value * 100).toFixed(2)}%`;
             } else {
-              return `${getMetricLabel(metric)}: ${value.toLocaleString('en-US')}`;
+              return `${getMetricLabel(metric)}: ${value.toLocaleString("en-US")}`;
             }
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       x: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
-            if (metric === 'revenue') {
-              return '$' + value.toLocaleString('en-US');
-            } else if (metric === 'conversionRate') {
-              return (Number(value) * 100).toFixed(1) + '%';
+          callback: function (value) {
+            if (metric === "revenue") {
+              return "$" + value.toLocaleString("en-US");
+            } else if (metric === "conversionRate") {
+              return (Number(value) * 100).toFixed(1) + "%";
             } else {
               return value;
             }
-          }
-        }
-      }
+          },
+        },
+      },
     },
   };
 
@@ -149,14 +151,14 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({
 // Helper function to get the label for each metric
 function getMetricLabel(metric: string): string {
   switch (metric) {
-    case 'revenue':
-      return 'Revenue';
-    case 'orders':
-      return 'Orders';
-    case 'views':
-      return 'Views';
-    case 'conversionRate':
-      return 'Conversion Rate';
+    case "revenue":
+      return "Revenue";
+    case "orders":
+      return "Orders";
+    case "views":
+      return "Views";
+    case "conversionRate":
+      return "Conversion Rate";
     default:
       return metric.charAt(0).toUpperCase() + metric.slice(1);
   }

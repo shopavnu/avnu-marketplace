@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type SessionResponse = {
   sessionId: string;
@@ -13,10 +13,10 @@ type SessionResponse = {
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SessionResponse>
+  res: NextApiResponse<SessionResponse>,
 ) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
     return;
   }
@@ -29,8 +29,8 @@ export default function handler(
     user: {
       isAuthenticated: false,
       isGuest: true,
-      preferences: {}
-    }
+      preferences: {},
+    },
   };
 
   res.status(200).json(sessionResponse);

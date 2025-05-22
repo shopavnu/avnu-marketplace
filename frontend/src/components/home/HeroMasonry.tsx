@@ -1,78 +1,88 @@
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
-import { MasonryItem } from '@/types/home';
+import { MasonryItem } from "@/types/home";
 
 // Get aspect ratio based on index
 const getAspectRatio = (index: number) => {
   // Create a repeating pattern of aspect ratios
-  const ratios = ['3/4', '4/3', '3/2', '2/3', '1/1', '9/16'];
+  const ratios = ["3/4", "4/3", "3/2", "2/3", "1/1", "9/16"];
   return ratios[index % ratios.length];
 };
 
 const heroItems: MasonryItem[] = [
   {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&q=80&fit=crop',
-    title: 'Handcrafted Ceramics',
-    category: 'Home'
+    id: "1",
+    image:
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&q=80&fit=crop",
+    title: "Handcrafted Ceramics",
+    category: "Home",
   },
   {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1602872030219-ad2b9a54315c?auto=format&q=80&fit=crop',
-    title: 'Artisan Jewelry',
-    category: 'Accessories'
+    id: "2",
+    image:
+      "https://images.unsplash.com/photo-1602872030219-ad2b9a54315c?auto=format&q=80&fit=crop",
+    title: "Artisan Jewelry",
+    category: "Accessories",
   },
   {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?auto=format&q=80&fit=crop',
-    title: 'Sustainable Fashion',
-    category: 'Fashion'
+    id: "3",
+    image:
+      "https://images.unsplash.com/photo-1631679706909-1844bbd07221?auto=format&q=80&fit=crop",
+    title: "Sustainable Fashion",
+    category: "Fashion",
   },
   {
-    id: '4',
-    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&q=80&fit=crop',
-    title: 'Modern Lighting',
-    category: 'Home'
+    id: "4",
+    image:
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&q=80&fit=crop",
+    title: "Modern Lighting",
+    category: "Home",
   },
   {
-    id: '5',
-    image: 'https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&q=80&fit=crop',
-    title: 'Eco-friendly Textiles',
-    category: 'Home'
+    id: "5",
+    image:
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&q=80&fit=crop",
+    title: "Eco-friendly Textiles",
+    category: "Home",
   },
   {
-    id: '6',
-    image: 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&q=80&fit=crop',
-    title: 'Minimalist Decor',
-    category: 'Home'
+    id: "6",
+    image:
+      "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&q=80&fit=crop",
+    title: "Minimalist Decor",
+    category: "Home",
   },
   {
-    id: '7',
-    image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&q=80&fit=crop',
-    title: 'Artisanal Pottery',
-    category: 'Home'
+    id: "7",
+    image:
+      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&q=80&fit=crop",
+    title: "Artisanal Pottery",
+    category: "Home",
   },
   {
-    id: '8',
-    image: 'https://images.unsplash.com/photo-1467293622093-9f15c96be70f?auto=format&q=80&fit=crop',
-    title: 'Woven Baskets',
-    category: 'Home'
+    id: "8",
+    image:
+      "https://images.unsplash.com/photo-1467293622093-9f15c96be70f?auto=format&q=80&fit=crop",
+    title: "Woven Baskets",
+    category: "Home",
   },
   {
-    id: '9',
-    image: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&q=80&fit=crop',
-    title: 'Handmade Soaps',
-    category: 'Bath & Body'
+    id: "9",
+    image:
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&q=80&fit=crop",
+    title: "Handmade Soaps",
+    category: "Bath & Body",
   },
   {
-    id: '10',
-    image: 'https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&q=80&fit=crop',
-    title: 'Organic Candles',
-    category: 'Home'
-  }
+    id: "10",
+    image:
+      "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&q=80&fit=crop",
+    title: "Organic Candles",
+    category: "Home",
+  },
 ];
 
 export default function HeroMasonry() {
@@ -100,7 +110,9 @@ export default function HeroMasonry() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              Discover Extraordinary<br />Independent Brands
+              Discover Extraordinary
+              <br />
+              Independent Brands
             </motion.h1>
             <motion.p
               className="font-inter text-base sm:text-lg md:text-xl text-neutral-gray mb-6 sm:mb-8 max-w-2xl mx-auto px-2"
@@ -108,7 +120,8 @@ export default function HeroMasonry() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              Explore our curated collection of unique products from passionate creators and artisans.
+              Explore our curated collection of unique products from passionate
+              creators and artisans.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4"
@@ -149,11 +162,16 @@ export default function HeroMasonry() {
               key={item.id}
               className="relative w-full break-inside-avoid rounded-xl overflow-hidden"
               style={{
-                aspectRatio: index === 0 ? '2/3' : // First item is always tall
-                          index === 1 ? '1/1' : // Second item is square
-                          index === 2 ? '3/4' : // Third item is medium
-                          index === 3 ? '4/3' : // Fourth item is wide
-                          getAspectRatio(index) // Use consistent pattern
+                aspectRatio:
+                  index === 0
+                    ? "2/3" // First item is always tall
+                    : index === 1
+                      ? "1/1" // Second item is square
+                      : index === 2
+                        ? "3/4" // Third item is medium
+                        : index === 3
+                          ? "4/3" // Fourth item is wide
+                          : getAspectRatio(index), // Use consistent pattern
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -177,11 +195,18 @@ export default function HeroMasonry() {
               <motion.div
                 className="absolute bottom-0 left-0 right-0 p-4 text-white"
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: hoveredId === item.id ? 1 : 0, y: hoveredId === item.id ? 0 : 20 }}
+                animate={{
+                  opacity: hoveredId === item.id ? 1 : 0,
+                  y: hoveredId === item.id ? 0 : 20,
+                }}
                 transition={{ duration: 0.3 }}
               >
-                <h3 className="font-montserrat text-sm font-medium mb-1">{item.title}</h3>
-                <p className="font-inter text-xs text-white/80">{item.category}</p>
+                <h3 className="font-montserrat text-sm font-medium mb-1">
+                  {item.title}
+                </h3>
+                <p className="font-inter text-xs text-white/80">
+                  {item.category}
+                </p>
               </motion.div>
             </motion.div>
           ))}

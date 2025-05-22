@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,8 +8,8 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
 
 // Register ChartJS components
 ChartJS.register(
@@ -18,7 +18,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 interface OrganicVsPaidData {
@@ -47,7 +47,7 @@ interface OrganicVsPaidChartProps {
 
 const OrganicVsPaidChart: React.FC<OrganicVsPaidChartProps> = ({
   data,
-  title = 'Organic vs. Paid Performance',
+  title = "Organic vs. Paid Performance",
 }) => {
   if (!data) {
     return (
@@ -58,13 +58,15 @@ const OrganicVsPaidChart: React.FC<OrganicVsPaidChartProps> = ({
   }
 
   // Prepare data for the chart
-  const labels = ['Impressions', 'Clicks', 'Conversion Rate', 'Revenue'];
-  
+  const labels = ["Impressions", "Clicks", "Conversion Rate", "Revenue"];
+
   // Normalize revenue to be on a similar scale as other metrics for visualization
   const maxRevenue = Math.max(data.revenue.organic, data.revenue.paid);
-  const normalizedOrganicRevenue = maxRevenue > 0 ? data.revenue.organic / maxRevenue * 100 : 0;
-  const normalizedPaidRevenue = maxRevenue > 0 ? data.revenue.paid / maxRevenue * 100 : 0;
-  
+  const normalizedOrganicRevenue =
+    maxRevenue > 0 ? (data.revenue.organic / maxRevenue) * 100 : 0;
+  const normalizedPaidRevenue =
+    maxRevenue > 0 ? (data.revenue.paid / maxRevenue) * 100 : 0;
+
   // Normalize conversion rates to percentage for better visualization
   const organicConversionPercentage = data.conversionRates.organic * 100;
   const paidConversionPercentage = data.conversionRates.paid * 100;
@@ -73,38 +75,38 @@ const OrganicVsPaidChart: React.FC<OrganicVsPaidChartProps> = ({
     labels,
     datasets: [
       {
-        label: 'Organic',
+        label: "Organic",
         data: [
           data.impressions.organic,
           data.clicks.organic,
           organicConversionPercentage,
           normalizedOrganicRevenue,
         ],
-        backgroundColor: 'rgba(101, 163, 13, 0.7)', // sage green
-        borderColor: 'rgb(101, 163, 13)',
+        backgroundColor: "rgba(101, 163, 13, 0.7)", // sage green
+        borderColor: "rgb(101, 163, 13)",
         borderWidth: 1,
       },
       {
-        label: 'Paid',
+        label: "Paid",
         data: [
           data.impressions.paid,
           data.clicks.paid,
           paidConversionPercentage,
           normalizedPaidRevenue,
         ],
-        backgroundColor: 'rgba(59, 130, 246, 0.7)', // blue
-        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: "rgba(59, 130, 246, 0.7)", // blue
+        borderColor: "rgb(59, 130, 246)",
         borderWidth: 1,
       },
     ],
   };
 
-  const options: ChartOptions<'bar'> = {
+  const options: ChartOptions<"bar"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: "top" as const,
       },
       title: {
         display: true,
@@ -115,42 +117,50 @@ const OrganicVsPaidChart: React.FC<OrganicVsPaidChartProps> = ({
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const value = context.raw as number;
-            const datasetLabel = context.dataset.label || '';
+            const datasetLabel = context.dataset.label || "";
             const categoryIndex = context.dataIndex;
-            
-            if (categoryIndex === 0) { // Impressions
+
+            if (categoryIndex === 0) {
+              // Impressions
               return `${datasetLabel}: ${value.toLocaleString()} impressions`;
-            } else if (categoryIndex === 1) { // Clicks
+            } else if (categoryIndex === 1) {
+              // Clicks
               return `${datasetLabel}: ${value.toLocaleString()} clicks`;
-            } else if (categoryIndex === 2) { // Conversion Rate
+            } else if (categoryIndex === 2) {
+              // Conversion Rate
               return `${datasetLabel}: ${value.toFixed(2)}%`;
-            } else if (categoryIndex === 3) { // Revenue (normalized)
+            } else if (categoryIndex === 3) {
+              // Revenue (normalized)
               // Show actual revenue value in tooltip
-              const actualRevenue = datasetLabel === 'Organic' 
-                ? data.revenue.organic 
-                : data.revenue.paid;
-              return `${datasetLabel}: $${actualRevenue.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`;
+              const actualRevenue =
+                datasetLabel === "Organic"
+                  ? data.revenue.organic
+                  : data.revenue.paid;
+              return `${datasetLabel}: $${actualRevenue.toLocaleString(
+                "en-US",
+                {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                },
+              )}`;
             }
             return `${datasetLabel}: ${value}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value, index, ticks) {
+          callback: function (value, index, ticks) {
             // For conversion rate and revenue, show percentage
             return value;
-          }
-        }
-      }
+          },
+        },
+      },
     },
   };
 
@@ -162,90 +172,110 @@ const OrganicVsPaidChart: React.FC<OrganicVsPaidChartProps> = ({
         <div className="flex justify-between items-end">
           <div>
             <p className="text-xs text-gray-500">Organic</p>
-            <p className="text-lg font-semibold">{data.impressions.organic.toLocaleString()}</p>
+            <p className="text-lg font-semibold">
+              {data.impressions.organic.toLocaleString()}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500">Paid</p>
-            <p className="text-lg font-semibold">{data.impressions.paid.toLocaleString()}</p>
+            <p className="text-lg font-semibold">
+              {data.impressions.paid.toLocaleString()}
+            </p>
           </div>
         </div>
         <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-green-600" 
-            style={{ 
-              width: `${data.impressions.organic / (data.impressions.organic + data.impressions.paid) * 100}%` 
+          <div
+            className="h-full bg-green-600"
+            style={{
+              width: `${(data.impressions.organic / (data.impressions.organic + data.impressions.paid)) * 100}%`,
             }}
           ></div>
         </div>
       </div>
-      
+
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h4 className="text-sm font-medium text-gray-500 mb-1">Clicks</h4>
         <div className="flex justify-between items-end">
           <div>
             <p className="text-xs text-gray-500">Organic</p>
-            <p className="text-lg font-semibold">{data.clicks.organic.toLocaleString()}</p>
+            <p className="text-lg font-semibold">
+              {data.clicks.organic.toLocaleString()}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500">Paid</p>
-            <p className="text-lg font-semibold">{data.clicks.paid.toLocaleString()}</p>
+            <p className="text-lg font-semibold">
+              {data.clicks.paid.toLocaleString()}
+            </p>
           </div>
         </div>
         <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-green-600" 
-            style={{ 
-              width: `${data.clicks.organic / (data.clicks.organic + data.clicks.paid) * 100}%` 
+          <div
+            className="h-full bg-green-600"
+            style={{
+              width: `${(data.clicks.organic / (data.clicks.organic + data.clicks.paid)) * 100}%`,
             }}
           ></div>
         </div>
       </div>
-      
+
       <div className="bg-white p-4 rounded-lg shadow-sm">
-        <h4 className="text-sm font-medium text-gray-500 mb-1">Conversion Rate</h4>
+        <h4 className="text-sm font-medium text-gray-500 mb-1">
+          Conversion Rate
+        </h4>
         <div className="flex justify-between items-end">
           <div>
             <p className="text-xs text-gray-500">Organic</p>
-            <p className="text-lg font-semibold">{(data.conversionRates.organic * 100).toFixed(2)}%</p>
+            <p className="text-lg font-semibold">
+              {(data.conversionRates.organic * 100).toFixed(2)}%
+            </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500">Paid</p>
-            <p className="text-lg font-semibold">{(data.conversionRates.paid * 100).toFixed(2)}%</p>
+            <p className="text-lg font-semibold">
+              {(data.conversionRates.paid * 100).toFixed(2)}%
+            </p>
           </div>
         </div>
         <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-green-600" 
-            style={{ 
-              width: `${data.conversionRates.organic / (data.conversionRates.organic + data.conversionRates.paid) * 100}%` 
+          <div
+            className="h-full bg-green-600"
+            style={{
+              width: `${(data.conversionRates.organic / (data.conversionRates.organic + data.conversionRates.paid)) * 100}%`,
             }}
           ></div>
         </div>
       </div>
-      
+
       <div className="bg-white p-4 rounded-lg shadow-sm">
         <h4 className="text-sm font-medium text-gray-500 mb-1">Revenue</h4>
         <div className="flex justify-between items-end">
           <div>
             <p className="text-xs text-gray-500">Organic</p>
-            <p className="text-lg font-semibold">${data.revenue.organic.toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}</p>
+            <p className="text-lg font-semibold">
+              $
+              {data.revenue.organic.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500">Paid</p>
-            <p className="text-lg font-semibold">${data.revenue.paid.toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}</p>
+            <p className="text-lg font-semibold">
+              $
+              {data.revenue.paid.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
           </div>
         </div>
         <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-green-600" 
-            style={{ 
-              width: `${data.revenue.organic / (data.revenue.organic + data.revenue.paid) * 100}%` 
+          <div
+            className="h-full bg-green-600"
+            style={{
+              width: `${(data.revenue.organic / (data.revenue.organic + data.revenue.paid)) * 100}%`,
             }}
           ></div>
         </div>

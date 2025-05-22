@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import sessionService from '../services/session.service';
+import { useEffect, useRef, useState } from "react";
+import sessionService from "../services/session.service";
 
 interface ImpressionTrackingOptions {
   /**
@@ -7,12 +7,12 @@ interface ImpressionTrackingOptions {
    * Default: 0.5 (50% visible)
    */
   threshold?: number;
-  
+
   /**
    * The search query associated with these results
    */
   searchQuery?: string;
-  
+
   /**
    * Whether to track impressions (can be disabled for performance)
    * Default: true
@@ -25,23 +25,23 @@ interface ImpressionTrackingOptions {
  * @param options Configuration options
  * @returns Functions and refs for tracking impressions
  */
-export const useImpressionTracking = (options: ImpressionTrackingOptions = {}) => {
-  const { 
-    threshold = 0.5, 
-    searchQuery = '',
-    enabled = true 
-  } = options;
-  
+export const useImpressionTracking = (
+  options: ImpressionTrackingOptions = {},
+) => {
+  const { threshold = 0.5, searchQuery = "", enabled = true } = options;
+
   // Keep track of which results have already been tracked
-  const [trackedImpressions, setTrackedImpressions] = useState<Set<string>>(new Set());
-  
+  const [trackedImpressions, setTrackedImpressions] = useState<Set<string>>(
+    new Set(),
+  );
+
   // Reference to the observer
   const observerRef = useRef<IntersectionObserver | null>(null);
-  
+
   // Initialize observer
   useEffect(() => {
     if (!enabled || !searchQuery) return;
-    
+
     // Cleanup function
     const cleanup = () => {
       if (observerRef.current) {
@@ -49,51 +49,64 @@ export const useImpressionTracking = (options: ImpressionTrackingOptions = {}) =
         observerRef.current = null;
       }
     };
-    
+
     // Create new observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
         const newlyVisibleResults: string[] = [];
-        
-        entries.forEach(entry => {
-          const resultId = entry.target.getAttribute('data-result-id');
-          
-          if (resultId && entry.isIntersecting && !trackedImpressions.has(resultId)) {
+
+        entries.forEach((entry) => {
+          const resultId = entry.target.getAttribute("data-result-id");
+
+          if (
+            resultId &&
+            entry.isIntersecting &&
+            !trackedImpressions.has(resultId)
+          ) {
             newlyVisibleResults.push(resultId);
-            setTrackedImpressions(prev => {
+            setTrackedImpressions((prev) => {
               const newSet = new Set(Array.from(prev));
               newSet.add(resultId);
               return newSet;
             });
           }
         });
-        
+
         if (newlyVisibleResults.length > 0 && searchQuery) {
           // Track impressions in session service
-          sessionService.trackSearchResultImpressions(newlyVisibleResults, searchQuery);
+          sessionService.trackSearchResultImpressions(
+            newlyVisibleResults,
+            searchQuery,
+          );
         }
       },
-      { threshold }
+      { threshold },
     );
-    
+
     return cleanup;
   }, [enabled, searchQuery, threshold, trackedImpressions]);
-  
+
   /**
    * Register an element to be tracked for impressions
    * @param element The DOM element to track
    * @param resultId The ID of the result
    */
   const trackElement = (element: HTMLElement | null, resultId: string) => {
-    if (!element || !observerRef.current || !enabled || trackedImpressions.has(resultId)) return;
-    
+    if (
+      !element ||
+      !observerRef.current ||
+      !enabled ||
+      trackedImpressions.has(resultId)
+    )
+      return;
+
     // Set data attribute for the observer
-    element.setAttribute('data-result-id', resultId);
-    
+    element.setAttribute("data-result-id", resultId);
+
     // Start observing
     observerRef.current.observe(element);
   };
-  
+
   /**
    * Reset tracking (e.g., when search results change)
    */
@@ -102,15 +115,15 @@ export const useImpressionTracking = (options: ImpressionTrackingOptions = {}) =
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
-    
+
     // Reset tracked impressions
     setTrackedImpressions(new Set());
   };
-  
+
   return {
     trackElement,
     resetTracking,
-    trackedImpressions: Array.from(trackedImpressions)
+    trackedImpressions: Array.from(trackedImpressions),
   };
 };
 

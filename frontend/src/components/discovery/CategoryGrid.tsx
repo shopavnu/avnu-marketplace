@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import CategoryCard from './CategoryCard';
-import { Category, categories as allCategories } from '@/data/categories';
-import { ScrollItem } from '@/components/common';
+import React from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import CategoryCard from "./CategoryCard";
+import { Category, categories as allCategories } from "@/data/categories";
+import { ScrollItem } from "@/components/common";
 
 interface CategoryGridProps {
   title?: string;
@@ -14,20 +14,20 @@ interface CategoryGridProps {
 }
 
 const CategoryGrid: React.FC<CategoryGridProps> = ({
-  title = 'Browse Categories',
+  title = "Browse Categories",
   description,
   categories = allCategories,
   showFeaturedOnly = false,
   maxCategories,
-  className = '',
+  className = "",
 }) => {
   // Filter categories if needed
   let displayCategories = categories;
-  
+
   if (showFeaturedOnly) {
-    displayCategories = categories.filter(category => category.featured);
+    displayCategories = categories.filter((category) => category.featured);
   }
-  
+
   if (maxCategories && maxCategories > 0) {
     displayCategories = displayCategories.slice(0, maxCategories);
   }
@@ -38,18 +38,18 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.5 }
-    }
+      transition: { duration: 0.5 },
+    },
   };
 
   return (
@@ -60,7 +60,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
           <ScrollItem>
             <div className="mb-6">
               {title && (
-                <motion.h2 
+                <motion.h2
                   className="text-2xl font-montserrat font-medium text-charcoal"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -71,7 +71,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
                 </motion.h2>
               )}
               {description && (
-                <motion.p 
+                <motion.p
                   className="text-neutral-gray mt-2"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -86,7 +86,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
         )}
 
         {/* Category Grid */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
           variants={containerVariants}
           initial="hidden"
@@ -96,10 +96,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
           {displayCategories.map((category, index) => (
             <motion.div key={category.id} variants={itemVariants}>
               <ScrollItem delay={index * 0.05}>
-                <CategoryCard 
-                  category={category} 
-                  size="medium" 
-                />
+                <CategoryCard category={category} size="medium" />
               </ScrollItem>
             </motion.div>
           ))}

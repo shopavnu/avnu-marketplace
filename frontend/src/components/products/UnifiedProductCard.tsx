@@ -1,8 +1,8 @@
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Product } from '@/data/products';
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Product } from "@/data/products";
 
 interface UnifiedProductCardProps {
   product: any; // Using any to accommodate both Product and discovery product types
@@ -13,7 +13,7 @@ interface UnifiedProductCardProps {
 const UnifiedProductCard: React.FC<UnifiedProductCardProps> = ({
   product,
   badges,
-  showRating = true
+  showRating = true,
 }) => {
   return (
     <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300">
@@ -21,20 +21,20 @@ const UnifiedProductCard: React.FC<UnifiedProductCardProps> = ({
         {/* Fixed-height image container */}
         <div className="relative w-full h-64 bg-gray-50">
           <Image
-            src={product.images?.[0] || '/images/placeholder-product.jpg'}
+            src={product.images?.[0] || "/images/placeholder-product.jpg"}
             alt={product.title}
             fill
             className="object-contain p-2"
             sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
-          
+
           {/* Badges */}
           {badges && (
             <div className="absolute top-3 left-3 flex flex-col gap-2">
               {badges}
             </div>
           )}
-          
+
           {/* Default badges based on product properties */}
           {!badges && (
             <div className="absolute top-3 left-3 flex flex-col gap-2">
@@ -66,14 +66,16 @@ const UnifiedProductCard: React.FC<UnifiedProductCardProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* Product info - fixed height */}
         <div className="p-4 h-32">
           {/* Brand */}
           {product.brand && (
             <div className="mb-1">
               <span className="text-xs text-neutral-gray truncate block">
-                {typeof product.brand === 'string' ? product.brand : product.brand?.name || ''}
+                {typeof product.brand === "string"
+                  ? product.brand
+                  : product.brand?.name || ""}
               </span>
             </div>
           )}
@@ -106,7 +108,9 @@ const UnifiedProductCard: React.FC<UnifiedProductCardProps> = ({
                     <svg
                       key={i}
                       className={`w-3 h-3 ${
-                        i < Math.floor(product.rating.average || 0) ? 'text-yellow-400' : 'text-gray-300'
+                        i < Math.floor(product.rating.average || 0)
+                          ? "text-yellow-400"
+                          : "text-gray-300"
                       }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
