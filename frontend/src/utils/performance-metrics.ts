@@ -223,20 +223,23 @@ export class PerformanceMetricsCollector {
    */
   private collectNetworkInformation(): any {
     // @ts-ignore - TypeScript doesn't know about the Network Information API
+    // Use type assertion for deprecated browser API properties
     const connection =
       navigator.connection ||
-      navigator.mozConnection ||
-      navigator.webkitConnection;
+      (navigator as any).mozConnection ||
+      (navigator as any).webkitConnection;
 
     if (!connection) {
       return null;
     }
 
+    // Use type assertion for NetworkInformation API properties
+    const networkConnection = connection as any;
     return JSON.stringify({
-      effectiveType: connection.effectiveType,
-      downlink: connection.downlink,
-      rtt: connection.rtt,
-      saveData: connection.saveData,
+      effectiveType: networkConnection.effectiveType,
+      downlink: networkConnection.downlink,
+      rtt: networkConnection.rtt,
+      saveData: networkConnection.saveData,
     });
   }
 
