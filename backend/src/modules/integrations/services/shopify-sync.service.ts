@@ -357,7 +357,7 @@ export class ShopifySyncService {
         `Error handling Shopify webhook: ${errorMessage}`,
         error instanceof Error ? error.stack : undefined,
       );
-      
+
       // TODO: Add retry mechanism for transient errors
       // For now, return false to indicate failure
       return false;
