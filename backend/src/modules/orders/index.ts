@@ -1,11 +1,45 @@
-// Export main module
-export * from './orders.module';
+// @ts-strict-mode: enabled
+// Module
+export { OrdersModule } from './orders.module';
 
-// Export entities (assuming these files exist)
-// export * from './entities/order.entity';
+// Entities
+export { Order } from './entities/order.entity';
+export { OrderItem } from './entities/order-item.entity';
+export { OrderFulfillment } from './entities/order-fulfillment.entity';
 
-// Export services (assuming these files exist)
-// export * from './orders.service';
+// DTOs
+export { CreateOrderDto } from './dto/create-order.dto';
+export { UpdateOrderDto } from './dto/update-order.dto';
 
-// Export controllers (assuming these files exist)
-// export * from './orders.controller';
+// GraphQL Types
+export {
+  OrderType,
+  OrderItemType,
+  OrderFulfillmentType,
+  ShippingAddressType,
+  PaginatedOrdersType,
+} from './dto/order.types';
+
+// GraphQL Inputs
+export {
+  CreateOrderInput,
+  UpdateOrderInput,
+  OrderItemInput,
+  ShippingAddressInput,
+  PaginationInput,
+} from './dto/order.inputs';
+
+// Services
+export { OrdersService } from './services/orders.service';
+
+// Controllers
+export { OrdersController } from './controllers/orders.controller';
+
+// Resolvers
+export { OrdersResolver } from './resolvers/orders.resolver';
+
+// Enums
+export { OrderStatus } from './enums/order-status.enum';
+export { PaymentStatus } from './enums/payment-status.enum';
+export { FulfillmentStatus } from './enums/fulfillment-status.enum';
+export { SyncStatus } from './enums/sync-status.enum';

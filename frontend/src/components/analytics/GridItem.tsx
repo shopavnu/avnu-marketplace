@@ -1,13 +1,13 @@
-import React, { ReactNode } from 'react';
-import { Grid } from '@mui/material';
+import React, { ReactNode } from "react";
+import { Grid } from "@mui/material";
 
 interface GridItemProps {
   children: ReactNode;
-  xs?: number | boolean | 'auto';
-  sm?: number | boolean | 'auto';
-  md?: number | boolean | 'auto';
-  lg?: number | boolean | 'auto';
-  xl?: number | boolean | 'auto';
+  xs?: number | boolean | "auto";
+  sm?: number | boolean | "auto";
+  md?: number | boolean | "auto";
+  lg?: number | boolean | "auto";
+  xl?: number | boolean | "auto";
   className?: string;
   sx?: any;
 }
@@ -28,7 +28,7 @@ const GridItem = ({
 }: GridItemProps) => {
   // Create a props object with only the properties that MUI Grid accepts
   const gridProps: any = {};
-  
+
   // Add grid properties
   if (xs !== undefined) gridProps.xs = xs;
   if (sm !== undefined) gridProps.sm = sm;
@@ -37,7 +37,7 @@ const GridItem = ({
   if (xl !== undefined) gridProps.xl = xl;
   if (className) gridProps.className = className;
   if (sx) gridProps.sx = sx;
-  
+
   return (
     <Grid item {...gridProps}>
       {children}

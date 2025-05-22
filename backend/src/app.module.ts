@@ -3,8 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
+// Import Redis store at the top level
+// No need for type imports as we're using direct configuration
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const redisStore = require('cache-manager-redis-store').default;
 import { CommonModule } from '@common/common.module';
 import { HealthModule } from './health/health.module';
 
@@ -13,6 +16,7 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { UsersModule } from '@modules/users';
 import { ProductsModule } from '@modules/products';
 import { MerchantsModule } from '@modules/merchants';
+import { CategoriesModule } from '@modules/categories/categories.module';
 import { OrdersModule } from '@modules/orders';
 import { IntegrationsModule } from '@modules/integrations';
 import { SearchModule } from '@modules/search';
@@ -22,6 +26,9 @@ import { NlpModule } from '@modules/nlp';
 import { PersonalizationModule } from '@modules/personalization';
 import { AnalyticsModule } from '@modules/analytics';
 import { AbTestingModule } from '@modules/ab-testing';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { AdvertisingModule } from './modules/advertising/advertising.module';
+import { AccessibilityModule } from './modules/accessibility/accessibility.module';
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -75,10 +82,19 @@ registerEnumType(ExperimentStatus, {
     }),
 
     // Redis Cache
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      ttl: 60 * 60, // 1 hour
-      max: 1000, // Maximum number of items in cache
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore,
+        // Redis client options
+        ttl: configService.get('REDIS_TTL', 60 * 60), // 1 hour default
+        url: `redis://${configService.get('REDIS_HOST', 'localhost')}:${configService.get('REDIS_PORT', 6379)}`,
+        password: configService.get('REDIS_PASSWORD', ''),
+        database: configService.get('REDIS_DB', 0),
+        max: configService.get('REDIS_MAX_ITEMS', 1000), // Maximum number of items in cache
+      }),
     }),
 
     // Feature modules
@@ -86,6 +102,7 @@ registerEnumType(ExperimentStatus, {
     UsersModule,
     ProductsModule,
     MerchantsModule,
+    CategoriesModule,
     OrdersModule,
     IntegrationsModule,
     SearchModule,
@@ -95,6 +112,9 @@ registerEnumType(ExperimentStatus, {
     PersonalizationModule,
     AnalyticsModule,
     AbTestingModule,
+    RecommendationsModule,
+    AdvertisingModule,
+    AccessibilityModule,
   ],
 })
 export class AppModule {}

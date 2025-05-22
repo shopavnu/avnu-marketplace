@@ -1,8 +1,8 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import { useMutation, useQuery } from '@apollo/client';
-import { 
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import { useMutation, useQuery } from "@apollo/client";
+import {
   ArrowLeftIcon,
   CalendarIcon,
   TagIcon,
@@ -11,40 +11,48 @@ import {
   MapPinIcon,
   HeartIcon,
   CheckCircleIcon,
-  XCircleIcon
-} from '@heroicons/react/24/outline';
-import MerchantLayout from '@/components/merchant/MerchantLayout';
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
+import MerchantLayout from "@/components/merchant/MerchantLayout";
 import {
   CampaignType,
   TargetAudience,
   CampaignFormData,
   Product,
   BudgetForecast,
-  CreateAdCampaignInput
-} from '@/types/adCampaigns';
+  CreateAdCampaignInput,
+} from "@/types/adCampaigns";
 import {
   GET_MERCHANT_PRODUCTS,
   GET_BUDGET_FORECAST,
-  CREATE_AD_CAMPAIGN
-} from '@/graphql/adCampaigns';
-import ProductSelector from '@/components/merchant/ProductSelector';
-import BudgetAllocator from '@/components/merchant/BudgetAllocator';
-import DemographicTargeting from '@/components/merchant/DemographicTargeting';
+  CREATE_AD_CAMPAIGN,
+} from "@/graphql/adCampaigns";
+import ProductSelector from "@/components/merchant/ProductSelector";
+import BudgetAllocator from "@/components/merchant/BudgetAllocator";
+import DemographicTargeting from "@/components/merchant/DemographicTargeting";
 
 // Demographics options
-const ageRanges = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
-const genders = ['All', 'Male', 'Female', 'Non-binary'];
+const ageRanges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
+const genders = ["All", "Male", "Female", "Non-binary"];
 const interests = [
-  'Sustainable Fashion', 
-  'Eco-Friendly Products', 
-  'Environmentalism', 
-  'Sustainable Living',
-  'Ethical Shopping',
-  'Zero Waste',
-  'Minimalism',
-  'Organic Products'
+  "Sustainable Fashion",
+  "Eco-Friendly Products",
+  "Environmentalism",
+  "Sustainable Living",
+  "Ethical Shopping",
+  "Zero Waste",
+  "Minimalism",
+  "Organic Products",
 ];
-const locations = ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Global'];
+const locations = [
+  "United States",
+  "Canada",
+  "United Kingdom",
+  "Australia",
+  "Germany",
+  "France",
+  "Global",
+];
 
 const CampaignCreatePage = () => {
   const router = useRouter();
@@ -52,21 +60,21 @@ const CampaignCreatePage = () => {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  
+
   // Form state
   const [formData, setFormData] = useState<CampaignFormData>({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     type: CampaignType.PRODUCT_PROMOTION,
-    startDate: '',
-    endDate: '',
+    startDate: "",
+    endDate: "",
     budget: 100,
     targetAudience: TargetAudience.ALL,
     selectedProducts: [],
     selectedAgeRanges: [],
-    selectedGenders: ['All'],
+    selectedGenders: ["All"],
     selectedInterests: [],
-    selectedLocations: []
+    selectedLocations: [],
   });
 
   // Budget forecast state
@@ -77,7 +85,7 @@ const CampaignCreatePage = () => {
     estimatedConversions: 0,
     estimatedCostPerClick: 0,
     estimatedCostPerMille: 0,
-    estimatedCostPerAcquisition: 0
+    estimatedCostPerAcquisition: 0,
   });
 
   // Mock budget forecast data (fallback when no products selected)
@@ -88,28 +96,37 @@ const CampaignCreatePage = () => {
     estimatedConversions: 100,
     estimatedCostPerClick: 1.0,
     estimatedCostPerMille: 5.0,
-    estimatedCostPerAcquisition: 5.0
+    estimatedCostPerAcquisition: 5.0,
   };
 
   // Handle input changes
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
   // Handle checkbox changes for multi-select options
-  const handleCheckboxChange = (field: keyof CampaignFormData, value: string) => {
-    if (field === 'selectedAgeRanges' || field === 'selectedGenders' || 
-        field === 'selectedInterests' || field === 'selectedLocations' || 
-        field === 'selectedProducts') {
+  const handleCheckboxChange = (
+    field: keyof CampaignFormData,
+    value: string,
+  ) => {
+    if (
+      field === "selectedAgeRanges" ||
+      field === "selectedGenders" ||
+      field === "selectedInterests" ||
+      field === "selectedLocations" ||
+      field === "selectedProducts"
+    ) {
       setFormData({
         ...formData,
         [field]: formData[field].includes(value)
-          ? formData[field].filter(item => item !== value)
-          : [...formData[field], value]
+          ? formData[field].filter((item) => item !== value)
+          : [...formData[field], value],
       });
     }
   };
@@ -124,29 +141,32 @@ const CampaignCreatePage = () => {
     setFormData({
       ...formData,
       selectedProducts: formData.selectedProducts.includes(productId)
-        ? formData.selectedProducts.filter(id => id !== productId)
-        : [...formData.selectedProducts, productId]
+        ? formData.selectedProducts.filter((id) => id !== productId)
+        : [...formData.selectedProducts, productId],
     });
   };
 
   // GraphQL mutation for creating a campaign
-  const [createCampaign, { loading: mutationLoading }] = useMutation(CREATE_AD_CAMPAIGN, {
-    onCompleted: (data) => {
-      console.log('Campaign created:', data);
-      // Redirect to campaigns list on success
-      router.push('/merchant/advertising');
+  const [createCampaign, { loading: mutationLoading }] = useMutation(
+    CREATE_AD_CAMPAIGN,
+    {
+      onCompleted: (data) => {
+        console.log("Campaign created:", data);
+        // Redirect to campaigns list on success
+        router.push("/merchant/advertising");
+      },
+      onError: (error) => {
+        console.error("Error creating campaign:", error);
+        setSubmitting(false);
+      },
     },
-    onError: (error) => {
-      console.error('Error creating campaign:', error);
-      setSubmitting(false);
-    }
-  });
+  );
 
   // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
-    
+
     try {
       // Prepare input data for the mutation
       const campaignInput: CreateAdCampaignInput = {
@@ -160,17 +180,17 @@ const CampaignCreatePage = () => {
         targetLocations: formData.selectedLocations,
         targetInterests: formData.selectedInterests,
         startDate: formData.startDate,
-        endDate: formData.endDate
+        endDate: formData.endDate,
       };
-      
+
       // Execute the mutation
       await createCampaign({
         variables: {
-          input: campaignInput
-        }
+          input: campaignInput,
+        },
       });
     } catch (error) {
-      console.error('Error creating campaign:', error);
+      console.error("Error creating campaign:", error);
       setSubmitting(false);
     }
   };
@@ -188,30 +208,37 @@ const CampaignCreatePage = () => {
   };
 
   // Query for merchant products
-  const { data: productData, loading: productsLoading } = useQuery(GET_MERCHANT_PRODUCTS, {
-    onCompleted: (data) => {
-      if (data?.merchantProducts) {
-        setProducts(data.merchantProducts);
-      }
-    }
-  });
+  const { data: productData, loading: productsLoading } = useQuery(
+    GET_MERCHANT_PRODUCTS,
+    {
+      onCompleted: (data) => {
+        if (data?.merchantProducts) {
+          setProducts(data.merchantProducts);
+        }
+      },
+    },
+  );
 
   // Query for budget forecast
-  const { data: forecastData, loading: forecastLoading, refetch: refetchForecast } = useQuery(GET_BUDGET_FORECAST, {
+  const {
+    data: forecastData,
+    loading: forecastLoading,
+    refetch: refetchForecast,
+  } = useQuery(GET_BUDGET_FORECAST, {
     variables: {
       budget: formData.budget,
       productIds: formData.selectedProducts,
       targetAudience: formData.targetAudience,
       targetDemographics: formData.selectedAgeRanges,
       targetLocations: formData.selectedLocations,
-      targetInterests: formData.selectedInterests
+      targetInterests: formData.selectedInterests,
     },
     skip: formData.selectedProducts.length === 0, // Skip if no products selected
     onCompleted: (data) => {
       if (data?.getBudgetForecast) {
         setBudgetForecast(data.getBudgetForecast);
       }
-    }
+    },
   });
 
   // Update budget forecast when budget changes
@@ -224,20 +251,27 @@ const CampaignCreatePage = () => {
         targetAudience: formData.targetAudience,
         targetDemographics: formData.selectedAgeRanges,
         targetLocations: formData.selectedLocations,
-        targetInterests: formData.selectedInterests
+        targetInterests: formData.selectedInterests,
       });
     } else {
       // Fallback to mock data if no products selected
       const scaleFactor = budget / 500; // Mock data is based on $500 budget
-      
+
       setBudgetForecast({
         recommendedBudget: budget,
-        estimatedImpressions: Math.round(mockBudgetForecast.estimatedImpressions * scaleFactor),
-        estimatedClicks: Math.round(mockBudgetForecast.estimatedClicks * scaleFactor),
-        estimatedConversions: Math.round(mockBudgetForecast.estimatedConversions * scaleFactor),
+        estimatedImpressions: Math.round(
+          mockBudgetForecast.estimatedImpressions * scaleFactor,
+        ),
+        estimatedClicks: Math.round(
+          mockBudgetForecast.estimatedClicks * scaleFactor,
+        ),
+        estimatedConversions: Math.round(
+          mockBudgetForecast.estimatedConversions * scaleFactor,
+        ),
         estimatedCostPerClick: mockBudgetForecast.estimatedCostPerClick,
         estimatedCostPerMille: mockBudgetForecast.estimatedCostPerMille,
-        estimatedCostPerAcquisition: mockBudgetForecast.estimatedCostPerAcquisition
+        estimatedCostPerAcquisition:
+          mockBudgetForecast.estimatedCostPerAcquisition,
       });
     }
   };
@@ -246,9 +280,11 @@ const CampaignCreatePage = () => {
   const isCurrentStepValid = () => {
     switch (step) {
       case 1:
-        return formData.name.trim() !== '' && 
-               formData.startDate !== '' && 
-               formData.endDate !== '';
+        return (
+          formData.name.trim() !== "" &&
+          formData.startDate !== "" &&
+          formData.endDate !== ""
+        );
       case 2:
         return formData.selectedProducts.length > 0;
       case 3:
@@ -276,45 +312,65 @@ const CampaignCreatePage = () => {
               >
                 <ArrowLeftIcon className="h-5 w-5" />
               </button>
-              <h1 className="text-2xl font-semibold text-gray-900">Create New Ad Campaign</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Create New Ad Campaign
+              </h1>
             </div>
 
             {/* Progress Steps */}
             <div className="mb-8">
               <div className="flex justify-between items-center">
-                {['Campaign Details', 'Product Selection', 'Budget Allocation', 'Targeting'].map((stepName, index) => (
+                {[
+                  "Campaign Details",
+                  "Product Selection",
+                  "Budget Allocation",
+                  "Targeting",
+                ].map((stepName, index) => (
                   <div key={index} className="flex flex-col items-center">
-                    <div 
+                    <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        step > index + 1 ? 'bg-green-500' : 
-                        step === index + 1 ? 'bg-blue-600' : 'bg-gray-300'
+                        step > index + 1
+                          ? "bg-green-500"
+                          : step === index + 1
+                            ? "bg-blue-600"
+                            : "bg-gray-300"
                       } text-white font-medium`}
                     >
-                      {step > index + 1 ? '✓' : index + 1}
+                      {step > index + 1 ? "✓" : index + 1}
                     </div>
-                    <span className={`mt-2 text-sm ${step === index + 1 ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
+                    <span
+                      className={`mt-2 text-sm ${step === index + 1 ? "text-blue-600 font-medium" : "text-gray-500"}`}
+                    >
                       {stepName}
                     </span>
                   </div>
                 ))}
               </div>
               <div className="mt-2 h-1 w-full bg-gray-200 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-blue-600 transition-all duration-300"
                   style={{ width: `${(step / 4) * 100}%` }}
                 ></div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-lg overflow-hidden">
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white shadow-sm rounded-lg overflow-hidden"
+            >
               {/* Step 1: Campaign Details */}
               {step === 1 && (
                 <div className="p-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-6">Campaign Details</h2>
-                  
+                  <h2 className="text-lg font-medium text-gray-900 mb-6">
+                    Campaign Details
+                  </h2>
+
                   <div className="space-y-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Campaign Name*
                       </label>
                       <input
@@ -330,7 +386,10 @@ const CampaignCreatePage = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Description
                       </label>
                       <textarea
@@ -345,7 +404,10 @@ const CampaignCreatePage = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="type"
+                        className="block text-sm font-medium text-gray-700"
+                      >
                         Campaign Type*
                       </label>
                       <select
@@ -355,15 +417,24 @@ const CampaignCreatePage = () => {
                         onChange={handleInputChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
-                        <option value={CampaignType.PRODUCT_PROMOTION}>Product Promotion</option>
-                        <option value={CampaignType.RETARGETING}>Retargeting</option>
-                        <option value={CampaignType.BRAND_AWARENESS}>Brand Awareness</option>
+                        <option value={CampaignType.PRODUCT_PROMOTION}>
+                          Product Promotion
+                        </option>
+                        <option value={CampaignType.RETARGETING}>
+                          Retargeting
+                        </option>
+                        <option value={CampaignType.BRAND_AWARENESS}>
+                          Brand Awareness
+                        </option>
                       </select>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="startDate"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           Start Date*
                         </label>
                         <div className="mt-1 relative rounded-md shadow-sm">
@@ -376,7 +447,7 @@ const CampaignCreatePage = () => {
                             name="startDate"
                             value={formData.startDate}
                             onChange={handleInputChange}
-                            min={new Date().toISOString().split('T')[0]}
+                            min={new Date().toISOString().split("T")[0]}
                             required
                             className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           />
@@ -384,7 +455,10 @@ const CampaignCreatePage = () => {
                       </div>
 
                       <div>
-                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="endDate"
+                          className="block text-sm font-medium text-gray-700"
+                        >
                           End Date*
                         </label>
                         <div className="mt-1 relative rounded-md shadow-sm">
@@ -397,7 +471,10 @@ const CampaignCreatePage = () => {
                             name="endDate"
                             value={formData.endDate}
                             onChange={handleInputChange}
-                            min={formData.startDate || new Date().toISOString().split('T')[0]}
+                            min={
+                              formData.startDate ||
+                              new Date().toISOString().split("T")[0]
+                            }
                             required
                             className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           />
@@ -411,9 +488,12 @@ const CampaignCreatePage = () => {
               {/* Step 2: Product Selection */}
               {step === 2 && (
                 <div className="p-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-6">Product Selection</h2>
+                  <h2 className="text-lg font-medium text-gray-900 mb-6">
+                    Product Selection
+                  </h2>
                   <p className="text-sm text-gray-500 mb-4">
-                    Select the products you want to promote in this campaign. You can select multiple products.
+                    Select the products you want to promote in this campaign.
+                    You can select multiple products.
                   </p>
 
                   <ProductSelector
@@ -434,13 +514,15 @@ const CampaignCreatePage = () => {
               {/* Step 3: Budget Allocation */}
               {step === 3 && (
                 <div className="p-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-6">Budget Allocation</h2>
-                  
+                  <h2 className="text-lg font-medium text-gray-900 mb-6">
+                    Budget Allocation
+                  </h2>
+
                   <div className="space-y-6">
                     <BudgetAllocator
                       budget={formData.budget}
                       onBudgetChange={(budget) => {
-                        setFormData(prev => ({ ...prev, budget }));
+                        setFormData((prev) => ({ ...prev, budget }));
                         updateBudgetForecast(budget);
                       }}
                       forecast={budgetForecast}
@@ -453,9 +535,12 @@ const CampaignCreatePage = () => {
               {/* Step 4: Demographic Targeting */}
               {step === 4 && (
                 <div className="p-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-6">Demographic Targeting</h2>
+                  <h2 className="text-lg font-medium text-gray-900 mb-6">
+                    Demographic Targeting
+                  </h2>
                   <p className="text-sm text-gray-500 mb-4">
-                    Refine your audience targeting to reach the right customers. All fields are optional.
+                    Refine your audience targeting to reach the right customers.
+                    All fields are optional.
                   </p>
 
                   <DemographicTargeting
@@ -493,8 +578,8 @@ const CampaignCreatePage = () => {
                     disabled={!isCurrentStepValid()}
                     className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                       isCurrentStepValid()
-                        ? 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                        : 'bg-blue-300 cursor-not-allowed'
+                        ? "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        : "bg-blue-300 cursor-not-allowed"
                     }`}
                   >
                     Next
@@ -505,11 +590,11 @@ const CampaignCreatePage = () => {
                     disabled={loading}
                     className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                       loading
-                        ? 'bg-blue-300 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                        ? "bg-blue-300 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     }`}
                   >
-                    {loading ? 'Creating Campaign...' : 'Create Campaign'}
+                    {loading ? "Creating Campaign..." : "Create Campaign"}
                   </button>
                 )}
               </div>

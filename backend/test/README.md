@@ -160,11 +160,13 @@ TEST_INDEXING_THROUGHPUT_THRESHOLD=100
 ### Common Issues
 
 1. **Flaky Tests**: If tests are inconsistently passing/failing, check for:
+
    - Race conditions
    - Dependency on test execution order
    - External service availability
 
 2. **Slow Tests**: If tests are running slowly, consider:
+
    - Using in-memory databases for testing
    - Mocking external services
    - Parallelizing test execution

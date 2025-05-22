@@ -1,11 +1,18 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { Repository, Between, IsNull, Not, FindOptionsWhere, In } from 'typeorm';
+import {
+  Repository,
+  Between as _Between,
+  IsNull as _IsNull,
+  Not as _Not,
+  FindOptionsWhere as _FindOptionsWhere,
+  In as _In,
+} from 'typeorm';
 import { MerchantAnalytics } from '../entities/merchant-analytics.entity';
 import { MerchantAnalyticsService } from './merchant-analytics.service';
 import { ProductService } from '../../products/services';
 
 type TimeFrame = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom';
-type MetricType = 'revenue' | 'orders' | 'views' | 'clicks' | 'conversion' | 'ctr';
+type _MetricType = 'revenue' | 'orders' | 'views' | 'clicks' | 'conversion' | 'ctr';
 
 @Injectable()
 export class MerchantDashboardAnalyticsService {

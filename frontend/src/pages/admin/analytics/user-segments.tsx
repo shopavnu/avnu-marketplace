@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useQuery, gql } from '@apollo/client';
-import AdminLayout from '../../../components/admin/AdminLayout';
+import React, { useState } from "react";
+import { useQuery, gql } from "@apollo/client";
+import AdminLayout from "../../../components/admin/AdminLayout";
 
 // Define interfaces for data structures
 interface Segment {
@@ -40,8 +40,8 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+} from "chart.js";
+import { Pie, Bar } from "react-chartjs-2";
 
 // Register ChartJS components
 ChartJS.register(
@@ -53,7 +53,7 @@ ChartJS.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 // GraphQL query for user segments
@@ -83,50 +83,57 @@ const USER_SEGMENTS = gql`
 
 const UserSegmentsDashboard: React.FC = () => {
   const [period, setPeriod] = useState<number>(30);
-  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
-  
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(
+    null,
+  );
+
   // Fetch user segments data
-  const { 
-    data, 
-    loading, 
-    error 
-  } = useQuery(USER_SEGMENTS, {
+  const { data, loading, error } = useQuery(USER_SEGMENTS, {
     variables: { period },
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   // Format percentages for display
   const formatPercentage = (value: number | undefined | null, decimals = 2) => {
-    if (value === undefined || value === null) return '0%';
+    if (value === undefined || value === null) return "0%";
     return `${(value * 100).toFixed(decimals)}%`;
   };
 
   // Prepare data for segment distribution chart
   const prepareSegmentDistributionData = (segments: Segment[]) => {
-    if (!segments || segments.length === 0) return {
-      labels: [],
-      datasets: [{ label: 'User Count', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }]
-    };
+    if (!segments || segments.length === 0)
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: "User Count",
+            data: [],
+            backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1,
+          },
+        ],
+      };
 
     return {
       labels: segments.map((segment: Segment) => segment.name),
       datasets: [
         {
-          label: 'User Count',
+          label: "User Count",
           data: segments.map((segment: Segment) => segment.userCount),
           backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-            'rgba(255, 159, 64, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 99, 132, 0.6)',
+            "rgba(75, 192, 192, 0.6)",
+            "rgba(153, 102, 255, 0.6)",
+            "rgba(255, 159, 64, 0.6)",
+            "rgba(54, 162, 235, 0.6)",
+            "rgba(255, 99, 132, 0.6)",
           ],
           borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 99, 132, 1)',
+            "rgba(75, 192, 192, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(255, 159, 64, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 99, 132, 1)",
           ],
           borderWidth: 1,
         },
@@ -136,33 +143,56 @@ const UserSegmentsDashboard: React.FC = () => {
 
   // Prepare data for personalization impact chart
   const preparePersonalizationImpactData = (segments: Segment[]) => {
-    if (!segments || segments.length === 0) return {
-      labels: [],
-      datasets: [{ label: 'CTR Improvement', data: [], backgroundColor: '', borderColor: '', borderWidth: 1 }]
-    };
+    if (!segments || segments.length === 0)
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: "CTR Improvement",
+            data: [],
+            backgroundColor: "",
+            borderColor: "",
+            borderWidth: 1,
+          },
+        ],
+      };
 
     return {
-      labels: segments.map(segment => segment.name),
+      labels: segments.map((segment) => segment.name),
       datasets: [
         {
-          label: 'CTR Improvement',
-          data: segments.map((segment: Segment) => segment.averagePersonalizationImpact?.clickThroughRateImprovement ? segment.averagePersonalizationImpact.clickThroughRateImprovement * 100 : 0),
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
+          label: "CTR Improvement",
+          data: segments.map((segment: Segment) =>
+            segment.averagePersonalizationImpact?.clickThroughRateImprovement
+              ? segment.averagePersonalizationImpact
+                  .clickThroughRateImprovement * 100
+              : 0,
+          ),
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(75, 192, 192, 1)",
           borderWidth: 1,
         },
         {
-          label: 'Conversion Improvement',
-          data: segments.map((segment: Segment) => segment.averagePersonalizationImpact?.conversionRateImprovement ? segment.averagePersonalizationImpact.conversionRateImprovement * 100 : 0),
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',
-          borderColor: 'rgba(153, 102, 255, 1)',
+          label: "Conversion Improvement",
+          data: segments.map((segment: Segment) =>
+            segment.averagePersonalizationImpact?.conversionRateImprovement
+              ? segment.averagePersonalizationImpact.conversionRateImprovement *
+                100
+              : 0,
+          ),
+          backgroundColor: "rgba(153, 102, 255, 0.6)",
+          borderColor: "rgba(153, 102, 255, 1)",
           borderWidth: 1,
         },
         {
-          label: 'Dwell Time Improvement',
-          data: segments.map((segment: Segment) => segment.averagePersonalizationImpact?.dwellTimeImprovement ? segment.averagePersonalizationImpact.dwellTimeImprovement * 100 : 0),
-          backgroundColor: 'rgba(255, 159, 64, 0.6)',
-          borderColor: 'rgba(255, 159, 64, 1)',
+          label: "Dwell Time Improvement",
+          data: segments.map((segment: Segment) =>
+            segment.averagePersonalizationImpact?.dwellTimeImprovement
+              ? segment.averagePersonalizationImpact.dwellTimeImprovement * 100
+              : 0,
+          ),
+          backgroundColor: "rgba(255, 159, 64, 0.6)",
+          borderColor: "rgba(255, 159, 64, 1)",
           borderWidth: 1,
         },
       ],
@@ -171,19 +201,30 @@ const UserSegmentsDashboard: React.FC = () => {
 
   // Prepare data for segment performance chart
   const prepareSegmentPerformanceData = (segments: Segment[]) => {
-    if (!segments || segments.length === 0) return {
-      labels: [],
-      datasets: [{ label: 'Conversion Rate', data: [], backgroundColor: '', borderColor: '', borderWidth: 1 }]
-    };
+    if (!segments || segments.length === 0)
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: "Conversion Rate",
+            data: [],
+            backgroundColor: "",
+            borderColor: "",
+            borderWidth: 1,
+          },
+        ],
+      };
 
     return {
       labels: segments.map((segment: Segment) => segment.name),
       datasets: [
         {
-          label: 'Conversion Rate',
-          data: segments.map((segment: Segment) => segment.conversionRate ? segment.conversionRate * 100 : 0),
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
+          label: "Conversion Rate",
+          data: segments.map((segment: Segment) =>
+            segment.conversionRate ? segment.conversionRate * 100 : 0,
+          ),
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(75, 192, 192, 1)",
           borderWidth: 1,
         },
       ],
@@ -192,35 +233,48 @@ const UserSegmentsDashboard: React.FC = () => {
 
   // Get the selected segment
   const selectedSegment = data?.userSegments?.segments?.find(
-    (segment: Segment) => segment.id === selectedSegmentId
+    (segment: Segment) => segment.id === selectedSegmentId,
   );
 
   // Prepare data for top preferences chart
   const prepareTopPreferencesData = (segment: Segment) => {
-    if (!segment || !segment.topPreferences || segment.topPreferences.length === 0) return {
-      labels: [],
-      datasets: [{ label: 'Preference Count', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }]
-    };
+    if (
+      !segment ||
+      !segment.topPreferences ||
+      segment.topPreferences.length === 0
+    )
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: "Preference Count",
+            data: [],
+            backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1,
+          },
+        ],
+      };
 
     return {
-      labels: segment.topPreferences.map(pref => pref.category),
+      labels: segment.topPreferences.map((pref) => pref.category),
       datasets: [
         {
-          label: 'Preference Count',
-          data: segment.topPreferences.map(pref => pref.count),
+          label: "Preference Count",
+          data: segment.topPreferences.map((pref) => pref.count),
           backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-            'rgba(255, 159, 64, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 99, 132, 0.6)',
+            "rgba(75, 192, 192, 0.6)",
+            "rgba(153, 102, 255, 0.6)",
+            "rgba(255, 159, 64, 0.6)",
+            "rgba(54, 162, 235, 0.6)",
+            "rgba(255, 99, 132, 0.6)",
           ],
           borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 99, 132, 1)',
+            "rgba(75, 192, 192, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(255, 159, 64, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 99, 132, 1)",
           ],
           borderWidth: 1,
         },
@@ -238,16 +292,25 @@ const UserSegmentsDashboard: React.FC = () => {
         <div className="space-y-2">
           <div className="flex justify-between">
             <span className="text-gray-600">Users:</span>
-            <span className="font-medium">{segment.userCount.toLocaleString()}</span>
+            <span className="font-medium">
+              {segment.userCount.toLocaleString()}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">% of Total:</span>
-            <span className="font-medium">{formatPercentage(segment.userCount / (data?.userSegments?.totalUsers || 0))}</span>
+            <span className="font-medium">
+              {formatPercentage(
+                segment.userCount / (data?.userSegments?.totalUsers || 0),
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">CTR Improvement:</span>
             <span className="font-medium text-green-600">
-              {formatPercentage(segment.averagePersonalizationImpact?.clickThroughRateImprovement)}
+              {formatPercentage(
+                segment.averagePersonalizationImpact
+                  ?.clickThroughRateImprovement,
+              )}
             </span>
           </div>
         </div>
@@ -271,9 +334,7 @@ const UserSegmentsDashboard: React.FC = () => {
       <AdminLayout title="User Segments">
         <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
           <p>Error loading user segment data. Please try again later.</p>
-          {error && (
-            <p className="text-sm mt-2">{error.message}</p>
-          )}
+          {error && <p className="text-sm mt-2">{error.message}</p>}
         </div>
       </AdminLayout>
     );
@@ -299,18 +360,23 @@ const UserSegmentsDashboard: React.FC = () => {
 
       {/* Overview */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">User Segmentation Overview</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">
+          User Segmentation Overview
+        </h2>
         <p className="text-gray-600 mb-4">
-          Users are segmented based on their interaction patterns and response to personalization.
-          Total users in the selected period: <span className="font-semibold">{totalUsers.toLocaleString()}</span>
+          Users are segmented based on their interaction patterns and response
+          to personalization. Total users in the selected period:{" "}
+          <span className="font-semibold">{totalUsers.toLocaleString()}</span>
         </p>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Segment distribution chart */}
           <div>
-            <h3 className="text-md font-medium text-gray-800 mb-2">User Distribution by Segment</h3>
+            <h3 className="text-md font-medium text-gray-800 mb-2">
+              User Distribution by Segment
+            </h3>
             <div className="h-64">
-              <Pie 
+              <Pie
                 data={prepareSegmentDistributionData(segments)}
                 options={{
                   responsive: true,
@@ -319,12 +385,14 @@ const UserSegmentsDashboard: React.FC = () => {
               />
             </div>
           </div>
-          
+
           {/* Personalization impact chart */}
           <div>
-            <h3 className="text-md font-medium text-gray-800 mb-2">Personalization Impact by Segment</h3>
+            <h3 className="text-md font-medium text-gray-800 mb-2">
+              Personalization Impact by Segment
+            </h3>
             <div className="h-64">
-              <Bar 
+              <Bar
                 data={preparePersonalizationImpactData(segments)}
                 options={{
                   responsive: true,
@@ -334,7 +402,7 @@ const UserSegmentsDashboard: React.FC = () => {
                       beginAtZero: true,
                       title: {
                         display: true,
-                        text: 'Improvement (%)',
+                        text: "Improvement (%)",
                       },
                     },
                   },
@@ -348,10 +416,12 @@ const UserSegmentsDashboard: React.FC = () => {
       {/* Segment details */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {segments.map((segment: Segment) => (
-          <div 
+          <div
             key={segment.id}
             className={`bg-white rounded-lg shadow p-6 cursor-pointer transition-all duration-200 ${
-              selectedSegmentId === segment.id ? 'ring-2 ring-sage' : 'hover:shadow-md'
+              selectedSegmentId === segment.id
+                ? "ring-2 ring-sage"
+                : "hover:shadow-md"
             }`}
             onClick={() => setSelectedSegmentId(segment.id)}
           >
@@ -366,36 +436,54 @@ const UserSegmentsDashboard: React.FC = () => {
           <h2 className="text-lg font-medium text-gray-900 mb-4">
             {selectedSegment.name} Segment Details
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-md font-medium text-gray-800 mb-2">Personalization Impact</h3>
+              <h3 className="text-md font-medium text-gray-800 mb-2">
+                Personalization Impact
+              </h3>
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-600">Click-Through Rate</span>
+                    <span className="text-sm text-gray-600">
+                      Click-Through Rate
+                    </span>
                     <span className="text-sm font-medium text-green-600">
-                      +{formatPercentage(selectedSegment.averagePersonalizationImpact.clickThroughRateImprovement)}
+                      +
+                      {formatPercentage(
+                        selectedSegment.averagePersonalizationImpact
+                          .clickThroughRateImprovement,
+                      )}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-500 rounded-full h-2" 
-                      style={{ width: `${Math.min(100, selectedSegment.averagePersonalizationImpact.clickThroughRateImprovement * 100)}%` }}
+                    <div
+                      className="bg-green-500 rounded-full h-2"
+                      style={{
+                        width: `${Math.min(100, selectedSegment.averagePersonalizationImpact.clickThroughRateImprovement * 100)}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-600">Conversion Rate</span>
+                    <span className="text-sm text-gray-600">
+                      Conversion Rate
+                    </span>
                     <span className="text-sm font-medium text-green-600">
-                      +{formatPercentage(selectedSegment.averagePersonalizationImpact.conversionRateImprovement)}
+                      +
+                      {formatPercentage(
+                        selectedSegment.averagePersonalizationImpact
+                          .conversionRateImprovement,
+                      )}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-500 rounded-full h-2" 
-                      style={{ width: `${Math.min(100, selectedSegment.averagePersonalizationImpact.conversionRateImprovement * 100)}%` }}
+                    <div
+                      className="bg-green-500 rounded-full h-2"
+                      style={{
+                        width: `${Math.min(100, selectedSegment.averagePersonalizationImpact.conversionRateImprovement * 100)}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
@@ -403,28 +491,36 @@ const UserSegmentsDashboard: React.FC = () => {
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-gray-600">Dwell Time</span>
                     <span className="text-sm font-medium text-green-600">
-                      +{formatPercentage(selectedSegment.averagePersonalizationImpact.dwellTimeImprovement)}
+                      +
+                      {formatPercentage(
+                        selectedSegment.averagePersonalizationImpact
+                          .dwellTimeImprovement,
+                      )}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-500 rounded-full h-2" 
-                      style={{ width: `${Math.min(100, selectedSegment.averagePersonalizationImpact.dwellTimeImprovement * 100)}%` }}
+                    <div
+                      className="bg-green-500 rounded-full h-2"
+                      style={{
+                        width: `${Math.min(100, selectedSegment.averagePersonalizationImpact.dwellTimeImprovement * 100)}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <div className="md:col-span-2">
-              <h3 className="text-md font-medium text-gray-800 mb-2">Top User Preferences</h3>
+              <h3 className="text-md font-medium text-gray-800 mb-2">
+                Top User Preferences
+              </h3>
               <div className="h-64">
-                <Bar 
+                <Bar
                   data={prepareTopPreferencesData(selectedSegment)}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
+                    indexAxis: "y",
                     scales: {
                       x: {
                         beginAtZero: true,
@@ -435,11 +531,13 @@ const UserSegmentsDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex justify-end">
             <button
               className="bg-sage text-white px-4 py-2 rounded-md hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage"
-              onClick={() => window.location.href = `/admin/analytics/user-journey?segment=${selectedSegment.id}`}
+              onClick={() =>
+                (window.location.href = `/admin/analytics/user-journey?segment=${selectedSegment.id}`)
+              }
             >
               View User Journeys
             </button>

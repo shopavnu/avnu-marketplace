@@ -1,6 +1,6 @@
 /**
  * test-nlp-search.ts
- * 
+ *
  * This script tests the NLP-enhanced search capabilities of the Avnu Marketplace
  * It evaluates entity recognition, query expansion, intent detection, and semantic search
  */
@@ -14,18 +14,22 @@ const API_URL = 'http://localhost:3001/graphql';
 async function checkServerAvailability(): Promise<boolean> {
   try {
     await axios.get('http://localhost:3001/health', {
-      timeout: 5000
+      timeout: 5000,
     });
     return true;
   } catch (error) {
     // Try the GraphQL endpoint directly as a fallback
     try {
-      await axios.post(API_URL, {
-        query: `{ __schema { queryType { name } } }`
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 5000
-      });
+      await axios.post(
+        API_URL,
+        {
+          query: `{ __schema { queryType { name } } }`,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 5000,
+        },
+      );
       return true;
     } catch (innerError) {
       return false;
@@ -136,7 +140,10 @@ interface CustomAxiosError extends Error {
 }
 
 // Helper function to execute GraphQL queries
-async function executeGraphQLQuery<T>(query: string, variables?: Record<string, unknown>): Promise<GraphQLResponse<T>> {
+async function executeGraphQLQuery<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<GraphQLResponse<T>> {
   try {
     const response = await axios.post(
       API_URL,
@@ -148,7 +155,7 @@ async function executeGraphQLQuery<T>(query: string, variables?: Record<string, 
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
 
     return response.data as GraphQLResponse<T>;
@@ -232,7 +239,9 @@ async function performNlpSearch(query: string): Promise<GraphQLResponse<ProductS
 }
 
 // Function to perform a search without NLP processing for comparison
-async function performStandardSearch(query: string): Promise<GraphQLResponse<ProductSearchResponse>> {
+async function performStandardSearch(
+  query: string,
+): Promise<GraphQLResponse<ProductSearchResponse>> {
   const graphqlQuery = `
     query StandardSearch($input: SearchOptionsInput!) {
       searchProducts(input: $input) {
@@ -287,43 +296,48 @@ function displayNlpSearchResults(result: GraphQLResponse<ProductSearchResponse>)
   }
 
   const searchResult = result.data.searchProducts;
-  
+
   console.log('\n=== NLP-ENHANCED SEARCH RESULTS ===');
   console.log(`Original Query: "${searchResult.query}"`);
-  
+
   if (searchResult.processedQuery && searchResult.processedQuery !== searchResult.query) {
     console.log(`Processed Query: "${searchResult.processedQuery}"`);
   }
-  
+
   console.log(`Total Results: ${searchResult.pagination.total}`);
-  
+
   // Display NLP metadata if available
   if (searchResult.nlpMetadata) {
     console.log('\n=== NLP METADATA ===');
-    
+
     if (searchResult.nlpMetadata.recognizedEntities) {
       console.log('\nRecognized Entities:');
-      for (const [entityType, entities] of Object.entries(searchResult.nlpMetadata.recognizedEntities)) {
+      for (const [entityType, entities] of Object.entries(
+        searchResult.nlpMetadata.recognizedEntities,
+      )) {
         console.log(`  ${entityType}: ${entities.join(', ')}`);
       }
     }
-    
-    if (searchResult.nlpMetadata.expandedTerms && searchResult.nlpMetadata.expandedTerms.length > 0) {
+
+    if (
+      searchResult.nlpMetadata.expandedTerms &&
+      searchResult.nlpMetadata.expandedTerms.length > 0
+    ) {
       console.log('\nExpanded Terms:', searchResult.nlpMetadata.expandedTerms.join(', '));
     }
-    
+
     if (searchResult.nlpMetadata.detectedIntent) {
       console.log('\nDetected Intent:', searchResult.nlpMetadata.detectedIntent);
       if (searchResult.nlpMetadata.confidence !== undefined) {
         console.log(`Confidence: ${(searchResult.nlpMetadata.confidence * 100).toFixed(2)}%`);
       }
     }
-    
+
     if (searchResult.nlpMetadata.processingTimeMs !== undefined) {
       console.log(`\nNLP Processing Time: ${searchResult.nlpMetadata.processingTimeMs}ms`);
     }
   }
-  
+
   // Display product results
   console.log('\n=== PRODUCTS ===');
   if (searchResult.products.length > 0) {
@@ -335,41 +349,39 @@ function displayNlpSearchResults(result: GraphQLResponse<ProductSearchResponse>)
   } else {
     console.log('No products found');
   }
-  
+
   // Display facet information
   if (searchResult.facets) {
     console.log('\n=== FACETS ===');
-    
+
     if (searchResult.facets.categories && searchResult.facets.categories.length > 0) {
       console.log('\nCategories:');
-      searchResult.facets.categories.slice(0, 5).forEach(c => 
-        console.log(`  ${c.name} (${c.count})`)
-      );
+      searchResult.facets.categories
+        .slice(0, 5)
+        .forEach(c => console.log(`  ${c.name} (${c.count})`));
     }
-    
+
     if (searchResult.facets.brands && searchResult.facets.brands.length > 0) {
       console.log('\nBrands:');
-      searchResult.facets.brands.slice(0, 5).forEach(b => 
-        console.log(`  ${b.name} (${b.count})`)
-      );
+      searchResult.facets.brands.slice(0, 5).forEach(b => console.log(`  ${b.name} (${b.count})`));
     }
-    
+
     if (searchResult.facets.colors && searchResult.facets.colors.length > 0) {
       console.log('\nColors:');
-      searchResult.facets.colors.slice(0, 5).forEach(c => 
-        console.log(`  ${c.name} (${c.count})`)
-      );
+      searchResult.facets.colors.slice(0, 5).forEach(c => console.log(`  ${c.name} (${c.count})`));
     }
-    
+
     if (searchResult.facets.materials && searchResult.facets.materials.length > 0) {
       console.log('\nMaterials:');
-      searchResult.facets.materials.slice(0, 5).forEach(m => 
-        console.log(`  ${m.name} (${m.count})`)
-      );
+      searchResult.facets.materials
+        .slice(0, 5)
+        .forEach(m => console.log(`  ${m.name} (${m.count})`));
     }
-    
+
     if (searchResult.facets.price) {
-      console.log(`\nPrice Range: $${searchResult.facets.price.min.toFixed(2)} - $${searchResult.facets.price.max.toFixed(2)}`);
+      console.log(
+        `\nPrice Range: $${searchResult.facets.price.min.toFixed(2)} - $${searchResult.facets.price.max.toFixed(2)}`,
+      );
     }
   }
 }
@@ -377,77 +389,79 @@ function displayNlpSearchResults(result: GraphQLResponse<ProductSearchResponse>)
 // Function to compare NLP vs standard search results
 async function compareSearchResults(query: string): Promise<void> {
   console.log(`\n=== COMPARING SEARCH RESULTS FOR: "${query}" ===\n`);
-  
+
   // Get results with and without NLP
   const nlpResults = await performNlpSearch(query);
   const standardResults = await performStandardSearch(query);
-  
+
   if (!nlpResults.data.searchProducts || !standardResults.data.searchProducts) {
     console.log('Error: Could not retrieve search results for comparison');
     return;
   }
-  
+
   const nlpSearch = nlpResults.data.searchProducts;
   const stdSearch = standardResults.data.searchProducts;
-  
+
   // Compare result counts
   console.log('=== RESULT COUNT COMPARISON ===');
   console.log(`Standard Search: ${stdSearch.pagination.total} results`);
   console.log(`NLP-Enhanced Search: ${nlpSearch.pagination.total} results`);
   console.log(`Difference: ${nlpSearch.pagination.total - stdSearch.pagination.total} results`);
-  
+
   // Compare top products
   console.log('\n=== TOP RESULTS COMPARISON ===');
-  
+
   // Get product IDs from both searches
   const stdProductIds = stdSearch.products.map(p => p.id);
   const nlpProductIds = nlpSearch.products.map(p => p.id);
-  
+
   // Find products that appear in NLP results but not in standard results
   const uniqueToNlp = nlpSearch.products.filter(p => !stdProductIds.includes(p.id));
-  
+
   // Find products that appear in standard results but not in NLP results
   const uniqueToStd = stdSearch.products.filter(p => !nlpProductIds.includes(p.id));
-  
+
   // Find products that appear in both but in different positions
   const commonProducts = nlpSearch.products.filter(p => stdProductIds.includes(p.id));
-  
+
   console.log(`\nProducts unique to NLP search: ${uniqueToNlp.length}`);
   if (uniqueToNlp.length > 0) {
     uniqueToNlp.forEach((product, i) => {
-      console.log(`  ${i+1}. ${product.title} ($${product.price.toFixed(2)})`);
+      console.log(`  ${i + 1}. ${product.title} ($${product.price.toFixed(2)})`);
     });
   }
-  
+
   console.log(`\nProducts unique to standard search: ${uniqueToStd.length}`);
   if (uniqueToStd.length > 0) {
     uniqueToStd.forEach((product, i) => {
-      console.log(`  ${i+1}. ${product.title} ($${product.price.toFixed(2)})`);
+      console.log(`  ${i + 1}. ${product.title} ($${product.price.toFixed(2)})`);
     });
   }
-  
+
   console.log(`\nProducts in both searches: ${commonProducts.length}`);
-  
+
   // Display NLP metadata for reference
   if (nlpSearch.nlpMetadata) {
     console.log('\n=== NLP PROCESSING DETAILS ===');
-    
+
     if (nlpSearch.processedQuery && nlpSearch.processedQuery !== query) {
       console.log(`Original query: "${query}"`);
       console.log(`Processed query: "${nlpSearch.processedQuery}"`);
     }
-    
+
     if (nlpSearch.nlpMetadata.recognizedEntities) {
       console.log('\nRecognized Entities:');
-      for (const [entityType, entities] of Object.entries(nlpSearch.nlpMetadata.recognizedEntities)) {
+      for (const [entityType, entities] of Object.entries(
+        nlpSearch.nlpMetadata.recognizedEntities,
+      )) {
         console.log(`  ${entityType}: ${entities.join(', ')}`);
       }
     }
-    
+
     if (nlpSearch.nlpMetadata.expandedTerms && nlpSearch.nlpMetadata.expandedTerms.length > 0) {
       console.log('\nExpanded Terms:', nlpSearch.nlpMetadata.expandedTerms.join(', '));
     }
-    
+
     if (nlpSearch.nlpMetadata.processingTimeMs !== undefined) {
       console.log(`\nNLP Processing Time: ${nlpSearch.nlpMetadata.processingTimeMs}ms`);
     }
@@ -456,33 +470,33 @@ async function compareSearchResults(query: string): Promise<void> {
 
 // Sample test queries that demonstrate different NLP capabilities
 const testQueries = [
-  "red nike shoes",                   // Basic entity recognition (color + brand + product)
-  "summer dresses under $50",         // Price filtering + seasonal intent
-  "comfortable running shoes",        // Product attribute + activity intent
-  "business casual men's attire",     // Style + gender intent
-  "waterproof hiking boots",          // Product attribute + activity
-  "gifts for mom",                    // Occasion/intent detection
-  "similar to north face jacket",     // Similarity/recommendation intent
-  "breathable workout clothes",       // Material property + activity
-  "evening gown for wedding",         // Occasion + formal wear
-  "sustainable eco-friendly products" // Ethical shopping intent
+  'red nike shoes', // Basic entity recognition (color + brand + product)
+  'summer dresses under $50', // Price filtering + seasonal intent
+  'comfortable running shoes', // Product attribute + activity intent
+  "business casual men's attire", // Style + gender intent
+  'waterproof hiking boots', // Product attribute + activity
+  'gifts for mom', // Occasion/intent detection
+  'similar to north face jacket', // Similarity/recommendation intent
+  'breathable workout clothes', // Material property + activity
+  'evening gown for wedding', // Occasion + formal wear
+  'sustainable eco-friendly products', // Ethical shopping intent
 ];
 
 // Interactive CLI for testing NLP search
 async function runInteractiveMode(): Promise<void> {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
-  
+
   console.log('\n=== AVNU MARKETPLACE NLP SEARCH TESTER ===');
   console.log('Enter a search query or choose from the following options:');
   console.log('1. Run all test queries');
   console.log('2. Compare NLP vs standard search');
   console.log('3. Exit');
-  
+
   const promptUser = () => {
-    rl.question('\nEnter your choice or search query: ', async (input) => {
+    rl.question('\nEnter your choice or search query: ', async input => {
       if (input === '1') {
         // Run all test queries
         console.log('\n=== RUNNING ALL TEST QUERIES ===');
@@ -498,7 +512,7 @@ async function runInteractiveMode(): Promise<void> {
         promptUser();
       } else if (input === '2') {
         // Compare NLP vs standard search
-        rl.question('\nEnter query to compare: ', async (query) => {
+        rl.question('\nEnter query to compare: ', async query => {
           try {
             await compareSearchResults(query);
           } catch (error) {
@@ -506,7 +520,11 @@ async function runInteractiveMode(): Promise<void> {
           }
           promptUser();
         });
-      } else if (input === '3' || input.toLowerCase() === 'exit' || input.toLowerCase() === 'quit') {
+      } else if (
+        input === '3' ||
+        input.toLowerCase() === 'exit' ||
+        input.toLowerCase() === 'quit'
+      ) {
         // Exit
         rl.close();
         return;
@@ -524,7 +542,7 @@ async function runInteractiveMode(): Promise<void> {
       }
     });
   };
-  
+
   promptUser();
 }
 
@@ -541,10 +559,10 @@ async function main(): Promise<void> {
     console.error('3. Ensure your server has the GraphQL endpoint enabled');
     process.exit(1);
   }
-  
+
   console.log('Successfully connected to the GraphQL server!');
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     // No arguments, run interactive mode
     await runInteractiveMode();

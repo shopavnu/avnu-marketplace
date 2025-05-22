@@ -1,5 +1,5 @@
-import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import React from "react";
+import { useQuery, gql } from "@apollo/client";
 
 // A minimal query to test the GraphQL connection
 const TEST_QUERY = gql`
@@ -12,8 +12,8 @@ const TEST_QUERY = gql`
 const GraphQLErrorHandler: React.FC = () => {
   // Run a test query to check connection
   const { loading, error } = useQuery(TEST_QUERY, {
-    fetchPolicy: 'network-only',
-    errorPolicy: 'all',
+    fetchPolicy: "network-only",
+    errorPolicy: "all",
   });
 
   // Only show if there's an error
@@ -26,7 +26,8 @@ const GraphQLErrorHandler: React.FC = () => {
           GraphQL Connection Issue
         </h3>
         <p className="text-yellow-700 mb-2">
-          The app is having trouble connecting to the API. Some features may not work correctly.
+          The app is having trouble connecting to the API. Some features may not
+          work correctly.
         </p>
         <details className="text-sm">
           <summary className="cursor-pointer text-yellow-600 hover:text-yellow-800">
@@ -37,7 +38,8 @@ const GraphQLErrorHandler: React.FC = () => {
           </pre>
         </details>
         <p className="text-sm text-yellow-600 mt-2">
-          This is a demo environment - you can continue using the app with mock data.
+          This is a demo environment - you can continue using the app with mock
+          data.
         </p>
       </div>
     </div>

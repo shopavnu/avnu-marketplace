@@ -1,4 +1,4 @@
 export declare class DemographicFilterInput {
-    key: string;
-    values: string[];
+  key: string;
+  values: string[];
 }

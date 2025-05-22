@@ -1,6 +1,6 @@
 /**
  * Script to index all entities (products, brands, merchants) in Elasticsearch
- * 
+ *
  * This script connects to the database, fetches all entities,
  * and indexes them in Elasticsearch with proper mappings and settings.
  */
@@ -25,12 +25,8 @@ const dbConfig = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'avnu_marketplace',
-  entities: [
-    Product,
-    Brand,
-    Merchant
-  ],
-  synchronize: false
+  entities: [Product, Brand, Merchant],
+  synchronize: false,
 };
 
 // Load environment variables
@@ -172,7 +168,7 @@ const merchantsMapping = {
 // Define the settings for all indices
 const indexSettings = {
   index: {
-    max_ngram_diff: 3,  // Allow a larger difference between min_gram and max_gram
+    max_ngram_diff: 3, // Allow a larger difference between min_gram and max_gram
   },
   analysis: {
     analyzer: {
@@ -253,19 +249,16 @@ async function bulkIndexDocuments(index: string, documents: any[]): Promise<void
   // Prepare bulk operations
   const operations = [];
   for (const doc of documents) {
-    operations.push(
-      { index: { _index: index, _id: doc.id } },
-      doc
-    );
+    operations.push({ index: { _index: index, _id: doc.id } }, doc);
   }
 
   // Execute bulk indexing
   try {
     const result = await client.bulk({ refresh: true, body: operations });
-    
+
     // Type assertion to access properties safely
     const bulkResponse = result as any;
-    
+
     if (bulkResponse.errors) {
       logger.error(`Errors during bulk indexing for ${index}:`, bulkResponse.errors);
     } else {
@@ -373,10 +366,10 @@ async function main() {
     const products = await productRepository.find();
     logger.log(`Fetched ${products.length} products`);
 
-    const productsToIndex = products.map(product => 
-      prepareProductForIndexing(product, categories as Category[])
+    const productsToIndex = products.map(product =>
+      prepareProductForIndexing(product, categories as Category[]),
     );
-    
+
     logger.log('Indexing products...');
     await bulkIndexDocuments('products', productsToIndex);
 
@@ -386,10 +379,8 @@ async function main() {
     const brands = await brandRepository.find();
     logger.log(`Fetched ${brands.length} brands`);
 
-    const brandsToIndex = brands.map(brand => 
-      prepareBrandForIndexing(brand)
-    );
-    
+    const brandsToIndex = brands.map(brand => prepareBrandForIndexing(brand));
+
     logger.log('Indexing brands...');
     await bulkIndexDocuments('brands', brandsToIndex);
 
@@ -399,10 +390,10 @@ async function main() {
     const merchants = await merchantRepository.find();
     logger.log(`Fetched ${merchants.length} merchants`);
 
-    const merchantsToIndex = merchants.map(merchant => 
-      prepareMerchantForIndexing(merchant, categories as Category[])
+    const merchantsToIndex = merchants.map(merchant =>
+      prepareMerchantForIndexing(merchant, categories as Category[]),
     );
-    
+
     logger.log('Indexing merchants...');
     await bulkIndexDocuments('merchants', merchantsToIndex);
 
@@ -424,13 +415,12 @@ async function main() {
     logger.log(`Products indexed: ${productCountResult.count || 0}`);
     logger.log(`Brands indexed: ${brandCountResult.count || 0}`);
     logger.log(`Merchants indexed: ${merchantCountResult.count || 0}`);
-    
+
     logger.log('');
     logger.log('NEXT STEPS:');
     logger.log('1. Restart your NestJS server to use the updated Elasticsearch indices');
     logger.log('2. Use the GraphQL API to test search functionality');
-    logger.log('3. If search still doesn\'t work, check the NestJS logs for errors');
-
+    logger.log("3. If search still doesn't work, check the NestJS logs for errors");
   } catch (error) {
     logger.error('Error indexing entities:', error);
   } finally {

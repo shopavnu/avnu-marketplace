@@ -27,20 +27,26 @@ Located in `/src/modules/search/services/nlp-search.service.ts`, this service pr
 ### 2. Search Testing Scripts
 
 #### GraphQL Search Test Script
+
 Located in `/scripts/test-graphql-search.ts`, this script allows testing of:
+
 - Basic search functionality
 - Filtered searches
 - Faceted search results
 
 #### NLP Search Test Script
+
 Located in `/scripts/test-nlp-search.ts`, this script provides:
+
 - Interactive testing of NLP search features
 - Comparison between NLP and standard search
 - Detailed NLP metadata analysis
 - Predefined test queries for different NLP capabilities
 
 #### Client Search Script
+
 Located in `/scripts/client-search.ts`, this script demonstrates:
+
 - Client-side implementation of search
 - NLP integration
 - Advanced search options
@@ -49,13 +55,13 @@ Located in `/scripts/client-search.ts`, this script demonstrates:
 
 ### Query Processing Capabilities
 
-| Feature | Description |
-|---------|-------------|
-| Synonym Mapping | Maps user queries to known synonyms to expand search scope |
+| Feature            | Description                                                  |
+| ------------------ | ------------------------------------------------------------ |
+| Synonym Mapping    | Maps user queries to known synonyms to expand search scope   |
 | Entity Recognition | Identifies entities like product types, brands, colors, etc. |
-| Query Expansion | Adds related terms to improve recall |
-| Intent Detection | Determines user intent (browse, purchase, compare, etc.) |
-| Semantic Search | Understands meaning beyond keywords |
+| Query Expansion    | Adds related terms to improve recall                         |
+| Intent Detection   | Determines user intent (browse, purchase, compare, etc.)     |
+| Semantic Search    | Understands meaning beyond keywords                          |
 
 ### Supported Entity Types
 
@@ -135,16 +141,19 @@ Search responses are structured according to `/src/modules/search/dto/search-res
 ## Future Enhancements
 
 1. **Machine Learning Integration**
+
    - Personalized search rankings
    - User behavior-based recommendations
    - Automatic relevance tuning
 
 2. **Advanced Faceting**
+
    - Dynamic facet generation
    - Hierarchical facets
    - Facet value prediction
 
 3. **Performance Optimization**
+
    - Query caching
    - Precomputed results for common queries
    - Distributed search infrastructure

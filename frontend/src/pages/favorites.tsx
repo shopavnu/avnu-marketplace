@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { HeartIcon, XMarkIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { products as allProducts } from '@/data/products';
-import { Product } from '@/types/products';
-import ProductCard from '@/components/products/ProductCard';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  HeartIcon,
+  XMarkIcon,
+  ShoppingBagIcon,
+} from "@heroicons/react/24/outline";
+import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+import { products as allProducts } from "@/data/products";
+import { Product } from "@/types/products";
+import ProductCard from "@/components/products/ProductCard";
 
 const FavoritesPage = () => {
   const router = useRouter();
@@ -20,32 +24,32 @@ const FavoritesPage = () => {
     // For demo purposes, we'll use a subset of products as mock favorites
     const loadFavorites = () => {
       setIsLoading(true);
-      
+
       // Simulate API call delay
       setTimeout(() => {
         // Select a few random products as favorites
         const mockFavorites = allProducts
           .filter((_, index) => index % 3 === 0) // Select every third product
           .slice(0, 6); // Limit to 6 products
-        
+
         setFavorites(mockFavorites);
         setIsLoading(false);
       }, 800);
     };
-    
+
     loadFavorites();
   }, []);
 
   // Remove item from favorites
   const removeFromFavorites = (productId: string) => {
-    setFavorites(prev => prev.filter(product => product.id !== productId));
+    setFavorites((prev) => prev.filter((product) => product.id !== productId));
   };
 
   // Add to cart (mock functionality)
   const addToCart = (product: Product) => {
     // In a real app, this would add the product to the cart
-    console.log('Added to cart:', product.title);
-    
+    console.log("Added to cart:", product.title);
+
     // Show a toast or notification
     alert(`Added ${product.title} to your cart!`);
   };
@@ -54,9 +58,11 @@ const FavoritesPage = () => {
     <div className="bg-warm-white min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-charcoal">My Favorites</h1>
-          <Link 
-            href="/shop" 
+          <h1 className="text-2xl md:text-3xl font-bold text-charcoal">
+            My Favorites
+          </h1>
+          <Link
+            href="/shop"
             className="text-sage hover:underline flex items-center"
           >
             Continue Shopping
@@ -70,19 +76,22 @@ const FavoritesPage = () => {
           </div>
         ) : favorites.length === 0 ? (
           // Empty state
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="text-center py-16 max-w-md mx-auto"
           >
             <HeartIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <h2 className="text-xl font-medium text-charcoal mb-2">Your favorites list is empty</h2>
+            <h2 className="text-xl font-medium text-charcoal mb-2">
+              Your favorites list is empty
+            </h2>
             <p className="text-gray-600 mb-6">
-              Browse our collections and heart your favorite items to save them here for later.
+              Browse our collections and heart your favorite items to save them
+              here for later.
             </p>
-            <Link 
-              href="/shop" 
+            <Link
+              href="/shop"
               className="inline-block px-6 py-3 bg-sage text-white rounded-md font-medium hover:bg-sage/90 transition-colors"
             >
               Explore Products
@@ -115,7 +124,7 @@ const FavoritesPage = () => {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   </Link>
-                  
+
                   {/* Remove from favorites button */}
                   <button
                     onClick={() => removeFromFavorites(product.id)}
@@ -125,11 +134,11 @@ const FavoritesPage = () => {
                     <HeartIconSolid className="w-5 h-5 text-sage" />
                   </button>
                 </div>
-                
+
                 {/* Product Details */}
                 <div className="p-4">
-                  <Link 
-                    href={`/brand/${product.brand.toLowerCase().replace(/\s+/g, '-')}`}
+                  <Link
+                    href={`/brand/${product.brand.toLowerCase().replace(/\s+/g, "-")}`}
                     className="text-sage hover:underline text-sm font-medium"
                   >
                     {product.brand}
@@ -140,7 +149,9 @@ const FavoritesPage = () => {
                     </h3>
                   </Link>
                   <div className="flex justify-between items-center mt-2">
-                    <span className="font-medium text-charcoal">${product.price.toFixed(2)}</span>
+                    <span className="font-medium text-charcoal">
+                      ${product.price.toFixed(2)}
+                    </span>
                     <button
                       onClick={() => addToCart(product)}
                       className="flex items-center text-sage hover:text-sage/80 transition-colors"
@@ -155,13 +166,15 @@ const FavoritesPage = () => {
             ))}
           </motion.div>
         )}
-        
+
         {/* Recently Viewed Section (optional) */}
         {!isLoading && favorites.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-xl font-bold text-charcoal mb-6">You May Also Like</h2>
+            <h2 className="text-xl font-bold text-charcoal mb-6">
+              You May Also Like
+            </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {allProducts.slice(6, 10).map(product => (
+              {allProducts.slice(6, 10).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

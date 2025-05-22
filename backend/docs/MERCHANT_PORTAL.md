@@ -119,22 +119,75 @@ type TimeSeriesDataPoint {
 }
 
 type Query {
-  merchantAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime, productId: ID, categoryId: ID): [MerchantAnalytics!]!
-  merchantProductAnalytics(merchantId: ID!, productId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
-  merchantCategoryAnalytics(merchantId: ID!, categoryId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
-  merchantOverallAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
+  merchantAnalytics(
+    merchantId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+    productId: ID
+    categoryId: ID
+  ): [MerchantAnalytics!]!
+  merchantProductAnalytics(
+    merchantId: ID!
+    productId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
+  merchantCategoryAnalytics(
+    merchantId: ID!
+    categoryId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
+  merchantOverallAnalytics(
+    merchantId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
   merchantDemographicData(merchantId: ID!, timeFrame: String = "monthly"): JSON!
-  merchantTopProducts(merchantId: ID!, limit: Int = 10, timeFrame: String = "monthly"): [TopProduct!]!
-  merchantFilteredAnalytics(merchantId: ID!, filters: [AnalyticsFilterInput!]!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
-  merchantTopPerformingProducts(merchantId: ID!, metric: String!, limit: Int = 10, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [TopProduct!]!
-  merchantRollingAverages(merchantId: ID!, metricName: String!, days: Int = 7, timeFrame: String, startDate: DateTime, endDate: DateTime): [TimeSeriesDataPoint!]!
+  merchantTopProducts(
+    merchantId: ID!
+    limit: Int = 10
+    timeFrame: String = "monthly"
+  ): [TopProduct!]!
+  merchantFilteredAnalytics(
+    merchantId: ID!
+    filters: [AnalyticsFilterInput!]!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
+  merchantTopPerformingProducts(
+    merchantId: ID!
+    metric: String!
+    limit: Int = 10
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [TopProduct!]!
+  merchantRollingAverages(
+    merchantId: ID!
+    metricName: String!
+    days: Int = 7
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): [TimeSeriesDataPoint!]!
 }
 
 type Mutation {
   updateProductVisibility(productId: ID!, isVisible: Boolean!): Boolean!
   updateProductSearchBoost(productId: ID!, searchBoost: Float!): Boolean!
   updateProductKeywords(productId: ID!, keywords: [String!]!): Boolean!
-  createSearchExperiment(name: String!, description: String!, productIds: [ID!]!, variants: [ExperimentVariantInput!]!): ID!
+  createSearchExperiment(
+    name: String!
+    description: String!
+    productIds: [ID!]!
+    variants: [ExperimentVariantInput!]!
+  ): ID!
   startSearchExperiment(experimentId: ID!): Boolean!
   stopSearchExperiment(experimentId: ID!): Boolean!
   updateMerchantValues(merchantId: ID!, values: [String!]!): Boolean!

@@ -75,18 +75,12 @@ const heroItems: MasonryItem[] = [
 ];
 
 export default function HeroMasonry() {
-  const [mounted, setMounted] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div className="relative min-h-screen bg-warm-white overflow-hidden safe-top safe-bottom">
       {/* Floating Text */}
-      {mounted ? (
-        <motion.div
+      <motion.div
           className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -132,12 +126,10 @@ export default function HeroMasonry() {
             </motion.div>
           </div>
         </motion.div>
-      ) : null}
 
       {/* Masonry Grid */}
-      {mounted ? (
-        <div className="absolute inset-0 columns-1 xs:columns-2 md:columns-3 lg:columns-4 gap-2 sm:gap-4 p-2 sm:p-4 opacity-75 [column-fill:_balance] space-y-2 sm:space-y-4 safe-left safe-right safe-bottom">
-          {heroItems.map((item, index) => (
+      <div className="absolute inset-0 columns-1 xs:columns-2 md:columns-3 lg:columns-4 gap-2 sm:gap-4 p-2 sm:p-4 opacity-75 [column-fill:_balance] space-y-2 sm:space-y-4 safe-left safe-right safe-bottom">
+        {heroItems.map((item, index) => (
             <motion.div
               key={item.id}
               className="relative w-full break-inside-avoid rounded-xl overflow-hidden"
@@ -179,7 +171,6 @@ export default function HeroMasonry() {
             </motion.div>
           ))}
         </div>
-      ) : null}
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-warm-white/0 via-warm-white/60 to-warm-white pointer-events-none" />

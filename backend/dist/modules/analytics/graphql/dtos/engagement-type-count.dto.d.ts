@@ -1,4 +1,4 @@
 export declare class EngagementTypeCount {
-    type: string;
-    count: number;
+  type: string;
+  count: number;
 }

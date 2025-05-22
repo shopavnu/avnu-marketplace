@@ -1,5 +1,9 @@
-import { FC } from 'react';
-import { UserGroupIcon, MapPinIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { FC } from "react";
+import {
+  UserGroupIcon,
+  MapPinIcon,
+  HeartIcon,
+} from "@heroicons/react/24/outline";
 
 interface DemographicTargetingProps {
   ageRanges: string[];
@@ -22,7 +26,7 @@ const DemographicTargeting: FC<DemographicTargetingProps> = ({
   selectedGenders,
   selectedInterests,
   selectedLocations,
-  onCheckboxChange
+  onCheckboxChange,
 }) => {
   return (
     <div className="space-y-8">
@@ -39,10 +43,13 @@ const DemographicTargeting: FC<DemographicTargetingProps> = ({
                 type="checkbox"
                 id={`age-${age}`}
                 checked={selectedAgeRanges.includes(age)}
-                onChange={() => onCheckboxChange('selectedAgeRanges', age)}
+                onChange={() => onCheckboxChange("selectedAgeRanges", age)}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor={`age-${age}`} className="ml-2 text-sm text-gray-700">
+              <label
+                htmlFor={`age-${age}`}
+                className="ml-2 text-sm text-gray-700"
+              >
                 {age}
               </label>
             </div>
@@ -63,10 +70,13 @@ const DemographicTargeting: FC<DemographicTargetingProps> = ({
                 type="checkbox"
                 id={`gender-${gender}`}
                 checked={selectedGenders.includes(gender)}
-                onChange={() => onCheckboxChange('selectedGenders', gender)}
+                onChange={() => onCheckboxChange("selectedGenders", gender)}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor={`gender-${gender}`} className="ml-2 text-sm text-gray-700">
+              <label
+                htmlFor={`gender-${gender}`}
+                className="ml-2 text-sm text-gray-700"
+              >
                 {gender}
               </label>
             </div>
@@ -85,12 +95,15 @@ const DemographicTargeting: FC<DemographicTargetingProps> = ({
             <div key={interest} className="flex items-center">
               <input
                 type="checkbox"
-                id={`interest-${interest.replace(/\s+/g, '-').toLowerCase()}`}
+                id={`interest-${interest.replace(/\s+/g, "-").toLowerCase()}`}
                 checked={selectedInterests.includes(interest)}
-                onChange={() => onCheckboxChange('selectedInterests', interest)}
+                onChange={() => onCheckboxChange("selectedInterests", interest)}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor={`interest-${interest.replace(/\s+/g, '-').toLowerCase()}`} className="ml-2 text-sm text-gray-700">
+              <label
+                htmlFor={`interest-${interest.replace(/\s+/g, "-").toLowerCase()}`}
+                className="ml-2 text-sm text-gray-700"
+              >
                 {interest}
               </label>
             </div>
@@ -109,12 +122,15 @@ const DemographicTargeting: FC<DemographicTargetingProps> = ({
             <div key={location} className="flex items-center">
               <input
                 type="checkbox"
-                id={`location-${location.replace(/\s+/g, '-').toLowerCase()}`}
+                id={`location-${location.replace(/\s+/g, "-").toLowerCase()}`}
                 checked={selectedLocations.includes(location)}
-                onChange={() => onCheckboxChange('selectedLocations', location)}
+                onChange={() => onCheckboxChange("selectedLocations", location)}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor={`location-${location.replace(/\s+/g, '-').toLowerCase()}`} className="ml-2 text-sm text-gray-700">
+              <label
+                htmlFor={`location-${location.replace(/\s+/g, "-").toLowerCase()}`}
+                className="ml-2 text-sm text-gray-700"
+              >
                 {location}
               </label>
             </div>

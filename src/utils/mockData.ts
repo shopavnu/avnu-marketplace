@@ -1,4 +1,5 @@
 import { Brand } from '@/types/brand';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Product } from '@/types/products';
 import { productImages } from '@/data/productImages';
 
@@ -15,51 +16,73 @@ const brandImages = [
 ];
 
 // Helper function to generate mock brands
-export const generateMockBrands = (seed = 1) => Array.from({ length: 8 }, (_, i) => {
-  const brandIndex = i + 1;
-  const categories = ['Apparel', 'Accessories', 'Home Goods', 'Beauty', 'Electronics'];
-  const locations = ['Portland, OR', 'Seattle, WA', 'San Francisco, CA', 'Austin, TX'];
-  const values = [
-    ['sustainable', 'eco-friendly', 'ethical-production'],
-    ['local-made', 'artisan', 'fair-trade'],
-    ['sustainable', 'eco-friendly', 'ethical-production'],
-    ['organic', 'cruelty-free', 'vegan'],
-    ['innovative', 'eco-friendly', 'tech-forward'],
-    ['artisan', 'handmade', 'local-made'],
-    ['sustainable', 'fair-trade', 'ethical-production'],
-    ['innovative', 'tech-forward', 'eco-friendly'],
-  ];
+// Store generated data in memory to ensure consistency between renders
+let cachedBrands: Brand[] | null = null;
 
-  return {
-    id: `brand-${brandIndex}`,
-    name: `Brand ${brandIndex}`,
-    description: `Specializing in ${categories[i % categories.length]} with a focus on sustainable and ethical production.`,
-    coverImage: `https://images.unsplash.com/${brandImages[i]}?auto=format&fit=crop&w=1200&q=80`,
-    logo: `https://images.unsplash.com/${brandImages[(i + 3) % 8]}?auto=format&fit=crop&w=200&q=80`,
-    location: locations[i % locations.length],
-    categories: [categories[i % categories.length]],
-    primaryCategory: categories[i % categories.length] as Brand['primaryCategory'],
-    secondaryCategories: [
-      // Add relevant secondary categories based on primary category
-      ...(categories[i % categories.length] === 'Apparel' ? ['Baby', 'Sports'] as const : []),
-      ...(categories[i % categories.length] === 'Accessories' ? ['Pet Products', 'Sports'] as const : []),
-      ...(categories[i % categories.length] === 'Home Goods' ? ['Baby', 'Pet Products'] as const : []),
-      ...(categories[i % categories.length] === 'Beauty' ? ['Wellness'] as const : []),
-      ...(categories[i % categories.length] === 'Electronics' ? ['Sports', 'Wellness'] as const : [])
-    ],
-    values: values[i],
-    productCount: 10 + (brandIndex * 5),
-    rating: 4 + (brandIndex % 2) * 0.5,
-    isVerified: true,
-    joinedDate: new Date(2024, 0, brandIndex).toISOString()
-  };
-});
+export const generateMockBrands = (): Brand[] => {
+  // Return cached brands if available
+  if (cachedBrands) return cachedBrands;
+  
+  // Generate brands only once
+  cachedBrands = Array.from({ length: 8 }, (_, i) => {
+    const brandIndex = i + 1;
+    const categories = ['Apparel', 'Accessories', 'Home Goods', 'Beauty', 'Electronics'];
+    const locations = ['Portland, OR', 'Seattle, WA', 'San Francisco, CA', 'Austin, TX'];
+    const values = [
+      ['sustainable', 'eco-friendly', 'ethical-production'],
+      ['local-made', 'artisan', 'fair-trade'],
+      ['sustainable', 'eco-friendly', 'ethical-production'],
+      ['organic', 'cruelty-free', 'vegan'],
+      ['innovative', 'eco-friendly', 'tech-forward'],
+      ['artisan', 'handmade', 'local-made'],
+      ['sustainable', 'fair-trade', 'ethical-production'],
+      ['innovative', 'tech-forward', 'eco-friendly'],
+    ];
+
+    return {
+      id: `brand-${brandIndex}`,
+      name: `Brand ${brandIndex}`,
+      description: `Specializing in ${categories[i % categories.length]} with a focus on sustainable and ethical production.`,
+      coverImage: `https://images.unsplash.com/${brandImages[i]}?auto=format&fit=crop&w=1200&q=80`,
+      logo: `https://images.unsplash.com/${brandImages[(i + 3) % 8]}?auto=format&fit=crop&w=200&q=80`,
+      location: locations[i % locations.length],
+      categories: [categories[i % categories.length]],
+      primaryCategory: categories[i % categories.length] as Brand['primaryCategory'],
+      secondaryCategories: [
+        // Add relevant secondary categories based on primary category
+        ...(categories[i % categories.length] === 'Apparel' ? ['Baby', 'Sports'] as const : []),
+        ...(categories[i % categories.length] === 'Accessories' ? ['Pet Products', 'Sports'] as const : []),
+        ...(categories[i % categories.length] === 'Home Goods' ? ['Baby', 'Pet Products'] as const : []),
+        ...(categories[i % categories.length] === 'Beauty' ? ['Wellness'] as const : []),
+        ...(categories[i % categories.length] === 'Electronics' ? ['Sports', 'Wellness'] as const : [])
+      ],
+      values: values[i],
+      productCount: 10 + (brandIndex * 5),
+      rating: 4 + (brandIndex % 2) * 0.5,
+      isVerified: true,
+      joinedDate: new Date(2024, 0, brandIndex).toISOString()
+    };
+  });
+  
+  return cachedBrands;
+};
+
+// Cache for products to ensure consistency between renders
+const cachedProducts: Record<string, Product[]> = {};
 
 // Generate mock products for a specific brand and category
-export const generateBrandProducts = (brand: Brand & { values: string[] }, category: string) => {
+export const generateBrandProducts = (brand: Brand & { values: string[] }, category: string): Product[] => {
+  // Create a cache key using brand id and category
+  const cacheKey = `${brand.id}-${category}`;
+  
+  // Return cached products if available
+  if (cachedProducts[cacheKey]) {
+    return cachedProducts[cacheKey];
+  }
   const images = productImages[category as keyof typeof productImages];
   
-  return Array.from({ length: 8 }, (_, i) => {
+  // Generate products and store in cache
+  cachedProducts[cacheKey] = Array.from({ length: 8 }, (_, i) => {
     const productIndex = i + 1;
     let subCategories: string[] = [];
     let attributes: Record<string, string[]> = {};
@@ -121,11 +144,15 @@ export const generateBrandProducts = (brand: Brand & { values: string[] }, categ
       rating: {
         shopifyRating: {
           average: 4.5,
-          count: 30 + i
+          count: 30 + Math.floor(i/2) * 5 // Use more stable calculation
         },
         avnuRating: {
-          average: 4.5,
-          count: 15 + i
+          average: 4.3 + (i % 3) * 0.2, // Create fixed variation pattern
+          count: 15 + Math.floor(i/2) * 10 // Use more stable calculation
+        },
+        wooCommerceRating: {
+          average: 4.4,
+          count: 10
         }
       },
       vendor: {
@@ -144,4 +171,6 @@ export const generateBrandProducts = (brand: Brand & { values: string[] }, categ
       createdAt: new Date(2024, 0, i + 1).toISOString()
     };
   });
+  
+  return cachedProducts[cacheKey];
 };

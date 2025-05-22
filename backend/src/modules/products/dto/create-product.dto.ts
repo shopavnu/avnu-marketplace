@@ -5,11 +5,17 @@ import {
   IsArray,
   IsOptional,
   IsBoolean,
-  Min,
+  IsObject,
+  ValidateNested,
   IsUUID,
+  IsUrl,
+  IsInt as _IsInt,
+  Min,
 } from 'class-validator';
 import { Field, InputType, Float, Int } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductAttributesDto } from './product-attributes.dto';
 
 @InputType()
 export class CreateProductDto {
@@ -46,8 +52,19 @@ export class CreateProductDto {
   @ApiProperty({ example: ['https://example.com/image1.jpg'], description: 'Product images' })
   @IsArray()
   @IsString({ each: true })
+  @IsUrl({}, { each: true, message: 'Each image must be a valid URL' })
   @IsNotEmpty({ message: 'At least one image is required' })
   images: string[];
+
+  @Field(() => String, { nullable: true })
+  @ApiProperty({
+    required: false,
+    example: 'handcrafted-ceramic-mug',
+    description: 'URL-friendly slug',
+  })
+  @IsString()
+  @IsOptional()
+  slug?: string;
 
   @Field({ nullable: true })
   @ApiProperty({ required: false, description: 'Product thumbnail' })
@@ -68,6 +85,18 @@ export class CreateProductDto {
   @IsString({ each: true })
   @IsOptional()
   tags?: string[];
+
+  @Field(() => ProductAttributesDto, { nullable: true })
+  @ApiProperty({
+    required: false,
+    description: 'Product attributes like size, color, material, etc.',
+    type: () => ProductAttributesDto,
+  })
+  @IsObject()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ProductAttributesDto)
+  attributes?: ProductAttributesDto;
 
   @Field()
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'Merchant ID' })

@@ -14,34 +14,21 @@ export default function Logo({ className = "", color = "#5A6F57" }: LogoProps) {
       className={className}
     >
       {/* A */}
-      <path 
-        d="M50 20L75 80L100 20H150L100 100H50L0 20H50Z" 
-        fill={color}
-      />
+      <path d="M50 20L75 80L100 20H150L100 100H50L0 20H50Z" fill={color} />
       {/* V */}
-      <path 
-        d="M225 20L200 80L175 20H175V100H225" 
-        stroke={color} 
+      <path
+        d="M225 20L200 80L175 20H175V100H225"
+        stroke={color}
         strokeWidth="5"
       />
       {/* | */}
-      <rect 
-        x="250" 
-        y="20" 
-        width="5" 
-        height="80" 
-        fill={color}
-      />
+      <rect x="250" y="20" width="5" height="80" fill={color} />
       {/* N */}
-      <path 
-        d="M300 100V20H350L375 80V20" 
-        stroke={color} 
-        strokeWidth="5"
-      />
+      <path d="M300 100V20H350L375 80V20" stroke={color} strokeWidth="5" />
       {/* U */}
-      <path 
-        d="M375 20V80C375 91.0457 366.046 100 355 100H350" 
-        stroke={color} 
+      <path
+        d="M375 20V80C375 91.0457 366.046 100 355 100H350"
+        stroke={color}
         strokeWidth="5"
       />
     </svg>

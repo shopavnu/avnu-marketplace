@@ -4,9 +4,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MerchantAdCampaign } from '../entities/merchant-ad-campaign.entity';
 import {
   BudgetAllocationStrategy,
-  BudgetUtilization,
-  BudgetForecast,
-  BudgetUpdateResult,
+  BudgetUtilization as _BudgetUtilization,
+  BudgetForecast as _BudgetForecast,
+  BudgetUpdateResult as _BudgetUpdateResult,
 } from '../test/mocks/entity-mocks';
 
 // Import the mock service instead of the real one
@@ -14,8 +14,8 @@ import { AdBudgetManagementService } from '../test/mocks/ad-budget-management.se
 
 describe('AdBudgetManagementService', () => {
   let service: AdBudgetManagementService;
-  let adCampaignRepository: any;
-  let eventEmitter: EventEmitter2;
+  let _adCampaignRepository: any;
+  let _eventEmitter: EventEmitter2;
 
   beforeEach(async () => {
     // Create mock repository
@@ -96,8 +96,8 @@ describe('AdBudgetManagementService', () => {
     }).compile();
 
     service = module.get<AdBudgetManagementService>(AdBudgetManagementService);
-    adCampaignRepository = module.get(getRepositoryToken(MerchantAdCampaign));
-    eventEmitter = module.get(EventEmitter2);
+    _adCampaignRepository = module.get(getRepositoryToken(MerchantAdCampaign));
+    _eventEmitter = module.get(EventEmitter2);
   });
 
   it('should be defined', () => {

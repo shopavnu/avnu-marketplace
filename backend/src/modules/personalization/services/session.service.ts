@@ -3,21 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SessionEntity } from '../entities/session.entity';
 import { SessionInteractionEntity } from '../entities/session-interaction.entity';
-
-/**
- * Session interaction types for tracking user behavior within a session
- */
-export enum SessionInteractionType {
-  SEARCH = 'search',
-  CLICK = 'click',
-  VIEW = 'view',
-  FILTER = 'filter',
-  SORT = 'sort',
-  IMPRESSION = 'impression',
-  DWELL = 'dwell',
-  ADD_TO_CART = 'add_to_cart',
-  PURCHASE = 'purchase',
-}
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 
 /**
  * Session service for managing and tracking user sessions
@@ -132,6 +118,27 @@ export class SessionService {
   }
 
   /**
+   * Get interactions by type across all sessions
+   * @param type Interaction type
+   * @param limit Maximum number of interactions to return
+   */
+  async getInteractionsByType(
+    type: SessionInteractionType,
+    limit: number = 100,
+  ): Promise<SessionInteractionEntity[]> {
+    try {
+      return this.interactionRepository.find({
+        where: { type },
+        order: { timestamp: 'DESC' },
+        take: limit,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get interactions by type: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
    * Calculate session-based personalization weights
    * @param sessionId Session ID
    */
@@ -147,12 +154,15 @@ export class SessionService {
       });
 
       // Initialize weights
-      const weights: Record<string, any> = {
+      const weights = {
         entities: {},
         categories: {},
         brands: {},
         queries: {},
         filters: {},
+        scrollDepth: {},
+        productViews: {},
+        viewTime: {},
       };
 
       // Process interactions to calculate weights
@@ -246,6 +256,65 @@ export class SessionService {
                 (weights.brands[data.brandId] || 0) + interactionWeight * recencyWeight;
             }
             break;
+
+          case SessionInteractionType.SCROLL_DEPTH:
+            // Calculate scroll depth weight (0.1 to 0.8 based on depth)
+            const scrollPercentage = data.scrollPercentage || 0;
+            interactionWeight = 0.1 + (scrollPercentage / 100) * 0.7; // Scale from 0.1 to 0.8
+
+            // Track scroll depth by page type
+            if (data.pageType) {
+              weights.scrollDepth[data.pageType] = Math.max(
+                weights.scrollDepth[data.pageType] || 0,
+                scrollPercentage,
+              );
+            }
+
+            // If product listing page, add weights to visible products
+            if (data.visibleProductIds && Array.isArray(data.visibleProductIds)) {
+              data.visibleProductIds.forEach((productId: string) => {
+                weights.entities[productId] =
+                  (weights.entities[productId] || 0) + interactionWeight * recencyWeight * 0.3;
+              });
+            }
+            break;
+
+          case SessionInteractionType.PRODUCT_VIEW:
+            // Calculate product view weight based on view time
+            const viewTimeSeconds = (data.viewTimeMs || 0) / 1000;
+            // Cap at 60 seconds (1 minute) for maximum weight
+            interactionWeight = Math.min(1.0, viewTimeSeconds / 60) * 0.9; // Scale up to 0.9
+
+            if (data.productId) {
+              // Add to product views with time data
+              weights.productViews[data.productId] = {
+                count: (weights.productViews[data.productId]?.count || 0) + 1,
+                totalTime: (weights.productViews[data.productId]?.totalTime || 0) + viewTimeSeconds,
+                lastViewed: Date.now(),
+              };
+
+              // Add to entities weight
+              weights.entities[data.productId] =
+                (weights.entities[data.productId] || 0) + interactionWeight * recencyWeight;
+
+              // Track view time for analytics
+              weights.viewTime[data.productId] =
+                (weights.viewTime[data.productId] || 0) + viewTimeSeconds;
+
+              // If product has category, add to category weights
+              if (data.categoryId) {
+                weights.categories[data.categoryId] =
+                  (weights.categories[data.categoryId] || 0) +
+                  interactionWeight * recencyWeight * 0.5;
+              }
+
+              // If product has brand, add to brand weights
+              if (data.brandId) {
+                weights.brands[data.brandId] =
+                  (weights.brands[data.brandId] || 0) + interactionWeight * recencyWeight * 0.5;
+              }
+            }
+            break;
         }
       });
 
@@ -258,6 +327,9 @@ export class SessionService {
         brands: {},
         queries: {},
         filters: {},
+        scrollDepth: {},
+        productViews: {},
+        viewTime: {},
       };
     }
   }

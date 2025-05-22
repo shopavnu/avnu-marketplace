@@ -19,7 +19,7 @@ async function bootstrap() {
     // Test direct database search (without Elasticsearch)
     logger.log('Testing direct database search for "shirt"...');
     const searchResults = await productsService.search('shirt', { page: 1, limit: 10 });
-    
+
     logger.log(`Found ${searchResults.total} products matching "shirt"`);
     if (searchResults.items.length > 0) {
       logger.log('Search results:');
@@ -32,10 +32,14 @@ async function bootstrap() {
 
     // Test search with filters
     logger.log('\nTesting search with category filter...');
-    const filteredResults = await productsService.search('', { page: 1, limit: 10 }, {
-      categories: ['clothing'],
-    });
-    
+    const filteredResults = await productsService.search(
+      '',
+      { page: 1, limit: 10 },
+      {
+        categories: ['clothing'],
+      },
+    );
+
     logger.log(`Found ${filteredResults.total} products in "clothing" category`);
     if (filteredResults.items.length > 0) {
       logger.log('Filtered results:');
@@ -48,11 +52,15 @@ async function bootstrap() {
 
     // Test search with price range
     logger.log('\nTesting search with price range...');
-    const priceRangeResults = await productsService.search('', { page: 1, limit: 10 }, {
-      priceMin: 50,
-      priceMax: 200,
-    });
-    
+    const priceRangeResults = await productsService.search(
+      '',
+      { page: 1, limit: 10 },
+      {
+        priceMin: 50,
+        priceMax: 200,
+      },
+    );
+
     logger.log(`Found ${priceRangeResults.total} products with price between $50 and $200`);
     if (priceRangeResults.items.length > 0) {
       logger.log('Price range results:');

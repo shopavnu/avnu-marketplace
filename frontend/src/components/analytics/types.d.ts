@@ -1,6 +1,6 @@
 // This file contains TypeScript definitions for all analytics components
 
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 // Scroll Analytics Types
 export interface ScrollAnalyticsData {

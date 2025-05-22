@@ -1,162 +1,170 @@
-import { useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import Image from 'next/image';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
-  PencilIcon, 
+import { useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import Image from "next/image";
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
+  PencilIcon,
   TrashIcon,
   EyeIcon,
   ArrowsUpDownIcon,
   ChevronDownIcon,
-  AdjustmentsHorizontalIcon
-} from '@heroicons/react/24/outline';
-import MerchantLayout from '@/components/merchant/MerchantLayout';
+  AdjustmentsHorizontalIcon,
+} from "@heroicons/react/24/outline";
+import MerchantLayout from "@/components/merchant/MerchantLayout";
 
 // Mock product data
 const products = [
   {
-    id: 'PROD-001',
-    name: 'Organic Cotton T-Shirt',
-    description: 'Sustainable and eco-friendly cotton t-shirt.',
+    id: "PROD-001",
+    name: "Organic Cotton T-Shirt",
+    description: "Sustainable and eco-friendly cotton t-shirt.",
     price: 29.99,
     inventory: 124,
-    category: 'Apparel',
-    status: 'Active',
+    category: "Apparel",
+    status: "Active",
     image: null,
     featured: true,
-    createdAt: '2025-03-15'
+    createdAt: "2025-03-15",
   },
   {
-    id: 'PROD-002',
-    name: 'Bamboo Water Bottle',
-    description: 'Reusable water bottle made from sustainable bamboo.',
+    id: "PROD-002",
+    name: "Bamboo Water Bottle",
+    description: "Reusable water bottle made from sustainable bamboo.",
     price: 24.99,
     inventory: 89,
-    category: 'Accessories',
-    status: 'Active',
+    category: "Accessories",
+    status: "Active",
     image: null,
     featured: false,
-    createdAt: '2025-03-18'
+    createdAt: "2025-03-18",
   },
   {
-    id: 'PROD-003',
-    name: 'Recycled Denim Jacket',
-    description: 'Stylish jacket made from recycled denim materials.',
+    id: "PROD-003",
+    name: "Recycled Denim Jacket",
+    description: "Stylish jacket made from recycled denim materials.",
     price: 79.99,
     inventory: 32,
-    category: 'Apparel',
-    status: 'Active',
+    category: "Apparel",
+    status: "Active",
     image: null,
     featured: true,
-    createdAt: '2025-03-20'
+    createdAt: "2025-03-20",
   },
   {
-    id: 'PROD-004',
-    name: 'Hemp Canvas Tote Bag',
-    description: 'Durable tote bag made from sustainable hemp canvas.',
+    id: "PROD-004",
+    name: "Hemp Canvas Tote Bag",
+    description: "Durable tote bag made from sustainable hemp canvas.",
     price: 24.99,
     inventory: 156,
-    category: 'Accessories',
-    status: 'Active',
+    category: "Accessories",
+    status: "Active",
     image: null,
     featured: false,
-    createdAt: '2025-03-22'
+    createdAt: "2025-03-22",
   },
   {
-    id: 'PROD-005',
-    name: 'Sustainable Yoga Mat',
-    description: 'Eco-friendly yoga mat made from natural rubber.',
+    id: "PROD-005",
+    name: "Sustainable Yoga Mat",
+    description: "Eco-friendly yoga mat made from natural rubber.",
     price: 39.99,
     inventory: 67,
-    category: 'Wellness',
-    status: 'Active',
+    category: "Wellness",
+    status: "Active",
     image: null,
     featured: false,
-    createdAt: '2025-03-25'
+    createdAt: "2025-03-25",
   },
   {
-    id: 'PROD-006',
-    name: 'Recycled Plastic Sunglasses',
-    description: 'Stylish sunglasses made from recycled ocean plastic.',
+    id: "PROD-006",
+    name: "Recycled Plastic Sunglasses",
+    description: "Stylish sunglasses made from recycled ocean plastic.",
     price: 49.99,
     inventory: 42,
-    category: 'Accessories',
-    status: 'Draft',
+    category: "Accessories",
+    status: "Draft",
     image: null,
     featured: false,
-    createdAt: '2025-03-28'
+    createdAt: "2025-03-28",
   },
   {
-    id: 'PROD-007',
-    name: 'Organic Linen Dress',
-    description: 'Elegant dress made from organic linen.',
+    id: "PROD-007",
+    name: "Organic Linen Dress",
+    description: "Elegant dress made from organic linen.",
     price: 89.99,
     inventory: 28,
-    category: 'Apparel',
-    status: 'Active',
+    category: "Apparel",
+    status: "Active",
     image: null,
     featured: true,
-    createdAt: '2025-04-01'
+    createdAt: "2025-04-01",
   },
   {
-    id: 'PROD-008',
-    name: 'Biodegradable Phone Case',
-    description: 'Phone case made from biodegradable materials.',
+    id: "PROD-008",
+    name: "Biodegradable Phone Case",
+    description: "Phone case made from biodegradable materials.",
     price: 19.99,
     inventory: 95,
-    category: 'Accessories',
-    status: 'Active',
+    category: "Accessories",
+    status: "Active",
     image: null,
     featured: false,
-    createdAt: '2025-04-05'
+    createdAt: "2025-04-05",
   },
 ];
 
 const ProductsPage = () => {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedStatus, setSelectedStatus] = useState('All');
-  const [sortBy, setSortBy] = useState('name');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   // Available categories for filtering
-  const categories = ['All', 'Apparel', 'Accessories', 'Wellness', 'Home Goods', 'Beauty'];
-  
+  const categories = [
+    "All",
+    "Apparel",
+    "Accessories",
+    "Wellness",
+    "Home Goods",
+    "Beauty",
+  ];
+
   // Available statuses for filtering
-  const statuses = ['All', 'Active', 'Draft', 'Out of Stock'];
+  const statuses = ["All", "Active", "Draft", "Out of Stock"];
 
   // Filter and sort products
   const filteredProducts = products
-    .filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesStatus = selectedStatus === 'All' || product.status === selectedStatus;
-      
+    .filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || product.category === selectedCategory;
+      const matchesStatus =
+        selectedStatus === "All" || product.status === selectedStatus;
+
       return matchesSearch && matchesCategory && matchesStatus;
     })
     .sort((a, b) => {
-      if (sortBy === 'name') {
-        return sortOrder === 'asc' 
-          ? a.name.localeCompare(b.name) 
+      if (sortBy === "name") {
+        return sortOrder === "asc"
+          ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
-      } else if (sortBy === 'price') {
-        return sortOrder === 'asc' 
-          ? a.price - b.price 
-          : b.price - a.price;
-      } else if (sortBy === 'inventory') {
-        return sortOrder === 'asc' 
-          ? a.inventory - b.inventory 
+      } else if (sortBy === "price") {
+        return sortOrder === "asc" ? a.price - b.price : b.price - a.price;
+      } else if (sortBy === "inventory") {
+        return sortOrder === "asc"
+          ? a.inventory - b.inventory
           : b.inventory - a.inventory;
-      } else if (sortBy === 'createdAt') {
-        return sortOrder === 'asc' 
-          ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() 
+      } else if (sortBy === "createdAt") {
+        return sortOrder === "asc"
+          ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
       return 0;
@@ -164,32 +172,35 @@ const ProductsPage = () => {
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedProducts(filteredProducts.map(product => product.id));
+      setSelectedProducts(filteredProducts.map((product) => product.id));
     } else {
       setSelectedProducts([]);
     }
   };
 
-  const handleSelectProduct = (e: React.ChangeEvent<HTMLInputElement>, productId: string) => {
+  const handleSelectProduct = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    productId: string,
+  ) => {
     if (e.target.checked) {
       setSelectedProducts([...selectedProducts, productId]);
     } else {
-      setSelectedProducts(selectedProducts.filter(id => id !== productId));
+      setSelectedProducts(selectedProducts.filter((id) => id !== productId));
     }
   };
 
   const handleDeleteSelected = () => {
     // In a real app, this would call an API to delete the selected products
-    alert(`Deleting products: ${selectedProducts.join(', ')}`);
+    alert(`Deleting products: ${selectedProducts.join(", ")}`);
     setSelectedProducts([]);
   };
 
@@ -197,9 +208,12 @@ const ProductsPage = () => {
     <>
       <Head>
         <title>Products | Merchant Portal | av|nu</title>
-        <meta name="description" content="Manage your products on av|nu marketplace" />
+        <meta
+          name="description"
+          content="Manage your products on av|nu marketplace"
+        />
       </Head>
-      
+
       <MerchantLayout>
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="sm:flex sm:items-center sm:justify-between">
@@ -214,13 +228,16 @@ const ProductsPage = () => {
               </Link>
             </div>
           </div>
-          
+
           {/* Search and Filters */}
           <div className="mt-6 bg-white shadow rounded-lg p-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="relative flex-grow max-w-lg">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <MagnifyingGlassIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
                 </div>
                 <input
                   type="text"
@@ -230,36 +247,48 @@ const ProductsPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
+
               <div className="flex items-center">
                 <button
                   type="button"
                   className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage"
                   onClick={() => setShowFilters(!showFilters)}
                 >
-                  <AdjustmentsHorizontalIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                  <AdjustmentsHorizontalIcon
+                    className="-ml-0.5 mr-2 h-4 w-4"
+                    aria-hidden="true"
+                  />
                   Filters
-                  <ChevronDownIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+                  <ChevronDownIcon
+                    className="ml-2 h-4 w-4"
+                    aria-hidden="true"
+                  />
                 </button>
-                
+
                 {selectedProducts.length > 0 && (
                   <button
                     type="button"
                     className="ml-3 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     onClick={handleDeleteSelected}
                   >
-                    <TrashIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                    <TrashIcon
+                      className="-ml-0.5 mr-2 h-4 w-4"
+                      aria-hidden="true"
+                    />
                     Delete Selected ({selectedProducts.length})
                   </button>
                 )}
               </div>
             </div>
-            
+
             {/* Expanded Filters */}
             {showFilters && (
               <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="category"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Category
                   </label>
                   <select
@@ -276,9 +305,12 @@ const ProductsPage = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="status"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Status
                   </label>
                   <select
@@ -295,9 +327,12 @@ const ProductsPage = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
-                  <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="sortBy"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Sort By
                   </label>
                   <select
@@ -307,7 +342,7 @@ const ProductsPage = () => {
                     value={sortBy}
                     onChange={(e) => {
                       setSortBy(e.target.value);
-                      setSortOrder('asc');
+                      setSortOrder("asc");
                     }}
                   >
                     <option value="name">Name</option>
@@ -319,66 +354,106 @@ const ProductsPage = () => {
               </div>
             )}
           </div>
-          
+
           {/* Products Table */}
           <div className="mt-6 bg-white shadow overflow-hidden rounded-lg">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       <div className="flex items-center">
                         <input
                           type="checkbox"
                           className="h-4 w-4 text-sage focus:ring-sage border-gray-300 rounded"
-                          checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                          checked={
+                            selectedProducts.length ===
+                              filteredProducts.length &&
+                            filteredProducts.length > 0
+                          }
                           onChange={handleSelectAll}
                         />
                       </div>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       <button
                         className="group inline-flex items-center"
-                        onClick={() => handleSort('name')}
+                        onClick={() => handleSort("name")}
                       >
                         Product
-                        <ArrowsUpDownIcon className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                        <ArrowsUpDownIcon
+                          className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500"
+                          aria-hidden="true"
+                        />
                       </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       <button
                         className="group inline-flex items-center"
-                        onClick={() => handleSort('price')}
+                        onClick={() => handleSort("price")}
                       >
                         Price
-                        <ArrowsUpDownIcon className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                        <ArrowsUpDownIcon
+                          className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500"
+                          aria-hidden="true"
+                        />
                       </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       <button
                         className="group inline-flex items-center"
-                        onClick={() => handleSort('inventory')}
+                        onClick={() => handleSort("inventory")}
                       >
                         Inventory
-                        <ArrowsUpDownIcon className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                        <ArrowsUpDownIcon
+                          className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500"
+                          aria-hidden="true"
+                        />
                       </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Category
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       <button
                         className="group inline-flex items-center"
-                        onClick={() => handleSort('createdAt')}
+                        onClick={() => handleSort("createdAt")}
                       >
                         Date Added
-                        <ArrowsUpDownIcon className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                        <ArrowsUpDownIcon
+                          className="ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-500"
+                          aria-hidden="true"
+                        />
                       </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Actions
                     </th>
                   </tr>
@@ -393,7 +468,9 @@ const ProductsPage = () => {
                               type="checkbox"
                               className="h-4 w-4 text-sage focus:ring-sage border-gray-300 rounded"
                               checked={selectedProducts.includes(product.id)}
-                              onChange={(e) => handleSelectProduct(e, product.id)}
+                              onChange={(e) =>
+                                handleSelectProduct(e, product.id)
+                              }
                             />
                           </div>
                         </td>
@@ -410,7 +487,9 @@ const ProductsPage = () => {
                                 />
                               ) : (
                                 <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
-                                  <span className="text-xs text-gray-500">No img</span>
+                                  <span className="text-xs text-gray-500">
+                                    No img
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -425,25 +504,35 @@ const ProductsPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">${product.price.toFixed(2)}</div>
+                          <div className="text-sm text-gray-900">
+                            ${product.price.toFixed(2)}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{product.inventory}</div>
+                          <div className="text-sm text-gray-900">
+                            {product.inventory}
+                          </div>
                           {product.inventory < 10 && (
-                            <div className="text-xs text-red-500">Low stock</div>
+                            <div className="text-xs text-red-500">
+                              Low stock
+                            </div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{product.category}</div>
+                          <div className="text-sm text-gray-900">
+                            {product.category}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            product.status === 'Active' 
-                              ? 'bg-green-100 text-green-800' 
-                              : product.status === 'Draft'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              product.status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : product.status === "Draft"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
+                            }`}
+                          >
                             {product.status}
                           </span>
                           {product.featured && (
@@ -457,18 +546,21 @@ const ProductsPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
-                            <Link 
+                            <Link
                               href={`/merchant/products/${product.id}`}
                               className="text-gray-400 hover:text-gray-500"
                             >
                               <EyeIcon className="h-5 w-5" aria-hidden="true" />
                               <span className="sr-only">View</span>
                             </Link>
-                            <Link 
+                            <Link
                               href={`/merchant/products/${product.id}/edit`}
                               className="text-indigo-600 hover:text-indigo-900"
                             >
-                              <PencilIcon className="h-5 w-5" aria-hidden="true" />
+                              <PencilIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
                               <span className="sr-only">Edit</span>
                             </Link>
                             <button
@@ -478,7 +570,10 @@ const ProductsPage = () => {
                                 alert(`Deleting product: ${product.id}`);
                               }}
                             >
-                              <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                              <TrashIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
                               <span className="sr-only">Delete</span>
                             </button>
                           </div>
@@ -487,7 +582,10 @@ const ProductsPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                      <td
+                        colSpan={8}
+                        className="px-6 py-10 text-center text-sm text-gray-500"
+                      >
                         No products found matching your criteria.
                       </td>
                     </tr>

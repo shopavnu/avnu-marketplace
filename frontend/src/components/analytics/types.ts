@@ -1,5 +1,74 @@
 // Common analytics data types
 
+/**
+ * Performance Metrics Types
+ */
+export interface PerformanceMetricsData {
+  pageLoadTime: {
+    average: number;
+    byPage: {
+      pagePath: string;
+      loadTime: number;
+    }[];
+  };
+  firstContentfulPaint: {
+    average: number;
+    byPage: {
+      pagePath: string;
+      fcp: number;
+    }[];
+  };
+  largestContentfulPaint: {
+    average: number;
+    byPage: {
+      pagePath: string;
+      lcp: number;
+    }[];
+  };
+  cumulativeLayoutShift: {
+    average: number;
+    byPage: {
+      pagePath: string;
+      cls: number;
+    }[];
+  };
+  firstInputDelay: {
+    average: number;
+    byPage: {
+      pagePath: string;
+      fid: number;
+    }[];
+  };
+}
+
+/**
+ * User Behavior Data Types
+ */
+export interface UserBehaviorData {
+  sessionMetrics: {
+    totalSessions: number;
+    avgSessionDuration: number;
+    bounceRate: number;
+    returnRate: number;
+  };
+  navigationPaths: {
+    path: string[];
+    count: number;
+    conversionRate: number;
+  }[];
+  userSegments: {
+    segment: string;
+    sessionCount: number;
+    avgSessionDuration: number;
+    conversionRate: number;
+  }[];
+  deviceBreakdown: {
+    deviceType: string;
+    sessionCount: number;
+    percentage: number;
+  }[];
+}
+
 // Scroll Analytics Types
 export interface ScrollDepthByPage {
   pagePath: string;
@@ -83,7 +152,7 @@ export interface InteractionTimeDistribution {
 }
 
 export interface HeatmapAnalyticsData {
-  topPages: { pagePath: string }[];
+  topPages: { pagePath: string; viewCount?: number }[];
   interactionTypes: InteractionType[];
   topInteractionAreas: TopInteractionArea[];
   interactionMetricsByPage: InteractionMetricsByPage[];

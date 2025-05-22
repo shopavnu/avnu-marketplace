@@ -1,0 +1,52 @@
+type CircuitBreakerMetrics {
+  state: String!
+  failures: Int!
+  lastFailureTime: String
+  options: CircuitBreakerOptions!
+}
+
+type CircuitBreakerOptions {
+  failureThreshold: Int!
+  resetTimeout: Int!
+  maxRetries: Int!
+  retryDelay: Int!
+  monitorInterval: Int!
+}
+
+type FallbackCacheStats {
+  keys: Int!
+  hits: Int!
+  misses: Int!
+  ksize: Int!
+  vsize: Int!
+}
+
+type CacheStats {
+  fallback: FallbackCacheStats!
+  circuitBreaker: CircuitBreakerMetrics!
+}
+
+type CachePerformanceMetrics {
+  cacheHits: Int!
+  cacheMisses: Int!
+  cacheInvalidations: Int!
+  cacheHitRate: Float!
+  averageResponseTimeWithCache: Float!
+  averageResponseTimeWithoutCache: Float!
+  responseTimeImprovement: Float!
+  cacheWarmingTime: Int!
+  lastResetTime: String!
+  cacheStats: CacheStats!
+}
+
+type Query {
+  cachePerformanceMetrics: CachePerformanceMetrics!
+}
+
+type Mutation {
+  resetCachePerformanceMetrics: Boolean!
+  warmProductCache: Boolean!
+  invalidateAllProductCache: Boolean!
+  invalidateProductCache(productId: ID!): Boolean!
+  invalidateMerchantProductCache(merchantId: ID!): Boolean!
+}

@@ -6,15 +6,15 @@ import { BudgetAllocationStrategy, BudgetForecast, BudgetUtilization } from './e
 export class AdBudgetManagementResolver {
   constructor(private readonly budgetService: AdBudgetManagementService) {}
 
-  async merchantBudgetUtilization(merchantId: string, user?: any): Promise<BudgetUtilization> {
+  async merchantBudgetUtilization(merchantId: string, _user?: any): Promise<BudgetUtilization> {
     return this.budgetService.getBudgetUtilization(merchantId);
   }
 
-  async merchantBudgetForecast(merchantId: string, user?: any): Promise<BudgetForecast> {
+  async merchantBudgetForecast(merchantId: string, _user?: any): Promise<BudgetForecast> {
     return this.budgetService.getBudgetForecast(merchantId);
   }
 
-  async merchantDailyBudget(merchantId: string, user?: any): Promise<number> {
+  async merchantDailyBudget(merchantId: string, _user?: any): Promise<number> {
     return this.budgetService.getDailyBudget(merchantId);
   }
 
@@ -23,7 +23,7 @@ export class AdBudgetManagementResolver {
     totalBudget: number,
     campaignIds: string[],
     strategy: BudgetAllocationStrategy = BudgetAllocationStrategy.EQUAL,
-    user?: any,
+    _user?: any,
   ): Promise<Record<string, number>> {
     return this.budgetService.allocateBudgetAcrossCampaigns(
       merchantId,

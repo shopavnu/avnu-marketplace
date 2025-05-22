@@ -1,6 +1,6 @@
-import React, { ReactNode, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
+import React, { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import {
   ChartBarIcon,
   CogIcon,
@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
   ShoppingBagIcon,
   TagIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -28,17 +28,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       try {
         // In a real implementation, this would be an API call to check admin status
         // For now, we'll just simulate it with a timeout
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // For development, we'll assume the user is an admin
         // In production, this would check the user's role from a JWT token or API
         setIsAdmin(true);
         setIsLoading(false);
       } catch (error) {
-        console.error('Authentication error:', error);
+        console.error("Authentication error:", error);
         setIsAdmin(false);
         setIsLoading(false);
-        router.push('/login');
+        router.push("/login");
       }
     };
 
@@ -47,42 +47,47 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   // Navigation items
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: HomeIcon, current: router.pathname === '/admin' },
-    { 
-      name: 'Analytics', 
-      href: '/admin/analytics', 
-      icon: ChartBarIcon, 
-      current: router.pathname.startsWith('/admin/analytics')
+    {
+      name: "Dashboard",
+      href: "/admin",
+      icon: HomeIcon,
+      current: router.pathname === "/admin",
     },
-    { 
-      name: 'Search', 
-      href: '/admin/search', 
-      icon: MagnifyingGlassIcon, 
-      current: router.pathname.startsWith('/admin/search')
+    {
+      name: "Analytics",
+      href: "/admin/analytics",
+      icon: ChartBarIcon,
+      current: router.pathname.startsWith("/admin/analytics"),
     },
-    { 
-      name: 'Users', 
-      href: '/admin/users', 
-      icon: UserGroupIcon, 
-      current: router.pathname.startsWith('/admin/users')
+    {
+      name: "Search",
+      href: "/admin/search",
+      icon: MagnifyingGlassIcon,
+      current: router.pathname.startsWith("/admin/search"),
     },
-    { 
-      name: 'Products', 
-      href: '/admin/products', 
-      icon: ShoppingBagIcon, 
-      current: router.pathname.startsWith('/admin/products')
+    {
+      name: "Users",
+      href: "/admin/users",
+      icon: UserGroupIcon,
+      current: router.pathname.startsWith("/admin/users"),
     },
-    { 
-      name: 'Categories', 
-      href: '/admin/categories', 
-      icon: TagIcon, 
-      current: router.pathname.startsWith('/admin/categories')
+    {
+      name: "Products",
+      href: "/admin/products",
+      icon: ShoppingBagIcon,
+      current: router.pathname.startsWith("/admin/products"),
     },
-    { 
-      name: 'Settings', 
-      href: '/admin/settings', 
-      icon: CogIcon, 
-      current: router.pathname.startsWith('/admin/settings')
+    {
+      name: "Categories",
+      href: "/admin/categories",
+      icon: TagIcon,
+      current: router.pathname.startsWith("/admin/categories"),
+    },
+    {
+      name: "Settings",
+      href: "/admin/settings",
+      icon: CogIcon,
+      current: router.pathname.startsWith("/admin/settings"),
     },
   ];
 
@@ -106,7 +111,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <div className="flex-1 flex flex-col min-h-0 bg-charcoal">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
-                <span className="text-xl font-semibold text-white">Avnu Admin</span>
+                <span className="text-xl font-semibold text-white">
+                  Avnu Admin
+                </span>
               </div>
               <nav className="mt-5 flex-1 px-2 space-y-1">
                 {navigation.map((item) => (
@@ -115,13 +122,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                     href={item.href}
                     className={`
                       group flex items-center px-2 py-2 text-sm font-medium rounded-md
-                      ${item.current ? 'bg-sage text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}
+                      ${item.current ? "bg-sage text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"}
                     `}
                   >
                     <item.icon
                       className={`
                         mr-3 flex-shrink-0 h-6 w-6
-                        ${item.current ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'}
+                        ${item.current ? "text-white" : "text-gray-400 group-hover:text-gray-300"}
                       `}
                       aria-hidden="true"
                     />
@@ -138,7 +145,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <main className="flex-1">
             <div className="py-6">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                <h1 className="text-2xl font-semibold text-charcoal">{title}</h1>
+                <h1 className="text-2xl font-semibold text-charcoal">
+                  {title}
+                </h1>
               </div>
               <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                 <div className="py-4">{children}</div>

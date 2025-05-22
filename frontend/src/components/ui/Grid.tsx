@@ -1,16 +1,16 @@
-import React, { ReactNode } from 'react';
-import { Grid as MuiGrid, SxProps, Theme } from '@mui/material';
+import React, { ReactNode } from "react";
+import { Grid as MuiGrid, SxProps, Theme } from "@mui/material";
 
 // Custom Grid component to handle TypeScript errors with Material-UI v5
 export interface GridProps {
   children: ReactNode;
   container?: boolean;
   item?: boolean;
-  xs?: number | 'auto' | boolean;
-  sm?: number | 'auto' | boolean;
-  md?: number | 'auto' | boolean;
-  lg?: number | 'auto' | boolean;
-  xl?: number | 'auto' | boolean;
+  xs?: number | "auto" | boolean;
+  sm?: number | "auto" | boolean;
+  md?: number | "auto" | boolean;
+  lg?: number | "auto" | boolean;
+  xl?: number | "auto" | boolean;
   spacing?: number;
   sx?: SxProps<Theme>;
   className?: string;
@@ -35,9 +35,9 @@ const Grid = ({
   const gridProps: any = {
     sx,
     className,
-    ...rest
+    ...rest,
   };
-  
+
   // Add grid properties
   if (container) gridProps.container = true;
   if (item) gridProps.item = true;
@@ -47,12 +47,8 @@ const Grid = ({
   if (lg !== undefined) gridProps.lg = lg;
   if (xl !== undefined) gridProps.xl = xl;
   if (spacing !== undefined && container) gridProps.spacing = spacing;
-  
-  return (
-    <MuiGrid {...gridProps}>
-      {children}
-    </MuiGrid>
-  );
+
+  return <MuiGrid {...gridProps}>{children}</MuiGrid>;
 };
 
 // Convenience component for Grid container
@@ -62,7 +58,7 @@ const GridContainer = ({
   sx = {},
   className,
   ...rest
-}: Omit<GridProps, 'container' | 'item'>) => {
+}: Omit<GridProps, "container" | "item">) => {
   return (
     <Grid container spacing={spacing} sx={sx} className={className} {...rest}>
       {children}
@@ -81,9 +77,19 @@ const GridItem = ({
   sx = {},
   className,
   ...rest
-}: Omit<GridProps, 'container' | 'item'>) => {
+}: Omit<GridProps, "container" | "item">) => {
   return (
-    <Grid item xs={xs} sm={sm} md={md} lg={lg} xl={xl} sx={sx} className={className} {...rest}>
+    <Grid
+      item
+      xs={xs}
+      sm={sm}
+      md={md}
+      lg={lg}
+      xl={xl}
+      sx={sx}
+      className={className}
+      {...rest}
+    >
       {children}
     </Grid>
   );

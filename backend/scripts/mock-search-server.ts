@@ -1,13 +1,14 @@
 /**
  * mock-search-server.ts
- * 
+ *
  * A lightweight mock server that simulates the GraphQL API for testing search functionality
  * without requiring the full NestJS server to be running.
  */
-const express = require('express');
-const cors = require('cors');
-const { graphqlHTTP } = require('express-graphql');
-const { buildSchema } = require('graphql');
+import express from 'express';
+import cors from 'cors';
+import { graphqlHTTP } from 'express-graphql';
+import { buildSchema } from 'graphql';
+import { MockSearchService as _MockSearchService } from './mock-search.service';
 
 // Sample product data
 const products = [
@@ -22,7 +23,7 @@ const products = [
     colors: ['Red', 'Black', 'White'],
     materials: ['Synthetic', 'Mesh'],
     sizes: ['7', '8', '9', '10', '11'],
-    styles: ['Athletic', 'Casual']
+    styles: ['Athletic', 'Casual'],
   },
   {
     id: 'p2',
@@ -35,20 +36,20 @@ const products = [
     colors: ['Blue', 'Black', 'Grey'],
     materials: ['Primeknit', 'Rubber'],
     sizes: ['8', '9', '10', '11', '12'],
-    styles: ['Athletic', 'Performance']
+    styles: ['Athletic', 'Performance'],
   },
   {
     id: 'p3',
-    title: 'Levi\'s 501 Original Fit Jeans',
+    title: "Levi's 501 Original Fit Jeans",
     description: 'Classic straight leg jeans with button fly',
     price: 59.99,
-    brandName: 'Levi\'s',
+    brandName: "Levi's",
     imageUrl: 'https://example.com/levis-501.jpg',
-    categories: ['Clothing', 'Jeans', 'Men\'s'],
+    categories: ['Clothing', 'Jeans', "Men's"],
     colors: ['Blue', 'Black', 'Grey'],
     materials: ['Denim', 'Cotton'],
     sizes: ['30', '32', '34', '36'],
-    styles: ['Casual', 'Classic']
+    styles: ['Casual', 'Classic'],
   },
   {
     id: 'p4',
@@ -61,7 +62,7 @@ const products = [
     colors: ['Green', 'Black', 'Navy'],
     materials: ['Nylon', 'Synthetic Insulation'],
     sizes: ['S', 'M', 'L', 'XL'],
-    styles: ['Outdoor', 'Winter']
+    styles: ['Outdoor', 'Winter'],
   },
   {
     id: 'p5',
@@ -74,7 +75,7 @@ const products = [
     colors: ['Grey', 'Blue', 'Green'],
     materials: ['Recycled Polyester', 'Fleece'],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
-    styles: ['Casual', 'Outdoor', 'Eco-friendly']
+    styles: ['Casual', 'Outdoor', 'Eco-friendly'],
   },
   {
     id: 'p6',
@@ -83,11 +84,11 @@ const products = [
     price: 49.99,
     brandName: 'Zara',
     imageUrl: 'https://example.com/zara-summer-dress.jpg',
-    categories: ['Clothing', 'Dresses', 'Women\'s'],
+    categories: ['Clothing', 'Dresses', "Women's"],
     colors: ['Floral', 'White', 'Blue'],
     materials: ['Cotton', 'Linen'],
     sizes: ['XS', 'S', 'M', 'L'],
-    styles: ['Summer', 'Casual', 'Feminine']
+    styles: ['Summer', 'Casual', 'Feminine'],
   },
   {
     id: 'p7',
@@ -100,7 +101,7 @@ const products = [
     colors: ['Black', 'Tortoise', 'Blue'],
     materials: ['Acetate', 'Glass'],
     sizes: ['One Size'],
-    styles: ['Classic', 'Casual', 'Fashion']
+    styles: ['Classic', 'Casual', 'Fashion'],
   },
   {
     id: 'p8',
@@ -113,7 +114,7 @@ const products = [
     colors: ['White'],
     materials: ['Plastic', 'Silicone'],
     sizes: ['One Size'],
-    styles: ['Modern', 'Tech']
+    styles: ['Modern', 'Tech'],
   },
   {
     id: 'p9',
@@ -126,7 +127,7 @@ const products = [
     colors: ['Red', 'Blue', 'Yellow', 'Green'],
     materials: ['Vinylon F', 'Synthetic'],
     sizes: ['16L', '20L'],
-    styles: ['Casual', 'School', 'Outdoor']
+    styles: ['Casual', 'School', 'Outdoor'],
   },
   {
     id: 'p10',
@@ -139,22 +140,22 @@ const products = [
     colors: ['Brown', 'Black', 'White'],
     materials: ['Cork', 'Leather', 'Suede'],
     sizes: ['36', '37', '38', '39', '40', '41', '42'],
-    styles: ['Casual', 'Comfort', 'Summer']
-  }
+    styles: ['Casual', 'Comfort', 'Summer'],
+  },
 ];
 
 // Sample brands data
 const brands = [
   { id: 'b1', name: 'Nike' },
   { id: 'b2', name: 'Adidas' },
-  { id: 'b3', name: 'Levi\'s' },
+  { id: 'b3', name: "Levi's" },
   { id: 'b4', name: 'North Face' },
   { id: 'b5', name: 'Patagonia' },
   { id: 'b6', name: 'Zara' },
   { id: 'b7', name: 'Ray-Ban' },
   { id: 'b8', name: 'Apple' },
   { id: 'b9', name: 'Fjallraven' },
-  { id: 'b10', name: 'Birkenstock' }
+  { id: 'b10', name: 'Birkenstock' },
 ];
 
 // Sample merchants data
@@ -163,7 +164,7 @@ const merchants = [
   { id: 'm2', name: 'Sports World' },
   { id: 'm3', name: 'Tech Haven' },
   { id: 'm4', name: 'Outdoor Adventures' },
-  { id: 'm5', name: 'Urban Styles' }
+  { id: 'm5', name: 'Urban Styles' },
 ];
 
 // Define GraphQL schema
@@ -281,7 +282,7 @@ const schema = buildSchema(`
 function processWithNlp(query: string) {
   // Simple entity recognition
   const entities: Record<string, string[]> = {};
-  
+
   // Brand detection
   const brandMatches = brands
     .filter(brand => query.toLowerCase().includes(brand.name.toLowerCase()))
@@ -289,34 +290,57 @@ function processWithNlp(query: string) {
   if (brandMatches.length > 0) {
     entities.brands = brandMatches;
   }
-  
+
   // Color detection
-  const colors = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'purple', 'pink', 'orange', 'grey', 'gray', 'brown'];
+  const colors = [
+    'red',
+    'blue',
+    'green',
+    'black',
+    'white',
+    'yellow',
+    'purple',
+    'pink',
+    'orange',
+    'grey',
+    'gray',
+    'brown',
+  ];
   const colorMatches = colors.filter(color => query.toLowerCase().includes(color));
   if (colorMatches.length > 0) {
     entities.colors = colorMatches;
   }
-  
+
   // Product type detection
-  const productTypes = ['shoes', 'shirt', 'pants', 'jeans', 'jacket', 'dress', 'sunglasses', 'backpack', 'sandals'];
+  const productTypes = [
+    'shoes',
+    'shirt',
+    'pants',
+    'jeans',
+    'jacket',
+    'dress',
+    'sunglasses',
+    'backpack',
+    'sandals',
+  ];
   const productMatches = productTypes.filter(type => query.toLowerCase().includes(type));
   if (productMatches.length > 0) {
     entities.productTypes = productMatches;
   }
-  
+
   // Material detection
   const materials = ['cotton', 'leather', 'denim', 'wool', 'polyester', 'nylon', 'silk', 'linen'];
   const materialMatches = materials.filter(material => query.toLowerCase().includes(material));
   if (materialMatches.length > 0) {
     entities.materials = materialMatches;
   }
-  
+
   // Simple query expansion (synonyms)
   const expandedTerms: string[] = [];
   if (query.toLowerCase().includes('shoes')) expandedTerms.push('footwear', 'sneakers');
   if (query.toLowerCase().includes('jacket')) expandedTerms.push('coat', 'outerwear');
   if (query.toLowerCase().includes('pants')) expandedTerms.push('trousers', 'bottoms');
-  
+
   // Intent detection
   let intent = 'browse';
   if (query.toLowerCase().includes('buy') || query.toLowerCase().includes('purchase')) {
@@ -326,14 +350,14 @@ function processWithNlp(query: string) {
   } else if (query.toLowerCase().includes('gift') || query.toLowerCase().includes('present')) {
     intent = 'gift';
   }
-  
+
   return {
     processedQuery: query,
     recognizedEntities: entities,
     expandedTerms,
     detectedIntent: intent,
     confidence: 0.85,
-    processingTimeMs: 15
+    processingTimeMs: 15,
   };
 }
 
@@ -341,45 +365,44 @@ function processWithNlp(query: string) {
 const root = {
   searchProducts: ({ input }: { input: any }) => {
     const { query = '', limit = 10, page = 1, filters = [], enableNlp = false } = input;
-    
+
     // Filter products based on query and filters
     let filteredProducts = [...products];
-    
+
     if (query) {
       const searchTerms = query.toLowerCase().split(' ');
       filteredProducts = filteredProducts.filter(product => {
-        return searchTerms.some(term => 
-          product.title.toLowerCase().includes(term) || 
-          product.description.toLowerCase().includes(term) ||
-          product.brandName.toLowerCase().includes(term) ||
-          product.categories.some((cat: string) => cat.toLowerCase().includes(term))
+        return searchTerms.some(
+          term =>
+            product.title.toLowerCase().includes(term) ||
+            product.description.toLowerCase().includes(term) ||
+            product.brandName.toLowerCase().includes(term) ||
+            product.categories.some((cat: string) => cat.toLowerCase().includes(term)),
         );
       });
     }
-    
+
     // Apply filters
     if (filters && filters.length > 0) {
       filters.forEach((filter: any) => {
         const { field, values, exact } = filter;
-        
+
         if (field && values && values.length > 0) {
           filteredProducts = filteredProducts.filter(product => {
             if (field === 'brandName') {
-              return values.some((value: string) => 
-                exact 
+              return values.some((value: string) =>
+                exact
                   ? product.brandName === value
-                  : product.brandName.toLowerCase().includes(value.toLowerCase())
+                  : product.brandName.toLowerCase().includes(value.toLowerCase()),
               );
             } else if (field === 'price') {
               const [min, max] = values;
               return product.price >= parseFloat(min) && product.price <= parseFloat(max);
             } else if (field === 'categories') {
-              return values.some((value: string) => 
-                product.categories.some((cat: string) => 
-                  exact 
-                    ? cat === value
-                    : cat.toLowerCase().includes(value.toLowerCase())
-                )
+              return values.some((value: string) =>
+                product.categories.some((cat: string) =>
+                  exact ? cat === value : cat.toLowerCase().includes(value.toLowerCase()),
+                ),
               );
             }
             return true;
@@ -387,55 +410,45 @@ const root = {
         }
       });
     }
-    
+
     // Calculate pagination
     const total = filteredProducts.length;
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-    
+
     // Generate facets
     const facets = {
-      categories: Array.from(
-        new Set(filteredProducts.flatMap(p => p.categories))
-      ).map(name => ({
+      categories: Array.from(new Set(filteredProducts.flatMap(p => p.categories))).map(name => ({
         name,
-        count: filteredProducts.filter(p => p.categories.includes(name)).length
+        count: filteredProducts.filter(p => p.categories.includes(name)).length,
       })),
-      brands: Array.from(
-        new Set(filteredProducts.map(p => p.brandName))
-      ).map(name => ({
+      brands: Array.from(new Set(filteredProducts.map(p => p.brandName))).map(name => ({
         name,
-        count: filteredProducts.filter(p => p.brandName === name).length
+        count: filteredProducts.filter(p => p.brandName === name).length,
       })),
-      colors: Array.from(
-        new Set(filteredProducts.flatMap(p => p.colors))
-      ).map(name => ({
+      colors: Array.from(new Set(filteredProducts.flatMap(p => p.colors))).map(name => ({
         name,
-        count: filteredProducts.filter(p => p.colors.includes(name)).length
+        count: filteredProducts.filter(p => p.colors.includes(name)).length,
       })),
-      materials: Array.from(
-        new Set(filteredProducts.flatMap(p => p.materials))
-      ).map(name => ({
+      materials: Array.from(new Set(filteredProducts.flatMap(p => p.materials))).map(name => ({
         name,
-        count: filteredProducts.filter(p => p.materials.includes(name)).length
+        count: filteredProducts.filter(p => p.materials.includes(name)).length,
       })),
-      styles: Array.from(
-        new Set(filteredProducts.flatMap(p => p.styles))
-      ).map(name => ({
+      styles: Array.from(new Set(filteredProducts.flatMap(p => p.styles))).map(name => ({
         name,
-        count: filteredProducts.filter(p => p.styles.includes(name)).length
+        count: filteredProducts.filter(p => p.styles.includes(name)).length,
       })),
       price: {
         min: Math.min(...filteredProducts.map(p => p.price)),
-        max: Math.max(...filteredProducts.map(p => p.price))
-      }
+        max: Math.max(...filteredProducts.map(p => p.price)),
+      },
     };
-    
+
     // Process with NLP if enabled
     let nlpMetadata = null;
     let processedQuery = query;
-    
+
     if (enableNlp && query) {
       const nlpResult = processWithNlp(query);
       nlpMetadata = {
@@ -443,10 +456,10 @@ const root = {
         expandedTerms: nlpResult.expandedTerms,
         detectedIntent: nlpResult.detectedIntent,
         confidence: nlpResult.confidence,
-        processingTimeMs: nlpResult.processingTimeMs
+        processingTimeMs: nlpResult.processingTimeMs,
       };
       processedQuery = nlpResult.processedQuery;
-      
+
       // Add highlights if enabled
       if (input.enableHighlighting) {
         paginatedProducts.forEach(product => {
@@ -469,7 +482,7 @@ const root = {
         });
       }
     }
-    
+
     return {
       query,
       processedQuery,
@@ -479,59 +492,60 @@ const root = {
         page,
         limit,
         hasNext: endIndex < total,
-        hasPrevious: page > 1
+        hasPrevious: page > 1,
       },
       facets,
-      nlpMetadata
+      nlpMetadata,
     };
   },
-  
+
   searchAll: ({ input }: { input: any }) => {
     const { query = '', limit = 10, page = 1, enableNlp = false } = input;
-    
+
     // Filter entities based on query
     let filteredProducts = [...products];
     let filteredBrands = [...brands];
     let filteredMerchants = [...merchants];
-    
+
     if (query) {
       const searchTerms = query.toLowerCase().split(' ');
-      
+
       filteredProducts = filteredProducts.filter(product => {
-        return searchTerms.some(term => 
-          product.title.toLowerCase().includes(term) || 
-          product.description.toLowerCase().includes(term) ||
-          product.brandName.toLowerCase().includes(term)
+        return searchTerms.some(
+          term =>
+            product.title.toLowerCase().includes(term) ||
+            product.description.toLowerCase().includes(term) ||
+            product.brandName.toLowerCase().includes(term),
         );
       });
-      
+
       filteredBrands = filteredBrands.filter(brand => {
         return searchTerms.some(term => brand.name.toLowerCase().includes(term));
       });
-      
+
       filteredMerchants = filteredMerchants.filter(merchant => {
         return searchTerms.some(term => merchant.name.toLowerCase().includes(term));
       });
     }
-    
+
     // Calculate pagination
     const total = filteredProducts.length + filteredBrands.length + filteredMerchants.length;
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    
+
     // Distribute results proportionally
     const productLimit = Math.floor(limit * 0.6);
     const brandLimit = Math.floor(limit * 0.2);
     const merchantLimit = limit - productLimit - brandLimit;
-    
+
     const paginatedProducts = filteredProducts.slice(0, productLimit);
     const paginatedBrands = filteredBrands.slice(0, brandLimit);
     const paginatedMerchants = filteredMerchants.slice(0, merchantLimit);
-    
+
     // Process with NLP if enabled
     let nlpMetadata = null;
     let processedQuery = query;
-    
+
     if (enableNlp && query) {
       const nlpResult = processWithNlp(query);
       nlpMetadata = {
@@ -539,11 +553,11 @@ const root = {
         expandedTerms: nlpResult.expandedTerms,
         detectedIntent: nlpResult.detectedIntent,
         confidence: nlpResult.confidence,
-        processingTimeMs: nlpResult.processingTimeMs
+        processingTimeMs: nlpResult.processingTimeMs,
       };
       processedQuery = nlpResult.processedQuery;
     }
-    
+
     return {
       query,
       processedQuery,
@@ -555,11 +569,11 @@ const root = {
         page,
         limit,
         hasNext: endIndex < total,
-        hasPrevious: page > 1
+        hasPrevious: page > 1,
       },
-      nlpMetadata
+      nlpMetadata,
     };
-  }
+  },
 };
 
 // Create Express server
@@ -575,11 +589,14 @@ app.get('/health', (req, res) => {
 });
 
 // GraphQL endpoint
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: root,
-  graphiql: true, // Enable GraphiQL for testing in browser
-}));
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true, // Enable GraphiQL for testing in browser
+  }),
+);
 
 // Start server
 app.listen(PORT, () => {

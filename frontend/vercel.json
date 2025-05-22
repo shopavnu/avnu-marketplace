@@ -7,5 +7,11 @@
   "outputDirectory": ".next",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://avnu-marketplace-mock-api.onrender.com"
-  }
+  },
+  "routes": [
+    { "src": "/enhanced-discovery", "dest": "/enhanced-discovery", "status": 200, "headers": { "x-nextjs-page": "/enhanced-discovery" } },
+    { "src": "/final-discovery", "dest": "/final-discovery", "status": 200, "headers": { "x-nextjs-page": "/final-discovery" } },
+    { "src": "/optimized-discovery", "dest": "/optimized-discovery", "status": 200, "headers": { "x-nextjs-page": "/optimized-discovery" } },
+    { "src": "/accessible-discovery", "dest": "/accessible-discovery", "status": 200, "headers": { "x-nextjs-page": "/accessible-discovery" } }
+  ]
 }

@@ -1,24 +1,24 @@
 // Campaign types and statuses from backend
 export enum CampaignType {
-  PRODUCT_PROMOTION = 'product_promotion',
-  RETARGETING = 'retargeting',
-  BRAND_AWARENESS = 'brand_awareness',
+  PRODUCT_PROMOTION = "product_promotion",
+  RETARGETING = "retargeting",
+  BRAND_AWARENESS = "brand_awareness",
 }
 
 export enum CampaignStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  PAUSED = 'paused',
-  SCHEDULED = 'scheduled',
-  COMPLETED = 'completed',
-  ENDED = 'ended',
+  DRAFT = "draft",
+  ACTIVE = "active",
+  PAUSED = "paused",
+  SCHEDULED = "scheduled",
+  COMPLETED = "completed",
+  ENDED = "ended",
 }
 
 export enum TargetAudience {
-  ALL = 'all',
-  PREVIOUS_VISITORS = 'previous_visitors',
-  CART_ABANDONERS = 'cart_abandoners',
-  PREVIOUS_CUSTOMERS = 'previous_customers',
+  ALL = "all",
+  PREVIOUS_VISITORS = "previous_visitors",
+  CART_ABANDONERS = "cart_abandoners",
+  PREVIOUS_CUSTOMERS = "previous_customers",
 }
 
 // Interface for campaign data from API

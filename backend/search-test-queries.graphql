@@ -1,4 +1,3 @@
-
 # Test basic search for "shirt"
 query SearchForShirt {
   searchProducts(input: { query: "shirt", limit: 10, page: 1 }) {
@@ -21,15 +20,11 @@ query SearchForShirt {
 # Test search with filters
 query SearchWithFilters {
   searchProducts(
-    input: { 
-      query: "shirt", 
-      limit: 10, 
-      page: 1,
-      filters: {
-        priceMin: 30,
-        priceMax: 60,
-        categories: ["Clothing"]
-      }
+    input: {
+      query: "shirt"
+      limit: 10
+      page: 1
+      filters: { priceMin: 30, priceMax: 60, categories: ["Clothing"] }
     }
   ) {
     query
@@ -62,14 +57,7 @@ query SearchWithFilters {
 # Test brand search
 query SearchByBrand {
   searchProducts(
-    input: { 
-      query: "", 
-      limit: 10, 
-      page: 1,
-      filters: {
-        brandName: "FashionForward"
-      }
-    }
+    input: { query: "", limit: 10, page: 1, filters: { brandName: "FashionForward" } }
   ) {
     products {
       id

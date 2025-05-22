@@ -1,4 +1,4 @@
-import { Product } from '../products';
+import { Product } from "../products";
 
 export interface SearchFilters {
   isNew?: boolean;
@@ -11,9 +11,16 @@ export interface SearchFilters {
     min: number;
     max: number;
   };
+  // Added for backward compatibility with existing code
+  price?: {
+    min?: number;
+    max?: number;
+  };
+  // Added for backward compatibility with existing code
+  brand?: string[];
   freeShipping?: boolean;
   rating?: number;
-  sortBy?: 'relevance' | 'price_low' | 'price_high' | 'rating' | 'newest';
+  sortBy?: "relevance" | "price_low" | "price_high" | "rating" | "newest";
 }
 
 export interface Cause {
@@ -39,7 +46,7 @@ export interface SubCategory {
 
 export interface ProductAttribute {
   name: string;
-  type: 'size' | 'color' | 'material' | 'style';
+  type: "size" | "color" | "material" | "style";
   values: string[];
 }
 

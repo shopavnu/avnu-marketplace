@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   LineChart,
   Line,
@@ -8,11 +8,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Area
-} from 'recharts';
-import { Box, Typography, useTheme } from '@mui/material';
-import chartTheme, { brandColors, chartColors, gradients } from '../../utils/chartTheme';
-import { generateLegendLabel } from '../../utils/chartFormatters';
+  Area,
+} from "recharts";
+import { Box, Typography, useTheme } from "@mui/material";
+import chartTheme, {
+  brandColors,
+  chartColors,
+  gradients,
+} from "../../utils/chartTheme";
+import { generateLegendLabel } from "../../utils/chartFormatters";
 
 interface LineChartProps {
   data: any[];
@@ -41,14 +45,14 @@ const LineChartComponent: React.FC<LineChartProps> = ({
   yAxisLabel,
   tooltipFormatter = (value) => `${value}`,
   valueFormatter = (value) => `${value}`,
-  showGrid = true
+  showGrid = true,
 }) => {
   const muiTheme = useTheme();
   const primaryColor = brandColors.teal;
   const secondaryColor = brandColors.terracotta;
 
   return (
-    <Box sx={{ width: '100%', height: height }}>
+    <Box sx={{ width: "100%", height: height }}>
       {title && (
         <Typography variant="h6" gutterBottom>
           {title}
@@ -69,41 +73,64 @@ const LineChartComponent: React.FC<LineChartProps> = ({
             bottom: 20,
           }}
         >
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={brandColors.sand} strokeOpacity={0.4} />}
-          <XAxis 
-            dataKey={xKey} 
-            label={xAxisLabel ? { value: xAxisLabel, position: 'bottom', offset: 10, style: { fill: brandColors.charcoal, fontSize: 12 } } : undefined}
+          {showGrid && (
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={brandColors.sand}
+              strokeOpacity={0.4}
+            />
+          )}
+          <XAxis
+            dataKey={xKey}
+            label={
+              xAxisLabel
+                ? {
+                    value: xAxisLabel,
+                    position: "bottom",
+                    offset: 10,
+                    style: { fill: brandColors.charcoal, fontSize: 12 },
+                  }
+                : undefined
+            }
             tick={{ fill: brandColors.charcoal, fontSize: 12 }}
             axisLine={{ stroke: brandColors.sand }}
             tickLine={{ stroke: brandColors.sand }}
           />
-          <YAxis 
-            label={yAxisLabel ? { 
-              value: yAxisLabel, 
-              angle: -90, 
-              position: 'left', 
-              dx: -10, // Smaller offset to prevent layout issues
-              style: { fill: brandColors.charcoal, fontSize: 12 } 
-            } : undefined}
+          <YAxis
+            label={
+              yAxisLabel
+                ? {
+                    value: yAxisLabel,
+                    angle: -90,
+                    position: "left",
+                    dx: -10, // Smaller offset to prevent layout issues
+                    style: { fill: brandColors.charcoal, fontSize: 12 },
+                  }
+                : undefined
+            }
             tick={{ fill: brandColors.charcoal, fontSize: 12 }}
             axisLine={{ stroke: brandColors.sand }}
             tickLine={{ stroke: brandColors.sand }}
             width={50} // Fixed width for the Y-axis
           />
-          <Tooltip 
+          <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{ 
-              backgroundColor: '#FFFFFF',
+            contentStyle={{
+              backgroundColor: "#FFFFFF",
               border: `1px solid ${brandColors.sand}`,
               borderRadius: 8,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-              padding: '10px 14px',
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+              padding: "10px 14px",
               fontSize: 12,
-              fontWeight: 500
+              fontWeight: 500,
             }}
-            cursor={{ stroke: brandColors.charcoal, strokeWidth: 1, strokeDasharray: '5 5' }}
+            cursor={{
+              stroke: brandColors.charcoal,
+              strokeWidth: 1,
+              strokeDasharray: "5 5",
+            }}
           />
-          <Legend 
+          <Legend
             verticalAlign="bottom"
             height={40}
             wrapperStyle={{
@@ -112,13 +139,17 @@ const LineChartComponent: React.FC<LineChartProps> = ({
               bottom: 0,
               fontSize: 13,
               fontWeight: 500,
-              color: brandColors.charcoal
+              color: brandColors.charcoal,
             }}
             iconType="rect"
             iconSize={12}
             formatter={(value) => {
               // Make legend values more descriptive
-              return <span style={{color: brandColors.charcoal, padding: '0 8px'}}>{value}</span>;
+              return (
+                <span style={{ color: brandColors.charcoal, padding: "0 8px" }}>
+                  {value}
+                </span>
+              );
             }}
           />
           <Line
@@ -127,8 +158,18 @@ const LineChartComponent: React.FC<LineChartProps> = ({
             name={generateLegendLabel(yKey, title)} // Use our formatter utility for better legend display
             stroke={primaryColor}
             strokeWidth={2.5}
-            dot={{ fill: '#FFFFFF', stroke: primaryColor, strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 7, fill: primaryColor, stroke: '#FFFFFF', strokeWidth: 2 }}
+            dot={{
+              fill: "#FFFFFF",
+              stroke: primaryColor,
+              strokeWidth: 2,
+              r: 4,
+            }}
+            activeDot={{
+              r: 7,
+              fill: primaryColor,
+              stroke: "#FFFFFF",
+              strokeWidth: 2,
+            }}
             animationDuration={1200}
             animationEasing="ease-in-out"
           />
@@ -139,8 +180,18 @@ const LineChartComponent: React.FC<LineChartProps> = ({
               name={generateLegendLabel(secondaryYKey)} // Use our formatter utility for better legend display
               stroke={secondaryColor}
               strokeWidth={2.5}
-              dot={{ fill: '#FFFFFF', stroke: secondaryColor, strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 7, fill: secondaryColor, stroke: '#FFFFFF', strokeWidth: 2 }}
+              dot={{
+                fill: "#FFFFFF",
+                stroke: secondaryColor,
+                strokeWidth: 2,
+                r: 4,
+              }}
+              activeDot={{
+                r: 7,
+                fill: secondaryColor,
+                stroke: "#FFFFFF",
+                strokeWidth: 2,
+              }}
               animationDuration={1200}
               animationEasing="ease-in-out"
               animationBegin={300} // Slight delay for second line animation

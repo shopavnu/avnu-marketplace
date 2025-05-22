@@ -7,7 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { SessionEntity } from './session.entity';
-import { SessionInteractionType } from '../services/session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 
 /**
  * Entity for tracking detailed user interactions within a session
@@ -29,6 +29,9 @@ export class SessionInteractionEntity {
 
   @Column({ type: 'jsonb' })
   data: Record<string, any>;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata?: Record<string, any>;
 
   @Column({ type: 'timestamp' })
   timestamp: Date;

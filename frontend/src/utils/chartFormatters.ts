@@ -10,19 +10,19 @@
  * @returns Formatted string in Title Case
  */
 export const formatKeyToLabel = (str: string): string => {
-  if (!str) return '';
-  
+  if (!str) return "";
+
   // Handle snake_case
-  if (str.includes('_')) {
+  if (str.includes("_")) {
     return str
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   }
-  
+
   // Handle camelCase
   return str
-    .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+    .replace(/([A-Z])/g, " $1") // Insert space before capital letters
     .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
 };
 
@@ -36,19 +36,20 @@ export const formatKeyToLabel = (str: string): string => {
  */
 export const formatChartValue = (
   value: number,
-  prefix: string = '',
-  suffix: string = '',
-  decimals: number = 1
+  prefix: string = "",
+  suffix: string = "",
+  decimals: number = 1,
 ): string => {
-  if (value === undefined || value === null) return 'N/A';
-  
-  const formattedNumber = typeof value === 'number' 
-    ? value.toLocaleString(undefined, { 
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals 
-      })
-    : String(value);
-    
+  if (value === undefined || value === null) return "N/A";
+
+  const formattedNumber =
+    typeof value === "number"
+      ? value.toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        })
+      : String(value);
+
   return `${prefix}${formattedNumber}${suffix}`;
 };
 
@@ -58,70 +59,75 @@ export const formatChartValue = (
  * @param defaultTitle Optional fallback title if provided
  * @returns A human-readable label for the chart legend
  */
-export const generateLegendLabel = (key: string, defaultTitle?: string): string => {
+export const generateLegendLabel = (
+  key: string,
+  defaultTitle?: string,
+): string => {
   if (defaultTitle) return defaultTitle;
-  
+
   // Handle common data keys with special formatting and more specific descriptions
-  switch(key) {
-    case 'value':
-      return 'Customer LTV ($)';
-    case 'values':
-      return 'Data Values';
-    case 'customerLifetimeValue':
-      return 'Customer LTV ($)';
-    case 'count':
-      return 'Count';
-    case 'amount':
-      return 'Amount';
-    case 'total':
-      return 'Total';
-    case 'qty':
-    case 'quantity':
-      return 'Quantity';
-    case 'avg':
-    case 'average':
-      return 'Average';
-    case 'pct':
-    case 'percentage':
-      return 'Percentage';
-    case 'ratio':
-      return 'Ratio';
-    case 'volume':
-      return 'Volume';
+  switch (key) {
+    case "value":
+      return "Customer LTV ($)";
+    case "values":
+      return "Data Values";
+    case "customerLifetimeValue":
+      return "Customer LTV ($)";
+    case "count":
+      return "Count";
+    case "amount":
+      return "Amount";
+    case "total":
+      return "Total";
+    case "qty":
+    case "quantity":
+      return "Quantity";
+    case "avg":
+    case "average":
+      return "Average";
+    case "pct":
+    case "percentage":
+      return "Percentage";
+    case "ratio":
+      return "Ratio";
+    case "volume":
+      return "Volume";
     // Add more descriptive names for charts
-    case 'sales':
-      return 'Sales Volume';
-    case 'revenue':
-      return 'Revenue ($)';
-    case 'profit':
-      return 'Profit Margin';
-    case 'users':
-      return 'User Count';
-    case 'sessions':
-      return 'Session Count';
-    case 'views':
-      return 'Page Views';
-    case 'clicks':
-      return 'Click Count';
-    case 'conversions':
-      return 'Conversions';
-    case 'conversionRate':
-      return 'Conversion Rate';
-    case 'retention':
-      return 'Retention Rate';
-    case 'day30':
-      return '30-Day Value';
-    case 'day60':
-      return '60-Day Value';
-    case 'day90':
-      return '90-Day Value';
+    case "sales":
+      return "Sales Volume";
+    case "revenue":
+      return "Revenue ($)";
+    case "profit":
+      return "Profit Margin";
+    case "users":
+      return "User Count";
+    case "sessions":
+      return "Session Count";
+    case "views":
+      return "Page Views";
+    case "clicks":
+      return "Click Count";
+    case "conversions":
+      return "Conversions";
+    case "conversionRate":
+      return "Conversion Rate";
+    case "retention":
+      return "Retention Rate";
+    case "day30":
+      return "30-Day Value";
+    case "day60":
+      return "60-Day Value";
+    case "day90":
+      return "90-Day Value";
     default:
       return formatKeyToLabel(key);
   }
 };
 
-export default {
+const chartFormatters = {
   formatKeyToLabel,
   formatChartValue,
-  generateLegendLabel
+  generateLegendLabel,
 };
+
+export default chartFormatters;

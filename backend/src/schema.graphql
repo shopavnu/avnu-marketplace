@@ -17,7 +17,7 @@ type Query {
   myMerchants: [Merchant!]!
   profile: User
   merchantDashboardAnalytics(merchantId: ID!): MerchantDashboardAnalytics
-  
+
   # Experiment queries
   experiments(status: String): [Experiment!]!
   experiment(id: ID!): Experiment!
@@ -25,18 +25,23 @@ type Query {
   experimentSignificance(id: ID!): StatisticalSignificanceType!
   experimentTimeToCompletion(id: ID!, dailyTraffic: Int!): TimeToCompletionType!
   experimentMetricsOverTime(id: ID!, interval: String): MetricsOverTimeType!
-  requiredSampleSize(baselineConversionRate: Float!, minimumDetectableEffect: Float!, significanceLevel: Float, power: Float): Int!
+  requiredSampleSize(
+    baselineConversionRate: Float!
+    minimumDetectableEffect: Float!
+    significanceLevel: Float
+    power: Float
+  ): Int!
   searchExperiments: VariantConfigurationType
   personalizationExperiments: VariantConfigurationType
   recommendationExperiments: VariantConfigurationType
   uiExperiments: VariantConfigurationType
   experimentVariants(experimentType: String!): VariantConfigurationType
   userAssignments: [UserExperimentAssignment!]!
-  
+
   # User queries
   users: [User!]!
   user(id: ID!): User
-  
+
   # Merchant queries
   merchantBrand(merchantId: ID!): MerchantBrand
   merchantProducts(merchantId: ID!): [MerchantProduct!]!
@@ -46,46 +51,182 @@ type Query {
   activeMerchantAdCampaigns(merchantId: ID!): [MerchantAdCampaign!]!
   merchantAdCampaignsByType(merchantId: ID!, type: CampaignType!): [MerchantAdCampaign!]!
   merchantAdCampaignsForProduct(merchantId: ID!, productId: ID!): [MerchantAdCampaign!]!
-  
+
   # Ad budget management queries
   merchantBudgetUtilization(merchantId: ID!): BudgetUtilizationReport!
   campaignBudgetForecast(campaignId: ID!, merchantId: ID!): CampaignForecast!
   campaignDailyBudget(campaignId: ID!, merchantId: ID!): Float!
-  
+
   # Ad placement queries
   getAdsForDiscoveryFeed(options: AdPlacementOptionsInput): [AdPlacement!]!
   getRecommendedAdPlacements(merchantId: ID!): [ProductAdRecommendation!]!
-  
+
   # Merchant Analytics queries
-  merchantAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime, productId: ID, categoryId: ID): [MerchantAnalytics!]!
-  merchantProductAnalytics(merchantId: ID!, productId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
-  merchantCategoryAnalytics(merchantId: ID!, categoryId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
-  merchantOverallAnalytics(merchantId: ID!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
+  merchantAnalytics(
+    merchantId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+    productId: ID
+    categoryId: ID
+  ): [MerchantAnalytics!]!
+  merchantProductAnalytics(
+    merchantId: ID!
+    productId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
+  merchantCategoryAnalytics(
+    merchantId: ID!
+    categoryId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
+  merchantOverallAnalytics(
+    merchantId: ID!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
   merchantDemographicData(merchantId: ID!, timeFrame: String = "monthly"): JSON!
   merchantTopProducts(merchantId: ID!, limit: Int = 10, timeFrame: String = "monthly"): [JSON!]!
-  merchantFilteredAnalytics(merchantId: ID!, filters: [AnalyticsFilterInput!]!, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [MerchantAnalytics!]!
-  merchantTopPerformingProducts(merchantId: ID!, metric: String!, limit: Int = 10, timeFrame: String = "monthly", startDate: DateTime, endDate: DateTime): [TopProduct!]!
-  merchantCategoryPerformance(metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
-  merchantCategoryPerformanceOverTime(categoryId: String!, metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
-  merchantProductPerformanceOverTime(productId: String!, metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
-  merchantCompareProducts(productIds: [String!]!, metric: String, timeFrame: String, startDate: DateTime, endDate: DateTime): JSON!
-  
+  merchantFilteredAnalytics(
+    merchantId: ID!
+    filters: [AnalyticsFilterInput!]!
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [MerchantAnalytics!]!
+  merchantTopPerformingProducts(
+    merchantId: ID!
+    metric: String!
+    limit: Int = 10
+    timeFrame: String = "monthly"
+    startDate: DateTime
+    endDate: DateTime
+  ): [TopProduct!]!
+  merchantCategoryPerformance(
+    metric: String
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): JSON!
+  merchantCategoryPerformanceOverTime(
+    categoryId: String!
+    metric: String
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): JSON!
+  merchantProductPerformanceOverTime(
+    productId: String!
+    metric: String
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): JSON!
+  merchantCompareProducts(
+    productIds: [String!]!
+    metric: String
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): JSON!
+
   # Merchant Dashboard Analytics queries
-  merchantPeriodComparison(currentPeriodStart: DateTime!, currentPeriodEnd: DateTime!, previousPeriodStart: DateTime!, previousPeriodEnd: DateTime!, productIds: [String], categoryIds: [String]): PeriodComparisonData!
-  merchantPerformanceOverTime(metricName: String!, timeFrame: String, startDate: DateTime, endDate: DateTime): [TimeSeriesDataPoint!]!
-  merchantConversionFunnel(timeFrame: String, startDate: DateTime, endDate: DateTime): ConversionFunnel!
-  merchantOrganicVsPaidPerformance(timeFrame: String, startDate: DateTime, endDate: DateTime): OrganicVsPaidPerformance!
-  merchantMetricAggregation(metricName: String!, timeFrame: String, startDate: DateTime, endDate: DateTime, productId: String, categoryId: String): Float!
-  merchantCompareTimePeriods(metricName: String!, currentStartDate: DateTime!, currentEndDate: DateTime!, previousStartDate: DateTime!, previousEndDate: DateTime!, productId: String, categoryId: String): JSON!
-  merchantTimeSeriesData(metricName: String!, timeFrame: String, startDate: DateTime, endDate: DateTime, productId: String, categoryId: String): [TimeSeriesDataPoint!]!
-  merchantTopSellingProducts(timeFrame: String, startDate: DateTime, endDate: DateTime, limit: Int = 10): [TopProduct!]!
-  merchantRevenueAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime): RevenueAnalytics!
-  merchantConversionAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime): ConversionAnalytics!
-  merchantImpressionAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime): ImpressionAnalytics!
-  merchantDemographicAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime, filters: [DemographicFilterInput]): DemographicAnalytics!
-  merchantEnhancedDashboardAnalytics(timeFrame: String, startDate: DateTime, endDate: DateTime, demographicFilters: [DemographicFilterInput]): MerchantDashboardAnalytics!
-  merchantRollingAverages(merchantId: ID!, metricName: String!, days: Int = 7, timeFrame: String, startDate: DateTime, endDate: DateTime): [TimeSeriesDataPoint!]!
-  
+  merchantPeriodComparison(
+    currentPeriodStart: DateTime!
+    currentPeriodEnd: DateTime!
+    previousPeriodStart: DateTime!
+    previousPeriodEnd: DateTime!
+    productIds: [String]
+    categoryIds: [String]
+  ): PeriodComparisonData!
+  merchantPerformanceOverTime(
+    metricName: String!
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): [TimeSeriesDataPoint!]!
+  merchantConversionFunnel(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): ConversionFunnel!
+  merchantOrganicVsPaidPerformance(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): OrganicVsPaidPerformance!
+  merchantMetricAggregation(
+    metricName: String!
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+    productId: String
+    categoryId: String
+  ): Float!
+  merchantCompareTimePeriods(
+    metricName: String!
+    currentStartDate: DateTime!
+    currentEndDate: DateTime!
+    previousStartDate: DateTime!
+    previousEndDate: DateTime!
+    productId: String
+    categoryId: String
+  ): JSON!
+  merchantTimeSeriesData(
+    metricName: String!
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+    productId: String
+    categoryId: String
+  ): [TimeSeriesDataPoint!]!
+  merchantTopSellingProducts(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+    limit: Int = 10
+  ): [TopProduct!]!
+  merchantRevenueAnalytics(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): RevenueAnalytics!
+  merchantConversionAnalytics(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): ConversionAnalytics!
+  merchantImpressionAnalytics(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): ImpressionAnalytics!
+  merchantDemographicAnalytics(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+    filters: [DemographicFilterInput]
+  ): DemographicAnalytics!
+  merchantEnhancedDashboardAnalytics(
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+    demographicFilters: [DemographicFilterInput]
+  ): MerchantDashboardAnalytics!
+  merchantRollingAverages(
+    merchantId: ID!
+    metricName: String!
+    days: Int = 7
+    timeFrame: String
+    startDate: DateTime
+    endDate: DateTime
+  ): [TimeSeriesDataPoint!]!
+
   # Analytics queries
   dashboardAnalytics(period: Int = 30): DashboardAnalyticsDto!
   searchAnalytics(period: Int = 30): SearchAnalyticsSummaryDto!
@@ -100,15 +241,24 @@ type Query {
   businessMetricsAnalytics(period: Int = 30): JSON!
   businessMetricsSummary(period: Int = 30): JSON!
   revenueMetrics(period: Int = 30, granularity: TimeGranularity = DAILY): [BusinessMetrics!]!
-  
+
   # Product queries
   products(pagination: PaginationDto): ProductPaginatedResponse!
   product(id: ID!): Product!
-  searchProducts(query: String, pagination: PaginationDto, categories: [String], priceMin: Int, priceMax: Int, merchantId: String, inStock: Boolean, values: [String]): ProductPaginatedResponse!
+  searchProducts(
+    query: String
+    pagination: PaginationDto
+    categories: [String]
+    priceMin: Int
+    priceMax: Int
+    merchantId: String
+    inStock: Boolean
+    values: [String]
+  ): ProductPaginatedResponse!
   recommendedProducts(userId: ID!, limit: Int): [Product!]!
   discoveryProducts(limit: Int): [Product!]!
   merchantProductsPaginated(merchantId: ID!, pagination: PaginationDto): ProductPaginatedResponse!
-  
+
   # Search queries
   productSuggestions(query: String!, limit: Int): [String!]!
   relatedProducts(productId: ID!, limit: Int): [ProductSearchResult!]!
@@ -117,7 +267,7 @@ type Query {
   naturalLanguageSearch(query: String!, pagination: PaginationDto): ProductPaginatedResponse!
   searchAll(query: String!, pagination: PaginationDto): AllSearchResults!
   reindexAllProducts: Boolean!
-  
+
   # Search API queries
   search(input: SearchOptionsInput!): SearchResponseDto!
   searchProductsAdvanced(input: SearchOptionsInput!): SearchResponseDto!
@@ -125,41 +275,49 @@ type Query {
   searchBrands(input: SearchOptionsInput!): SearchResponseDto!
   searchAllEntities(input: SearchOptionsInput!): SearchResponseDto!
   processQuery(query: String!): SearchResponseDto!
-  
+
   # Multi-entity search query
   multiEntitySearch(input: EnhancedSearchInput!): SearchResponseType!
-  
+
   # Personalized search queries
   personalizedSearch(query: String!, options: SearchOptionsInput): SearchResponseType!
   personalizedRecommendations(limit: Int): SearchResponseType!
   discoveryFeed(limit: Int): SearchResponseType!
   personalizedSimilarProducts(productId: ID!, limit: Int): SearchResponseType!
-  
+
   # User preferences queries
   getUserPreferences: UserPreferences!
   getPersonalizedRecommendations(limit: Int): [String!]!
   getMostViewedProducts: [UserBehavior!]!
   getFavoriteProducts: [UserBehavior!]!
   getRecentSearches: [UserBehavior!]!
-  
+
   # Discovery search queries
   discoverySearch(query: String = "", options: SearchOptionsInput): SearchResponseType!
   discoverySuggestions(query: String!, limit: Int): DiscoverySuggestionsType!
   discoveryHomepage(options: SearchOptionsInput): DiscoveryHomepageType!
-  
+
   # Autocomplete queries
-  autocompleteSuggestions(query: String!, options: AutocompleteOptionsInput): AutocompleteSuggestionsType!
-  
+  autocompleteSuggestions(
+    query: String!
+    options: AutocompleteOptionsInput
+  ): AutocompleteSuggestionsType!
+
   # Related products queries
   complementaryProducts(productId: String!, limit: Int): SearchResponseType!
   frequentlyBoughtTogether(productId: String!, limit: Int): SearchResponseType!
-  
+
   # Indexing queries
   getReindexingStatus(entityType: String): String!
-  
+
   # Cursor-based search queries
-  cursorSearch(query: String, cursor: String, limit: Int = 20, sessionId: String): CursorSearchResponseType!
-  
+  cursorSearch(
+    query: String
+    cursor: String
+    limit: Int = 20
+    sessionId: String
+  ): CursorSearchResponseType!
+
   # Search dashboard queries
   searchPerformanceMetrics(timeframe: String): PerformanceMetricsType!
   searchRelevanceMetrics(timeframe: String): RelevanceMetricsType!
@@ -171,7 +329,7 @@ type Query {
   searchExperimentById(id: String!): ExperimentType
   searchExperimentResults(id: String!): ExperimentResultType
   searchHealthStatus: HealthStatusType!
-  
+
   # NLP queries
   nlpSearch(query: String!, pagination: PaginationDto): NlpSearchResult!
   analyzeQuery(query: String!): ProcessedQueryResult!
@@ -196,18 +354,43 @@ type Mutation {
   removeMerchant(id: ID!): Boolean!
   createOrUpdateMerchantBrand(merchantId: ID!, input: CreateMerchantBrandInput!): MerchantBrand!
   updateProductVisibility(merchantId: ID!, productId: ID!, isVisible: Boolean!): MerchantProduct!
-  updateProductPromotion(merchantId: ID!, productId: ID!, isPromoted: Boolean!, monthlyAdBudget: Float): MerchantProduct!
+  updateProductPromotion(
+    merchantId: ID!
+    productId: ID!
+    isPromoted: Boolean!
+    monthlyAdBudget: Float
+  ): MerchantProduct!
   updateMerchantShipping(merchantId: ID!, input: UpdateMerchantShippingInput!): MerchantShipping!
   # Ad campaign mutations
-  createMerchantAdCampaign(merchantId: ID!, input: CreateMerchantAdCampaignInput!): MerchantAdCampaign!
-  updateMerchantAdCampaign(id: ID!, merchantId: ID!, input: UpdateMerchantAdCampaignInput!): MerchantAdCampaign!
-  updateMerchantAdCampaignStatus(id: ID!, merchantId: ID!, status: CampaignStatus!): MerchantAdCampaign!
+  createMerchantAdCampaign(
+    merchantId: ID!
+    input: CreateMerchantAdCampaignInput!
+  ): MerchantAdCampaign!
+  updateMerchantAdCampaign(
+    id: ID!
+    merchantId: ID!
+    input: UpdateMerchantAdCampaignInput!
+  ): MerchantAdCampaign!
+  updateMerchantAdCampaignStatus(
+    id: ID!
+    merchantId: ID!
+    status: CampaignStatus!
+  ): MerchantAdCampaign!
   deleteMerchantAdCampaign(id: ID!, merchantId: ID!): Boolean!
-  createRetargetingCampaign(merchantId: ID!, productIds: [ID!]!, budget: Float!): MerchantAdCampaign!
-  
+  createRetargetingCampaign(
+    merchantId: ID!
+    productIds: [ID!]!
+    budget: Float!
+  ): MerchantAdCampaign!
+
   # Ad budget management mutations
-  allocateBudgetAcrossCampaigns(merchantId: ID!, totalBudget: Float!, campaignIds: [ID!]!, strategy: BudgetAllocationStrategy = EQUAL): [BudgetAllocation!]!
-  
+  allocateBudgetAcrossCampaigns(
+    merchantId: ID!
+    totalBudget: Float!
+    campaignIds: [ID!]!
+    strategy: BudgetAllocationStrategy = EQUAL
+  ): [BudgetAllocation!]!
+
   # Ad placement mutations
   recordAdClick(campaignId: ID!): Boolean!
   createProduct(input: CreateProductInput!): Product!
@@ -221,7 +404,7 @@ type Mutation {
   bulkIndexProducts(productIds: [String!]!): Boolean!
   bulkIndexMerchants(merchantIds: [String!]!): Boolean!
   bulkIndexBrands(brandIds: [String!]!): Boolean!
-  
+
   # Personalization mutations
   createUserPreferences(input: CreateUserPreferencesDto!): UserPreferences!
   updateUserPreferences(input: UpdateUserPreferencesDto!): UserPreferences!
@@ -230,14 +413,47 @@ type Mutation {
   trackSearch(query: String!): Boolean!
   trackAddToCart(productId: ID!, quantity: Int): Boolean!
   trackPurchase(productId: ID!, quantity: Int, price: Float): Boolean!
-  
+
   # Analytics mutations
   trackSearchAnalytics(data: TrackSearchInput!): SearchAnalytics!
   trackEngagement(data: TrackEngagementInput!): UserEngagement!
-  trackPageView(userId: ID, sessionId: ID!, pagePath: String!, referrer: String, deviceType: String, platform: String): UserEngagement!
-  analyticsTrackProductView(userId: ID, sessionId: ID!, productId: ID!, pagePath: String!, referrer: String, deviceType: String, platform: String): UserEngagement!
-  trackAnalyticsAddToCart(userId: ID, sessionId: ID!, productId: ID!, quantity: Int!, pagePath: String!, deviceType: String, platform: String): UserEngagement!
-  trackCheckoutComplete(userId: ID, sessionId: ID!, orderId: ID!, items: [OrderItemInput!]!, total: Float!, pagePath: String!, deviceType: String, platform: String, merchantId: ID): Boolean!
+  trackPageView(
+    userId: ID
+    sessionId: ID!
+    pagePath: String!
+    referrer: String
+    deviceType: String
+    platform: String
+  ): UserEngagement!
+  analyticsTrackProductView(
+    userId: ID
+    sessionId: ID!
+    productId: ID!
+    pagePath: String!
+    referrer: String
+    deviceType: String
+    platform: String
+  ): UserEngagement!
+  trackAnalyticsAddToCart(
+    userId: ID
+    sessionId: ID!
+    productId: ID!
+    quantity: Int!
+    pagePath: String!
+    deviceType: String
+    platform: String
+  ): UserEngagement!
+  trackCheckoutComplete(
+    userId: ID
+    sessionId: ID!
+    orderId: ID!
+    items: [OrderItemInput!]!
+    total: Float!
+    pagePath: String!
+    deviceType: String
+    platform: String
+    merchantId: ID
+  ): Boolean!
   createAlert(input: CreateAlertInput!): AlertEntity!
   trackSearchEvent(event: SearchEventInput!): TrackSearchEventResponse!
   createExperiment(input: CreateExperimentInput!): Experiment!
@@ -251,11 +467,21 @@ type Mutation {
   trackImpression(assignmentId: ID!): Boolean!
   trackInteraction(assignmentId: ID!, context: String, metadata: String): Boolean!
   trackConversion(assignmentId: ID!, value: Float, context: String, metadata: String): Boolean!
-  trackCustomEvent(assignmentId: ID!, eventType: String!, value: Float, context: String, metadata: String): Boolean!
-  
+  trackCustomEvent(
+    assignmentId: ID!
+    eventType: String!
+    value: Float
+    context: String
+    metadata: String
+  ): Boolean!
+
   # NLP mutations
   getRecommendationsFromDescription(description: String!, limit: Int): [Product!]!
-  getPersonalizedSearchResults(query: String!, userPreferences: UserPreferencesInput!, pagination: PaginationDto): NlpSearchResult!
+  getPersonalizedSearchResults(
+    query: String!
+    userPreferences: UserPreferencesInput!
+    pagination: PaginationDto
+  ): NlpSearchResult!
   extractKeywords(text: String!, maxKeywords: Int): KeywordsResult!
   calculateSimilarity(text1: String!, text2: String!): SimilarityResult!
 }

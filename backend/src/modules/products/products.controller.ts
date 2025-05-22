@@ -15,11 +15,19 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { DataNormalizationService, DataSource } from './services/data-normalization.service';
+import { Logger } from '@nestjs/common';
+import { CursorPaginationDto } from '../../common/dto/cursor-pagination.dto';
 
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  private readonly logger = new Logger(ProductsController.name);
+
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly dataNormalizationService: DataNormalizationService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -27,15 +35,66 @@ export class ProductsController {
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({ status: 201, description: 'Product successfully created' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  async create(@Body() createProductDto: CreateProductDto) {
+    try {
+      // Normalize the product data before creation
+      const normalizedProduct = await this.dataNormalizationService.normalizeProductData(
+        createProductDto,
+        createProductDto.externalSource || DataSource.MANUAL,
+      );
+
+      // Create the product with normalized data
+      const product = await this.productsService.create(normalizedProduct);
+
+      return product;
+    } catch (error) {
+      this.logger.error(`Error creating product: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all products with pagination' })
-  @ApiResponse({ status: 200, description: 'Return paginated products' })
+  @ApiOperation({ summary: 'Get all products with offset-based pagination' })
+  @ApiResponse({ status: 200, description: 'Return all products' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   findAll(@Query() paginationDto: PaginationDto) {
     return this.productsService.findAll(paginationDto);
+  }
+
+  @Get('cursor')
+  @ApiOperation({ summary: 'Get products with cursor-based pagination (for continuous scroll)' })
+  @ApiResponse({ status: 200, description: 'Return products with cursor for next page' })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    type: String,
+    description: 'Cursor for the next page',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+  })
+  @ApiQuery({
+    name: 'withCount',
+    required: false,
+    type: Boolean,
+    description: 'Include total count in response',
+  })
+  async findWithCursor(@Query() cursorPaginationDto: CursorPaginationDto) {
+    const result = await this.productsService.findWithCursor(cursorPaginationDto);
+
+    // Apply normalization to all products to ensure consistent data
+    if (result.items.length > 0) {
+      const normalizedProducts = await Promise.all(
+        result.items.map(product => this.dataNormalizationService.normalizeProduct(product)),
+      );
+      result.items = normalizedProducts;
+    }
+
+    return result;
   }
 
   @Get('search')
@@ -101,8 +160,10 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiResponse({ status: 200, description: 'Return the product' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const product = await this.productsService.findOne(id);
+    // Apply normalization to ensure virtual properties are calculated
+    return this.dataNormalizationService.normalizeProduct(product);
   }
 
   @Patch(':id')
@@ -111,8 +172,23 @@ export class ProductsController {
   @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({ status: 200, description: 'Product successfully updated' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    try {
+      // Normalize the update data
+      const normalizedUpdateData = await this.dataNormalizationService.updateProductWithDto(
+        id,
+        updateProductDto,
+      );
+
+      // Update the product with normalized data
+      const updatedProduct = await this.productsService.update(id, normalizedUpdateData);
+
+      // Apply additional normalization to ensure virtual properties are calculated
+      return this.dataNormalizationService.normalizeProduct(updatedProduct);
+    } catch (error) {
+      this.logger.error(`Error updating product ${id}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Delete(':id')

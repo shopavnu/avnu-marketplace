@@ -1,17 +1,30 @@
-import React from 'react';
-import { Box, Typography, Paper, CircularProgress, Alert, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { GridContainer, GridItem } from '../../../components/ui/MuiGrid';
-import AdminLayout from '../../../components/admin/AdminLayout';
-import AnalyticsNav from '../../../components/admin/AnalyticsNav';
+import React from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Alert,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import { GridContainer, GridItem } from "../../../components/ui/MuiGrid";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import AnalyticsNav from "../../../components/admin/AnalyticsNav";
 // Properly import MetricCard component
-import MetricCard from '../../../components/admin/MetricCard';
+import MetricCard from "../../../components/admin/MetricCard";
 // Import Recharts components
-import { 
-  BarChartComponent, 
-  PieChartComponent, 
+import {
+  BarChartComponent,
+  PieChartComponent,
   LineChartComponent,
-  CompositeChartComponent 
-} from '../../../components/charts';
+  CompositeChartComponent,
+} from "../../../components/charts";
 
 /**
  * Price Analytics Dashboard
@@ -35,31 +48,57 @@ const PriceAnalytics: React.FC = () => {
       { category: "Zero Waste Essentials", elasticity: 0.7 },
     ],
     competitiveAnalysis: [
-      { category: "Beauty", avnuPrice: 34.99, directPrice: 39.99, difference: -12.5 },
-      { category: "Apparel", avnuPrice: 58.50, directPrice: 54.99, difference: 6.4 },
-      { category: "Home Goods", avnuPrice: 45.75, directPrice: 48.99, difference: -6.6 },
-      { category: "Accessories", avnuPrice: 29.99, directPrice: 32.50, difference: -7.7 },
-      { category: "Food", avnuPrice: 22.49, directPrice: 21.99, difference: 2.3 }
+      {
+        category: "Beauty",
+        avnuPrice: 34.99,
+        directPrice: 39.99,
+        difference: -12.5,
+      },
+      {
+        category: "Apparel",
+        avnuPrice: 58.5,
+        directPrice: 54.99,
+        difference: 6.4,
+      },
+      {
+        category: "Home Goods",
+        avnuPrice: 45.75,
+        directPrice: 48.99,
+        difference: -6.6,
+      },
+      {
+        category: "Accessories",
+        avnuPrice: 29.99,
+        directPrice: 32.5,
+        difference: -7.7,
+      },
+      {
+        category: "Food",
+        avnuPrice: 22.49,
+        directPrice: 21.99,
+        difference: 2.3,
+      },
     ],
     priceDistribution: {
       belowMarket: 54,
       atMarket: 31,
-      aboveMarket: 15
-    }
+      aboveMarket: 15,
+    },
   };
-  
+
   return (
     <AdminLayout title="Price Analytics">
       <AnalyticsNav />
-      
+
       <Box className="p-6">
         <Typography variant="h4" component="h1" gutterBottom>
           Price Analytics
         </Typography>
         <Typography variant="body1" color="textSecondary" paragraph>
-          Monitor price competitiveness and identify pricing optimization opportunities
+          Monitor price competitiveness and identify pricing optimization
+          opportunities
         </Typography>
-        
+
         {loading ? (
           <Box display="flex" justifyContent="center" my={8}>
             <CircularProgress />
@@ -72,8 +111,8 @@ const PriceAnalytics: React.FC = () => {
           <>
             <GridContainer spacing={3} className="mb-6">
               <GridItem xs={12} sm={6} md={3}>
-                <MetricCard 
-                  title="Marketplace Price Index" 
+                <MetricCard
+                  title="Marketplace Price Index"
                   value={mockData.avgPriceIndex.toString()}
                   subtitle="vs. Direct-to-Consumer (100)"
                   icon="price_check"
@@ -82,24 +121,24 @@ const PriceAnalytics: React.FC = () => {
                 />
               </GridItem>
               <GridItem xs={12} sm={6} md={3}>
-                <MetricCard 
-                  title="Below Market Prices" 
+                <MetricCard
+                  title="Below Market Prices"
                   value={`${mockData.priceDistribution.belowMarket}%`}
                   icon="trending_down"
                   subtitle="of products"
                 />
               </GridItem>
               <GridItem xs={12} sm={6} md={3}>
-                <MetricCard 
-                  title="At Market Prices" 
+                <MetricCard
+                  title="At Market Prices"
                   value={`${mockData.priceDistribution.atMarket}%`}
                   icon="drag_handle"
                   subtitle="of products"
                 />
               </GridItem>
               <GridItem xs={12} sm={6} md={3}>
-                <MetricCard 
-                  title="Above Market Prices" 
+                <MetricCard
+                  title="Above Market Prices"
                   value={`${mockData.priceDistribution.aboveMarket}%`}
                   icon="trending_up"
                   subtitle="of products"
@@ -120,7 +159,7 @@ const PriceAnalytics: React.FC = () => {
                     <BarChartComponent
                       data={[
                         ...mockData.elasticCategories,
-                        ...mockData.inelasticCategories
+                        ...mockData.inelasticCategories,
                       ].sort((a, b) => b.elasticity - a.elasticity)}
                       xKey="category"
                       yKey="elasticity"
@@ -128,7 +167,9 @@ const PriceAnalytics: React.FC = () => {
                       barSize={40}
                       xAxisLabel="Category"
                       yAxisLabel="Price Elasticity"
-                      tooltipFormatter={(value: number) => `${value.toFixed(1)}`}
+                      tooltipFormatter={(value: number) =>
+                        `${value.toFixed(1)}`
+                      }
                     />
                   </Box>
                 </Paper>
@@ -144,25 +185,27 @@ const PriceAnalytics: React.FC = () => {
                   <Box height={300}>
                     <LineChartComponent
                       data={[
-                        { month: 'Jan', marketplace: 98.5, direct: 100 },
-                        { month: 'Feb', marketplace: 97.8, direct: 100 },
-                        { month: 'Mar', marketplace: 98.2, direct: 100 },
-                        { month: 'Apr', marketplace: 97.5, direct: 100 },
-                        { month: 'May', marketplace: 96.8, direct: 100 },
-                        { month: 'Jun', marketplace: 97.2, direct: 100 },
-                        { month: 'Jul', marketplace: 98.8, direct: 100 },
-                        { month: 'Aug', marketplace: 99.1, direct: 100 },
-                        { month: 'Sep', marketplace: 98.5, direct: 100 },
-                        { month: 'Oct', marketplace: 97.9, direct: 100 },
-                        { month: 'Nov', marketplace: 97.4, direct: 100 },
-                        { month: 'Dec', marketplace: 98.2, direct: 100 }
+                        { month: "Jan", marketplace: 98.5, direct: 100 },
+                        { month: "Feb", marketplace: 97.8, direct: 100 },
+                        { month: "Mar", marketplace: 98.2, direct: 100 },
+                        { month: "Apr", marketplace: 97.5, direct: 100 },
+                        { month: "May", marketplace: 96.8, direct: 100 },
+                        { month: "Jun", marketplace: 97.2, direct: 100 },
+                        { month: "Jul", marketplace: 98.8, direct: 100 },
+                        { month: "Aug", marketplace: 99.1, direct: 100 },
+                        { month: "Sep", marketplace: 98.5, direct: 100 },
+                        { month: "Oct", marketplace: 97.9, direct: 100 },
+                        { month: "Nov", marketplace: 97.4, direct: 100 },
+                        { month: "Dec", marketplace: 98.2, direct: 100 },
                       ]}
                       xKey="month"
                       yKey="marketplace"
                       height={270}
                       xAxisLabel="Month"
                       yAxisLabel="Price Index (Direct-to-Consumer = 100)"
-                      tooltipFormatter={(value: number) => `${value.toFixed(1)}`}
+                      tooltipFormatter={(value: number) =>
+                        `${value.toFixed(1)}`
+                      }
                     />
                   </Box>
                 </Paper>
@@ -178,7 +221,9 @@ const PriceAnalytics: React.FC = () => {
                         <TableRow>
                           <TableCell>Category</TableCell>
                           <TableCell align="right">Avg. Avnu Price</TableCell>
-                          <TableCell align="right">Avg. Direct-to-Consumer</TableCell>
+                          <TableCell align="right">
+                            Avg. Direct-to-Consumer
+                          </TableCell>
                           <TableCell align="right">Price Difference</TableCell>
                           <TableCell align="right">Elasticity</TableCell>
                         </TableRow>
@@ -186,27 +231,43 @@ const PriceAnalytics: React.FC = () => {
                       <TableBody>
                         {mockData.competitiveAnalysis.map((category) => {
                           // Find elasticity for this category
-                          const elasticityItem = [...mockData.elasticCategories, ...mockData.inelasticCategories]
-                            .find(item => item.category.includes(category.category) || category.category.includes(item.category));
-                          
+                          const elasticityItem = [
+                            ...mockData.elasticCategories,
+                            ...mockData.inelasticCategories,
+                          ].find(
+                            (item) =>
+                              item.category.includes(category.category) ||
+                              category.category.includes(item.category),
+                          );
+
                           return (
                             <TableRow key={category.category}>
                               <TableCell component="th" scope="row">
                                 {category.category}
                               </TableCell>
-                              <TableCell align="right">${category.avnuPrice}</TableCell>
-                              <TableCell align="right">${category.directPrice}</TableCell>
-                              <TableCell 
+                              <TableCell align="right">
+                                ${category.avnuPrice}
+                              </TableCell>
+                              <TableCell align="right">
+                                ${category.directPrice}
+                              </TableCell>
+                              <TableCell
                                 align="right"
                                 sx={{
-                                  color: category.difference < 0 ? 'success.main' : 
-                                         category.difference > 0 ? 'error.main' : 'inherit'
+                                  color:
+                                    category.difference < 0
+                                      ? "success.main"
+                                      : category.difference > 0
+                                        ? "error.main"
+                                        : "inherit",
                                 }}
                               >
-                                {category.difference < 0 ? '' : '+'}
+                                {category.difference < 0 ? "" : "+"}
                                 {category.difference}%
                               </TableCell>
-                              <TableCell align="right">{elasticityItem?.elasticity || 'N/A'}</TableCell>
+                              <TableCell align="right">
+                                {elasticityItem?.elasticity || "N/A"}
+                              </TableCell>
                             </TableRow>
                           );
                         })}
