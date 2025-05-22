@@ -7,7 +7,7 @@ import {
   Index,
 } from 'typeorm';
 import { Field, ID, ObjectType, Float, Int, GraphQLISODateTime } from '@nestjs/graphql';
-import { PlatformType } from '../../shared';
+import { PlatformType } from '@modules/shared';
 
 @ObjectType()
 class AccessibilityMetadata {

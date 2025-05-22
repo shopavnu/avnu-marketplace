@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { PlatformType } from '../../shared';
+import { PlatformType } from '@modules/shared';
 
 /**
  * Entity representing a connection between a merchant and an e-commerce platform

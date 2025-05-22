@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, FindOperator } from 'typeorm';
-import { MerchantPlatformConnection } from '../entities/merchant-platform-connection.entity';
-import { Product } from '../../products/entities/product.entity';
-import { Order } from '../../orders/entities/order.entity';
-import { PlatformType, SyncResult } from '../../shared';
+import { MerchantPlatformConnection } from '@modules/integrations/entities/merchant-platform-connection.entity';
+import { Product } from '@modules/products/entities/product.entity';
+import { Order } from '@modules/orders/entities/order.entity';
+import { PlatformType, SyncResult } from '@modules/shared';
 import { ShopifyService } from './shopify.service';
 
 /**
