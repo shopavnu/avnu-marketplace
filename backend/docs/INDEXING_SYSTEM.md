@@ -43,6 +43,7 @@ modules/
 ### ElasticsearchIndexingService
 
 Provides advanced indexing capabilities:
+
 - Individual entity indexing (products, merchants, brands)
 - Bulk operations for improved performance
 - Complete reindexing with zero downtime
@@ -51,6 +52,7 @@ Provides advanced indexing capabilities:
 ### IndexingController
 
 Exposes REST endpoints for indexing operations:
+
 - Reindexing (all entities or by type)
 - Status tracking
 - Bulk indexing by IDs
@@ -59,6 +61,7 @@ Exposes REST endpoints for indexing operations:
 ### IndexingResolver
 
 Provides GraphQL operations for indexing:
+
 - Mutations for triggering reindexing
 - Queries for status tracking
 - Mutations for bulk indexing
@@ -67,6 +70,7 @@ Provides GraphQL operations for indexing:
 ### SearchIndexListener
 
 Handles events for real-time indexing:
+
 - Entity creation/update/deletion events
 - Bulk operation events
 - Reindexing events
@@ -163,6 +167,7 @@ During development, you may encounter TypeScript lint errors related to missing 
 1. **Module Not Found Errors**
 
    Error:
+
    ```
    Cannot find module '@nestjs/common' or its corresponding type declarations.
    Cannot find module '@nestjs/config' or its corresponding type declarations.
@@ -181,6 +186,7 @@ During development, you may encounter TypeScript lint errors related to missing 
 2. **Entity Import Errors**
 
    Error:
+
    ```
    Cannot find module '../../products/entities/product.entity' or its corresponding type declarations.
    Cannot find module '../../merchants/entities/merchant.entity' or its corresponding type declarations.
@@ -193,6 +199,7 @@ During development, you may encounter TypeScript lint errors related to missing 
 3. **TypeORM Related Errors**
 
    Error:
+
    ```
    Cannot find module 'typeorm' or its corresponding type declarations.
    ```
@@ -207,6 +214,7 @@ During development, you may encounter TypeScript lint errors related to missing 
 4. **Elasticsearch Client Access Error**
 
    Error:
+
    ```
    Property 'client' is private and only accessible within class 'ElasticsearchService'.
    ```
@@ -233,11 +241,13 @@ During development, you may encounter TypeScript lint errors related to missing 
 ### Running the Indexing System
 
 1. Start Elasticsearch:
+
    ```bash
    docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.14.0
    ```
 
 2. Start the NestJS application:
+
    ```bash
    npm run start:dev
    ```

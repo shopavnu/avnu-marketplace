@@ -9,6 +9,7 @@ The caching layer uses Redis to store frequently accessed product data, with aut
 ## Features
 
 ### 1. Redis Configuration
+
 - Configured in `app.module.ts` using `cache-manager-redis-store`
 - Environment variables for Redis connection settings:
   - `REDIS_HOST`: Redis server hostname (default: 'localhost')
@@ -19,6 +20,7 @@ The caching layer uses Redis to store frequently accessed product data, with aut
   - `REDIS_MAX_ITEMS`: Maximum number of items in cache (default: 1000)
 
 ### 2. Cached Data Types
+
 - Individual products by ID
 - Product lists (paginated)
 - Products by cursor (for infinite scroll)
@@ -29,12 +31,14 @@ The caching layer uses Redis to store frequently accessed product data, with aut
 - Discovery products
 
 ### 3. Cache Invalidation
+
 - Automatic invalidation on product creation, update, or deletion
 - Event-based invalidation using NestJS event emitter
 - Merchant-specific cache invalidation
 - Admin API endpoints for manual cache invalidation
 
 ### 4. Cache Warming
+
 - Scheduled cache warming for popular products
 - Category-based cache warming
 - Merchant-based cache warming
@@ -46,18 +50,21 @@ The caching layer uses Redis to store frequently accessed product data, with aut
 ### Services
 
 1. **ProductCacheService**
+
    - Core caching service that handles all cache operations
    - Provides methods for getting/setting cached data
    - Handles cache invalidation based on events
    - Implements cache warming logic
 
 2. **CachedProductsService**
+
    - Enhanced product service that uses caching
    - Wraps database operations with cache checks
    - Maintains the same API as the original ProductsService
    - Handles cache misses by fetching from database
 
 3. **CacheWarmingService**
+
    - Scheduled service for cache warming
    - Runs on configurable intervals (hourly/daily)
    - Prioritizes popular and frequently accessed data
@@ -126,6 +133,7 @@ Admin users can manage the cache via the following API endpoints:
 ## Monitoring
 
 The caching system logs all operations with appropriate log levels:
+
 - `debug` for cache hits/misses
 - `log` for cache warming operations
 - `error` for cache errors

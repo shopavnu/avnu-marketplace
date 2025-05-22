@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository as _InjectRepository } from '@nestjs/typeorm';
+import { Repository as _Repository } from 'typeorm';
 import { ABTestResultDto } from '../dto/ab-test-results.dto';
 
 @Injectable()

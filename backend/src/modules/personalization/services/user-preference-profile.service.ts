@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserPreferenceProfile } from '../entities/user-preference-profile.entity';
-import { SessionService, SessionInteractionType } from './session.service';
+import { SessionService } from './session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 import { SessionInteractionEntity } from '../entities/session-interaction.entity';
 
 /**

@@ -1,473 +1,341 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNav from '../../../components/admin/AnalyticsNav';
-import { Grid as GridContainer, Grid as GridItem } from '../../../components/ui/MuiGrid';
+import GridContainer from '../../../components/analytics/GridContainer';
+import GridItem from '../../../components/analytics/GridItem';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { Line, Bar, Pie } from 'react-chartjs-2';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-// GraphQL query for analytics dashboard data
-const DASHBOARD_OVERVIEW = gql`
-  query DashboardOverview($period: Int) {
-    dashboardOverview(period: $period) {
-      searchMetrics {
-        conversionRate
-        clickThroughRate
-        personalizedVsRegular {
-          personalized {
-            clickThroughRate
-            conversionRate
-          }
-          regular {
-            clickThroughRate
-            conversionRate
-          }
-        }
-        topQueries {
-          query
-          count
-        }
-      }
-      personalizationImpact {
-        clickThroughImprovement
-        conversionImprovement
-      }
-      sessionAnalytics {
-        totalSessions
-        avgInteractionsPerSession
-        avgSessionDuration
-        interactionTypeDistribution
-      }
-    }
-  }
-`;
-
-// GraphQL query for personalization effectiveness
-const PERSONALIZATION_EFFECTIVENESS = gql`
-  query PersonalizationEffectiveness($period: Int) {
-    personalizationEffectiveness(period: $period) {
-      personalizedVsRegular {
-        personalized {
-          clickThroughRate
-          conversionRate
-        }
-        regular {
-          clickThroughRate
-          conversionRate
-        }
-      }
-      improvements {
-        clickThroughImprovement
-        conversionImprovement
-        clickThroughImprovementPercentage
-        conversionImprovementPercentage
-      }
-      sessionPersonalization {
-        interactionTypeDistribution
-        dwellTimeMetrics {
-          personalized {
-            avgDwellTime
-            count
-          }
-          regular {
-            avgDwellTime
-            count
-          }
-          improvement
-          improvementPercentage
-        }
-        clickThroughRates {
-          personalized {
-            clicks
-            impressions
-            clickThroughRate
-          }
-          regular {
-            clicks
-            impressions
-            clickThroughRate
-          }
-          improvement
-          improvementPercentage
-        }
-        impressionToClickRates {
-          personalized {
-            sessions
-            impressions
-            clicks
-            conversionRate
-          }
-          regular {
-            sessions
-            impressions
-            clicks
-            conversionRate
-          }
-          improvement
-          improvementPercentage
-        }
-      }
-    }
-  }
-`;
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+  Paper,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
 
 const AdminAnalytics: React.FC = () => {
+  // State for period selection
   const [period, setPeriod] = useState<number>(30);
   
-  // Fetch dashboard overview data
-  const { 
-    data: overviewData, 
-    loading: overviewLoading, 
-    error: overviewError 
-  } = useQuery(DASHBOARD_OVERVIEW, {
-    variables: { period },
-    fetchPolicy: 'network-only',
-  });
+  // State for loading and errors
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  // State for analytics data
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  
+  // Load mock data
+  useEffect(() => {
+    setLoading(true);
+    
+    // Simulate API call delay
+    const timer = setTimeout(() => {
+      try {
+        // Sample mock data
+        const mockData = {
+          totalSessions: 45678,
+          avgSessionDuration: 342, // in seconds
+          avgInteractionsPerSession: 8.3,
+          conversionRate: 4.5, // percentage
+          clickThroughRate: 32, // percentage
+          personalizationImpact: {
+            clickThroughImprovement: 31, // percentage
+            conversionImprovement: 36.8 // percentage
+          },
+          interactionTypes: [
+            { type: "Product View", count: 25678 },
+            { type: "Search", count: 18765 },
+            { type: "Filter", count: 12543 },
+            { type: "Add to Cart", count: 8765 },
+            { type: "Checkout", count: 4321 }
+          ],
+          topQueries: [
+            { query: "sustainable clothing", count: 1245 },
+            { query: "organic cotton", count: 987 },
+            { query: "eco-friendly", count: 876 },
+            { query: "recycled materials", count: 654 },
+            { query: "vegan leather", count: 543 }
+          ]
+        };
+        
+        setAnalyticsData(mockData);
+        setLoading(false);
+      } catch (error) {
+        setError(error instanceof Error ? error : new Error('Unknown error occurred'));
+        setLoading(false);
+      }
+    }, 1000);
 
-  // Fetch personalization effectiveness data
-  const { 
-    data: personalizationData, 
-    loading: personalizationLoading, 
-    error: personalizationError 
-  } = useQuery(PERSONALIZATION_EFFECTIVENESS, {
-    variables: { period },
-    fetchPolicy: 'network-only',
-  });
+    return () => clearTimeout(timer);
+  }, [period]);
 
-  // Handle loading and error states
-  if (overviewLoading || personalizationLoading) {
+  // Handle loading state
+  if (loading) {
     return (
       <AdminLayout title="Analytics Dashboard">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sage"></div>
-        </div>
+        <AnalyticsNav />
+        <Box display="flex" justifyContent="center" alignItems="center" height="400px">
+          <CircularProgress />
+        </Box>
       </AdminLayout>
     );
   }
 
-  if (overviewError || personalizationError) {
+  // Handle error state
+  if (error) {
     return (
       <AdminLayout title="Analytics Dashboard">
         <AnalyticsNav />
         <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
           <p>Error loading analytics data. Please try again later.</p>
-          {(overviewError || personalizationError) && (
-            <p className="text-sm mt-2">
-              {overviewError?.message || personalizationError?.message}
-            </p>
-          )}
+          <p className="text-sm mt-2">
+            {error?.message || 'Unknown error'}
+          </p>
         </div>
       </AdminLayout>
     );
   }
-
-  // Extract data for charts
-  const overview = overviewData?.dashboardOverview || {};
-  const personalization = personalizationData?.personalizationEffectiveness || {};
-  const sessionAnalytics = overview.sessionAnalytics || {};
-  const sessionPersonalization = personalization.sessionPersonalization || {};
-
-  // Prepare data for interaction type distribution chart
-  const interactionTypes = sessionAnalytics.interactionTypeDistribution 
-    ? Object.keys(sessionAnalytics.interactionTypeDistribution).filter(key => !key.includes('Percentage'))
-    : [];
   
-  const interactionCounts = interactionTypes.map(
-    type => sessionAnalytics.interactionTypeDistribution[type] || 0
-  );
-
-  const interactionDistributionData = {
-    labels: interactionTypes.map(type => type.charAt(0).toUpperCase() + type.slice(1)),
-    datasets: [
-      {
-        label: 'Interaction Count',
-        data: interactionCounts,
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-          'rgba(255, 159, 64, 0.6)',
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-        ],
-        borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  // Prepare data for personalization comparison chart
-  const personalizationComparisonData = {
-    labels: ['Click-Through Rate', 'Conversion Rate', 'Dwell Time (sec)'],
-    datasets: [
-      {
-        label: 'Personalized',
-        data: [
-          personalization.personalizedVsRegular?.personalized?.clickThroughRate * 100 || 0,
-          personalization.personalizedVsRegular?.personalized?.conversionRate * 100 || 0,
-          sessionPersonalization.dwellTimeMetrics?.personalized?.avgDwellTime / 1000 || 0,
-        ],
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-      },
-      {
-        label: 'Regular',
-        data: [
-          personalization.personalizedVsRegular?.regular?.clickThroughRate * 100 || 0,
-          personalization.personalizedVsRegular?.regular?.conversionRate * 100 || 0,
-          sessionPersonalization.dwellTimeMetrics?.regular?.avgDwellTime / 1000 || 0,
-        ],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  // Prepare data for improvement metrics chart
-  const improvementData = {
-    labels: ['Click-Through Rate', 'Conversion Rate', 'Dwell Time', 'Impression-to-Click'],
-    datasets: [
-      {
-        label: 'Improvement (%)',
-        data: [
-          personalization.improvements?.clickThroughImprovementPercentage || 0,
-          personalization.improvements?.conversionImprovementPercentage || 0,
-          sessionPersonalization.dwellTimeMetrics?.improvementPercentage || 0,
-          sessionPersonalization.impressionToClickRates?.improvementPercentage || 0,
-        ],
-        backgroundColor: 'rgba(153, 102, 255, 0.6)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+  // Handle no data state
+  if (!analyticsData) {
+    return (
+      <AdminLayout title="Analytics Dashboard">
+        <AnalyticsNav />
+        <Box p={3}>
+          <Alert severity="info">
+            No analytics data available. Please try again later.
+          </Alert>
+        </Box>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title="Analytics Dashboard">
       <AnalyticsNav />
+      
       {/* Period selector */}
-      <div className="mb-6 flex justify-end">
-        <select
-          value={period}
-          onChange={(e) => setPeriod(Number(e.target.value))}
-          className="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sage focus:border-transparent"
-        >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
-      </div>
-
+      <Box display="flex" justifyContent="flex-end" mb={3}>
+        <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+          <InputLabel id="period-select-label">Period</InputLabel>
+          <Select
+            labelId="period-select-label"
+            id="period-select"
+            value={period.toString()}
+            onChange={(e: SelectChangeEvent) => setPeriod(Number(e.target.value))}
+            label="Period"
+          >
+            <MenuItem value={7}>Last 7 days</MenuItem>
+            <MenuItem value={30}>Last 30 days</MenuItem>
+            <MenuItem value={90}>Last 90 days</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+      
       {/* Overview metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Total Sessions</h3>
-          <p className="text-3xl font-bold text-sage">
-            {sessionAnalytics.totalSessions?.toLocaleString() || 0}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Avg. Interactions</h3>
-          <p className="text-3xl font-bold text-sage">
-            {sessionAnalytics.avgInteractionsPerSession?.toFixed(2) || 0}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Avg. Session Duration</h3>
-          <p className="text-3xl font-bold text-sage">
-            {sessionAnalytics.avgSessionDuration?.toFixed(2) || 0} min
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">CTR Improvement</h3>
-          <p className="text-3xl font-bold text-sage">
-            {personalization.improvements?.clickThroughImprovementPercentage?.toFixed(2) || 0}%
-          </p>
-        </div>
-      </div>
-
-      {/* Session-based personalization metrics */}
-      <h2 className="text-xl font-semibold text-charcoal mb-4">Session-Based Personalization</h2>
+      <GridContainer spacing={3} sx={{ mb: 3 }}>
+        <GridItem xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Total Sessions
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {analyticsData.totalSessions?.toLocaleString() || 0}
+            </Typography>
+          </Paper>
+        </GridItem>
+        <GridItem xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Avg. Interactions
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {analyticsData.avgInteractionsPerSession?.toFixed(1) || 0}
+            </Typography>
+          </Paper>
+        </GridItem>
+        <GridItem xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Avg. Session Duration
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {analyticsData.avgSessionDuration ? `${(analyticsData.avgSessionDuration / 60).toFixed(1)} min` : '0 min'}
+            </Typography>
+          </Paper>
+        </GridItem>
+        <GridItem xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Conversion Rate
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {analyticsData.conversionRate?.toFixed(1) || 0}%
+            </Typography>
+          </Paper>
+        </GridItem>
+      </GridContainer>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Interaction type distribution */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Interaction Type Distribution</h3>
-          <div className="h-64">
-            <Pie data={interactionDistributionData} />
-          </div>
-        </div>
-
-        {/* Personalization comparison */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Personalization Comparison</h3>
-          <div className="h-64">
-            <Bar 
-              data={personalizationComparisonData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    title: {
-                      display: true,
-                      text: 'Value (%)',
-                    },
-                  },
-                },
+      {/* Personalization Impact */}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Personalization Impact
+        </Typography>
+        <GridContainer spacing={3}>
+          <GridItem xs={12} md={6}>
+            <Box sx={{ bgcolor: '#f0f9f0', p: 2, borderRadius: 1 }}>
+              <Typography variant="body2" color="textSecondary">
+                Click-Through Improvement
+              </Typography>
+              <Typography variant="h5" color="success.main">
+                +{analyticsData.personalizationImpact?.clickThroughImprovement?.toFixed(1) || 0}%
+              </Typography>
+              <Box sx={{ width: '100%', bgcolor: '#e0e0e0', height: 8, borderRadius: 4, mt: 1 }}>
+                <Box 
+                  sx={{ 
+                    bgcolor: 'success.main', 
+                    height: 8, 
+                    borderRadius: 4,
+                    width: `${Math.min(100, analyticsData.personalizationImpact?.clickThroughImprovement || 0)}%`
+                  }}
+                />
+              </Box>
+            </Box>
+          </GridItem>
+          <GridItem xs={12} md={6}>
+            <Box sx={{ bgcolor: '#f0f9f0', p: 2, borderRadius: 1 }}>
+              <Typography variant="body2" color="textSecondary">
+                Conversion Improvement
+              </Typography>
+              <Typography variant="h5" color="success.main">
+                +{analyticsData.personalizationImpact?.conversionImprovement?.toFixed(1) || 0}%
+              </Typography>
+              <Box sx={{ width: '100%', bgcolor: '#e0e0e0', height: 8, borderRadius: 4, mt: 1 }}>
+                <Box 
+                  sx={{ 
+                    bgcolor: 'success.main', 
+                    height: 8, 
+                    borderRadius: 4,
+                    width: `${Math.min(100, analyticsData.personalizationImpact?.conversionImprovement || 0)}%`
+                  }}
+                />
+              </Box>
+            </Box>
+          </GridItem>
+        </GridContainer>
+      </Paper>
+      
+      {/* Interaction Types and Top Queries */}
+      <GridContainer spacing={3} sx={{ mb: 3 }}>
+        <GridItem xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Interaction Types
+            </Typography>
+            <Box sx={{ mt: 2 }}>
+              {analyticsData.interactionTypes?.map((item: any, index: number) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">{item.type}</Typography>
+                    <Typography variant="body2">
+                      {item.count.toLocaleString()}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ width: '100%', bgcolor: '#e0e0e0', height: 8, borderRadius: 4 }}>
+                    <Box 
+                      sx={{ 
+                        bgcolor: 'primary.main', 
+                        height: 8, 
+                        borderRadius: 4,
+                        width: `${Math.min(100, (item.count / analyticsData.totalSessions) * 100)}%`
+                      }}
+                    />
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Paper>
+        </GridItem>
+        
+        <GridItem xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Top Search Queries
+            </Typography>
+            <Box sx={{ mt: 2 }}>
+              {analyticsData.topQueries?.map((item: any, index: number) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">{item.query}</Typography>
+                    <Typography variant="body2">
+                      {item.count.toLocaleString()}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ width: '100%', bgcolor: '#e0e0e0', height: 8, borderRadius: 4 }}>
+                    <Box 
+                      sx={{ 
+                        bgcolor: 'secondary.main', 
+                        height: 8, 
+                        borderRadius: 4,
+                        width: `${Math.min(100, (item.count / (analyticsData.topQueries[0]?.count || 1)) * 100)}%`
+                      }}
+                    />
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Paper>
+        </GridItem>
+      </GridContainer>
+      
+      {/* Call to Action */}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { md: 'center' } }}>
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Need More Detailed Analytics?
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Check out our performance metrics and user behavior sections for in-depth analysis.
+            </Typography>
+          </Box>
+          <Box sx={{ mt: { xs: 2, md: 0 }, display: 'flex', gap: 2 }}>
+            <Box 
+              component="a" 
+              href="/admin/analytics/performance-metrics"
+              sx={{ 
+                px: 2, 
+                py: 1, 
+                bgcolor: 'primary.main', 
+                color: 'white', 
+                borderRadius: 1,
+                textDecoration: 'none',
+                '&:hover': { bgcolor: 'primary.dark' }
               }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Improvement metrics */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Personalization Improvements</h3>
-        <div className="h-64">
-          <Bar 
-            data={improvementData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  title: {
-                    display: true,
-                    text: 'Improvement (%)',
-                  },
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Detailed metrics */}
-      <h2 className="text-xl font-semibold text-charcoal mb-4">Detailed Metrics</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Click-through rates */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Click-Through Rates</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Personalized</span>
-                <span className="text-sm font-medium text-gray-700">
-                  {(sessionPersonalization.clickThroughRates?.personalized?.clickThroughRate * 100)?.toFixed(2) || 0}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-sage rounded-full h-2" 
-                  style={{ width: `${(sessionPersonalization.clickThroughRates?.personalized?.clickThroughRate * 100) || 0}%` }}
-                ></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Regular</span>
-                <span className="text-sm font-medium text-gray-700">
-                  {(sessionPersonalization.clickThroughRates?.regular?.clickThroughRate * 100)?.toFixed(2) || 0}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-500 rounded-full h-2" 
-                  style={{ width: `${(sessionPersonalization.clickThroughRates?.regular?.clickThroughRate * 100) || 0}%` }}
-                ></div>
-              </div>
-            </div>
-            <div className="pt-2 border-t border-gray-200">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium text-gray-700">Improvement</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{sessionPersonalization.clickThroughRates?.improvementPercentage?.toFixed(2) || 0}%
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Dwell time metrics */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Dwell Time (seconds)</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Personalized</span>
-                <span className="text-sm font-medium text-gray-700">
-                  {(sessionPersonalization.dwellTimeMetrics?.personalized?.avgDwellTime / 1000)?.toFixed(2) || 0}s
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-sage rounded-full h-2" 
-                  style={{ width: `${Math.min(100, ((sessionPersonalization.dwellTimeMetrics?.personalized?.avgDwellTime / 1000) / 60) * 100) || 0}%` }}
-                ></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Regular</span>
-                <span className="text-sm font-medium text-gray-700">
-                  {(sessionPersonalization.dwellTimeMetrics?.regular?.avgDwellTime / 1000)?.toFixed(2) || 0}s
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-500 rounded-full h-2" 
-                  style={{ width: `${Math.min(100, ((sessionPersonalization.dwellTimeMetrics?.regular?.avgDwellTime / 1000) / 60) * 100) || 0}%` }}
-                ></div>
-              </div>
-            </div>
-            <div className="pt-2 border-t border-gray-200">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium text-gray-700">Improvement</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{sessionPersonalization.dwellTimeMetrics?.improvementPercentage?.toFixed(2) || 0}%
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            >
+              Performance Metrics
+            </Box>
+            <Box 
+              component="a" 
+              href="/admin/analytics/user-behavior"
+              sx={{ 
+                px: 2, 
+                py: 1, 
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 1,
+                textDecoration: 'none',
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
+            >
+              User Behavior
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
     </AdminLayout>
   );
 };

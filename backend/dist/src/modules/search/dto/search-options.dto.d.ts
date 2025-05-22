@@ -51,3 +51,4 @@ export declare class SearchOptionsInput {
     highlightPostTag?: string;
     highlightFragmentSize?: number;
 }
+export { SearchOptionsInput as SearchOptions };

@@ -1,1 +1,13 @@
 export * from './integrations.module';
+export { IntegrationsService as IntegrationsServiceImpl, IntegrationCredentials as IntegrationCredentialsImpl, SyncResult as SyncResultImpl, } from './integrations.service';
+export * from './services/shopify.service';
+export * from './services/woocommerce.service';
+export * from './services/base-integration.service';
+export * from './services/order-sync.service';
+export * from './integrations.controller';
+export * from './controllers/merchant-auth.controller';
+export * from './controllers/sync.controller';
+export { IntegrationsService, IntegrationCredentials, SyncResult, ShopifyCredentials, WooCommerceCredentials, } from './integrations.service.interface';
+export * from './types/integration-type.enum';
+export * from './entities/merchant-platform-connection.entity';
+export * from './enums';

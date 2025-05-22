@@ -5,24 +5,28 @@ This module provides comprehensive A/B testing capabilities for the av | nu mark
 ## Features
 
 ### Experiment Management
+
 - Create, update, and manage experiments with multiple variants
 - Control experiment lifecycle (draft, running, paused, completed, archived)
 - Configure audience targeting and traffic allocation
 - Set experiment duration and goals
 
 ### Variant Assignment
+
 - Random assignment of users to experiment variants
 - Consistent assignment across sessions
 - Support for audience percentage control
 - Flexible variant configuration via JSON
 
 ### Tracking and Analytics
+
 - Track impressions, interactions, and conversions
 - Record custom events and revenue data
 - Calculate key metrics (conversion rates, click-through rates)
 - Time-series analysis of experiment performance
 
 ### Statistical Analysis
+
 - Calculate statistical significance of results
 - Determine confidence levels for variant performance
 - Estimate required sample sizes for experiments
@@ -34,26 +38,28 @@ This module provides comprehensive A/B testing capabilities for the av | nu mark
 
 ```graphql
 mutation {
-  createExperiment(createExperimentDto: {
-    name: "Product Sort Order Experiment",
-    description: "Testing different product sorting algorithms",
-    type: SEARCH_ALGORITHM,
-    audiencePercentage: 50,
-    variants: [
-      {
-        name: "Control",
-        description: "Current sorting algorithm",
-        isControl: true,
-        configuration: "{\"algorithm\":\"default\",\"boost_new\":false}"
-      },
-      {
-        name: "Personalized Sort",
-        description: "Personalized sorting based on user preferences",
-        isControl: false,
-        configuration: "{\"algorithm\":\"personalized\",\"boost_new\":true}"
-      }
-    ]
-  }) {
+  createExperiment(
+    createExperimentDto: {
+      name: "Product Sort Order Experiment"
+      description: "Testing different product sorting algorithms"
+      type: SEARCH_ALGORITHM
+      audiencePercentage: 50
+      variants: [
+        {
+          name: "Control"
+          description: "Current sorting algorithm"
+          isControl: true
+          configuration: "{\"algorithm\":\"default\",\"boost_new\":false}"
+        }
+        {
+          name: "Personalized Sort"
+          description: "Personalized sorting based on user preferences"
+          isControl: false
+          configuration: "{\"algorithm\":\"personalized\",\"boost_new\":true}"
+        }
+      ]
+    }
+  ) {
     id
     name
     status
@@ -84,11 +90,7 @@ query {
 
 ```graphql
 mutation {
-  trackConversion(
-    assignmentId: "assignment-uuid",
-    value: 49.99,
-    context: "purchase"
-  )
+  trackConversion(assignmentId: "assignment-uuid", value: 49.99, context: "purchase")
 }
 ```
 
@@ -113,18 +115,22 @@ query {
 ## Integration with Other Modules
 
 ### Search Module
+
 - Test different search algorithms, boosting strategies, and ranking factors
 - Optimize relevance and discovery
 
 ### Personalization Module
+
 - Experiment with different personalization approaches
 - Test preference weighting and behavioral signals
 
 ### Analytics Module
+
 - Feed experiment results into analytics dashboards
 - Track long-term impact of winning variants
 
 ### UI Components
+
 - Test different layouts, CTAs, and user flows
 - Optimize for engagement and conversion
 

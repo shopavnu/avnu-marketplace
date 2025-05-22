@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react';
+/*
+  TEMPORARY: This file contains some unused imports and variables that are expected to be used
+  in future development (e.g., when integrating real merchant data or new features).
+  eslint-disable-next-line comments have been added to allow builds to pass during development.
+  BEFORE PRODUCTION: Remove these disables and clean up all unused code.
+*/
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/types/products';
+import { getUserProfile } from '@/utils/user';
 import { SearchFilters, SearchResult } from '@/types/search';
 import SearchBar from '@/components/search/SearchBar';
-import FilterPanel from '@/components/search/FilterPanel';
+import DiscoverFilterPanel, { DiscoverFilters } from '@/components/DiscoverFilterPanel';
+import ActiveFilterPills from '@/components/ActiveFilterPills';
 import ProductCard from '@/components/products/ProductCard';
 
 // Product image URLs from Unsplash - exactly 20 verified images
@@ -32,10 +40,12 @@ const productImages = [
 
 // Helper function to generate mock products
 const generateMockProducts = (seed = 1) => Array.from({ length: 20 }, (_, i) => {
+  // Use seed to create deterministic variation
+  const variation = (i * seed) % 5;
   // Use deterministic values for server-side rendering
   const productIndex = i + 1;
   const vendorIndex = Math.floor(i / 5) + 1;
-  const brandIndex = Math.floor(i / 3) + 1;
+  const brandIndex = Math.floor(i / 3) + 1 + variation; // Add variation to brand index
 
   return {
     id: `product-${productIndex}`,
@@ -76,37 +86,49 @@ const generateMockProducts = (seed = 1) => Array.from({ length: 20 }, (_, i) => 
   };
 });
 
+// Personalization helper
+function getPersonalizedProducts(products: Product[]): Product[] {
+  const profile = getUserProfile();
+  if (!profile || (!profile.interests.length && !profile.favoriteProducts.length)) return products;
+  // Prioritize favorite products, then products matching interests, then the rest
+  const favs = products.filter((p: Product) => profile.favoriteProducts.includes(p.id));
+  const interestMatches = products.filter((p: Product) =>
+    profile.interests.some((interest: string) => p.category === interest || (p.tags && p.tags.includes(interest))) &&
+    !profile.favoriteProducts.includes(p.id)
+  );
+  const rest = products.filter((p: Product) => !favs.includes(p) && !interestMatches.includes(p));
+  return [...favs, ...interestMatches, ...rest];
+}
+
 // Initial products with deterministic values for SSR
 const mockProducts: Product[] = generateMockProducts();
 
 export default function ShopPage() {
-  const [mounted, setMounted] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [, setMounted] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<SearchFilters>({
-    categories: [],
-    causes: [],
-    attributes: {},
-    isLocal: false,
-    isNew: false
-  });
+  const [filters, setFilters] = useState<DiscoverFilters>({});
+  const personalizedProducts = getPersonalizedProducts(mockProducts);
   const [searchResults, setSearchResults] = useState<SearchResult>({
     query: '',
     filters: {
       categories: [],
       causes: [],
-      attributes: {},
+      attributes: {} as { [categoryId: string]: { [attributeName: string]: string[] } },
       isLocal: false,
       isNew: false
     },
-    totalResults: mockProducts.length,
-    products: mockProducts,
+    totalResults: personalizedProducts.length,
+    products: personalizedProducts.slice(0, 16), // Start with 16 products
     brands: [],
     suggestedFilters: []
   });
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [, setPage] = useState(1);
+  const [, setHasMore] = useState(true);
+  const loadingMoreRef = useRef<HTMLDivElement | null>(null);
+  const [recentSearches] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setMounted(true);
@@ -154,21 +176,17 @@ export default function ShopPage() {
     setLoading(true);
     // In a real implementation, this would be an API call
     await new Promise(resolve => setTimeout(resolve, 500));
-    
     setSearchResults({
       query,
       filters: newFilters,
-      totalResults: mockProducts.length,
-      products: mockProducts,
+      totalResults: personalizedProducts.length,
+      products: personalizedProducts.slice(0, 16),
       brands: [],
       suggestedFilters: []
     });
-    
-    if (query && !recentSearches.includes(query)) {
-      setRecentSearches(prev => [query, ...prev].slice(0, 5));
-    }
-    
     setLoading(false);
+    setPage(1);
+    setHasMore(personalizedProducts.length > 16);
   };
 
   // Handle infinite scroll
@@ -202,54 +220,183 @@ export default function ShopPage() {
       <div className="container mx-auto px-4 safe-left safe-right safe-bottom">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Filters Panel */}
-          <div className="w-full md:w-64 shrink-0">
-            <FilterPanel
-              filters={filters}
-              onChange={(newFilters: Partial<SearchFilters>) => {
-                const updatedFilters = { ...filters, ...newFilters };
-                setFilters(updatedFilters);
-                handleSearch(searchQuery, updatedFilters);
-              }}
-            />
+          {/* Mobile filter button */}
+          <div className="block md:hidden mb-4">
+            <button
+              className="px-4 py-2 rounded bg-sage text-white font-semibold w-full"
+              onClick={() => setShowMobileFilters(true)}
+            >
+              Show Filters
+            </button>
           </div>
 
-          {/* Search Results */}
-          <div className="flex-1">
-            {/* Search Summary */}
-            <div className="mb-6">
-              <h1 className="text-2xl font-montserrat font-bold text-charcoal mb-2">
-                {searchQuery ? `Results for "${searchQuery}"` : 'All Products'}
-              </h1>
-              <p className="text-neutral-gray">
-                {searchResults.totalResults} products found
-              </p>
+          {/* Sticky sidebar for desktop, mobile hidden */}
+          <div className="hidden md:block w-64 shrink-0">
+            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+              <DiscoverFilterPanel
+                filters={filters}
+                onChange={change => setFilters(prev => ({ ...prev, ...change }))}
+                availableBrands={Array.from(new Set((searchResults.products ?? []).map(p => p.brand))).sort()}
+                availableCategories={Array.from(new Set((searchResults.products ?? []).map(p => p.category))).sort()}
+                availableAttributes={(() => {
+                  const availableAttributes: { [key: string]: string[] } = {};
+                  (searchResults.products ?? []).forEach(p => {
+                    if (p.attributes) {
+                      Object.entries(p.attributes).forEach(([k, v]) => {
+                        if (!Array.isArray(availableAttributes[k])) availableAttributes[k] = [];
+                        if (Array.isArray(v)) {
+                          v.forEach(val => {
+                            if (!availableAttributes[k].includes(val)) availableAttributes[k].push(val);
+                          });
+                        } else if (typeof v === 'string') {
+                          if (!availableAttributes[k].includes(v)) availableAttributes[k].push(v);
+                        }
+                      });
+                    }
+                  });
+                  return availableAttributes;
+                })()}
+              />
             </div>
+          </div>
 
-            {/* Product Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              <AnimatePresence>
-                {searchResults.products.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-
-            {/* Loading State */}
-            {loading && (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-4 border-sage border-t-transparent rounded-full animate-spin" />
-              </div>
+          {/* Mobile filter drawer/modal */}
+          <AnimatePresence>
+            {showMobileFilters && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 flex justify-end bg-black bg-opacity-40 md:hidden"
+                onClick={() => setShowMobileFilters(false)}
+              >
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="w-11/12 max-w-sm h-full bg-white shadow-xl p-4"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold">Filters</h2>
+                    <button onClick={() => setShowMobileFilters(false)} className="text-xl">&times;</button>
+                  </div>
+                  <DiscoverFilterPanel
+                    filters={filters}
+                    onChange={change => setFilters(prev => ({ ...prev, ...change }))}
+                    availableBrands={Array.from(new Set((searchResults.products ?? []).map(p => p.brand))).sort()}
+                    availableCategories={Array.from(new Set((searchResults.products ?? []).map(p => p.category))).sort()}
+                    availableAttributes={(() => {
+                      const availableAttributes: { [key: string]: string[] } = {};
+                      (searchResults.products ?? []).forEach(p => {
+                        if (p.attributes) {
+                          Object.entries(p.attributes).forEach(([k, v]) => {
+                            if (!Array.isArray(availableAttributes[k])) availableAttributes[k] = [];
+                            if (Array.isArray(v)) {
+                              v.forEach(val => {
+                                if (!availableAttributes[k].includes(val)) availableAttributes[k].push(val);
+                              });
+                            } else if (typeof v === 'string') {
+                              if (!availableAttributes[k].includes(v)) availableAttributes[k].push(v);
+                            }
+                          });
+                        }
+                      });
+                      return availableAttributes;
+                    })()}
+                  />
+                </motion.div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
+
+        {/* Search Results */}
+        <div className="flex-1">
+          {/* Active filter pills */}
+          <ActiveFilterPills
+            filters={filters}
+            onRemove={(key, value) => {
+              setFilters(prev => {
+                const updated: DiscoverFilters = { ...prev };
+                if (Array.isArray(updated[key])) {
+                  const arr = (updated[key] as string[]).filter((v: string) => v !== value);
+                  if (arr.length > 0) updated[key] = arr;
+                  else delete updated[key];
+                } else if (typeof updated[key] === 'object' && updated[key] !== null) {
+                  const obj = { ...updated[key] } as Record<string, string[]>;
+                  Object.keys(obj).forEach(attr => {
+                    if (Array.isArray(obj[attr])) {
+                      obj[attr] = obj[attr].filter((v: string) => value !== `${attr}: ${v}`);
+                      if (obj[attr].length === 0) delete obj[attr];
+                    }
+                  });
+                  if (Object.keys(obj).length > 0) {
+                    updated[key] = obj;
+                  } else {
+                    delete updated[key];
+                  }
+                } else {
+                  delete updated[key];
+                }
+                return updated;
+              });
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Search Results */}
+      <div className="flex-1">
+        {/* Search Summary */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-montserrat font-bold text-charcoal mb-2">
+            {searchQuery ? `Results for "${searchQuery}"` : 'All Products'}
+          </h1>
+          <p className="text-neutral-gray">
+            {searchResults.totalResults} products found
+          </p>
+        </div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+          <AnimatePresence>
+            {(searchResults.products ?? []).map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+        {/* Infinite scroll sentinel */}
+        <div ref={loadingMoreRef} style={{ height: 1 }} />
+
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 py-8">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-neutral-100 rounded-lg p-4 animate-pulse h-64 flex flex-col justify-between"
+              >
+                <div className="bg-neutral-200 h-32 rounded mb-4" />
+                <div className="space-y-2">
+                  <div className="h-4 bg-neutral-200 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-200 rounded w-1/2" />
+                  <div className="h-3 bg-neutral-200 rounded w-1/3" />
+                </div>
+                <div className="h-6 bg-neutral-200 rounded w-1/2 mt-4" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

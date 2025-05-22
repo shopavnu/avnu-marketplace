@@ -40,6 +40,10 @@ export declare class Product {
     tags?: string[];
     merchantId: string;
     brandName: string;
+    brandInfo?: {
+        name: string;
+        id: string;
+    } | string;
     isActive: boolean;
     inStock: boolean;
     featured: boolean;

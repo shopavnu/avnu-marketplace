@@ -1,20 +1,17 @@
+// @ts-strict-mode: enabled
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { OrdersService } from './services/orders.service';
+import { OrdersController } from './controllers/orders.controller';
+import { OrdersResolver } from './resolvers/orders.resolver';
+import { Order } from './entities/order.entity';
+import { OrderItem } from './entities/order-item.entity';
+import { OrderFulfillment } from './entities/order-fulfillment.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      // Order entities will go here
-    ]),
-  ],
-  providers: [
-    // Order services will go here
-  ],
-  controllers: [
-    // Order controllers will go here
-  ],
-  exports: [
-    // Exported services will go here
-  ],
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, OrderFulfillment])],
+  controllers: [OrdersController],
+  providers: [OrdersService, OrdersResolver],
+  exports: [OrdersService],
 })
 export class OrdersModule {}

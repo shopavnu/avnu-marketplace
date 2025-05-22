@@ -72,8 +72,8 @@ export class PersonalizationMetricsService {
    * Calculate conversion rate comparison between personalized and non-personalized experiences
    */
   private async calculateConversionRate(
-    sessions: SessionEntity[],
-    interactions: SessionInteractionEntity[],
+    _sessions: SessionEntity[],
+    _interactions: SessionInteractionEntity[],
   ): Promise<MetricComparisonDto> {
     // In a real implementation, this would analyze actual conversion data
     // For this example, we'll return sample data
@@ -93,7 +93,7 @@ export class PersonalizationMetricsService {
     interactions: SessionInteractionEntity[],
   ): Promise<MetricComparisonDto> {
     // Filter for click interactions
-    const clickInteractions = interactions.filter(interaction => interaction.type === 'CLICK');
+    const _clickInteractions = interactions.filter(interaction => interaction.type === 'CLICK');
 
     // In a real implementation, this would analyze actual click data
     // For this example, we'll return sample data
@@ -113,7 +113,7 @@ export class PersonalizationMetricsService {
     interactions: SessionInteractionEntity[],
   ): Promise<MetricComparisonDto> {
     // Filter for purchase interactions
-    const purchaseInteractions = interactions.filter(
+    const _purchaseInteractions = interactions.filter(
       interaction => interaction.type === 'PURCHASE',
     );
 
@@ -130,14 +130,11 @@ export class PersonalizationMetricsService {
   /**
    * Calculate time on site comparison between personalized and non-personalized experiences
    */
-  private async calculateTimeOnSite(sessions: SessionEntity[]): Promise<MetricComparisonDto> {
-    // Calculate average session duration
-    const personalizedSessions = sessions.filter(
-      session => session.duration && session.anonymousUserId,
-    );
-    const nonPersonalizedSessions = sessions.filter(
-      session => session.duration && !session.anonymousUserId,
-    );
+  private async calculateTimeOnSite(_sessions: SessionEntity[]): Promise<MetricComparisonDto> {
+    // These variables are not used in the mock implementation
+    // In a real implementation, we would filter sessions based on personalization flags
+    const _personalizedSessions = [];
+    const _nonPersonalizedSessions = [];
 
     // In a real implementation, this would analyze actual session duration data
     // For this example, we'll return sample data
@@ -156,7 +153,7 @@ export class PersonalizationMetricsService {
     interactions: SessionInteractionEntity[],
   ): Promise<number> {
     // Filter for recommendation click interactions
-    const recommendationInteractions = interactions.filter(
+    const _recommendationInteractions = interactions.filter(
       interaction => interaction.type === 'CLICK' && interaction.data?.source === 'recommendation',
     );
 
@@ -172,8 +169,8 @@ export class PersonalizationMetricsService {
     interactions: SessionInteractionEntity[],
   ): Promise<number> {
     // Filter for feedback interactions
-    const feedbackInteractions = interactions.filter(
-      interaction => interaction.type === 'FEEDBACK',
+    const _feedbackInteractions = interactions.filter(
+      interaction => interaction.data?.type === 'FEEDBACK',
     );
 
     // In a real implementation, this would analyze actual feedback data

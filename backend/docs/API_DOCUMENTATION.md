@@ -44,6 +44,7 @@ POST /api/search
 ```
 
 Request body:
+
 ```json
 {
   "query": "sustainable clothing",
@@ -116,34 +117,19 @@ GET /api/search/process-query?query=sustainable+clothing
 
 ```graphql
 query {
-  search(options: {
-    query: "sustainable clothing",
-    entityType: PRODUCT,
-    page: 0,
-    limit: 20,
-    enableNlp: true,
-    personalized: true,
-    filters: [
-      {
-        field: "categories",
-        values: ["Clothing", "Accessories"],
-        exact: false
-      }
-    ],
-    rangeFilters: [
-      {
-        field: "price",
-        min: 10,
-        max: 100
-      }
-    ],
-    sort: [
-      {
-        field: "price",
-        order: ASC
-      }
-    ]
-  }) {
+  search(
+    options: {
+      query: "sustainable clothing"
+      entityType: PRODUCT
+      page: 0
+      limit: 20
+      enableNlp: true
+      personalized: true
+      filters: [{ field: "categories", values: ["Clothing", "Accessories"], exact: false }]
+      rangeFilters: [{ field: "price", min: 10, max: 100 }]
+      sort: [{ field: "price", order: ASC }]
+    }
+  ) {
     pagination {
       total
       page
@@ -198,18 +184,12 @@ query {
 ```graphql
 query {
   searchProducts(
-    query: "sustainable clothing",
-    page: 0,
-    limit: 20,
-    enableNlp: true,
-    personalized: true,
-    filters: [
-      {
-        field: "categories",
-        values: ["Clothing"],
-        exact: false
-      }
-    ]
+    query: "sustainable clothing"
+    page: 0
+    limit: 20
+    enableNlp: true
+    personalized: true
+    filters: [{ field: "categories", values: ["Clothing"], exact: false }]
   ) {
     pagination {
       total
@@ -243,20 +223,20 @@ query {
 
 The search API supports the following options:
 
-| Option | Type | Description |
-|--------|------|-------------|
-| query | string | Search query |
-| entityType | enum | Type of entity to search (product, merchant, brand, all) |
-| page | number | Page number (0-indexed) |
-| limit | number | Items per page (max 100) |
-| enableNlp | boolean | Enable natural language processing |
-| personalized | boolean | Include personalized results |
-| filters | array | Array of filter options |
-| rangeFilters | array | Array of range filter options |
-| sort | array | Array of sort options |
-| boostByValues | boolean | Boost results matching user values |
-| includeSponsoredContent | boolean | Include sponsored content |
-| experimentId | string | Experiment ID for A/B testing |
+| Option                  | Type    | Description                                              |
+| ----------------------- | ------- | -------------------------------------------------------- |
+| query                   | string  | Search query                                             |
+| entityType              | enum    | Type of entity to search (product, merchant, brand, all) |
+| page                    | number  | Page number (0-indexed)                                  |
+| limit                   | number  | Items per page (max 100)                                 |
+| enableNlp               | boolean | Enable natural language processing                       |
+| personalized            | boolean | Include personalized results                             |
+| filters                 | array   | Array of filter options                                  |
+| rangeFilters            | array   | Array of range filter options                            |
+| sort                    | array   | Array of sort options                                    |
+| boostByValues           | boolean | Boost results matching user values                       |
+| includeSponsoredContent | boolean | Include sponsored content                                |
+| experimentId            | string  | Experiment ID for A/B testing                            |
 
 ### Filter Options
 
@@ -567,16 +547,19 @@ Implement these methods in their respective services or modify the code to use e
 ### Running the API
 
 1. Start Elasticsearch:
+
    ```bash
    docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.14.0
    ```
 
 2. Start the NestJS application:
+
    ```bash
    npm run start:dev
    ```
 
 3. Access the Swagger documentation:
+
    ```
    http://localhost:3000/api/docs
    ```

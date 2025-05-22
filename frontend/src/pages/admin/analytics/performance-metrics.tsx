@@ -5,20 +5,22 @@ import {
   Card,
   CardContent,
   CardHeader,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  CircularProgress,
-  Alert,
+  Tabs,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper,
+  CircularProgress,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent
 } from '@mui/material';
 import { 
   BarChart, 
@@ -35,14 +37,54 @@ import {
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNavigation from '../../../components/admin/AnalyticsNavigation';
 import { format } from 'date-fns';
-import { Grid as GridContainer, Grid as GridItem } from '../../../components/ui/MuiGrid';
+import GridContainer from '../../../components/analytics/GridContainer';
+import GridItem from '../../../components/analytics/GridItem';
 import { PerformanceMetricsData } from '../../../components/analytics/types';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`performance-tab-${index}`}
+      aria-labelledby={`performance-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `performance-tab-${index}`,
+    'aria-controls': `performance-tabpanel-${index}`,
+  };
+}
 
 const PerformanceMetrics: React.FC = () => {
   const [period, setPeriod] = useState<number>(30);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [performanceData, setPerformanceData] = useState<PerformanceMetricsData | null>(null);
+  const [tabValue, setTabValue] = useState(0);
+
+  // Handle tab change
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   // Load mock data
   useEffect(() => {
@@ -138,7 +180,7 @@ const PerformanceMetrics: React.FC = () => {
       );
       
       return {
-        name: item.pagePath.replace(/^\//, '').replace(/\/$/, '') || 'Home',
+        name: item.pagePath,
         pageLoad: item.loadTime,
         fcp: fcpItem?.fcp || 0,
         lcp: lcpItem?.lcp || 0
@@ -150,24 +192,20 @@ const PerformanceMetrics: React.FC = () => {
   const generateLayoutShiftData = () => {
     if (!performanceData) return [];
     
-    return performanceData.cumulativeLayoutShift.byPage.map((item) => {
-      return {
-        name: item.pagePath.replace(/^\//, '').replace(/\/$/, '') || 'Home',
-        cls: item.cls
-      };
-    });
+    return performanceData.cumulativeLayoutShift.byPage.map((item) => ({
+      name: item.pagePath,
+      cls: item.cls
+    }));
   };
 
   // Generate first input delay chart data
   const generateFidData = () => {
     if (!performanceData) return [];
     
-    return performanceData.firstInputDelay.byPage.map((item) => {
-      return {
-        name: item.pagePath.replace(/^\//, '').replace(/\/$/, '') || 'Home',
-        fid: item.fid
-      };
-    });
+    return performanceData.firstInputDelay.byPage.map((item) => ({
+      name: item.pagePath,
+      fid: item.fid
+    }));
   };
 
   // Handle loading state
@@ -187,12 +225,11 @@ const PerformanceMetrics: React.FC = () => {
     return (
       <AdminLayout title="Performance Metrics">
         <AnalyticsNavigation />
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
-          <p>Error loading performance metrics. Please try again later.</p>
-          <p className="text-sm mt-2">
-            {error?.message || 'Unknown error'}
-          </p>
-        </div>
+        <Box p={3}>
+          <Alert severity="error">
+            Error loading performance metrics: {error.message}
+          </Alert>
+        </Box>
       </AdminLayout>
     );
   }
@@ -216,15 +253,15 @@ const PerformanceMetrics: React.FC = () => {
       <AnalyticsNavigation />
       
       {/* Period selector */}
-      <Box display="flex" justifyContent="flex-end" mb={3}>
+      <Box display="flex" justifyContent="flex-end" mb={3} p={3}>
         <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
-          <InputLabel id="period-select-label">Period</InputLabel>
+          <InputLabel id="period-select-label">Time Period</InputLabel>
           <Select
             labelId="period-select-label"
             id="period-select"
             value={period}
             onChange={handlePeriodChange}
-            label="Period"
+            label="Time Period"
           >
             <MenuItem value={7}>Last 7 days</MenuItem>
             <MenuItem value={30}>Last 30 days</MenuItem>
@@ -233,218 +270,244 @@ const PerformanceMetrics: React.FC = () => {
         </FormControl>
       </Box>
       
-      {/* Core Web Vitals Overview */}
-      <GridContainer spacing={3} mb={3}>
-        <GridItem xs={12}>
-          <Card>
-            <CardHeader title="Core Web Vitals Overview" />
-            <CardContent>
-              <GridContainer spacing={3}>
-                <GridItem xs={12} md={4}>
-                  <Box textAlign="center" p={2} borderRadius={1} bgcolor="#f5f5f5">
-                    <Typography variant="h6" color="primary" gutterBottom>
-                      LCP
+      {/* Tabs */}
+      <Box sx={{ width: '100%', px: 3 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="performance metrics tabs">
+            <Tab label="Core Web Vitals" {...a11yProps(0)} />
+            <Tab label="Page Load Times" {...a11yProps(1)} />
+            <Tab label="Layout Stability" {...a11yProps(2)} />
+          </Tabs>
+        </Box>
+
+        {/* Core Web Vitals Tab */}
+        <TabPanel value={tabValue} index={0}>
+          <GridContainer spacing={3}>
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Core Web Vitals Overview" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={generateChartData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value}s`, '']} />
+                        <Legend />
+                        <Bar dataKey="fcp" name="First Contentful Paint" fill="#8884d8" />
+                        <Bar dataKey="lcp" name="Largest Contentful Paint" fill="#82ca9d" />
+                        <Bar dataKey="pageLoad" name="Page Load Time" fill="#ffc658" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={4}>
+              <Card>
+                <CardHeader title="Page Load Time" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {formatTime(performanceData.pageLoadTime.average)}
                     </Typography>
-                    <Typography variant="h4">
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average page load time
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={4}>
+              <Card>
+                <CardHeader title="First Contentful Paint" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {formatTime(performanceData.firstContentfulPaint.average)}
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average FCP
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={4}>
+              <Card>
+                <CardHeader title="Largest Contentful Paint" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
                       {formatTime(performanceData.largestContentfulPaint.average)}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Largest Contentful Paint
-                    </Typography>
-                    <Typography variant="caption" 
-                      color={performanceData.largestContentfulPaint.average < 2.5 ? "success.main" : 
-                        performanceData.largestContentfulPaint.average < 4 ? "warning.main" : "error.main"}>
-                      {performanceData.largestContentfulPaint.average < 2.5 ? "Good" : 
-                        performanceData.largestContentfulPaint.average < 4 ? "Needs Improvement" : "Poor"}
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average LCP
                     </Typography>
                   </Box>
-                </GridItem>
-                <GridItem xs={12} md={4}>
-                  <Box textAlign="center" p={2} borderRadius={1} bgcolor="#f5f5f5">
-                    <Typography variant="h6" color="primary" gutterBottom>
-                      FID
-                    </Typography>
-                    <Typography variant="h4">
-                      {formatTime(performanceData.firstInputDelay.average / 1000)}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      First Input Delay
-                    </Typography>
-                    <Typography variant="caption" 
-                      color={performanceData.firstInputDelay.average < 100 ? "success.main" : 
-                        performanceData.firstInputDelay.average < 300 ? "warning.main" : "error.main"}>
-                      {performanceData.firstInputDelay.average < 100 ? "Good" : 
-                        performanceData.firstInputDelay.average < 300 ? "Needs Improvement" : "Poor"}
-                    </Typography>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </TabPanel>
+
+        {/* Page Load Times Tab */}
+        <TabPanel value={tabValue} index={1}>
+          <GridContainer spacing={3}>
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Page Load Times by Page" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={performanceData.pageLoadTime.byPage}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="pagePath" 
+                          angle={-45} 
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value}s`, 'Load Time']} />
+                        <Bar dataKey="loadTime" name="Load Time" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </Box>
-                </GridItem>
-                <GridItem xs={12} md={4}>
-                  <Box textAlign="center" p={2} borderRadius={1} bgcolor="#f5f5f5">
-                    <Typography variant="h6" color="primary" gutterBottom>
-                      CLS
-                    </Typography>
-                    <Typography variant="h4">
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Page Load Time Details" />
+                <CardContent>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Page</TableCell>
+                          <TableCell align="right">Load Time (s)</TableCell>
+                          <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {performanceData.pageLoadTime.byPage.map((page) => (
+                          <TableRow key={page.pagePath}>
+                            <TableCell component="th" scope="row">
+                              {page.pagePath}
+                            </TableCell>
+                            <TableCell align="right">{formatTime(page.loadTime)}</TableCell>
+                            <TableCell align="right">
+                              {page.loadTime < 2.0 ? (
+                                <Typography color="success.main">Good</Typography>
+                              ) : page.loadTime < 3.0 ? (
+                                <Typography color="warning.main">Needs Improvement</Typography>
+                              ) : (
+                                <Typography color="error.main">Poor</Typography>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </TabPanel>
+
+        {/* Layout Stability Tab */}
+        <TabPanel value={tabValue} index={2}>
+          <GridContainer spacing={3}>
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="Cumulative Layout Shift" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
                       {performanceData.cumulativeLayoutShift.average.toFixed(2)}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Cumulative Layout Shift
-                    </Typography>
-                    <Typography variant="caption" 
-                      color={performanceData.cumulativeLayoutShift.average < 0.1 ? "success.main" : 
-                        performanceData.cumulativeLayoutShift.average < 0.25 ? "warning.main" : "error.main"}>
-                      {performanceData.cumulativeLayoutShift.average < 0.1 ? "Good" : 
-                        performanceData.cumulativeLayoutShift.average < 0.25 ? "Needs Improvement" : "Poor"}
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average CLS
                     </Typography>
                   </Box>
-                </GridItem>
-              </GridContainer>
-            </CardContent>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      
-      {/* Page Load Metrics Chart */}
-      <GridContainer spacing={3} mb={3}>
-        <GridItem xs={12}>
-          <Card>
-            <CardHeader title="Page Load Metrics by Page" />
-            <CardContent>
-              <Box height={400}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={generateChartData()}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end"
-                      height={70}
-                    />
-                    <YAxis label={{ value: 'Time (seconds)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value) => [`${value} seconds`, '']} />
-                    <Legend />
-                    <Bar dataKey="pageLoad" name="Page Load Time" fill="#8884d8" />
-                    <Bar dataKey="fcp" name="First Contentful Paint" fill="#82ca9d" />
-                    <Bar dataKey="lcp" name="Largest Contentful Paint" fill="#ffc658" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      
-      {/* Layout Shift and Input Delay Charts */}
-      <GridContainer spacing={3} mb={3}>
-        <GridItem xs={12} md={6}>
-          <Card>
-            <CardHeader title="Cumulative Layout Shift by Page" />
-            <CardContent>
-              <Box height={300}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={generateLayoutShiftData()}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end"
-                      height={70}
-                    />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${value}`, 'CLS Score']} />
-                    <Bar dataKey="cls" name="CLS Score" fill="#ff7300" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} md={6}>
-          <Card>
-            <CardHeader title="First Input Delay by Page" />
-            <CardContent>
-              <Box height={300}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={generateFidData()}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end"
-                      height={70}
-                    />
-                    <YAxis label={{ value: 'Time (ms)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value) => [`${value} ms`, 'FID']} />
-                    <Bar dataKey="fid" name="FID (ms)" fill="#8dd1e1" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      
-      {/* Detailed Metrics Table */}
-      <GridContainer spacing={3}>
-        <GridItem xs={12}>
-          <Card>
-            <CardHeader title="Detailed Performance Metrics by Page" />
-            <CardContent>
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Page</TableCell>
-                      <TableCell align="right">Page Load (s)</TableCell>
-                      <TableCell align="right">FCP (s)</TableCell>
-                      <TableCell align="right">LCP (s)</TableCell>
-                      <TableCell align="right">CLS</TableCell>
-                      <TableCell align="right">FID (ms)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {performanceData.pageLoadTime.byPage.map((item, index) => {
-                      const fcpItem = performanceData.firstContentfulPaint.byPage.find(
-                        (i) => i.pagePath === item.pagePath
-                      );
-                      const lcpItem = performanceData.largestContentfulPaint.byPage.find(
-                        (i) => i.pagePath === item.pagePath
-                      );
-                      const clsItem = performanceData.cumulativeLayoutShift.byPage.find(
-                        (i) => i.pagePath === item.pagePath
-                      );
-                      const fidItem = performanceData.firstInputDelay.byPage.find(
-                        (i) => i.pagePath === item.pagePath
-                      );
-                      
-                      return (
-                        <TableRow key={index}>
-                          <TableCell component="th" scope="row">
-                            {item.pagePath || '/'}
-                          </TableCell>
-                          <TableCell align="right">{item.loadTime.toFixed(2)}</TableCell>
-                          <TableCell align="right">{fcpItem?.fcp.toFixed(2) || '-'}</TableCell>
-                          <TableCell align="right">{lcpItem?.lcp.toFixed(2) || '-'}</TableCell>
-                          <TableCell align="right">{clsItem?.cls.toFixed(2) || '-'}</TableCell>
-                          <TableCell align="right">{fidItem?.fid || '-'}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        </GridItem>
-      </GridContainer>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={generateLayoutShiftData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [value, 'CLS']} />
+                        <Bar dataKey="cls" name="Layout Shift" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="First Input Delay" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {performanceData.firstInputDelay.average}ms
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average FID
+                    </Typography>
+                  </Box>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={generateFidData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value}ms`, 'FID']} />
+                        <Bar dataKey="fid" name="First Input Delay" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </TabPanel>
+      </Box>
     </AdminLayout>
   );
 };

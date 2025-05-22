@@ -35,7 +35,7 @@ If you encounter TypeScript errors with default imports, ensure that `esModuleIn
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
     // other options...
   }
 }
@@ -156,18 +156,18 @@ Handle GraphQL errors properly:
 ```typescript
 try {
   const result = await executeGraphQLQuery<ProductSearchResponseWrapper>(query, variables);
-  
+
   if (result.errors && result.errors.length > 0) {
     console.error('GraphQL errors:', result.errors);
     // Handle errors appropriately
     return null;
   }
-  
+
   if (!result.data || !result.data.searchProducts) {
     console.error('No data returned from GraphQL query');
     return null;
   }
-  
+
   return result.data.searchProducts;
 } catch (error) {
   console.error('Failed to execute GraphQL query:', error.message);
@@ -194,10 +194,7 @@ try {
   return response.data;
 } catch (error) {
   const axiosError = error as CustomAxiosError;
-  console.error(
-    'Request failed:',
-    axiosError.response?.data?.errors || axiosError.message
-  );
+  console.error('Request failed:', axiosError.response?.data?.errors || axiosError.message);
   throw error;
 }
 ```

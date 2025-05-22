@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useRef } from 'react';
+=======
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+>>>>>>> main
 import { 
   Box, 
   Typography, 
@@ -33,7 +37,10 @@ import {
   Pie,
   Cell
 } from 'recharts';
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 // Mock heatmap image URLs for different pages and device types
 const MOCK_HEATMAP_IMAGES: Record<string, string> = {
   '/': 'https://via.placeholder.com/800x600/f5f5f5/cccccc?text=Homepage+Heatmap',
@@ -74,7 +81,11 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
   }, [data]);
 
   // Load mock heatmap image for selected page and device
+<<<<<<< HEAD
   const loadHeatmapImage = () => {
+=======
+  const loadHeatmapImage = useCallback(() => {
+>>>>>>> main
     if (!selectedPage) return;
     
     setIsLoadingHeatmap(true);
@@ -99,17 +110,25 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
         setIsLoadingHeatmap(false);
       }
     }, 800); // Simulate network delay
+<<<<<<< HEAD
   };
+=======
+  }, [selectedPage, selectedDevice]);
+>>>>>>> main
 
   // Effect to load heatmap image when selected page or device changes
   useEffect(() => {
     if (selectedPage) {
       loadHeatmapImage();
     }
+<<<<<<< HEAD
   }, [selectedPage, selectedDevice]);
   
   // This is needed to avoid the dependency warning
   // eslint-disable-next-line react-hooks/exhaustive-deps
+=======
+  }, [selectedPage, selectedDevice, loadHeatmapImage]);
+>>>>>>> main
 
   // Format percentage
   const formatPercentage = (value: number) => `${(value * 100).toFixed(1)}%`;
@@ -165,6 +184,7 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
                   </Select>
                 </FormControl>
               </GridItem>
+<<<<<<< HEAD
             </GridContainer>
             
             {/* Heatmap Display */}
@@ -201,10 +221,51 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
                   sx={{ 
                     width: '100%', 
                     height: '100%', 
+=======
+              <GridItem xs={12} md={2}>
+                <Button 
+                  variant="contained" 
+                  color="primary"
+                  fullWidth
+                  onClick={loadHeatmapImage}
+                >
+                  Refresh Heatmap
+                </Button>
+              </GridItem>
+            </GridContainer>
+            
+            {/* Heatmap Visualization */}
+            <Box 
+              ref={heatmapContainerRef}
+              sx={{ 
+                mt: 3, 
+                height: 600, 
+                width: '100%', 
+                position: 'relative',
+                bgcolor: '#f5f5f5',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                border: '1px solid #ddd',
+                borderRadius: 1,
+                overflow: 'auto'
+              }}
+            >
+              {isLoadingHeatmap ? (
+                <Typography variant="h6" color="text.secondary">Loading heatmap...</Typography>
+              ) : heatmapImage ? (
+                <img 
+                  src={heatmapImage} 
+                  alt={`Heatmap for ${selectedPage}`}
+                  style={{ 
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+>>>>>>> main
                     objectFit: 'contain'
                   }}
                 />
               ) : (
+<<<<<<< HEAD
                 <Box 
                   sx={{ 
                     display: 'flex', 
@@ -219,6 +280,86 @@ const HeatmapAnalyticsTab: React.FC<HeatmapAnalyticsTabProps> = ({ data }) => {
                 </Box>
               )}
             </Box>
+=======
+                <Typography variant="h6" color="text.secondary">
+                  No heatmap data available for this page and device combination
+                </Typography>
+              )}
+            </Box>
+            
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              Heatmap shows click density (red = high, blue = low), hover patterns, and scroll pauses
+            </Typography>
+          </CardContent>
+        </Card>
+      </GridItem>
+
+      {/* Interaction Types */}
+      <GridItem xs={12} md={6}>
+        <Card>
+          <CardHeader title="Interaction Types Distribution" />
+          <CardContent>
+            <Box height={400}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data?.interactionTypes}
+                    dataKey="count"
+                    nameKey="type"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={120}
+                    label={(entry) => `${entry.type}: ${formatPercentage(entry.percentage)}`}
+                  >
+                    {data?.interactionTypes?.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: any, name: string, props: any) => {
+                      const entry = props.payload;
+                      return [`${value} (${formatPercentage(entry.percentage)})`, entry.type];
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+          </CardContent>
+        </Card>
+      </GridItem>
+
+      {/* Top Interaction Areas */}
+      <GridItem xs={12} md={6}>
+        <Card>
+          <CardHeader title="Top Interaction Areas" />
+          <CardContent>
+            <Box height={400}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data?.topInteractionAreas?.slice(0, 10)}
+                  layout="vertical"
+                  margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis 
+                    dataKey="elementSelector" 
+                    type="category" 
+                    width={150}
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => value.length > 25 ? `${value.substring(0, 25)}...` : value}
+                  />
+                  <Tooltip 
+                    formatter={(value: any) => [value, 'Interaction Count']}
+                    labelFormatter={(label) => `Element: ${label}`}
+                  />
+                  <Legend />
+                  <Bar dataKey="interactionCount" name="Interaction Count" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+>>>>>>> main
           </CardContent>
         </Card>
       </GridItem>

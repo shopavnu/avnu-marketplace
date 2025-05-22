@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import {
+  Repository,
+  Between as _Between,
+  MoreThanOrEqual,
+  LessThanOrEqual as _LessThanOrEqual,
+} from 'typeorm';
 import { SessionEntity } from '../entities/session.entity';
 import { SessionInteractionEntity } from '../entities/session-interaction.entity';
-import { SessionInteractionType } from './session.service';
+import { SessionInteractionType } from '../enums/session-interaction-type.enum';
 import { AnonymousUserMetricsDto } from '../dto/anonymous-user-metrics.dto';
 import { ProductsService } from '../../products/products.service';
 import { CategoryService } from '../../products/services/category.service';
@@ -91,7 +96,7 @@ export class AnonymousUserAnalyticsService {
   private async calculateOverviewMetrics(
     sessions: SessionEntity[],
     interactions: SessionInteractionEntity[],
-    startDate: Date,
+    _startDate: Date,
   ) {
     // Count total anonymous users (unique session IDs)
     const totalAnonymousUsers = sessions.length;
@@ -147,7 +152,7 @@ export class AnonymousUserAnalyticsService {
     const uniqueSessionIds = new Set<string>();
     let returningSessionCount = 0;
 
-    sessionsByDay.forEach((sessionsInDay, day) => {
+    sessionsByDay.forEach((sessionsInDay, _day) => {
       sessionsInDay.forEach(sessionId => {
         if (uniqueSessionIds.has(sessionId)) {
           returningSessionCount++;
@@ -396,8 +401,10 @@ export class AnonymousUserAnalyticsService {
     // Calculate conversion rate for each search term
     const result = [];
 
-    for (const [query, data] of searchData.entries()) {
+    for (const [_query, data] of searchData.entries()) {
       // Find sessions that searched for this term
+      // query variable is not used in the current implementation
+      // const _query = data.query;
       const searchSessionIds = data.sessions;
 
       // Find conversion interactions (add to cart or purchase) for these sessions
@@ -502,6 +509,8 @@ export class AnonymousUserAnalyticsService {
     // Convert to array and calculate averages
     const result = Array.from(timeframeData.values()).map(data => ({
       date: data.date,
+      // day property is not used in the current implementation
+      // _day: new Date(data.date).toLocaleDateString('en-US', { weekday: 'short' }),
       anonymousUsers: data.anonymousUsers,
       newUsers: data.newUsers,
       returningUsers: data.returningUsers.size,

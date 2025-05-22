@@ -181,6 +181,11 @@ __decorate([
     __metadata("design:type", String)
 ], Product.prototype, "brandName", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    (0, typeorm_1.Column)('json', { nullable: true }),
+    __metadata("design:type", Object)
+], Product.prototype, "brandInfo", void 0);
+__decorate([
     (0, graphql_1.Field)(),
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)

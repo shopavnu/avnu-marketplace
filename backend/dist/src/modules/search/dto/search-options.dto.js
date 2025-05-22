@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchOptionsInput = exports.RangeFilterOption = exports.FilterOption = exports.SortOption = exports.SortOrder = void 0;
+exports.SearchOptions = exports.SearchOptionsInput = exports.RangeFilterOption = exports.FilterOption = exports.SortOption = exports.SortOrder = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
@@ -146,6 +146,7 @@ let SearchOptionsInput = class SearchOptionsInput {
     }
 };
 exports.SearchOptionsInput = SearchOptionsInput;
+exports.SearchOptions = SearchOptionsInput;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Search query',
@@ -409,7 +410,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], SearchOptionsInput.prototype, "highlightFragmentSize", void 0);
-exports.SearchOptionsInput = SearchOptionsInput = __decorate([
+exports.SearchOptions = exports.SearchOptionsInput = SearchOptionsInput = __decorate([
     (0, graphql_1.InputType)('SearchOptionsInput')
 ], SearchOptionsInput);
 //# sourceMappingURL=search-options.dto.js.map

@@ -9,8 +9,7 @@ interface BrandCardProps {
 
 export default function BrandCard({ brand }: BrandCardProps) {
   return (
-    <ClientOnly>
-      <Link 
+    <Link 
         href={`/brands/${brand.id}`} 
         className="block overflow-hidden rounded-lg bg-white shadow-lg transition-transform hover:scale-[1.02]"
       >
@@ -61,6 +60,5 @@ export default function BrandCard({ brand }: BrandCardProps) {
           </div>
         </div>
       </Link>
-    </ClientOnly>
   );
 }

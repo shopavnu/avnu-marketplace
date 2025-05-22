@@ -121,29 +121,19 @@ The GraphQL schema follows a schema-first approach and includes:
 ```graphql
 # Multi-entity search with advanced options
 query {
-  multiEntitySearch(input: {
-    query: "sustainable fashion",
-    enableNlp: true,
-    personalized: true,
-    page: 0,
-    limit: 20,
-    productFilters: {
-      categories: ["clothing"],
-      minPrice: 50,
-      maxPrice: 200,
-      inStock: true
-    },
-    entityBoosting: {
-      productBoost: 1.2,
-      merchantBoost: 0.8,
-      brandBoost: 1.0
-    },
-    sortOptions: [{
-      field: "relevance",
-      order: DESC
-    }],
-    enableHighlighting: true
-  }) {
+  multiEntitySearch(
+    input: {
+      query: "sustainable fashion"
+      enableNlp: true
+      personalized: true
+      page: 0
+      limit: 20
+      productFilters: { categories: ["clothing"], minPrice: 50, maxPrice: 200, inStock: true }
+      entityBoosting: { productBoost: 1.2, merchantBoost: 0.8, brandBoost: 1.0 }
+      sortOptions: [{ field: "relevance", order: DESC }]
+      enableHighlighting: true
+    }
+  ) {
     query
     pagination {
       page
@@ -232,7 +222,7 @@ query {
     p95ResponseTime
     p99ResponseTime
   }
-  
+
   searchRelevanceMetrics(timeframe: "week") {
     averageRelevanceScore
     clickThroughRate
@@ -247,14 +237,14 @@ query {
     }
     averageResultCount
   }
-  
+
   popularSearches(limit: 10) {
     query
     count
     conversionRate
     clickThroughRate
   }
-  
+
   searchExperiments {
     id
     name
@@ -268,7 +258,7 @@ query {
       trafficPercentage
     }
   }
-  
+
   searchHealthStatus {
     isHealthy
     alerts {
@@ -288,9 +278,9 @@ query {
 ```graphql
 query {
   cursorSearch(
-    query: "sustainable fashion",
-    cursor: "eyJwYWdlIjoxfQ==",
-    limit: 20,
+    query: "sustainable fashion"
+    cursor: "eyJwYWdlIjoxfQ=="
+    limit: 20
     sessionId: "user-session-123"
   ) {
     query
@@ -331,7 +321,7 @@ query {
     preferEthical
     preferLocalBrands
   }
-  
+
   getPersonalizedRecommendations(limit: 10) {
     query
     pagination {
@@ -448,7 +438,9 @@ ELASTICSEARCH_INDEXING_CONCURRENCY=5
 
 ```javascript
 // Enhanced product search with filters
-const response = await fetch('/api/multi-search/products?query=sustainable+dress&categories=clothing,dresses&minPrice=50&maxPrice=200&enableNlp=true');
+const response = await fetch(
+  '/api/multi-search/products?query=sustainable+dress&categories=clothing,dresses&minPrice=50&maxPrice=200&enableNlp=true',
+);
 const results = await response.json();
 ```
 
@@ -499,7 +491,7 @@ const query = `
 
 const variables = {
   options: {
-    query: "eco-friendly",
+    query: 'eco-friendly',
     page: 0,
     limit: 20,
     enableNlp: true,
@@ -507,9 +499,9 @@ const variables = {
     entityBoosting: {
       productBoost: 1.2,
       merchantBoost: 0.8,
-      brandBoost: 1.0
-    }
-  }
+      brandBoost: 1.0,
+    },
+  },
 };
 
 const results = await graphqlClient.request(query, variables);
@@ -555,12 +547,14 @@ The search infrastructure follows a modular architecture with the following key 
 ### Setting Up the Development Environment
 
 1. **Prerequisites**:
+
    - Node.js (v14+)
    - npm or yarn
    - Elasticsearch (v7.10+)
    - Redis (for caching)
 
 2. **Installation**:
+
    ```bash
    # Install dependencies
    npm install
@@ -570,6 +564,7 @@ The search infrastructure follows a modular architecture with the following key 
    ```
 
 3. **Running the Indexing Script**:
+
    ```bash
    # Index all entities into Elasticsearch
    npm run index-all-entities

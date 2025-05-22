@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -34,7 +34,8 @@ import {
 import AdminLayout from '../../../components/admin/AdminLayout';
 import AnalyticsNavigation from '../../../components/admin/AnalyticsNavigation';
 import { format } from 'date-fns';
-import { Grid as GridContainer, Grid as GridItem } from '../../../components/ui/MuiGrid';
+import GridContainer from '../../../components/analytics/GridContainer';
+import GridItem from '../../../components/analytics/GridItem';
 import { UserBehaviorData } from '../../../components/analytics/types';
 import HeatmapAnalyticsTab from '../../../components/analytics/HeatmapAnalyticsTab';
 
@@ -149,12 +150,12 @@ const UserBehavior: React.FC = () => {
             },
             { 
               segment: 'Cart Abandoners', 
-              sessionCount: 2345,
+              sessionCount: 2543,
               avgSessionDuration: 280,
               conversionRate: 0.12
             }
           ],
-          deviceDistribution: [
+          deviceBreakdown: [
             { deviceType: 'Desktop', sessionCount: 5678, percentage: 0.45 },
             { deviceType: 'Mobile', sessionCount: 5432, percentage: 0.43 },
             { deviceType: 'Tablet', sessionCount: 1433, percentage: 0.12 }
@@ -177,31 +178,31 @@ const UserBehavior: React.FC = () => {
               hoverCount: 23456, 
               scrollPauseCount: 8765, 
               avgInteractionTime: 45.3,
-              interactionDensity: 0.67
+              interactionDensity: 0.65
             },
             { 
               pagePath: '/shop', 
               clickCount: 9876, 
-              hoverCount: 18765, 
-              scrollPauseCount: 6543, 
-              avgInteractionTime: 38.7,
-              interactionDensity: 0.58
+              hoverCount: 19876, 
+              scrollPauseCount: 7654, 
+              avgInteractionTime: 38.2,
+              interactionDensity: 0.59
             },
             { 
               pagePath: '/product/123', 
               clickCount: 7654, 
-              hoverCount: 14321, 
+              hoverCount: 15432, 
               scrollPauseCount: 5432, 
-              avgInteractionTime: 62.1,
-              interactionDensity: 0.72
+              avgInteractionTime: 52.1,
+              interactionDensity: 0.71
             },
             { 
               pagePath: '/cart', 
               clickCount: 4321, 
               hoverCount: 8765, 
               scrollPauseCount: 3456, 
-              avgInteractionTime: 28.9,
-              interactionDensity: 0.45
+              avgInteractionTime: 28.5,
+              interactionDensity: 0.48
             },
             { 
               pagePath: '/checkout', 
@@ -217,9 +218,8 @@ const UserBehavior: React.FC = () => {
             { deviceType: 'Mobile', interactionCount: 34567 },
             { deviceType: 'Tablet', interactionCount: 12345 }
           ],
-          interactionTimeDistribution: [
-            { timeRange: '0-10 seconds', sessionCount: 2345 },
-            { timeRange: '10-30 seconds', sessionCount: 5678 },
+          sessionDuration: [
+            { timeRange: '0-30 seconds', sessionCount: 2345 },
             { timeRange: '30-60 seconds', sessionCount: 7654 },
             { timeRange: '1-3 minutes', sessionCount: 6543 },
             { timeRange: '3+ minutes', sessionCount: 3456 }
@@ -232,7 +232,7 @@ const UserBehavior: React.FC = () => {
             { name: 'Homepage Visit', count: 10000, conversionRate: 1.0 },
             { name: 'Product View', count: 7500, conversionRate: 0.75 },
             { name: 'Add to Cart', count: 3000, conversionRate: 0.4 },
-            { name: 'Checkout Start', count: 1800, conversionRate: 0.6 },
+            { name: 'Checkout', count: 1800, conversionRate: 0.6 },
             { name: 'Purchase', count: 1200, conversionRate: 0.67 }
           ],
           dropOffPoints: [
@@ -254,10 +254,11 @@ const UserBehavior: React.FC = () => {
             { pagePath: '/checkout', avgScrollDepth: 0.95 }
           ],
           scrollPausePoints: [
-            { position: '25%', count: 4567 },
-            { position: '50%', count: 6789 },
+            { position: '10%', count: 7654 },
+            { position: '25%', count: 6543 },
+            { position: '50%', count: 5432 },
             { position: '75%', count: 3456 },
-            { position: '100%', count: 1234 }
+            { position: '90%', count: 1234 }
           ]
         };
         
@@ -276,29 +277,13 @@ const UserBehavior: React.FC = () => {
   }, [period]);
 
   // Load heatmap data function (referenced in useEffect warning)
-  const loadHeatmapData = () => {
-    // This function would normally fetch heatmap data
-    // It's already handled in the main useEffect
-  };
-
-  // Load funnel data function (referenced in useEffect warning)
-  const loadFunnelData = () => {
-    // This function would normally fetch funnel data
-    // It's already handled in the main useEffect
-  };
-
-  // Load scroll data function (referenced in useEffect warning)
-  const loadScrollData = () => {
-    // This function would normally fetch scroll data
-    // It's already handled in the main useEffect
-  };
+  const loadHeatmapData = useCallback(() => {
+    // Implementation would go here in a real app
+  }, []);
 
   const handlePeriodChange = (event: SelectChangeEvent<number>) => {
     setPeriod(Number(event.target.value));
   };
-
-  // Generate chart colors
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
   // Handle loading state
   if (loading) {
@@ -317,12 +302,11 @@ const UserBehavior: React.FC = () => {
     return (
       <AdminLayout title="User Behavior Analytics">
         <AnalyticsNavigation />
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-6">
-          <p>Error loading user behavior data. Please try again later.</p>
-          <p className="text-sm mt-2">
-            {error?.message || 'Unknown error'}
-          </p>
-        </div>
+        <Box p={3}>
+          <Alert severity="error">
+            Error loading user behavior data: {error.message}
+          </Alert>
+        </Box>
       </AdminLayout>
     );
   }
@@ -341,20 +325,22 @@ const UserBehavior: React.FC = () => {
     );
   }
 
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#9C27B0'];
+
   return (
     <AdminLayout title="User Behavior Analytics">
       <AnalyticsNavigation />
       
       {/* Period selector */}
-      <Box display="flex" justifyContent="flex-end" mb={3}>
+      <Box display="flex" justifyContent="flex-end" p={3}>
         <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
-          <InputLabel id="period-select-label">Period</InputLabel>
+          <InputLabel id="period-select-label">Time Period</InputLabel>
           <Select
             labelId="period-select-label"
             id="period-select"
             value={period}
             onChange={handlePeriodChange}
-            label="Period"
+            label="Time Period"
           >
             <MenuItem value={7}>Last 7 days</MenuItem>
             <MenuItem value={30}>Last 30 days</MenuItem>
@@ -363,286 +349,289 @@ const UserBehavior: React.FC = () => {
         </FormControl>
       </Box>
       
-      {/* Session Metrics Overview */}
-      <GridContainer spacing={3} mb={3}>
-        <GridItem xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="textSecondary" gutterBottom>
-                Total Sessions
-              </Typography>
-              <Typography variant="h4">
-                {behaviorData.sessionMetrics.totalSessions.toLocaleString()}
-              </Typography>
-            </CardContent>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="textSecondary" gutterBottom>
-                Avg. Session Duration
-              </Typography>
-              <Typography variant="h4">
-                {Math.floor(behaviorData.sessionMetrics.avgSessionDuration / 60)}m {behaviorData.sessionMetrics.avgSessionDuration % 60}s
-              </Typography>
-            </CardContent>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="textSecondary" gutterBottom>
-                Bounce Rate
-              </Typography>
-              <Typography variant="h4">
-                {(behaviorData.sessionMetrics.bounceRate * 100).toFixed(1)}%
-              </Typography>
-            </CardContent>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="textSecondary" gutterBottom>
-                Return Rate
-              </Typography>
-              <Typography variant="h4">
-                {(behaviorData.sessionMetrics.returnRate * 100).toFixed(1)}%
-              </Typography>
-            </CardContent>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      
-      {/* Tabs for different analytics views */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="user behavior tabs">
-          <Tab label="Overview" {...a11yProps(0)} />
-          <Tab label="Heatmap" {...a11yProps(1)} />
-          <Tab label="Funnel Analysis" {...a11yProps(2)} />
-          <Tab label="Scroll Behavior" {...a11yProps(3)} />
-        </Tabs>
-      </Box>
-      
-      {/* Overview Tab */}
-      <TabPanel value={tabValue} index={0}>
-        <GridContainer spacing={3}>
-          {/* Device Distribution */}
-          <GridItem xs={12} md={6}>
-            <Card>
-              <CardHeader title="Device Distribution" />
-              <CardContent>
-                <Box height={300}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={behaviorData.deviceDistribution}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="sessionCount"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+      {/* Tabs */}
+      <Box sx={{ px: 3 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="user behavior tabs">
+            <Tab label="Overview" {...a11yProps(0)} />
+            <Tab label="Heatmap Analytics" {...a11yProps(1)} />
+            <Tab label="Conversion Funnel" {...a11yProps(2)} />
+            <Tab label="Scroll Behavior" {...a11yProps(3)} />
+          </Tabs>
+        </Box>
+        
+        {/* Overview Tab */}
+        <TabPanel value={tabValue} index={0}>
+          <GridContainer spacing={3}>
+            {/* Session Metrics */}
+            <GridItem xs={12} md={6} lg={3}>
+              <Card>
+                <CardHeader title="Total Sessions" />
+                <CardContent>
+                  <Box textAlign="center">
+                    <Typography variant="h3" color="primary">
+                      {behaviorData.sessionMetrics.totalSessions.toLocaleString()}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            <GridItem xs={12} md={6} lg={3}>
+              <Card>
+                <CardHeader title="Avg. Session Duration" />
+                <CardContent>
+                  <Box textAlign="center">
+                    <Typography variant="h3" color="primary">
+                      {Math.floor(behaviorData.sessionMetrics.avgSessionDuration / 60)}m {behaviorData.sessionMetrics.avgSessionDuration % 60}s
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            <GridItem xs={12} md={6} lg={3}>
+              <Card>
+                <CardHeader title="Bounce Rate" />
+                <CardContent>
+                  <Box textAlign="center">
+                    <Typography variant="h3" color="primary">
+                      {(behaviorData.sessionMetrics.bounceRate * 100).toFixed(1)}%
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            <GridItem xs={12} md={6} lg={3}>
+              <Card>
+                <CardHeader title="Return Rate" />
+                <CardContent>
+                  <Box textAlign="center">
+                    <Typography variant="h3" color="primary">
+                      {(behaviorData.sessionMetrics.returnRate * 100).toFixed(1)}%
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            {/* User Segments */}
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="User Segments" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={behaviorData.userSegments}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
                       >
-                        {behaviorData.deviceDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => [value.toLocaleString(), 'Sessions']} />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridItem>
-          
-          {/* User Segments */}
-          <GridItem xs={12} md={6}>
-            <Card>
-              <CardHeader title="User Segments" />
-              <CardContent>
-                <Box height={300}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={behaviorData.userSegments}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="segment" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => [value.toLocaleString(), 'Sessions']} />
-                      <Legend />
-                      <Bar dataKey="sessionCount" name="Sessions" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridItem>
-          
-          {/* Navigation Paths */}
-          <GridItem xs={12}>
-            <Card>
-              <CardHeader title="Top Navigation Paths" />
-              <CardContent>
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Path</TableCell>
-                        <TableCell align="right">Count</TableCell>
-                        <TableCell align="right">Conversion Rate</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {behaviorData.navigationPaths.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            {item.path.join(' → ')}
-                          </TableCell>
-                          <TableCell align="right">{item.count.toLocaleString()}</TableCell>
-                          <TableCell align="right">{(item.conversionRate * 100).toFixed(1)}%</TableCell>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="segment" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          height={70}
+                        />
+                        <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                        <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                        <Tooltip />
+                        <Legend />
+                        <Bar yAxisId="left" dataKey="sessionCount" name="Sessions" fill="#8884d8" />
+                        <Bar yAxisId="right" dataKey="avgSessionDuration" name="Avg. Duration (s)" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            {/* Device Breakdown */}
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="Device Type Breakdown" />
+                <CardContent>
+                  <Box height={300} display="flex" justifyContent="center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={behaviorData.deviceBreakdown}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="sessionCount"
+                          nameKey="deviceType"
+                          label={({ deviceType, percentage }) => `${deviceType}: ${(percentage * 100).toFixed(0)}%`}
+                        >
+                          {behaviorData.deviceBreakdown.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [value.toLocaleString(), 'Sessions']} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            {/* Navigation Paths */}
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Top Navigation Paths" />
+                <CardContent>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Path</TableCell>
+                          <TableCell align="right">Users</TableCell>
+                          <TableCell align="right">Conversion Rate</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
-          </GridItem>
-        </GridContainer>
-      </TabPanel>
-      
-      {/* Heatmap Tab */}
-      <TabPanel value={tabValue} index={1}>
-        <HeatmapAnalyticsTab data={heatmapData} />
-      </TabPanel>
-      
-      {/* Funnel Analysis Tab */}
-      <TabPanel value={tabValue} index={2}>
-        <GridContainer spacing={3}>
-          {/* Conversion Funnel */}
-          <GridItem xs={12}>
-            <Card>
-              <CardHeader title="Conversion Funnel" />
-              <CardContent>
-                <Box height={400}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={funnelData.stages}
-                      layout="vertical"
-                      margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        width={100}
-                      />
-                      <Tooltip formatter={(value) => [value.toLocaleString(), 'Users']} />
-                      <Bar 
-                        dataKey="count" 
-                        name="Users" 
-                        fill="#8884d8"
-                        label={{ position: 'right', formatter: (value) => value.toLocaleString() }}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridItem>
-          
-          {/* Drop-off Points */}
-          <GridItem xs={12}>
-            <Card>
-              <CardHeader title="Drop-off Points" />
-              <CardContent>
-                <Box height={300}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={funnelData.dropOffPoints}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="stage" />
-                      <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                      <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="count" name="Users Lost" fill="#8884d8" />
-                      <Bar yAxisId="right" dataKey="percentage" name="Drop-off Rate" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridItem>
-        </GridContainer>
-      </TabPanel>
-      
-      {/* Scroll Behavior Tab */}
-      <TabPanel value={tabValue} index={3}>
-        <GridContainer spacing={3}>
-          {/* Average Scroll Depth */}
-          <GridItem xs={12} md={6}>
-            <Card>
-              <CardHeader title="Average Scroll Depth by Page" />
-              <CardContent>
-                <Box height={300}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={scrollData.scrollDepthByPage}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="pagePath" 
-                        angle={-45} 
-                        textAnchor="end"
-                        height={70}
-                      />
-                      <YAxis 
-                        domain={[0, 1]} 
-                        tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-                      />
-                      <Tooltip formatter={(value) => [`${(value * 100).toFixed(1)}%`, 'Avg Scroll Depth']} />
-                      <Bar dataKey="avgScrollDepth" name="Avg Scroll Depth" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridItem>
-          
-          {/* Scroll Pause Points */}
-          <GridItem xs={12} md={6}>
-            <Card>
-              <CardHeader title="Scroll Pause Points" />
-              <CardContent>
-                <Box height={300}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={scrollData.scrollPausePoints}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="position" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => [value.toLocaleString(), 'Pauses']} />
-                      <Bar dataKey="count" name="Pause Count" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridItem>
-        </GridContainer>
-      </TabPanel>
+                      </TableHead>
+                      <TableBody>
+                        {behaviorData.navigationPaths.map((path, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{path.path.join(' → ')}</TableCell>
+                            <TableCell align="right">{path.count.toLocaleString()}</TableCell>
+                            <TableCell align="right">{(path.conversionRate * 100).toFixed(1)}%</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </TabPanel>
+        
+        {/* Heatmap Analytics Tab */}
+        <TabPanel value={tabValue} index={1}>
+          <HeatmapAnalyticsTab data={heatmapData} />
+        </TabPanel>
+        
+        {/* Conversion Funnel Tab */}
+        <TabPanel value={tabValue} index={2}>
+          <GridContainer spacing={3}>
+            {/* Conversion Funnel */}
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Conversion Funnel" />
+                <CardContent>
+                  <Box height={400}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={funnelData.stages}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [value.toLocaleString(), 'Users']} />
+                        <Bar dataKey="count" fill="#8884d8">
+                          {funnelData.stages.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            {/* Drop-off Points */}
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Drop-off Points" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={funnelData.dropOffPoints}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="stage" />
+                        <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                        <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                        <Tooltip />
+                        <Legend />
+                        <Bar yAxisId="left" dataKey="count" name="Users Lost" fill="#8884d8" />
+                        <Bar yAxisId="right" dataKey="percentage" name="Drop-off Rate" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </TabPanel>
+        
+        {/* Scroll Behavior Tab */}
+        <TabPanel value={tabValue} index={3}>
+          <GridContainer spacing={3}>
+            {/* Average Scroll Depth */}
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="Average Scroll Depth by Page" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={scrollData.scrollDepthByPage}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="pagePath" 
+                          angle={-45} 
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis 
+                          domain={[0, 1]} 
+                          tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+                        />
+                        <Tooltip formatter={(value) => [`${(value * 100).toFixed(1)}%`, 'Avg Scroll Depth']} />
+                        <Bar dataKey="avgScrollDepth" name="Avg Scroll Depth" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+            
+            {/* Scroll Pause Points */}
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="Scroll Pause Points" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={scrollData.scrollPausePoints}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="position" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [value.toLocaleString(), 'Pauses']} />
+                        <Bar dataKey="count" name="Pause Count" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </TabPanel>
+      </Box>
     </AdminLayout>
   );
 };

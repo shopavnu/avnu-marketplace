@@ -1,2 +1,1 @@
-export declare class KeyboardNavigationModule {
-}
+export declare class KeyboardNavigationModule {}

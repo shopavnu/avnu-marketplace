@@ -1,0 +1,82 @@
+  /**
+   * Generate a secure state parameter with hash verification
+   * This provides better CSRF protection for the OAuth flow
+   */
+  private generateSecureState(baseState: string): { secureState: string; hash: string } {
+    // Create a hash of the state with our secret
+    const hmac = crypto.createHmac('sha256', this.config.api.secret || '');
+    hmac.update(baseState);
+    const hash = hmac.digest('hex');
+    
+    // Return the state and its hash
+    return {
+      secureState: baseState,
+      hash,
+    };
+  }
+  
+  /**
+   * Verify that a shop domain is valid
+   * Prevents redirects to malicious domains
+   */
+  private isValidShopDomain(shop: string): boolean {
+    // Check the shop is a valid myshopify.com domain
+    const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/;
+    return shopRegex.test(shop);
+  }
+  
+  /**
+   * Verify that all required scopes were granted
+   */
+  private verifyRequiredScopes(grantedScopes: string): void {
+    // Split the granted scopes into an array
+    const scopesArray = grantedScopes.split(',').map(scope => scope.trim());
+    
+    // Define the minimum required scopes for our app
+    const requiredScopes = [
+      'read_products',
+      'write_products',
+      'read_orders',
+      'write_orders',
+      'read_fulfillments',
+      'write_fulfillments',
+      // Add 2025-01 required scopes
+      'read_merchant_managed_fulfillment_orders',
+      'write_merchant_managed_fulfillment_orders'
+    ];
+    
+    // Check if all required scopes are granted
+    const missingScopes = requiredScopes.filter(scope => !scopesArray.includes(scope));
+    
+    if (missingScopes.length > 0) {
+      this.logger.warn(`Missing required scopes: ${missingScopes.join(', ')}`);
+      throw new Error(`Missing required Shopify API scopes: ${missingScopes.join(', ')}`);
+    }
+  }
+  
+  /**
+   * Verify that the access token works by making a test API call
+   */
+  private async verifyAccessToken(shop: string, accessToken: string): Promise<void> {
+    try {
+      // Make a simple API call to verify the token works
+      const response = await axios.get(
+        `https://${shop}/admin/api/${this.config.api.version}/shop.json`,
+        {
+          headers: {
+            'X-Shopify-Access-Token': accessToken,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (!response.data || !response.data.shop) {
+        throw new Error('Failed to verify access token: Invalid response');
+      }
+      
+      this.logger.log(`Successfully verified access token for shop: ${shop}`);
+    } catch (error) {
+      this.logger.error('Access token verification failed', error);
+      throw new Error('Failed to verify access token with Shopify');
+    }
+  }

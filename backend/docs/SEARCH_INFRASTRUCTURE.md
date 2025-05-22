@@ -178,8 +178,16 @@ type Query {
   searchBrands(query: String!, options: SearchOptionsInput): SearchResponseType!
   searchAll(query: String!, options: SearchOptionsInput): SearchResponseType!
   multiEntitySearch(input: EnhancedSearchInput!): SearchResponseType!
-  cursorSearch(query: String, cursor: String, limit: Int = 20, sessionId: String): CursorSearchResponseType!
-  autocompleteSuggestions(query: String!, options: AutocompleteOptionsInput): AutocompleteSuggestionsType!
+  cursorSearch(
+    query: String
+    cursor: String
+    limit: Int = 20
+    sessionId: String
+  ): CursorSearchResponseType!
+  autocompleteSuggestions(
+    query: String!
+    options: AutocompleteOptionsInput
+  ): AutocompleteSuggestionsType!
   discoverySearch(query: String = "", options: SearchOptionsInput): SearchResponseType!
   discoverySuggestions(limit: Int): DiscoverySuggestionsType!
   discoveryHomepage: DiscoveryHomepageType!

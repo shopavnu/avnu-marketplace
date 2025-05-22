@@ -32,32 +32,36 @@ We've implemented a Redis-based caching layer to improve performance and reduce 
    - Handles cache invalidation based on events
    - Implements cache warming logic
    - Uses ResilientCacheService for fault tolerance
-   
 2. **ProductQueryOptimizerService**
+
    - Optimizes database queries for product listings
    - Builds efficient query plans with proper indexes
    - Implements caching for common query patterns
    - Provides automatic cache warming for frequent queries
 
 3. **CachedProductsService**
+
    - Enhanced product service that leverages caching
    - Drop-in replacement for the original ProductsService
    - Maintains the same API while adding caching capabilities
    - Handles cache misses by fetching from the database
 
 4. **CacheWarmingService**
+
    - Scheduled service for cache warming
    - Runs on configurable intervals (hourly/daily)
    - Prioritizes popular and frequently accessed data
    - Can be triggered manually via API
 
 5. **CachePerformanceMonitorService**
+
    - Tracks cache hit/miss rates
    - Measures response times with and without cache
    - Calculates performance improvements
    - Provides metrics for monitoring and optimization
 
 6. **CircuitBreakerService**
+
    - Monitors Redis connection health
    - Automatically switches to fallback strategy when Redis is unavailable
    - Implements retry logic with configurable parameters
@@ -88,6 +92,7 @@ We've implemented a Redis-based caching layer to improve performance and reduce 
 We've implemented a comprehensive indexing strategy for the Product entity to optimize the most common query patterns:
 
 #### Single Column Indexes
+
 - `price`: Optimizes price range filtering and sorting
 - `merchantId`: Speeds up merchant-specific product listings
 - `inStock`: Improves filtering for available products
@@ -98,21 +103,25 @@ We've implemented a comprehensive indexing strategy for the Product entity to op
 - `slug`: Optimizes URL-friendly lookups
 
 #### Composite Indexes
+
 - `merchantId, inStock, isActive`: Optimizes the common pattern of filtering active, in-stock products for a specific merchant
 - `price, inStock, isActive`: Improves price range queries on active, available products
 - `createdAt, id`: Ensures stable sorting for cursor-based pagination
 
 #### Full-Text Indexes
+
 - `categories`: Enables efficient text search within product categories
 
 ### Query Optimization Techniques
 
 1. **Optimized Query Building**
+
    - Uses TypeORM's QueryBuilder for efficient query construction
    - Applies appropriate WHERE clauses based on filter combinations
    - Ensures consistent ordering for stable pagination
 
 2. **Smart Join Strategy**
+
    - Avoids unnecessary joins for simple queries
    - Uses LEFT JOINs only when needed for related data
 
@@ -123,10 +132,12 @@ We've implemented a comprehensive indexing strategy for the Product entity to op
 ### Query Result Caching
 
 1. **Cache Key Generation**
+
    - Creates consistent cache keys based on filter parameters
    - Normalizes filter objects to ensure cache hits for equivalent queries
 
 2. **Cache TTL Strategy**
+
    - Frequently accessed combinations: 5 minutes
    - Less common combinations: 2 minutes
    - Highly volatile data: 30 seconds
@@ -190,6 +201,7 @@ The system includes a Redis health monitoring service that:
 ### Event-based Tracking
 
 The system uses NestJS event emitter to track:
+
 - Cache hits and misses
 - Response times
 - Cache invalidations
