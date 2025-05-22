@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from 'nestjs-redis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
 
 /**
@@ -12,7 +12,6 @@ import { Redis } from 'ioredis';
 @Injectable()
 export class ShopifyWebhookDeduplicator {
   private readonly logger = new Logger(ShopifyWebhookDeduplicator.name);
-  private redisClient: Redis;
   private readonly useRedis: boolean;
 
   // Default processing window (how long to remember processed webhooks)
@@ -23,7 +22,7 @@ export class ShopifyWebhookDeduplicator {
 
   constructor(
     private configService: ConfigService,
-    private redisService: RedisService,
+    @InjectRedis() private readonly redisClient: Redis,
   ) {
     // Get configuration
     this.processingWindowMs = this.configService.get<number>(
@@ -36,7 +35,6 @@ export class ShopifyWebhookDeduplicator {
 
     if (this.useRedis) {
       try {
-        this.redisClient = this.redisService.getClient();
         this.logger.log('Webhook deduplicator initialized with Redis');
       } catch (error) {
         this.logger.error(`Failed to initialize Redis for webhook deduplication: ${error.message}`);

@@ -1,7 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { RedisModule } from 'nestjs-redis';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 // Import our scalability utilities
 import { ShopifyConnectionPoolManager } from './connection-pool-manager';
@@ -35,13 +35,13 @@ import { ShopifyClientService as _ShopifyClientService } from '../services/shopi
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([ShopifyBulkOperationJob]),
-    RedisModule.register({
-      // These would ideally come from your config service
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379', 10),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0', 10),
-      keyPrefix: 'shopify:',
+    RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'single',
+        url: `redis://${process.env.REDIS_HOST || 'localhost'}:${parseInt(process.env.REDIS_PORT || '6379', 10)}`,
+      }),
+      inject: [ConfigService],
     }),
   ],
   providers: [
