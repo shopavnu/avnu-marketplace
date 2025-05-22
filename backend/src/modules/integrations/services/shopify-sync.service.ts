@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { Repository, FindOptionsWhere, FindOperator } from 'typeorm';
 import { MerchantPlatformConnection } from '../entities/merchant-platform-connection.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Order } from '../../orders/entities/order.entity';
@@ -36,7 +36,7 @@ export class ShopifySyncService {
       this.logger.warn('Received empty Shopify order status, defaulting to PENDING');
       return 'PENDING';
     }
-    
+
     // Normalize status to lowercase for consistent comparison
     const normalizedStatus = status.toLowerCase().trim();
     
@@ -79,8 +79,10 @@ export class ShopifySyncService {
       return [];
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Error fetching Shopify products: ${errorMessage}`, 
-                         error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Error fetching Shopify products: ${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw new Error(`Failed to fetch Shopify products: ${errorMessage}`);
     }
   }
@@ -99,8 +101,10 @@ export class ShopifySyncService {
       return [];
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Error fetching Shopify orders: ${errorMessage}`, 
-                         error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Error fetching Shopify orders: ${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw new Error(`Failed to fetch Shopify orders: ${errorMessage}`);
     }
   }
@@ -133,7 +137,7 @@ export class ShopifySyncService {
         failed: 0,
         total: externalProducts.length,
         errors: [],
-        success: true
+        success: true,
       };
       
       // Process each product
@@ -150,9 +154,9 @@ export class ShopifySyncService {
           // Find existing product
           const existingProduct = await this.productRepository.findOne({
             where: {
-              externalId: shopifyProduct.id.toString(), // Convert number to string for query
-              platformType: PlatformType.SHOPIFY
-            } as FindOptionsWhere<Product>
+              externalId: externalProduct.id.toString(), // Convert number to string for query
+              platformType: PlatformType.SHOPIFY,
+            } as FindOptionsWhere<Product>,
           });
           
           if (existingProduct) {
@@ -165,9 +169,12 @@ export class ShopifySyncService {
             result.created++;
           }
         } catch (productError) {
-          const errorMessage = productError instanceof Error ? productError.message : 'Unknown error';
-          this.logger.error(`Error processing Shopify product: ${errorMessage}`, 
-                            productError instanceof Error ? productError.stack : undefined);
+          const errorMessage =
+            productError instanceof Error ? productError.message : 'Unknown error';
+          this.logger.error(
+            `Error processing Shopify product: ${errorMessage}`,
+            productError instanceof Error ? productError.stack : undefined,
+          );
           result.failed++;
           result.errors = result.errors || [];
           result.errors.push(errorMessage);
@@ -184,8 +191,11 @@ export class ShopifySyncService {
     } catch (error) {
       // Handle overall sync failure
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Error syncing Shopify products: ${errorMessage}`, 
-                         error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Error syncing Shopify products: ${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+
       
       // Update connection with error status
       try {
@@ -195,7 +205,7 @@ export class ShopifySyncService {
         await this.merchantPlatformConnectionRepository.save(connection);
       } catch (saveError) {
         this.logger.error(
-          `Failed to update connection ${connection.id} sync status: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`
+          `Failed to update connection ${connection.id} sync status: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`,
         );
       }
       
@@ -205,7 +215,7 @@ export class ShopifySyncService {
         failed: 0,
         total: 0,
         errors: [errorMessage],
-        success: false
+        success: false,
       };
     }
   }
@@ -222,10 +232,10 @@ export class ShopifySyncService {
 
     try {
       this.logger.log(`Starting order sync for Shopify store ${connection.platformStoreName}`);
-      
+
       // Get orders from Shopify
       const externalOrders = await this.fetchOrders(connection);
-      
+
       // Initialize sync result
       const result: SyncResult = {
         created: 0,
@@ -233,7 +243,7 @@ export class ShopifySyncService {
         failed: 0,
         total: externalOrders.length,
         errors: [],
-        success: true
+        success: true,
       };
       
       // Process each order
@@ -251,8 +261,8 @@ export class ShopifySyncService {
           const existingOrder = await this.orderRepository.findOne({
             where: {
               externalId: order.id.toString(), // Convert number to string for query
-              platformType: PlatformType.SHOPIFY
-            } as FindOptionsWhere<Order>
+              platformType: PlatformType.SHOPIFY,
+            } as FindOptionsWhere<Order>,
           });
           
           if (existingOrder) {
@@ -266,8 +276,10 @@ export class ShopifySyncService {
           }
         } catch (orderError) {
           const errorMessage = orderError instanceof Error ? orderError.message : 'Unknown error';
-          this.logger.error(`Error processing Shopify order: ${errorMessage}`, 
-                            orderError instanceof Error ? orderError.stack : undefined);
+          this.logger.error(
+            `Error processing Shopify order: ${errorMessage}`,
+            orderError instanceof Error ? orderError.stack : undefined,
+          );
           result.failed++;
           result.errors = result.errors || [];
           result.errors.push(errorMessage);
@@ -278,8 +290,11 @@ export class ShopifySyncService {
     } catch (error) {
       // Handle overall sync failure
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Error syncing Shopify orders: ${errorMessage}`, 
-                         error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Error syncing Shopify orders: ${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+
       
       return {
         created: 0,
@@ -287,7 +302,7 @@ export class ShopifySyncService {
         failed: 0,
         total: 0,
         errors: [errorMessage],
-        success: false
+        success: false,
       };
     }
   }
@@ -299,18 +314,25 @@ export class ShopifySyncService {
    * @param merchantId Optional merchant ID associated with the webhook
    * @returns Promise resolving to a boolean indicating success or failure
    */
-  async handleWebhook(event: string, data: Record<string, any>, merchantId?: string): Promise<boolean> {
+  async handleWebhook(
+    event: string,
+    data: Record<string, unknown>,
+    merchantId?: string
+  ): Promise<boolean> {
     try {
       this.logger.log(`Processing Shopify webhook event: ${event}`);
       
       // Find the appropriate connection for this merchant & platform
-      const connection = merchantId ? 
-        await this.merchantPlatformConnectionRepository.findOne({
-          where: {
-            merchantId,
-            platformType: PlatformType.SHOPIFY
-          }
-        }) : null;
+      const connection = merchantId
+        ? await this.merchantPlatformConnectionRepository.findOne({
+            where: {
+              merchantId,
+              platformType: PlatformType.SHOPIFY as unknown as
+                | PlatformType
+                | FindOperator<PlatformType>,
+            },
+          })
+        : null;
       
       if (!connection && merchantId) {
         this.logger.warn(`No Shopify connection found for merchant ${merchantId}`);
@@ -332,8 +354,10 @@ export class ShopifySyncService {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Error handling Shopify webhook: ${errorMessage}`, 
-                         error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Error handling Shopify webhook: ${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return false;
     }
   }
@@ -343,9 +367,9 @@ export class ShopifySyncService {
    * @private
    */
   private async handleProductWebhook(
-    event: string, 
-    data: Record<string, any>, 
-    connection: MerchantPlatformConnection | null
+    event: string,
+    _data: Record<string, unknown>,
+    _connection: MerchantPlatformConnection | null
   ): Promise<void> {
     // Implement product webhook logic based on event type
     this.logger.log(`Handling Shopify product webhook: ${event}`);
@@ -366,9 +390,9 @@ export class ShopifySyncService {
    * @private
    */
   private async handleOrderWebhook(
-    event: string, 
-    data: Record<string, any>, 
-    connection: MerchantPlatformConnection | null
+    event: string,
+    _data: Record<string, unknown>,
+    _connection: MerchantPlatformConnection | null
   ): Promise<void> {
     // Implement order webhook logic based on event type
     this.logger.log(`Handling Shopify order webhook: ${event}`);
