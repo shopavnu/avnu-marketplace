@@ -5,8 +5,8 @@ import {
   Paper,
   LinearProgress,
   Tooltip,
-  Grid,
 } from "@mui/material";
+import { GridContainer, GridItem } from "../../../ui/Grid";
 
 export interface QualityMetric {
   name: string;
@@ -96,13 +96,13 @@ const MerchantQualityScorecard: React.FC<MerchantQualityScorecardProps> = ({
         Quality Metrics Breakdown
       </Typography>
 
-      <Grid container spacing={2}>
+      <GridContainer spacing={2}>
         {data.metrics.map((metric, index) => {
           const percentage = (metric.score / metric.maxScore) * 100;
           const color = getColorForScore(metric.score, metric.maxScore);
 
           return (
-            <Grid item xs={12} key={index}>
+            <GridItem xs={12} key={index}>
               <Tooltip title={metric.tooltip || ""} arrow placement="top">
                 <Box>
                   <Box
@@ -135,10 +135,10 @@ const MerchantQualityScorecard: React.FC<MerchantQualityScorecardProps> = ({
                   />
                 </Box>
               </Tooltip>
-            </Grid>
+            </GridItem>
           );
         })}
-      </Grid>
+      </GridContainer>
     </Paper>
   );
 };
