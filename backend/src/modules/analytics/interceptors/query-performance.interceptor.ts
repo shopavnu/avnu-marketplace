@@ -37,7 +37,7 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
         ...request.query,
         ...request.body,
       };
-    } else if (context.getType() === 'graphql' as any) {
+    } else if (context.getType() === ('graphql' as any)) {
       // For GraphQL resolvers
       const _gqlContext = context.getArgByIndex(2);
       const info = context.getArgByIndex(3);
