@@ -62,7 +62,7 @@ export interface UserBehaviorData {
     avgSessionDuration: number;
     conversionRate: number;
   }[];
-  deviceDistribution: {
+  deviceBreakdown: {
     deviceType: string;
     sessionCount: number;
     percentage: number;
