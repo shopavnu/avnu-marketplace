@@ -15,6 +15,12 @@ import {
   Tabs,
   Tab,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import {
   BarChart,
@@ -589,7 +595,7 @@ const UserBehavior: React.FC = () => {
                           ]}
                         />
                         <Bar dataKey="count" fill="#8884d8">
-                          {funnelData.stages.map((entry, index) => (
+                          {funnelData.stages.map((entry: any, index: number) => (
                             <Cell
                               key={`cell-${index}`}
                               fill={COLORS[index % COLORS.length]}
@@ -677,8 +683,8 @@ const UserBehavior: React.FC = () => {
                           }
                         />
                         <Tooltip
-                          formatter={(value) => [
-                            `${(value * 100).toFixed(1)}%`,
+                          formatter={(value: any) => [
+                            `${(Number(value) * 100).toFixed(1)}%`,
                             "Avg Scroll Depth",
                           ]}
                         />
