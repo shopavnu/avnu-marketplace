@@ -7,6 +7,7 @@ import {
   Index,
 } from 'typeorm';
 import { Field, ID, ObjectType, Float, Int, GraphQLISODateTime } from '@nestjs/graphql';
+import { PlatformType } from '../../shared';
 
 @ObjectType()
 class AccessibilityMetadata {
@@ -175,6 +176,11 @@ export class Product {
   @Column()
   @Index()
   externalSource: string;
+
+  @Field(() => String)
+  @Column({ type: 'enum', enum: PlatformType, default: PlatformType.CUSTOM })
+  @Index()
+  platformType: PlatformType;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
