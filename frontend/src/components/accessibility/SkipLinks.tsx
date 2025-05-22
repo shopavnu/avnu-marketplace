@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 
 interface SkipLink {
   /**
    * The target ID to skip to
    */
   targetId: string;
-  
+
   /**
    * The text to display for the skip link
    */
@@ -34,7 +34,7 @@ const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
           left: 0;
           z-index: 9999;
         }
-        
+
         .skip-link {
           position: absolute;
           top: -9999px;
@@ -47,12 +47,12 @@ const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
           outline: none;
           transition: top 0.2s ease;
         }
-        
+
         .skip-link:focus {
           top: 0;
         }
       `}</style>
-      
+
       {links.map((link, index) => (
         <a
           key={index}
@@ -61,20 +61,20 @@ const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
           onClick={(e) => {
             // Prevent default to handle focus manually
             e.preventDefault();
-            
+
             // Find the target element
             const target = document.getElementById(link.targetId);
-            
+
             if (target) {
               // Scroll to the target
-              target.scrollIntoView({ behavior: 'smooth' });
-              
+              target.scrollIntoView({ behavior: "smooth" });
+
               // Set focus to the target
-              target.setAttribute('tabindex', '-1');
+              target.setAttribute("tabindex", "-1");
               target.focus({ preventScroll: true });
-              
+
               // Update URL hash
-              window.history.pushState(null, '', `#${link.targetId}`);
+              window.history.pushState(null, "", `#${link.targetId}`);
             }
           }}
         >

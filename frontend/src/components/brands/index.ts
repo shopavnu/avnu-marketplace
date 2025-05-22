@@ -1,2 +1,2 @@
-export { default as BrandCard } from './BrandCard';
-export { default as FeaturedBrands } from './FeaturedBrands';
+export { default as BrandCard } from "./BrandCard";
+export { default as FeaturedBrands } from "./FeaturedBrands";

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UseKeyboardNavigationProps {
   rootElement: React.RefObject<HTMLElement>;
@@ -23,71 +23,74 @@ export default function useKeyboardNavigation({
   wrapAround = true,
   focusFirstOnMount = false,
   onFocus,
-  onToggleHelp
+  onToggleHelp,
 }: UseKeyboardNavigationProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
-  
+
   // Get all focusable elements
   const getFocusableElements = useCallback((): HTMLElement[] => {
     if (!rootElement.current) return [];
-    
+
     const focusableElements = Array.from(
-      rootElement.current.querySelectorAll<HTMLElement>(selector)
-    ).filter(el => {
+      rootElement.current.querySelectorAll<HTMLElement>(selector),
+    ).filter((el) => {
       // Filter out hidden elements
-      return el.offsetParent !== null && !el.hasAttribute('disabled');
+      return el.offsetParent !== null && !el.hasAttribute("disabled");
     });
-    
+
     return focusableElements;
   }, [rootElement, selector]);
-  
+
   // Focus a specific element by index
-  const focusElement = useCallback((index: number) => {
-    const elements = getFocusableElements();
-    if (!elements[index]) return;
-    
-    elements[index].focus();
-    setCurrentIndex(index);
-    
-    if (onFocus) {
-      onFocus(elements[index], index);
-    }
-  }, [getFocusableElements, onFocus]);
-  
+  const focusElement = useCallback(
+    (index: number) => {
+      const elements = getFocusableElements();
+      if (!elements[index]) return;
+
+      elements[index].focus();
+      setCurrentIndex(index);
+
+      if (onFocus) {
+        onFocus(elements[index], index);
+      }
+    },
+    [getFocusableElements, onFocus],
+  );
+
   // Focus the next element
   const focusNextElement = useCallback(() => {
     const elements = getFocusableElements();
     if (elements.length === 0) return;
-    
+
     const focusedElement = document.activeElement as HTMLElement;
     const currentIdx = elements.indexOf(focusedElement);
     let nextIndex = currentIdx + 1;
-    
+
     // Wrap around to the beginning if at the end and wrapAround is true
     if (nextIndex >= elements.length) {
       nextIndex = wrapAround ? 0 : elements.length - 1;
     }
-    
+
     focusElement(nextIndex);
   }, [getFocusableElements, wrapAround, focusElement]);
-  
+
   // Focus the previous element
   const focusPreviousElement = useCallback(() => {
     const elements = getFocusableElements();
     if (elements.length === 0) return;
-    
+
     const focusedElement = document.activeElement as HTMLElement;
     const currentIdx = elements.indexOf(focusedElement);
     let prevIndex = currentIdx - 1;
-    
+
     // Wrap around to the end if at the beginning and wrapAround is true
     if (prevIndex < 0) {
       prevIndex = wrapAround ? elements.length - 1 : 0;
     }
-    
+
     focusElement(prevIndex);
   }, [getFocusableElements, wrapAround, focusElement]);
-  
+
   // Focus first element on mount if enabled
   useEffect(() => {
     if (focusFirstOnMount) {
@@ -97,55 +100,55 @@ export default function useKeyboardNavigation({
       }
     }
   }, [focusFirstOnMount, getFocusableElements, focusElement]);
-  
+
   // Set up keyboard event listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input or textarea
       if (
-        document.activeElement?.tagName === 'INPUT' ||
-        document.activeElement?.tagName === 'TEXTAREA' ||
-        document.activeElement?.getAttribute('role') === 'textbox' ||
-        document.activeElement?.hasAttribute('contenteditable')
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA" ||
+        document.activeElement?.getAttribute("role") === "textbox" ||
+        document.activeElement?.hasAttribute("contenteditable")
       ) {
         return;
       }
 
       switch (e.key) {
-        case 'ArrowDown':
+        case "ArrowDown":
           if (enableVertical) {
             e.preventDefault();
             focusNextElement();
           }
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           if (enableVertical) {
             e.preventDefault();
             focusPreviousElement();
           }
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           if (enableHorizontal) {
             e.preventDefault();
             focusNextElement();
           }
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           if (enableHorizontal) {
             e.preventDefault();
             focusPreviousElement();
           }
           break;
-        case 'Home':
+        case "Home":
           e.preventDefault();
           focusElement(0);
           break;
-        case 'End':
+        case "End":
           e.preventDefault();
           const elements = getFocusableElements();
           focusElement(elements.length - 1);
           break;
-        case '/':
+        case "/":
           // Toggle help dialog
           if (onToggleHelp && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
@@ -154,26 +157,26 @@ export default function useKeyboardNavigation({
           break;
       }
     };
-    
-    document.addEventListener('keydown', handleKeyDown);
+
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [
-    enableVertical, 
-    enableHorizontal, 
-    focusNextElement, 
-    focusPreviousElement, 
-    focusElement, 
-    getFocusableElements, 
-    onToggleHelp
+    enableVertical,
+    enableHorizontal,
+    focusNextElement,
+    focusPreviousElement,
+    focusElement,
+    getFocusableElements,
+    onToggleHelp,
   ]);
-  
+
   return {
     currentIndex,
     focusElement,
     focusNextElement,
     focusPreviousElement,
-    getFocusableElements
+    getFocusableElements,
   };
 }

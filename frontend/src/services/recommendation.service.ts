@@ -1,7 +1,7 @@
-import axios from 'axios';
-import { Product } from '../types/product';
-import { getAuthHeader } from '../utils/auth';
-import { API_BASE_URL } from '../config';
+import axios from "axios";
+import { Product } from "../types/product";
+import { getAuthHeader } from "../utils/auth";
+import { API_BASE_URL } from "../config";
 
 /**
  * Service for interacting with the recommendation API
@@ -15,20 +15,20 @@ export class RecommendationService {
    */
   static async getSimilarProducts(
     productId: string,
-    type: 'attribute_based' | 'view_based' | 'hybrid' = 'hybrid',
-    limit: number = 6
+    type: "attribute_based" | "view_based" | "hybrid" = "hybrid",
+    limit: number = 6,
   ): Promise<Product[]> {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/recommendations/similar-products/${productId}`,
         {
           params: { type, limit },
-        }
+        },
       );
 
       return response.data.data || [];
     } catch (error) {
-      console.error('Error fetching similar products:', error);
+      console.error("Error fetching similar products:", error);
       return [];
     }
   }
@@ -44,7 +44,7 @@ export class RecommendationService {
     limit: number = 10,
     refresh: boolean = false,
     excludePurchased: boolean = true,
-    freshness: number = 0.7
+    freshness: number = 0.7,
   ): Promise<Product[]> {
     try {
       const response = await axios.get(
@@ -52,12 +52,12 @@ export class RecommendationService {
         {
           params: { limit, refresh, excludePurchased, freshness },
           headers: getAuthHeader(),
-        }
+        },
       );
 
       return response.data.data || [];
     } catch (error) {
-      console.error('Error fetching personalized recommendations:', error);
+      console.error("Error fetching personalized recommendations:", error);
       return [];
     }
   }
@@ -69,7 +69,7 @@ export class RecommendationService {
    */
   static async getTrendingProducts(
     limit: number = 10,
-    excludePurchased: boolean = true
+    excludePurchased: boolean = true,
   ): Promise<Product[]> {
     try {
       const response = await axios.get(
@@ -77,12 +77,12 @@ export class RecommendationService {
         {
           params: { limit, excludePurchased },
           headers: getAuthHeader(),
-        }
+        },
       );
 
       return response.data.data || [];
     } catch (error) {
-      console.error('Error fetching trending products:', error);
+      console.error("Error fetching trending products:", error);
       return [];
     }
   }
@@ -98,10 +98,10 @@ export class RecommendationService {
         {},
         {
           headers: getAuthHeader(),
-        }
+        },
       );
     } catch (error) {
-      console.error('Error tracking impression:', error);
+      console.error("Error tracking impression:", error);
     }
   }
 
@@ -116,10 +116,10 @@ export class RecommendationService {
         {},
         {
           headers: getAuthHeader(),
-        }
+        },
       );
     } catch (error) {
-      console.error('Error tracking click:', error);
+      console.error("Error tracking click:", error);
     }
   }
 
@@ -134,10 +134,10 @@ export class RecommendationService {
         {},
         {
           headers: getAuthHeader(),
-        }
+        },
       );
     } catch (error) {
-      console.error('Error tracking conversion:', error);
+      console.error("Error tracking conversion:", error);
     }
   }
 }

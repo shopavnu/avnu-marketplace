@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useQuery, gql } from '@apollo/client';
-import AdminLayout from '../../../components/admin/AdminLayout';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useQuery, gql } from "@apollo/client";
+import AdminLayout from "../../../components/admin/AdminLayout";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,8 +12,8 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
+} from "chart.js";
+import { Line, Bar } from "react-chartjs-2";
 
 // Define interfaces for data structures
 interface InteractionTimeSeriesItem {
@@ -74,7 +74,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 // GraphQL query for user journey data
@@ -154,41 +154,41 @@ const SEARCH_USERS = gql`
 const UserJourneyDashboard: React.FC = () => {
   const router = useRouter();
   const { userId: userIdFromUrl, segment: segmentId } = router.query;
-  
+
   const [userId, setUserId] = useState<string | null>(null);
   const [period, setPeriod] = useState<number>(30);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  
+
   // Set userId from URL parameter when available
   useEffect(() => {
-    if (userIdFromUrl && typeof userIdFromUrl === 'string') {
+    if (userIdFromUrl && typeof userIdFromUrl === "string") {
       setUserId(userIdFromUrl);
     }
   }, [userIdFromUrl]);
 
   // Fetch user journey data
-  const { 
-    data: journeyData, 
-    loading: journeyLoading, 
+  const {
+    data: journeyData,
+    loading: journeyLoading,
     error: journeyError,
-    refetch: refetchJourney
+    refetch: refetchJourney,
   } = useQuery(USER_JOURNEY, {
     variables: { userId, period },
     skip: !userId,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   // Fetch user search results
-  const { 
-    data: searchData, 
-    loading: searchLoading, 
+  const {
+    data: searchData,
+    loading: searchLoading,
     error: searchError,
-    refetch: refetchSearch
+    refetch: refetchSearch,
   } = useQuery(SEARCH_USERS, {
     variables: { query: searchQuery, limit: 5 },
     skip: !isSearching || !searchQuery,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   // Handle user search
@@ -204,75 +204,90 @@ const UserJourneyDashboard: React.FC = () => {
     setUserId(selectedUserId);
     setIsSearching(false);
     refetchJourney({ userId: selectedUserId, period });
-    
+
     // Update URL with selected user ID
-    router.push({
-      pathname: router.pathname,
-      query: { ...router.query, userId: selectedUserId },
-    }, undefined, { shallow: true });
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, userId: selectedUserId },
+      },
+      undefined,
+      { shallow: true },
+    );
   };
-  
+
   // Format dates for display
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    
+    if (!dateString) return "N/A";
+
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
-  
+
   // Format duration in milliseconds
   const formatDuration = (ms: number) => {
-    if (!ms) return '0s';
-    
+    if (!ms) return "0s";
+
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
   };
-  
+
   // Format percentages for display
-  const formatPercentage = (value: number | null | undefined, decimals = 2): string => {
-    if (value === undefined || value === null) return '0%';
-    return typeof value === 'number' ? `${value.toFixed(decimals)}%` : '0%';
+  const formatPercentage = (
+    value: number | null | undefined,
+    decimals = 2,
+  ): string => {
+    if (value === undefined || value === null) return "0%";
+    return typeof value === "number" ? `${value.toFixed(decimals)}%` : "0%";
   };
 
   // Prepare data for interactions over time chart
-  const prepareInteractionsTimeSeriesData = (interactions: InteractionTimeSeriesItem[]) => {
+  const prepareInteractionsTimeSeriesData = (
+    interactions: InteractionTimeSeriesItem[],
+  ) => {
     if (!interactions || interactions.length === 0) return null;
 
     return {
       labels: interactions.map((item: InteractionTimeSeriesItem) => item.date),
       datasets: [
         {
-          label: 'Interactions',
-          data: interactions.map((item: InteractionTimeSeriesItem) => item.interactionCount),
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          label: "Interactions",
+          data: interactions.map(
+            (item: InteractionTimeSeriesItem) => item.interactionCount,
+          ),
+          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
           fill: true,
           tension: 0.4,
         },
         {
-          label: 'Searches',
-          data: interactions.map((item: InteractionTimeSeriesItem) => item.searchCount),
-          borderColor: 'rgba(153, 102, 255, 1)',
-          backgroundColor: 'rgba(153, 102, 255, 0.2)',
+          label: "Searches",
+          data: interactions.map(
+            (item: InteractionTimeSeriesItem) => item.searchCount,
+          ),
+          borderColor: "rgba(153, 102, 255, 1)",
+          backgroundColor: "rgba(153, 102, 255, 0.2)",
           fill: true,
           tension: 0.4,
         },
         {
-          label: 'Clicks',
-          data: interactions.map((item: InteractionTimeSeriesItem) => item.clickCount),
-          borderColor: 'rgba(255, 159, 64, 1)',
-          backgroundColor: 'rgba(255, 159, 64, 0.2)',
+          label: "Clicks",
+          data: interactions.map(
+            (item: InteractionTimeSeriesItem) => item.clickCount,
+          ),
+          borderColor: "rgba(255, 159, 64, 1)",
+          backgroundColor: "rgba(255, 159, 64, 0.2)",
           fill: true,
           tension: 0.4,
         },
@@ -288,24 +303,30 @@ const UserJourneyDashboard: React.FC = () => {
       labels: byCategory.map((item: CategoryItem) => item.category),
       datasets: [
         {
-          label: 'CTR Improvement',
-          data: byCategory.map((item: CategoryItem) => item.clickThroughRateImprovement * 100),
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
+          label: "CTR Improvement",
+          data: byCategory.map(
+            (item: CategoryItem) => item.clickThroughRateImprovement * 100,
+          ),
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(75, 192, 192, 1)",
           borderWidth: 1,
         },
         {
-          label: 'Conversion Improvement',
-          data: byCategory.map((item: CategoryItem) => item.conversionRateImprovement * 100),
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',
-          borderColor: 'rgba(153, 102, 255, 1)',
+          label: "Conversion Improvement",
+          data: byCategory.map(
+            (item: CategoryItem) => item.conversionRateImprovement * 100,
+          ),
+          backgroundColor: "rgba(153, 102, 255, 0.6)",
+          borderColor: "rgba(153, 102, 255, 1)",
           borderWidth: 1,
         },
         {
-          label: 'Dwell Time Improvement',
-          data: byCategory.map((item: CategoryItem) => item.dwellTimeImprovement * 100),
-          backgroundColor: 'rgba(255, 159, 64, 0.6)',
-          borderColor: 'rgba(255, 159, 64, 1)',
+          label: "Dwell Time Improvement",
+          data: byCategory.map(
+            (item: CategoryItem) => item.dwellTimeImprovement * 100,
+          ),
+          backgroundColor: "rgba(255, 159, 64, 0.6)",
+          borderColor: "rgba(255, 159, 64, 1)",
           borderWidth: 1,
         },
       ],
@@ -335,15 +356,17 @@ const UserJourneyDashboard: React.FC = () => {
       </AdminLayout>
     );
   }
-  
+
   // Return the main component
   return (
     <AdminLayout title="User Journey Analysis">
       <div className="mb-6">
         <h1 className="text-xl font-semibold">User Journey Analysis</h1>
-        <p className="text-gray-500">View detailed user journey data and personalization effectiveness</p>
+        <p className="text-gray-500">
+          View detailed user journey data and personalization effectiveness
+        </p>
       </div>
-      
+
       {/* Placeholder for the actual implementation */}
       <div className="bg-white rounded-lg shadow p-6">
         <p className="text-center text-gray-500">

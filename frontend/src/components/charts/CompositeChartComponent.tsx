@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   ComposedChart,
   Line,
@@ -9,16 +9,16 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
-} from 'recharts';
-import { Box, Typography, useTheme } from '@mui/material';
+  ResponsiveContainer,
+} from "recharts";
+import { Box, Typography, useTheme } from "@mui/material";
 
 interface MetricConfig {
   key: string;
-  type: 'bar' | 'line' | 'area';
+  type: "bar" | "line" | "area";
   name?: string;
   color?: string;
-  yAxisId?: 'left' | 'right';
+  yAxisId?: "left" | "right";
   stackId?: string;
 }
 
@@ -50,21 +50,21 @@ const CompositeChartComponent: React.FC<CompositeChartProps> = ({
   rightYAxisLabel,
   useRightYAxis = false,
   tooltipFormatter = (value) => `${value}`,
-  showGrid = true
+  showGrid = true,
 }) => {
   const theme = useTheme();
-  
+
   // Default colors if not specified
   const defaultColors = [
     theme.palette.primary.main,
     theme.palette.secondary.main,
     theme.palette.success.main,
     theme.palette.info.main,
-    theme.palette.warning.main
+    theme.palette.warning.main,
   ];
 
   return (
-    <Box sx={{ width: '100%', height: height }}>
+    <Box sx={{ width: "100%", height: height }}>
       {title && (
         <Typography variant="h6" gutterBottom>
           {title}
@@ -85,67 +85,89 @@ const CompositeChartComponent: React.FC<CompositeChartProps> = ({
             bottom: 25,
           }}
         >
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />}
-          <XAxis 
+          {showGrid && (
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme.palette.divider}
+            />
+          )}
+          <XAxis
             dataKey={xKey}
-            label={xAxisLabel ? { value: xAxisLabel, position: 'bottom', offset: 0 } : undefined}
+            label={
+              xAxisLabel
+                ? { value: xAxisLabel, position: "bottom", offset: 0 }
+                : undefined
+            }
             tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
           />
-          <YAxis 
+          <YAxis
             yAxisId="left"
-            label={leftYAxisLabel ? { value: leftYAxisLabel, angle: -90, position: 'insideLeft' } : undefined}
+            label={
+              leftYAxisLabel
+                ? { value: leftYAxisLabel, angle: -90, position: "insideLeft" }
+                : undefined
+            }
             tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
           />
           {useRightYAxis && (
-            <YAxis 
-              yAxisId="right" 
+            <YAxis
+              yAxisId="right"
               orientation="right"
-              label={rightYAxisLabel ? { value: rightYAxisLabel, angle: 90, position: 'insideRight' } : undefined}
+              label={
+                rightYAxisLabel
+                  ? {
+                      value: rightYAxisLabel,
+                      angle: 90,
+                      position: "insideRight",
+                    }
+                  : undefined
+              }
               tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
             />
           )}
-          <Tooltip 
+          <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{ 
+            contentStyle={{
               backgroundColor: theme.palette.background.paper,
               border: `1px solid ${theme.palette.divider}`,
               borderRadius: 4,
-              boxShadow: theme.shadows[2]
+              boxShadow: theme.shadows[2],
             }}
           />
-          <Legend 
+          <Legend
             verticalAlign="bottom"
             height={36}
             wrapperStyle={{
               paddingTop: 15,
               marginTop: 10,
-              bottom: 0
+              bottom: 0,
             }}
           />
-          
+
           {metrics.map((metric, index) => {
-            const color = metric.color || defaultColors[index % defaultColors.length];
+            const color =
+              metric.color || defaultColors[index % defaultColors.length];
             const name = metric.name || metric.key;
-            const yAxisId = metric.yAxisId || 'left';
-            
+            const yAxisId = metric.yAxisId || "left";
+
             switch (metric.type) {
-              case 'bar':
+              case "bar":
                 return (
-                  <Bar 
+                  <Bar
                     key={metric.key}
-                    dataKey={metric.key} 
+                    dataKey={metric.key}
                     name={name}
                     fill={color}
                     yAxisId={yAxisId}
                     stackId={metric.stackId}
                   />
                 );
-              case 'line':
+              case "line":
                 return (
-                  <Line 
+                  <Line
                     key={metric.key}
-                    type="monotone" 
-                    dataKey={metric.key} 
+                    type="monotone"
+                    dataKey={metric.key}
                     name={name}
                     stroke={color}
                     yAxisId={yAxisId}
@@ -153,12 +175,12 @@ const CompositeChartComponent: React.FC<CompositeChartProps> = ({
                     dot={{ fill: color, strokeWidth: 2 }}
                   />
                 );
-              case 'area':
+              case "area":
                 return (
-                  <Area 
+                  <Area
                     key={metric.key}
-                    type="monotone" 
-                    dataKey={metric.key} 
+                    type="monotone"
+                    dataKey={metric.key}
                     name={name}
                     fill={color}
                     stroke={color}

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Product } from '../../types/product';
-import ResponsiveProductCard from './ResponsiveProductCard';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Product } from "../../types/product";
+import ResponsiveProductCard from "./ResponsiveProductCard";
 
 interface ProductCardProps {
   product: Product;
@@ -22,9 +22,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onClick,
   trackImpression,
   showBadges = true,
-  className = '',
+  className = "",
   testId,
-  isMerchantView = false
+  isMerchantView = false,
 }) => {
   // Track impression when component mounts
   React.useEffect(() => {
@@ -49,86 +49,95 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
     if (product.isOnSale && product.discountPercentage) {
       badges.push(
-        <div 
-          key="sale" 
+        <div
+          key="sale"
           className="product-badge sale-badge"
           style={{
-            backgroundColor: '#f44336',
-            color: 'white',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '0.75rem',
+            backgroundColor: "#f44336",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "0.75rem",
             fontWeight: 600,
-            marginRight: '4px'
+            marginRight: "4px",
           }}
         >
           {product.discountPercentage}% OFF
-        </div>
+        </div>,
       );
     }
 
     if (product.featured) {
       badges.push(
-        <div 
-          key="featured" 
+        <div
+          key="featured"
           className="product-badge featured-badge"
           style={{
-            backgroundColor: '#4caf50',
-            color: 'white',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '0.75rem',
+            backgroundColor: "#4caf50",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "0.75rem",
             fontWeight: 600,
-            marginRight: '4px'
+            marginRight: "4px",
           }}
         >
           Featured
-        </div>
+        </div>,
       );
     }
 
     if (!product.inStock) {
       badges.push(
-        <div 
-          key="out-of-stock" 
+        <div
+          key="out-of-stock"
           className="product-badge out-of-stock-badge"
           style={{
-            backgroundColor: '#9e9e9e',
-            color: 'white',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '0.75rem',
+            backgroundColor: "#9e9e9e",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "0.75rem",
             fontWeight: 600,
-            marginRight: '4px'
+            marginRight: "4px",
           }}
         >
           Out of Stock
-        </div>
+        </div>,
       );
     }
 
     return badges.length > 0 ? (
-      <div className="product-badges" style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 1, display: 'flex' }}>
+      <div
+        className="product-badges"
+        style={{
+          position: "absolute",
+          top: "8px",
+          left: "8px",
+          zIndex: 1,
+          display: "flex",
+        }}
+      >
         {badges}
       </div>
     ) : null;
   };
 
   return (
-    <div 
+    <div
       className={`product-card-wrapper ${className}`}
       onClick={handleClick}
       data-testid={testId || `product-card-${product.id}`}
-      style={{ 
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        display: 'flex', // Ensure flex display
-        flexDirection: 'column' // Stack children vertically
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        display: "flex", // Ensure flex display
+        flexDirection: "column", // Stack children vertically
       }}
     >
-      <ResponsiveProductCard 
-        product={product} 
+      <ResponsiveProductCard
+        product={product}
         badges={renderBadges()}
         isMerchantView={isMerchantView}
       />

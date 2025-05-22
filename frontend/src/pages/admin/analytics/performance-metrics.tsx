@@ -1,72 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  Tabs, 
-  Tab, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
   CircularProgress,
-  Slider,
+  Alert,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
-  Button,
   SelectChangeEvent,
-  Grid
-} from '@mui/material';
-import { 
-  LineChart, 
-  Line, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+} from "@mui/material";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import AdminLayout from '../../../components/admin/AdminLayout';
-import AnalyticsNavigation from '../../../components/admin/AnalyticsNavigation';
-// Mock data instead of using axios
-import { format } from 'date-fns';
-import { GridContainer, GridItem } from '../../../components/ui/MuiGrid';
+} from "recharts";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import AnalyticsNavigation from "../../../components/admin/AnalyticsNavigation";
+import { format } from "date-fns";
+import GridContainer from "../../../components/analytics/GridContainer";
+import GridItem from "../../../components/analytics/GridItem";
+import { PerformanceMetricsData } from "../../../components/analytics/types";
 
-// Define chart colors
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
-// Format milliseconds as readable time
-const formatTime = (ms: number) => {
-  if (ms < 1000) {
-    return `${ms.toFixed(0)}ms`;
-  } else {
-    return `${(ms / 1000).toFixed(2)}s`;
-  }
-};
-
-// Define tab panel component
-function TabPanel(props: any) {
+function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`performance-tabpanel-${index}`}
+      id={`performance-tab-${index}`}
       aria-labelledby={`performance-tab-${index}`}
       {...other}
     >
@@ -75,440 +63,491 @@ function TabPanel(props: any) {
   );
 }
 
-// Define performance metrics dashboard
-export default function PerformanceMetricsDashboard() {
-  // State for tab value
+function a11yProps(index: number) {
+  return {
+    id: `performance-tab-${index}`,
+    "aria-controls": `performance-tabpanel-${index}`,
+  };
+}
+
+const PerformanceMetrics: React.FC = () => {
+  const [period, setPeriod] = useState<number>(30);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [performanceData, setPerformanceData] =
+    useState<PerformanceMetricsData | null>(null);
   const [tabValue, setTabValue] = useState(0);
-  
-  // State for period selection
-  const [period, setPeriod] = useState(30);
-  
-  // State for threshold sliders
-  const [apiSlowThreshold, setApiSlowThreshold] = useState(1000);
-  const [querySlowThreshold, setQuerySlowThreshold] = useState(500);
-  
-  // State for loading indicators
-  const [apiLoading, setApiLoading] = useState(true);
-  const [clientLoading, setClientLoading] = useState(true);
-  const [queryLoading, setQueryLoading] = useState(true);
-  
-  // State for metrics data
-  const [apiMetrics, setApiMetrics] = useState<any>({slowEndpoints: [], performanceTrends: []});
-  const [clientMetrics, setClientMetrics] = useState<any>({slowPages: [], performanceTrends: []});
-  const [queryMetrics, setQueryMetrics] = useState<any>({slowQueries: [], executionCounts: [], performanceTrends: []});
 
   // Handle tab change
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  // Load API performance metrics with mock data
-  const loadApiMetrics = () => {
-    setApiLoading(true);
-    try {
-      // Use mock data instead of axios
-      setTimeout(() => {
-        setApiMetrics({
-          slowEndpoints: [
-            { endpoint: '/api/products', responseTime: 850, count: 245 },
-            { endpoint: '/api/orders', responseTime: 720, count: 189 },
-            { endpoint: '/api/users', responseTime: 650, count: 320 },
-            { endpoint: '/api/analytics', responseTime: 580, count: 156 },
-            { endpoint: '/api/checkout', responseTime: 520, count: 98 }
-          ],
-          performanceTrends: [
-            { date: '2023-01-01', responseTime: 620 },
-            { date: '2023-01-02', responseTime: 580 },
-            { date: '2023-01-03', responseTime: 650 },
-            { date: '2023-01-04', responseTime: 590 },
-            { date: '2023-01-05', responseTime: 540 },
-            { date: '2023-01-06', responseTime: 510 },
-            { date: '2023-01-07', responseTime: 490 }
-          ]
-        });
-        setApiLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Failed to load API performance metrics:', error);
-      setApiLoading(false);
-    }
-  };
-
-  // Load client performance metrics
-  const loadClientMetrics = async () => {
-    setClientLoading(true);
-    try {
-      // Simulate API call - in a real app, this would be an actual API call
-      // const response = await axios.get(`/analytics/performance/client?period=${period}`);
-      // setClientMetrics(response.data);
-      setTimeout(() => {
-        setClientMetrics({
-          slowPages: [
-            { page: '/products', loadTime: 1200, count: 1245 },
-            { page: '/checkout', loadTime: 980, count: 567 },
-            { page: '/product/details', loadTime: 890, count: 876 },
-            { page: '/cart', loadTime: 780, count: 654 },
-            { page: '/account', loadTime: 720, count: 432 }
-          ],
-          performanceTrends: [
-            { date: '2023-01-01', loadTime: 950 },
-            { date: '2023-01-02', loadTime: 920 },
-            { date: '2023-01-03', loadTime: 980 },
-            { date: '2023-01-04', loadTime: 910 },
-            { date: '2023-01-05', loadTime: 890 },
-            { date: '2023-01-06', loadTime: 870 },
-            { date: '2023-01-07', loadTime: 850 }
-          ]
-        });
-        setClientLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Failed to load client performance metrics:', error);
-      setClientLoading(false);
-    }
-  };
-
-  // Load query performance metrics
-  const loadQueryMetrics = async () => {
-    setQueryLoading(true);
-    try {
-      // Simulate API call - in a real app, this would be an actual API call
-      // const response = await axios.get(`/analytics/performance/query?period=${period}&slowThreshold=${querySlowThreshold}`);
-      // setQueryMetrics(response.data);
-      setTimeout(() => {
-        setQueryMetrics({
-          slowQueries: [
-            { queryType: 'SELECT', responseTime: 320, count: 5678 },
-            { queryType: 'INSERT', responseTime: 280, count: 1234 },
-            { queryType: 'UPDATE', responseTime: 260, count: 987 },
-            { queryType: 'DELETE', responseTime: 220, count: 345 },
-            { queryType: 'JOIN', responseTime: 380, count: 789 }
-          ],
-          executionCounts: [
-            { queryType: 'SELECT', count: 5678 },
-            { queryType: 'INSERT', count: 1234 },
-            { queryType: 'UPDATE', count: 987 },
-            { queryType: 'DELETE', count: 345 },
-            { queryType: 'JOIN', count: 789 }
-          ],
-          performanceTrends: [
-            { date: '2023-01-01', responseTime: 290 },
-            { date: '2023-01-02', responseTime: 310 },
-            { date: '2023-01-03', responseTime: 280 },
-            { date: '2023-01-04', responseTime: 270 },
-            { date: '2023-01-05', responseTime: 260 },
-            { date: '2023-01-06', responseTime: 250 },
-            { date: '2023-01-07', responseTime: 240 }
-          ]
-        });
-        setQueryLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Failed to load query performance metrics:', error);
-      setQueryLoading(false);
-    }
-  };
-
-  // Load all metrics when component mounts or filters change
+  // Load mock data
   useEffect(() => {
-    loadApiMetrics();
-    loadClientMetrics();
-    loadQueryMetrics();
-  }, [period, apiSlowThreshold, querySlowThreshold]);
+    setLoading(true);
 
-  // API Performance Tab Component
-  const ApiPerformanceTab = () => {
-    if (apiLoading) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <CircularProgress />
-        </Box>
-      );
-    }
+    // Simulate API call delay
+    const timer = setTimeout(() => {
+      try {
+        // Mock performance metrics data
+        const mockData: PerformanceMetricsData = {
+          pageLoadTime: {
+            average: 2.3,
+            byPage: [
+              { pagePath: "/", loadTime: 1.8 },
+              { pagePath: "/shop", loadTime: 2.1 },
+              { pagePath: "/product/123", loadTime: 2.5 },
+              { pagePath: "/cart", loadTime: 1.9 },
+              { pagePath: "/checkout", loadTime: 3.2 },
+            ],
+          },
+          firstContentfulPaint: {
+            average: 1.2,
+            byPage: [
+              { pagePath: "/", fcp: 0.9 },
+              { pagePath: "/shop", fcp: 1.1 },
+              { pagePath: "/product/123", fcp: 1.3 },
+              { pagePath: "/cart", fcp: 1.0 },
+              { pagePath: "/checkout", fcp: 1.7 },
+            ],
+          },
+          largestContentfulPaint: {
+            average: 2.8,
+            byPage: [
+              { pagePath: "/", lcp: 2.2 },
+              { pagePath: "/shop", lcp: 2.6 },
+              { pagePath: "/product/123", lcp: 3.1 },
+              { pagePath: "/cart", lcp: 2.4 },
+              { pagePath: "/checkout", lcp: 3.7 },
+            ],
+          },
+          cumulativeLayoutShift: {
+            average: 0.12,
+            byPage: [
+              { pagePath: "/", cls: 0.08 },
+              { pagePath: "/shop", cls: 0.11 },
+              { pagePath: "/product/123", cls: 0.15 },
+              { pagePath: "/cart", cls: 0.09 },
+              { pagePath: "/checkout", cls: 0.17 },
+            ],
+          },
+          firstInputDelay: {
+            average: 45,
+            byPage: [
+              { pagePath: "/", fid: 35 },
+              { pagePath: "/shop", fid: 42 },
+              { pagePath: "/product/123", fid: 48 },
+              { pagePath: "/cart", fid: 38 },
+              { pagePath: "/checkout", fid: 62 },
+            ],
+          },
+        };
 
-    if (!apiMetrics || !apiMetrics.slowEndpoints || !apiMetrics.performanceTrends) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <Typography variant="h6">No API metrics data available</Typography>
-        </Box>
-      );
-    }
+        setPerformanceData(mockData);
+        setLoading(false);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Unknown error occurred"),
+        );
+        setLoading(false);
+      }
+    }, 1000);
 
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <Typography variant="h6">API Performance Metrics would display here</Typography>
-      </Box>
-    );
+    return () => clearTimeout(timer);
+  }, [period]);
+
+  const handlePeriodChange = (event: SelectChangeEvent<number>) => {
+    setPeriod(Number(event.target.value));
   };
 
-  // Client Performance Tab Component
-  const ClientPerformanceTab = () => {
-    if (clientLoading) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <CircularProgress />
-        </Box>
-      );
-    }
-
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <Typography variant="h6">Client Performance Metrics would display here</Typography>
-      </Box>
-    );
+  // Format time in seconds with ms precision
+  const formatTime = (time: number, unit: string = "s") => {
+    return `${time.toFixed(2)}${unit}`;
   };
 
-  // Render query performance metrics
-  const QueryPerformanceTab = () => {
-    if (queryLoading) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+  // Generate chart data from performance metrics
+  const generateChartData = () => {
+    if (!performanceData) return [];
+
+    return performanceData.pageLoadTime.byPage.map((item) => {
+      const fcpItem = performanceData.firstContentfulPaint.byPage.find(
+        (i) => i.pagePath === item.pagePath,
+      );
+      const lcpItem = performanceData.largestContentfulPaint.byPage.find(
+        (i) => i.pagePath === item.pagePath,
+      );
+
+      return {
+        name: item.pagePath,
+        pageLoad: item.loadTime,
+        fcp: fcpItem?.fcp || 0,
+        lcp: lcpItem?.lcp || 0,
+      };
+    });
+  };
+
+  // Generate layout shift chart data
+  const generateLayoutShiftData = () => {
+    if (!performanceData) return [];
+
+    return performanceData.cumulativeLayoutShift.byPage.map((item) => ({
+      name: item.pagePath,
+      cls: item.cls,
+    }));
+  };
+
+  // Generate first input delay chart data
+  const generateFidData = () => {
+    if (!performanceData) return [];
+
+    return performanceData.firstInputDelay.byPage.map((item) => ({
+      name: item.pagePath,
+      fid: item.fid,
+    }));
+  };
+
+  // Handle loading state
+  if (loading) {
+    return (
+      <AdminLayout title="Performance Metrics">
+        <AnalyticsNavigation />
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="400px"
+        >
           <CircularProgress />
         </Box>
-      );
-    }
-
-    // Safely access the data with null checks
-    const slowQueries = queryMetrics?.slowQueries || [];
-    const executionCounts = queryMetrics?.executionCounts || [];
-    const performanceTrends = queryMetrics?.performanceTrends || [];
-    
-    return (
-      <GridContainer spacing={3}>
-        <GridItem xs={12} md={6}>
-          <Card>
-            <CardHeader title="Slow Queries by Type" />
-            <CardContent>
-              <Box height={400}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={slowQueries.slice(0, 10)}
-                    layout="vertical"
-                    margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" unit="ms" />
-                    <YAxis 
-                      dataKey="queryType" 
-                      type="category" 
-                      width={150}
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => value.length > 25 ? `${value.substring(0, 25)}...` : value}
-                    />
-                    <Tooltip 
-                      formatter={(value: any, name: string) => {
-                        if (name === 'Avg Execution Time') return [`${value.toFixed(0)}ms`, name];
-                        if (name === 'Max Execution Time') return [`${value.toFixed(0)}ms`, name];
-                        return [value, name];
-                      }}
-                      labelFormatter={(label) => `Query Type: ${label}`}
-                    />
-                    <Legend />
-                    <Bar dataKey="avgExecutionTime" name="Avg Execution Time" fill="#8884d8" />
-                    <Bar dataKey="maxExecutionTime" name="Max Execution Time" fill="#FF8042" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </GridItem>
-
-        <GridItem xs={12} md={6}>
-          <Card>
-            <CardHeader title="Query Execution Count" />
-            <CardContent>
-              <Box height={400}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={slowQueries.slice(0, 5)}
-                      dataKey="count"
-                      nameKey="queryType"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      label={(entry) => entry.queryType.split('.')[1] || entry.queryType}
-                    >
-                      {slowQueries.slice(0, 5).map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value: any) => [`${value} executions`, 'Count']}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </GridItem>
-
-        <GridItem xs={12}>
-          <Card>
-            <CardHeader title="Query Performance Trends" />
-            <CardContent>
-              <Box height={400}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={queryMetrics.queryPerformanceTrends}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={(value) => {
-                        try {
-                          return format(new Date(value), 'MM/dd');
-                        } catch (e) {
-                          return value;
-                        }
-                      }}
-                    />
-                    <YAxis unit="ms" />
-                    <Tooltip 
-                      formatter={(value: any) => [`${value.toFixed(0)}ms`, 'Avg Execution Time']}
-                      labelFormatter={(label) => {
-                        try {
-                          return format(new Date(label), 'MMM dd, yyyy');
-                        } catch (e) {
-                          return label;
-                        }
-                      }}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="avgExecutionTime" name="Avg Execution Time" stroke="#8884d8" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </GridItem>
-
-        <GridItem xs={12}>
-          <Card>
-            <CardHeader title="Slow Query Details" />
-            <CardContent>
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Query ID</TableCell>
-                      <TableCell>Query Type</TableCell>
-                      <TableCell align="right">Execution Time</TableCell>
-                      <TableCell align="right">Result Count</TableCell>
-                      <TableCell>Timestamp</TableCell>
-                      <TableCell>Parameters</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {queryMetrics.slowQueryDetails.slice(0, 10).map((query: any, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell 
-                          component="th" 
-                          scope="row"
-                          sx={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                        >
-                          {query.queryId}
-                        </TableCell>
-                        <TableCell
-                          sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                        >
-                          {query.queryType}
-                        </TableCell>
-                        <TableCell align="right">{formatTime(query.executionTime)}</TableCell>
-                        <TableCell align="right">{query.resultCount}</TableCell>
-                        <TableCell>
-                          {format(new Date(query.timestamp), 'MM/dd/yyyy HH:mm:ss')}
-                        </TableCell>
-                        <TableCell
-                          sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                        >
-                          {query.parameters}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        </GridItem>
-      </GridContainer>
+      </AdminLayout>
     );
-  };
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <AdminLayout title="Performance Metrics">
+        <AnalyticsNavigation />
+        <Box p={3}>
+          <Alert severity="error">
+            Error loading performance metrics: {error.message}
+          </Alert>
+        </Box>
+      </AdminLayout>
+    );
+  }
+
+  // Handle no data state
+  if (!performanceData) {
+    return (
+      <AdminLayout title="Performance Metrics">
+        <AnalyticsNavigation />
+        <Box p={3}>
+          <Alert severity="info">
+            No performance metrics available. Please try again later.
+          </Alert>
+        </Box>
+      </AdminLayout>
+    );
+  }
 
   return (
-    <AdminLayout title="Performance Metrics Dashboard">
+    <AdminLayout title="Performance Metrics">
       <AnalyticsNavigation />
-      <Box sx={{ width: '100%', p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Performance Metrics Dashboard
-        </Typography>
 
-        {/* Filters */}
-        <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-          <GridContainer spacing={3}>
-            <GridItem xs={12} md={4}>
-              <Typography gutterBottom>API Slow Threshold: {apiSlowThreshold}ms</Typography>
-              <Slider
-                value={apiSlowThreshold}
-                min={50}
-                max={1000}
-                step={50}
-                onChange={(e, newValue) => setApiSlowThreshold(newValue as number)}
-                valueLabelDisplay="auto"
-              />
-            </GridItem>
+      {/* Period selector */}
+      <Box display="flex" justifyContent="flex-end" mb={3} p={3}>
+        <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+          <InputLabel id="period-select-label">Time Period</InputLabel>
+          <Select
+            labelId="period-select-label"
+            id="period-select"
+            value={period}
+            onChange={handlePeriodChange}
+            label="Time Period"
+          >
+            <MenuItem value={7}>Last 7 days</MenuItem>
+            <MenuItem value={30}>Last 30 days</MenuItem>
+            <MenuItem value={90}>Last 90 days</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
-            <GridItem xs={12} md={4}>
-              <Typography gutterBottom>Query Slow Threshold: {querySlowThreshold}ms</Typography>
-              <Slider
-                value={querySlowThreshold}
-                min={50}
-                max={1000}
-                step={50}
-                onChange={(e, newValue) => setQuerySlowThreshold(newValue as number)}
-                valueLabelDisplay="auto"
-              />
-            </GridItem>
-
-            <GridItem xs={12} md={4}>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={() => {
-                  loadApiMetrics();
-                  loadClientMetrics();
-                  loadQueryMetrics();
-                }}
-              >
-                Refresh
-              </Button>
-            </GridItem>
-          </GridContainer>
-        </Box>
-
-        {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="performance metrics tabs">
-            <Tab label="API Performance" id="performance-tab-0" aria-controls="performance-tabpanel-0" />
-            <Tab label="Client Performance" id="performance-tab-1" aria-controls="performance-tabpanel-1" />
-            <Tab label="Query Performance" id="performance-tab-2" aria-controls="performance-tabpanel-2" />
+      {/* Tabs */}
+      <Box sx={{ width: "100%", px: 3 }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="performance metrics tabs"
+          >
+            <Tab label="Core Web Vitals" {...a11yProps(0)} />
+            <Tab label="Page Load Times" {...a11yProps(1)} />
+            <Tab label="Layout Stability" {...a11yProps(2)} />
           </Tabs>
         </Box>
 
-        {/* Tab Panels */}
+        {/* Core Web Vitals Tab */}
         <TabPanel value={tabValue} index={0}>
-          <ApiPerformanceTab />
+          <GridContainer spacing={3}>
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Core Web Vitals Overview" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={generateChartData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value}s`, ""]} />
+                        <Legend />
+                        <Bar
+                          dataKey="fcp"
+                          name="First Contentful Paint"
+                          fill="#8884d8"
+                        />
+                        <Bar
+                          dataKey="lcp"
+                          name="Largest Contentful Paint"
+                          fill="#82ca9d"
+                        />
+                        <Bar
+                          dataKey="pageLoad"
+                          name="Page Load Time"
+                          fill="#ffc658"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={4}>
+              <Card>
+                <CardHeader title="Page Load Time" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {formatTime(performanceData.pageLoadTime.average)}
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average page load time
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={4}>
+              <Card>
+                <CardHeader title="First Contentful Paint" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {formatTime(performanceData.firstContentfulPaint.average)}
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average FCP
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={4}>
+              <Card>
+                <CardHeader title="Largest Contentful Paint" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {formatTime(
+                        performanceData.largestContentfulPaint.average,
+                      )}
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average LCP
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
         </TabPanel>
+
+        {/* Page Load Times Tab */}
         <TabPanel value={tabValue} index={1}>
-          <ClientPerformanceTab />
+          <GridContainer spacing={3}>
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Page Load Times by Page" />
+                <CardContent>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={performanceData.pageLoadTime.byPage}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="pagePath"
+                          angle={-45}
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip
+                          formatter={(value) => [`${value}s`, "Load Time"]}
+                        />
+                        <Bar
+                          dataKey="loadTime"
+                          name="Load Time"
+                          fill="#8884d8"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12}>
+              <Card>
+                <CardHeader title="Page Load Time Details" />
+                <CardContent>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Page</TableCell>
+                          <TableCell align="right">Load Time (s)</TableCell>
+                          <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {performanceData.pageLoadTime.byPage.map((page) => (
+                          <TableRow key={page.pagePath}>
+                            <TableCell component="th" scope="row">
+                              {page.pagePath}
+                            </TableCell>
+                            <TableCell align="right">
+                              {formatTime(page.loadTime)}
+                            </TableCell>
+                            <TableCell align="right">
+                              {page.loadTime < 2.0 ? (
+                                <Typography color="success.main">
+                                  Good
+                                </Typography>
+                              ) : page.loadTime < 3.0 ? (
+                                <Typography color="warning.main">
+                                  Needs Improvement
+                                </Typography>
+                              ) : (
+                                <Typography color="error.main">Poor</Typography>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
         </TabPanel>
+
+        {/* Layout Stability Tab */}
         <TabPanel value={tabValue} index={2}>
-          <QueryPerformanceTab />
+          <GridContainer spacing={3}>
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="Cumulative Layout Shift" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {performanceData.cumulativeLayoutShift.average.toFixed(2)}
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average CLS
+                    </Typography>
+                  </Box>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={generateLayoutShiftData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [value, "CLS"]} />
+                        <Bar dataKey="cls" name="Layout Shift" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+
+            <GridItem xs={12} md={6}>
+              <Card>
+                <CardHeader title="First Input Delay" />
+                <CardContent>
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary">
+                      {performanceData.firstInputDelay.average}ms
+                    </Typography>
+                    <Typography variant="subtitle1" color="textSecondary">
+                      Average FID
+                    </Typography>
+                  </Box>
+                  <Box height={300}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={generateFidData()}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={70}
+                        />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value}ms`, "FID"]} />
+                        <Bar
+                          dataKey="fid"
+                          name="First Input Delay"
+                          fill="#82ca9d"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </CardContent>
+              </Card>
+            </GridItem>
+          </GridContainer>
         </TabPanel>
       </Box>
     </AdminLayout>
   );
-}
+};
+
+export default PerformanceMetrics;

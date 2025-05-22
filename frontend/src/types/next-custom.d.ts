@@ -4,7 +4,7 @@
  */
 
 // Fix for React import issues
-declare module 'react' {
+declare module "react" {
   export = React;
   export as namespace React;
 }
@@ -17,8 +17,8 @@ declare namespace JSX {
 }
 
 // Fix for Next.js module imports
-declare module 'VAR_MODULE_GLOBAL_ERROR' {
-  import { ComponentType } from 'react';
+declare module "VAR_MODULE_GLOBAL_ERROR" {
+  import { ComponentType } from "react";
   const GlobalError: ComponentType<{
     error: Error;
     reset: () => void;
@@ -27,7 +27,7 @@ declare module 'VAR_MODULE_GLOBAL_ERROR' {
 }
 
 // Fix for webpack types
-declare module 'next/dist/compiled/webpack/webpack' {
+declare module "next/dist/compiled/webpack/webpack" {
   export const webpack: any;
   export default webpack;
   export namespace webpack {

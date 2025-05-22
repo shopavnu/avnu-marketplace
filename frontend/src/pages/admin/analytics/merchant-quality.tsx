@@ -1,17 +1,30 @@
-import React from 'react';
-import { Box, Typography, Paper, CircularProgress, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip } from '@mui/material';
-import { GridContainer, GridItem } from '../../../components/ui/Grid';
-import AdminLayout from '../../../components/admin/AdminLayout';
-import AnalyticsNav from '../../../components/admin/AnalyticsNav';
+import React from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+} from "@mui/material";
+import { GridContainer, GridItem } from "../../../components/ui/Grid";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import AnalyticsNav from "../../../components/admin/AnalyticsNav";
 // Properly import MetricCard component
-import MetricCard from '../../../components/admin/MetricCard';
+import MetricCard from "../../../components/admin/MetricCard";
 // Import Recharts components
-import { 
-  BarChartComponent, 
-  PieChartComponent, 
+import {
+  BarChartComponent,
+  PieChartComponent,
   LineChartComponent,
-  CompositeChartComponent
-} from '../../../components/charts';
+  CompositeChartComponent,
+} from "../../../components/charts";
 
 /**
  * Merchant Quality Dashboard
@@ -30,29 +43,59 @@ const MerchantQuality: React.FC = () => {
       excellent: 32,
       good: 45,
       needsImprovement: 18,
-      poor: 5
+      poor: 5,
     },
     merchantScores: [
-      { name: "Eco Apparel Co.", completeness: 96.2, imageQuality: 92.5, descriptionQuality: 94.8, overallScore: 94.6 },
-      { name: "Green Living", completeness: 89.7, imageQuality: 88.3, descriptionQuality: 91.2, overallScore: 89.8 },
-      { name: "Sustainable Beauty", completeness: 87.4, imageQuality: 79.8, descriptionQuality: 85.6, overallScore: 84.2 },
-      { name: "Planet Friendly Foods", completeness: 82.1, imageQuality: 76.3, descriptionQuality: 84.7, overallScore: 81.5 },
-      { name: "Ethical Wares", completeness: 74.9, imageQuality: 68.7, descriptionQuality: 71.2, overallScore: 71.6 }
-    ]
+      {
+        name: "Eco Apparel Co.",
+        completeness: 96.2,
+        imageQuality: 92.5,
+        descriptionQuality: 94.8,
+        overallScore: 94.6,
+      },
+      {
+        name: "Green Living",
+        completeness: 89.7,
+        imageQuality: 88.3,
+        descriptionQuality: 91.2,
+        overallScore: 89.8,
+      },
+      {
+        name: "Sustainable Beauty",
+        completeness: 87.4,
+        imageQuality: 79.8,
+        descriptionQuality: 85.6,
+        overallScore: 84.2,
+      },
+      {
+        name: "Planet Friendly Foods",
+        completeness: 82.1,
+        imageQuality: 76.3,
+        descriptionQuality: 84.7,
+        overallScore: 81.5,
+      },
+      {
+        name: "Ethical Wares",
+        completeness: 74.9,
+        imageQuality: 68.7,
+        descriptionQuality: 71.2,
+        overallScore: 71.6,
+      },
+    ],
   };
 
   // Helper function to get quality label and color
   const getQualityInfo = (score: number) => {
-    if (score >= 90) return { label: 'Excellent', color: 'success' };
-    if (score >= 80) return { label: 'Good', color: 'primary' };
-    if (score >= 70) return { label: 'Average', color: 'warning' };
-    return { label: 'Needs Improvement', color: 'error' };
+    if (score >= 90) return { label: "Excellent", color: "success" };
+    if (score >= 80) return { label: "Good", color: "primary" };
+    if (score >= 70) return { label: "Average", color: "warning" };
+    return { label: "Needs Improvement", color: "error" };
   };
-  
+
   return (
     <AdminLayout title="Merchant Quality Metrics">
       <AnalyticsNav />
-      
+
       <Box className="p-6">
         <Typography variant="h4" component="h1" gutterBottom>
           Merchant Quality Metrics
@@ -60,7 +103,7 @@ const MerchantQuality: React.FC = () => {
         <Typography variant="body1" color="textSecondary" paragraph>
           Track and improve the quality of merchant product listings
         </Typography>
-        
+
         {loading ? (
           <Box display="flex" justifyContent="center" my={8}>
             <CircularProgress />
@@ -73,22 +116,22 @@ const MerchantQuality: React.FC = () => {
           <>
             <GridContainer spacing={3} className="mb-6">
               <GridItem xs={12} sm={6} md={4}>
-                <MetricCard 
-                  title="Data Completeness" 
+                <MetricCard
+                  title="Data Completeness"
                   value={`${mockData.avgDataCompleteness}%`}
                   icon="check_circle"
                 />
               </GridItem>
               <GridItem xs={12} sm={6} md={4}>
-                <MetricCard 
-                  title="Image Quality Score" 
+                <MetricCard
+                  title="Image Quality Score"
                   value={`${mockData.avgImageQuality}%`}
                   icon="image"
                 />
               </GridItem>
               <GridItem xs={12} sm={6} md={4}>
-                <MetricCard 
-                  title="Description Quality" 
+                <MetricCard
+                  title="Description Quality"
                   value={`${mockData.avgDescriptionQuality}%`}
                   icon="description"
                 />
@@ -107,16 +150,28 @@ const MerchantQuality: React.FC = () => {
                   <Box height={300}>
                     <PieChartComponent
                       data={[
-                        { name: "Excellent", value: mockData.qualityDistribution.excellent },
-                        { name: "Good", value: mockData.qualityDistribution.good },
-                        { name: "Needs Improvement", value: mockData.qualityDistribution.needsImprovement },
-                        { name: "Poor", value: mockData.qualityDistribution.poor }
+                        {
+                          name: "Excellent",
+                          value: mockData.qualityDistribution.excellent,
+                        },
+                        {
+                          name: "Good",
+                          value: mockData.qualityDistribution.good,
+                        },
+                        {
+                          name: "Needs Improvement",
+                          value: mockData.qualityDistribution.needsImprovement,
+                        },
+                        {
+                          name: "Poor",
+                          value: mockData.qualityDistribution.poor,
+                        },
                       ]}
                       nameKey="name"
                       valueKey="value"
                       height={280}
                       tooltipFormatter={(value: number) => `${value}%`}
-                      colors={['#4caf50', '#8bc34a', '#ffeb3b', '#f44336']}
+                      colors={["#4caf50", "#8bc34a", "#ffeb3b", "#f44336"]}
                     />
                   </Box>
                 </Paper>
@@ -131,17 +186,20 @@ const MerchantQuality: React.FC = () => {
                   </Typography>
                   <Box height={300}>
                     <LineChartComponent
-                      data={mockData.merchantScores.map(item => ({
+                      data={mockData.merchantScores.map((item) => ({
                         name: item.name,
                         quality: item.overallScore,
-                        conversion: item.overallScore * (Math.random() * 0.5 + 0.5) // Simulated conversion rate
+                        conversion:
+                          item.overallScore * (Math.random() * 0.5 + 0.5), // Simulated conversion rate
                       }))}
                       xKey="quality"
                       yKey="conversion"
                       height={280}
                       xAxisLabel="Quality Score"
                       yAxisLabel="Conversion Rate (%)"
-                      tooltipFormatter={(value: number) => `${value.toFixed(1)}%`}
+                      tooltipFormatter={(value: number) =>
+                        `${value.toFixed(1)}%`
+                      }
                     />
                   </Box>
                 </Paper>
@@ -158,28 +216,40 @@ const MerchantQuality: React.FC = () => {
                           <TableCell>Merchant Name</TableCell>
                           <TableCell align="right">Data Completeness</TableCell>
                           <TableCell align="right">Image Quality</TableCell>
-                          <TableCell align="right">Description Quality</TableCell>
+                          <TableCell align="right">
+                            Description Quality
+                          </TableCell>
                           <TableCell align="right">Overall Score</TableCell>
                           <TableCell align="center">Status</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {mockData.merchantScores.map((merchant) => {
-                          const qualityInfo = getQualityInfo(merchant.overallScore);
+                          const qualityInfo = getQualityInfo(
+                            merchant.overallScore,
+                          );
                           return (
                             <TableRow key={merchant.name}>
                               <TableCell component="th" scope="row">
                                 {merchant.name}
                               </TableCell>
-                              <TableCell align="right">{merchant.completeness}%</TableCell>
-                              <TableCell align="right">{merchant.imageQuality}%</TableCell>
-                              <TableCell align="right">{merchant.descriptionQuality}%</TableCell>
-                              <TableCell align="right">{merchant.overallScore}%</TableCell>
+                              <TableCell align="right">
+                                {merchant.completeness}%
+                              </TableCell>
+                              <TableCell align="right">
+                                {merchant.imageQuality}%
+                              </TableCell>
+                              <TableCell align="right">
+                                {merchant.descriptionQuality}%
+                              </TableCell>
+                              <TableCell align="right">
+                                {merchant.overallScore}%
+                              </TableCell>
                               <TableCell align="center">
-                                <Chip 
-                                  label={qualityInfo.label} 
-                                  color={qualityInfo.color as any} 
-                                  size="small" 
+                                <Chip
+                                  label={qualityInfo.label}
+                                  color={qualityInfo.color as any}
+                                  size="small"
                                 />
                               </TableCell>
                             </TableRow>

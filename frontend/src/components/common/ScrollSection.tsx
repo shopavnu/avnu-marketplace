@@ -1,6 +1,6 @@
-import React, { useRef, ReactNode } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useInView } from '@/hooks/useScrollAnimation';
+import React, { useRef, ReactNode } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useInView } from "@/hooks/useScrollAnimation";
 
 interface ScrollSectionProps {
   children: ReactNode;
@@ -16,8 +16,8 @@ interface ScrollSectionProps {
 
 const ScrollSection: React.FC<ScrollSectionProps> = ({
   children,
-  className = '',
-  bgColor = 'bg-warm-white',
+  className = "",
+  bgColor = "bg-warm-white",
   fadeIn = true,
   slideUp = true,
   staggerChildren = false,
@@ -29,33 +29,41 @@ const ScrollSection: React.FC<ScrollSectionProps> = ({
   const isInView = useInView(sectionRef, { threshold, triggerOnce: true });
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ['start end', 'end start'],
+    offset: ["start end", "end start"],
   });
 
   // Transform values based on scroll progress
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.9, 1], [0.6, 1, 1, 0.6]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.9, 1], [0.98, 1, 1, 0.98]);
-  
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.9, 1],
+    [0.6, 1, 1, 0.6],
+  );
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.9, 1],
+    [0.98, 1, 1, 0.98],
+  );
+
   // Animation variants for the section
   const sectionVariants = {
-    hidden: { 
-      opacity: fadeIn ? 0 : 1, 
-      y: slideUp ? 40 : 0 
+    hidden: {
+      opacity: fadeIn ? 0 : 1,
+      y: slideUp ? 40 : 0,
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.6,
         delay,
         ease: [0.22, 1, 0.36, 1],
-        staggerChildren: staggerChildren ? 0.1 : 0
-      }
-    }
+        staggerChildren: staggerChildren ? 0.1 : 0,
+      },
+    },
   };
 
   return (
-    <section 
+    <section
       id={id}
       ref={sectionRef}
       className={`py-12 md:py-16 ${bgColor} ${className}`}
@@ -79,27 +87,27 @@ export const ScrollItem: React.FC<{
   className?: string;
   delay?: number;
   preserveHeight?: boolean; // New prop to preserve child height
-}> = ({ children, className = '', delay = 0, preserveHeight = false }) => {
+}> = ({ children, className = "", delay = 0, preserveHeight = false }) => {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.5,
         delay,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   // If preserveHeight is true, we need to ensure the motion.div doesn't affect the height
   // This is crucial for consistent card heights in grids
   return (
     <motion.div
-      className={`${className} ${preserveHeight ? 'h-full' : ''}`}
+      className={`${className} ${preserveHeight ? "h-full" : ""}`}
       variants={itemVariants}
-      style={preserveHeight ? { height: '100%', display: 'block' } : undefined}
+      style={preserveHeight ? { height: "100%", display: "block" } : undefined}
     >
       {children}
     </motion.div>

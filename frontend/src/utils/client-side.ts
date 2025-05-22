@@ -6,7 +6,7 @@
 /**
  * Check if code is running in browser environment
  */
-export const isBrowser = typeof window !== 'undefined';
+export const isBrowser = typeof window !== "undefined";
 
 /**
  * Safely access window object
@@ -46,10 +46,10 @@ export const safeAddEventListener = (
   target: EventTarget | undefined | null,
   event: string,
   callback: EventListenerOrEventListenerObject,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ): (() => void) => {
   if (!target) return () => {};
-  
+
   target.addEventListener(event, callback, options);
   return () => target.removeEventListener(event, callback, options);
 };

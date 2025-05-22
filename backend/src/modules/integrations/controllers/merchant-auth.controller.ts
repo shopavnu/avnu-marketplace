@@ -50,7 +50,7 @@ export class MerchantAuthController {
   @ApiBearerAuth()
   async authenticateWooCommerce(
     @Body()
-    body: {
+    _body: {
       storeUrl: string;
       consumerKey: string;
       consumerSecret: string;

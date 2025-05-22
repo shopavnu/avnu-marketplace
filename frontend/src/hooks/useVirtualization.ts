@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from "react";
 
 interface VirtualizationOptions {
   itemHeight: number;
@@ -9,7 +9,12 @@ interface VirtualizationOptions {
 }
 
 interface VirtualizationResult {
-  virtualItems: Array<{ index: number; start: number; end: number; size: number }>;
+  virtualItems: Array<{
+    index: number;
+    start: number;
+    end: number;
+    size: number;
+  }>;
   totalHeight: number;
   startIndex: number;
   endIndex: number;
@@ -21,7 +26,7 @@ interface VirtualizationResult {
 /**
  * A hook for virtualizing long lists of elements
  * Renders only the visible items and a configurable number of items above and below the viewport
- * 
+ *
  * @param options Configuration options for virtualization
  * @returns Virtualization state and methods
  */
@@ -30,7 +35,7 @@ export function useVirtualization({
   overscan = 3,
   itemCount,
   scrollingDelay = 150,
-  containerHeight
+  containerHeight,
 }: VirtualizationOptions): VirtualizationResult {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -46,12 +51,12 @@ export function useVirtualization({
     }
 
     const height = containerHeight || clientHeight;
-    
+
     // Calculate the range of visible items
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
     const end = Math.min(
       itemCount - 1,
-      Math.ceil((scrollTop + height) / itemHeight) + overscan
+      Math.ceil((scrollTop + height) / itemHeight) + overscan,
     );
 
     // Generate virtual items
@@ -61,7 +66,7 @@ export function useVirtualization({
         index: i,
         start: i * itemHeight,
         end: (i + 1) * itemHeight,
-        size: itemHeight
+        size: itemHeight,
       });
     }
 
@@ -69,9 +74,16 @@ export function useVirtualization({
       virtualItems,
       startIndex: start,
       endIndex: end,
-      totalHeight: itemCount * itemHeight
+      totalHeight: itemCount * itemHeight,
     };
-  }, [scrollTop, clientHeight, containerHeight, itemHeight, itemCount, overscan]);
+  }, [
+    scrollTop,
+    clientHeight,
+    containerHeight,
+    itemHeight,
+    itemCount,
+    overscan,
+  ]);
 
   // Handle scroll events
   useEffect(() => {
@@ -98,20 +110,20 @@ export function useVirtualization({
       }, scrollingDelay);
     };
 
-    container.addEventListener('scroll', handleScroll);
-    
+    container.addEventListener("scroll", handleScroll);
+
     // Handle resize
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       const { height } = entries[0].contentRect;
       if (!containerHeight && height > 0) {
         setClientHeight(height);
       }
     });
-    
+
     resizeObserver.observe(container);
 
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener("scroll", handleScroll);
       resizeObserver.disconnect();
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
@@ -133,7 +145,7 @@ export function useVirtualization({
     endIndex,
     containerRef,
     scrollTo,
-    isScrolling
+    isScrolling,
   };
 }
 

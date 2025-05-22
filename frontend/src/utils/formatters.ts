@@ -10,12 +10,12 @@
  * @returns Formatted currency string
  */
 export const formatCurrency = (
-  price: number, 
-  locale = 'en-US', 
-  currency = 'USD'
+  price: number,
+  locale = "en-US",
+  currency = "USD",
 ): string => {
   return new Intl.NumberFormat(locale, {
-    style: 'currency',
+    style: "currency",
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -28,12 +28,9 @@ export const formatCurrency = (
  * @param locale - The locale to use for formatting (default: 'en-US')
  * @returns Formatted percentage string
  */
-export const formatPercentage = (
-  value: number, 
-  locale = 'en-US'
-): string => {
+export const formatPercentage = (value: number, locale = "en-US"): string => {
   return new Intl.NumberFormat(locale, {
-    style: 'percent',
+    style: "percent",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value / 100);
@@ -46,8 +43,6 @@ export const formatPercentage = (
  * @returns Truncated text with ellipsis if needed
  */
 export const truncateText = (text: string, maxLength: number): string => {
-  if (!text) return '';
-  return text.length > maxLength 
-    ? `${text.substring(0, maxLength)}...` 
-    : text;
+  if (!text) return "";
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 };

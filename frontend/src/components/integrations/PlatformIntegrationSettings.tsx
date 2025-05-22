@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  Button, 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  Divider, 
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
   Stack,
-  TextField, 
-  Typography, 
-  Alert, 
+  TextField,
+  Typography,
+  Alert,
   CircularProgress,
   Snackbar,
   List,
@@ -21,12 +21,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
-} from '@mui/material';
+  DialogActions,
+} from "@mui/material";
 
-import { TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
-import { usePlatformConnections } from '../../hooks/usePlatformConnections';
+import { usePlatformConnections } from "../../hooks/usePlatformConnections";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,47 +45,45 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`platform-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
 export const PlatformIntegrationSettings: React.FC = () => {
-  const [shopifyDomain, setShopifyDomain] = useState('');
+  const [shopifyDomain, setShopifyDomain] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-  const [connectionToDelete, setConnectionToDelete] = useState<string | null>(null);
+  const [connectionToDelete, setConnectionToDelete] = useState<string | null>(
+    null,
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { 
-    connections, 
-    loading, 
+  const {
+    connections,
+    loading,
     error,
     connectToShopify,
     disconnectPlatform,
-    syncPlatform
+    syncPlatform,
   } = usePlatformConnections();
 
   // Tabs removed as part of Shopify-first approach
 
   const handleShopifyConnect = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!shopifyDomain) {
-      setErrorMessage('Please enter a Shopify domain');
+      setErrorMessage("Please enter a Shopify domain");
       return;
     }
-    
+
     try {
       const url = await connectToShopify(shopifyDomain);
       // Redirect to Shopify OAuth page
       window.location.href = url;
     } catch (err) {
-      setErrorMessage('Failed to connect to Shopify');
+      setErrorMessage("Failed to connect to Shopify");
       console.error(err);
     }
   };
@@ -99,14 +97,14 @@ export const PlatformIntegrationSettings: React.FC = () => {
 
   const confirmDisconnect = async () => {
     if (!connectionToDelete) return;
-    
+
     try {
       const success = await disconnectPlatform(connectionToDelete);
       if (success) {
-        setSuccessMessage('Platform disconnected successfully');
+        setSuccessMessage("Platform disconnected successfully");
       }
     } catch (err) {
-      setErrorMessage('Failed to disconnect platform');
+      setErrorMessage("Failed to disconnect platform");
       console.error(err);
     } finally {
       setOpenDialog(false);
@@ -117,9 +115,9 @@ export const PlatformIntegrationSettings: React.FC = () => {
   const handleSync = async (connectionId: string) => {
     try {
       await syncPlatform(connectionId);
-      setSuccessMessage('Synchronization started');
+      setSuccessMessage("Synchronization started");
     } catch (err) {
-      setErrorMessage('Failed to start synchronization');
+      setErrorMessage("Failed to start synchronization");
       console.error(err);
     }
   };
@@ -131,28 +129,28 @@ export const PlatformIntegrationSettings: React.FC = () => {
 
   return (
     <Box sx={{ mt: 3 }}>
-      <Snackbar 
-        open={!!errorMessage} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert onClose={handleCloseSnackbar} severity="error">
           {errorMessage}
         </Alert>
       </Snackbar>
-      
-      <Snackbar 
-        open={!!successMessage} 
-        autoHideDuration={6000} 
+
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert onClose={handleCloseSnackbar} severity="success">
           {successMessage}
         </Alert>
       </Snackbar>
-      
+
       <Card>
         <CardHeader title="Connected Platforms" />
         <Divider />
@@ -164,36 +162,46 @@ export const PlatformIntegrationSettings: React.FC = () => {
           ) : error ? (
             <Alert severity="error">{error}</Alert>
           ) : connections.length === 0 ? (
-            <Alert severity="info">No platforms connected yet. Connect to Shopify below.</Alert>
+            <Alert severity="info">
+              No platforms connected yet. Connect to Shopify below.
+            </Alert>
           ) : (
             <List>
               {connections.map((connection) => (
                 <ListItem key={connection.id}>
                   <ListItemText
-                    primary={connection.platformStoreName || connection.platformStoreUrl}
+                    primary={
+                      connection.platformStoreName ||
+                      connection.platformStoreUrl
+                    }
                     secondary={
                       <>
-                        <Typography component="span" variant="body2" color="textPrimary">
-                          {connection.platformType.charAt(0).toUpperCase() + connection.platformType.slice(1)}
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="textPrimary"
+                        >
+                          {connection.platformType.charAt(0).toUpperCase() +
+                            connection.platformType.slice(1)}
                         </Typography>
                         {` — ${connection.platformStoreUrl}`}
                         <br />
-                        {connection.lastSyncedAt 
-                          ? `Last synced: ${new Date(connection.lastSyncedAt).toLocaleString()}` 
-                          : 'Never synced'}
+                        {connection.lastSyncedAt
+                          ? `Last synced: ${new Date(connection.lastSyncedAt).toLocaleString()}`
+                          : "Never synced"}
                       </>
                     }
                   />
                   <ListItemSecondaryAction>
-                    <IconButton 
-                      edge="end" 
+                    <IconButton
+                      edge="end"
                       aria-label="refresh"
                       onClick={() => handleSync(connection.id)}
                     >
                       <ArrowPathIcon className="h-5 w-5" />
                     </IconButton>
-                    <IconButton 
-                      edge="end" 
+                    <IconButton
+                      edge="end"
                       aria-label="delete"
                       onClick={() => handleDisconnect(connection.id)}
                     >
@@ -206,12 +214,12 @@ export const PlatformIntegrationSettings: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
-      <Box sx={{ width: '100%', mb: 3, mt: 3 }}>
+
+      <Box sx={{ width: "100%", mb: 3, mt: 3 }}>
         <Card>
           <CardHeader title="Connect to Shopify" />
           <Divider />
-          
+
           <Box sx={{ p: 3 }}>
             <form onSubmit={handleShopifyConnect}>
               <Stack spacing={3}>
@@ -241,7 +249,11 @@ export const PlatformIntegrationSettings: React.FC = () => {
                     color="primary"
                     disabled={loading || !shopifyDomain}
                   >
-                    {loading ? <CircularProgress size={24} /> : 'Connect to Shopify'}
+                    {loading ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "Connect to Shopify"
+                    )}
                   </Button>
                 </Box>
               </Stack>
@@ -249,19 +261,18 @@ export const PlatformIntegrationSettings: React.FC = () => {
           </Box>
         </Card>
       </Box>
-      
+
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">
-          Disconnect Platform
-        </DialogTitle>
+        <DialogTitle id="alert-dialog-title">Disconnect Platform</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Are you sure you want to disconnect this platform? This will stop all synchronization of products and orders.
+            Are you sure you want to disconnect this platform? This will stop
+            all synchronization of products and orders.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

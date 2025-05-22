@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode } from "react";
 
 interface CardWrapperProps {
   children: ReactNode;
@@ -10,25 +10,25 @@ interface CardWrapperProps {
  * This addresses issues with parent containers and animation wrappers
  * that might be affecting card heights
  */
-const CardWrapper: React.FC<CardWrapperProps> = ({ 
-  children, 
-  className = '' 
+const CardWrapper: React.FC<CardWrapperProps> = ({
+  children,
+  className = "",
 }) => {
   return (
-    <div 
+    <div
       className={`${className} h-[360px] w-full`}
       style={{
-        display: 'block',
-        height: '360px',
-        minHeight: '360px',
-        maxHeight: '360px',
-        overflow: 'hidden',
+        display: "block",
+        height: "360px",
+        minHeight: "360px",
+        maxHeight: "360px",
+        overflow: "hidden",
         // Force a new stacking context to isolate the card
-        isolation: 'isolate',
+        isolation: "isolate",
         // Prevent any parent flex or grid behavior from affecting this element
-        position: 'relative',
+        position: "relative",
         // Ensure consistent box sizing
-        boxSizing: 'border-box'
+        boxSizing: "border-box",
       }}
     >
       {children}

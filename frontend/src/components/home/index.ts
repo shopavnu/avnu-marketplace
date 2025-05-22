@@ -1,1 +1,1 @@
-export { default as HeroMasonry } from './HeroMasonry';
+export { default as HeroMasonry } from "./HeroMasonry";

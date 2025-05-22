@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 interface LazyImageOptions {
   src: string;
@@ -20,16 +20,16 @@ interface LazyImageResult {
 /**
  * A hook for lazy loading images when they enter the viewport
  * Uses Intersection Observer API for efficient detection
- * 
+ *
  * @param options Configuration options for lazy loading
  * @returns Image loading state and ref to attach to the container
  */
 export function useLazyImage({
   src,
-  placeholderSrc = '',
-  rootMargin = '200px 0px',
+  placeholderSrc = "",
+  rootMargin = "200px 0px",
   threshold = 0.1,
-  delay = 0
+  delay = 0,
 }: LazyImageOptions): LazyImageResult {
   const [isInView, setIsInView] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -49,7 +49,7 @@ export function useLazyImage({
           observer.disconnect();
         }
       },
-      { rootMargin, threshold }
+      { rootMargin, threshold },
     );
 
     observer.observe(element);
@@ -66,17 +66,17 @@ export function useLazyImage({
     // Optional delay before loading the image
     const timer = setTimeout(() => {
       const img = new Image();
-      
+
       img.onload = () => {
         setCurrentSrc(src);
         setIsLoaded(true);
       };
-      
+
       img.onerror = () => {
         // Keep placeholder on error
         console.error(`Failed to load image: ${src}`);
       };
-      
+
       img.src = src;
     }, delay);
 
@@ -100,7 +100,7 @@ export function useLazyImage({
     currentSrc,
     ref,
     onLoad,
-    onError
+    onError,
   };
 }
 

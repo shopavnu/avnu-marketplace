@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface SkeletonProps {
   width?: string | number;
@@ -6,7 +6,7 @@ interface SkeletonProps {
   borderRadius?: string | number;
   className?: string;
   style?: React.CSSProperties;
-  animation?: 'pulse' | 'wave' | 'none';
+  animation?: "pulse" | "wave" | "none";
 }
 
 /**
@@ -14,18 +14,19 @@ interface SkeletonProps {
  * Supports different animations and customizable dimensions
  */
 export const Skeleton: React.FC<SkeletonProps> = ({
-  width = '100%',
-  height = '100%',
-  borderRadius = '4px',
-  className = '',
+  width = "100%",
+  height = "100%",
+  borderRadius = "4px",
+  className = "",
   style = {},
-  animation = 'pulse'
+  animation = "pulse",
 }) => {
-  const animationClass = animation === 'pulse' 
-    ? 'animate-pulse' 
-    : animation === 'wave' 
-      ? 'animate-shimmer' 
-      : '';
+  const animationClass =
+    animation === "pulse"
+      ? "animate-pulse"
+      : animation === "wave"
+        ? "animate-shimmer"
+        : "";
 
   return (
     <div
@@ -34,7 +35,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
         width,
         height,
         borderRadius,
-        ...style
+        ...style,
       }}
       aria-hidden="true"
     />
@@ -49,35 +50,33 @@ interface ProductCardSkeletonProps {
  * Skeleton loader specifically designed for product cards
  * Matches the exact dimensions of ConsistentProductCard for seamless transitions
  */
-export const ProductCardSkeleton: React.FC<ProductCardSkeletonProps> = ({ className = '' }) => {
+export const ProductCardSkeleton: React.FC<ProductCardSkeletonProps> = ({
+  className = "",
+}) => {
   return (
-    <div 
+    <div
       className={`bg-white rounded-xl shadow-sm overflow-hidden ${className}`}
       style={{
-        width: '100%',
-        height: '360px',
-        minHeight: '360px',
-        maxHeight: '360px',
-        contain: 'strict',
-        position: 'relative'
+        width: "100%",
+        height: "360px",
+        minHeight: "360px",
+        maxHeight: "360px",
+        contain: "strict",
+        position: "relative",
       }}
     >
       {/* Image placeholder */}
-      <Skeleton 
-        height="200px" 
-        width="100%" 
-        borderRadius="0"
-      />
-      
+      <Skeleton height="200px" width="100%" borderRadius="0" />
+
       {/* Content placeholders */}
       <div className="p-4 space-y-2">
         {/* Brand */}
         <Skeleton height="14px" width="40%" />
-        
+
         {/* Title */}
         <Skeleton height="18px" width="90%" />
         <Skeleton height="18px" width="70%" />
-        
+
         {/* Price */}
         <div className="pt-2">
           <Skeleton height="20px" width="30%" />
@@ -99,29 +98,29 @@ interface GridSkeletonProps {
 export const ProductGridSkeleton: React.FC<GridSkeletonProps> = ({
   count = 8,
   columns = 4,
-  gap = '1.5rem'
+  gap = "1.5rem",
 }) => {
   return (
-    <div 
+    <div
       className="w-full"
-      style={{ 
-        display: 'grid',
+      style={{
+        display: "grid",
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gap,
-        gridTemplateRows: 'repeat(auto-fill, 360px)',
-        contain: 'layout',
-        position: 'relative',
-        zIndex: 1
+        gridTemplateRows: "repeat(auto-fill, 360px)",
+        contain: "layout",
+        position: "relative",
+        zIndex: 1,
       }}
     >
       {Array.from({ length: count }).map((_, index) => (
-        <div 
+        <div
           key={index}
-          style={{ 
-            height: '360px',
-            width: '100%',
-            contain: 'strict',
-            position: 'relative'
+          style={{
+            height: "360px",
+            width: "100%",
+            contain: "strict",
+            position: "relative",
           }}
         >
           <ProductCardSkeleton />
@@ -150,7 +149,7 @@ export const ProductGridSkeleton: React.FC<GridSkeletonProps> = ({
 const SkeletonComponents = {
   Skeleton,
   ProductCardSkeleton,
-  ProductGridSkeleton
+  ProductGridSkeleton,
 };
 
 export default SkeletonComponents;

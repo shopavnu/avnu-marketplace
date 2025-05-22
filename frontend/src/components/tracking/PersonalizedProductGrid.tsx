@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSession } from '../../hooks/useSession';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
-import { Product } from '../../types/product';
-import ScrollTracker from './ScrollTracker';
-import ProductViewTracker from './ProductViewTracker';
+import React, { useState, useEffect, useRef } from "react";
+import { useSession } from "../../hooks/useSession";
+import { useUserPreferences } from "../../hooks/useUserPreferences";
+import { Product } from "../../types/product";
+import ScrollTracker from "./ScrollTracker";
+import ProductViewTracker from "./ProductViewTracker";
 
 interface PersonalizedProductGridProps {
   products: Product[];
@@ -22,14 +22,14 @@ const PersonalizedProductGrid: React.FC<PersonalizedProductGridProps> = ({
   pageType,
   gridClassName = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6",
   itemClassName = "",
-  renderProductCard
+  renderProductCard,
 }) => {
   const { sessionId } = useSession();
   const { updateFromCurrentSession } = useUserPreferences();
   const [visibleProducts, setVisibleProducts] = useState<Product[]>([]);
   const productRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
-  
+
   // Update user preferences when component unmounts
   useEffect(() => {
     return () => {
@@ -39,28 +39,28 @@ const PersonalizedProductGrid: React.FC<PersonalizedProductGridProps> = ({
       }
     };
   }, [sessionId, visibleProducts, updateFromCurrentSession]);
-  
+
   // Set up intersection observer to track visible products
   useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return;
-    
+    if (typeof IntersectionObserver === "undefined") return;
+
     // Clean up previous observer
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
-    
+
     // Create new observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
-          const productId = entry.target.getAttribute('data-product-id');
-          
+        entries.forEach((entry) => {
+          const productId = entry.target.getAttribute("data-product-id");
+
           if (productId) {
             if (entry.isIntersecting) {
               // Add to visible products if not already there
-              setVisibleProducts(prev => {
-                if (!prev.some(p => p.id === productId)) {
-                  const product = products.find(p => p.id === productId);
+              setVisibleProducts((prev) => {
+                if (!prev.some((p) => p.id === productId)) {
+                  const product = products.find((p) => p.id === productId);
                   return product ? [...prev, product] : prev;
                 }
                 return prev;
@@ -69,38 +69,38 @@ const PersonalizedProductGrid: React.FC<PersonalizedProductGridProps> = ({
           }
         });
       },
-      { threshold: 0.5 } // Consider visible when 50% in view
+      { threshold: 0.5 }, // Consider visible when 50% in view
     );
-    
+
     // Observe all product elements
     productRefs.current.forEach((ref) => {
       if (ref && observerRef.current) {
         observerRef.current.observe(ref);
       }
     });
-    
+
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
     };
   }, [products]);
-  
+
   // Get visible product IDs for scroll tracking
-  const visibleProductIds = visibleProducts.map(product => product.id);
-  
+  const visibleProductIds = visibleProducts.map((product) => product.id);
+
   return (
     <ScrollTracker pageType={pageType} visibleProductIds={visibleProductIds}>
       <div className={gridClassName}>
-        {products.map(product => (
+        {products.map((product) => (
           <div
             key={product.id}
             className={itemClassName}
-            ref={ref => {
+            ref={(ref) => {
               if (ref) {
                 productRefs.current.set(product.id, ref);
-                ref.setAttribute('data-product-id', product.id);
-                
+                ref.setAttribute("data-product-id", product.id);
+
                 // Observe if we have an observer
                 if (observerRef.current) {
                   observerRef.current.observe(ref);

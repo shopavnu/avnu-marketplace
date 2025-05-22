@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Product } from '../types/product';
-import ResponsiveProductCard from '../components/product/ResponsiveProductCard';
-import PersonalizedProductGrid from '../components/tracking/PersonalizedProductGrid';
-import PersonalizedRecommendations from '../components/recommendations/PersonalizedRecommendations';
-import RecentlyViewedProducts from '../components/recommendations/RecentlyViewedProducts';
-import { useSession } from '../hooks/useSession';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Product } from "../types/product";
+import ResponsiveProductCard from "../components/product/ResponsiveProductCard";
+import PersonalizedProductGrid from "../components/tracking/PersonalizedProductGrid";
+import PersonalizedRecommendations from "../components/recommendations/PersonalizedRecommendations";
+import RecentlyViewedProducts from "../components/recommendations/RecentlyViewedProducts";
+import { useSession } from "../hooks/useSession";
 
 /**
  * Example implementation of a personalized discovery feed
@@ -15,41 +15,41 @@ const PersonalizedDiscoveryFeed: React.FC = () => {
   const { trackInteraction } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('/api/products/discovery');
+        const response = await axios.get("/api/products/discovery");
         setProducts(response.data.items || []);
-        
+
         // Track page view
-        trackInteraction('view', {
-          type: 'page',
-          pageType: 'discovery_feed',
-          timestamp: new Date().toISOString()
+        trackInteraction("view", {
+          type: "page",
+          pageType: "discovery_feed",
+          timestamp: new Date().toISOString(),
         });
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error("Failed to fetch products:", error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, [trackInteraction]);
-  
+
   // Render product card with click tracking
   const renderProductCard = (product: Product) => {
     return (
-      <div 
+      <div
         onClick={() => {
           // Track product click
-          trackInteraction('click', {
+          trackInteraction("click", {
             productId: product.id,
-            categoryId: product.categoryId || (product.categories?.[0] || ''),
+            categoryId: product.categoryId || product.categories?.[0] || "",
             brandId: product.brandId || product.brandName,
             price: product.price,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
         }}
       >
@@ -57,7 +57,7 @@ const PersonalizedDiscoveryFeed: React.FC = () => {
       </div>
     );
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto py-12">
@@ -67,29 +67,26 @@ const PersonalizedDiscoveryFeed: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">Discovery Feed</h1>
-      
+
       {/* Personalized Recommendations Section */}
       <div className="mb-12">
-        <PersonalizedRecommendations 
+        <PersonalizedRecommendations
           title="Recommended for You"
           fallbackTitle="Trending Now"
           limit={4}
           showRefreshButton={true}
         />
       </div>
-      
+
       {/* Recently Viewed Products */}
       <div className="mb-12">
-        <RecentlyViewedProducts 
-          limit={4}
-          title="Recently Viewed"
-        />
+        <RecentlyViewedProducts limit={4} title="Recently Viewed" />
       </div>
-      
+
       {/* Main Product Grid with Personalization Tracking */}
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Popular Products</h2>

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/router';
-import sessionService from '../services/session.service';
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/router";
+import sessionService from "../services/session.service";
 
 /**
  * Hook for tracking page views and session data
@@ -33,25 +33,26 @@ export const useSessionTracking = () => {
     };
 
     // Subscribe to route changes
-    router.events.on('routeChangeComplete', handleRouteChange);
+    router.events.on("routeChangeComplete", handleRouteChange);
 
     // Cleanup
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
+      router.events.off("routeChangeComplete", handleRouteChange);
     };
   }, [router.asPath, router]);
 
   return {
     // Return session ID for components that need it
     sessionId: sessionService.getSessionId(),
-    
+
     // Tracking methods
     trackInteraction: sessionService.trackInteraction.bind(sessionService),
     trackSearchQuery: sessionService.trackSearchQuery.bind(sessionService),
     trackResultClick: sessionService.trackResultClick.bind(sessionService),
-    trackSearchResultImpressions: sessionService.trackSearchResultImpressions.bind(sessionService),
+    trackSearchResultImpressions:
+      sessionService.trackSearchResultImpressions.bind(sessionService),
     trackAddToCart: sessionService.trackAddToCart.bind(sessionService),
-    
+
     // Session data
     getSessionDuration: sessionService.getSessionDuration.bind(sessionService),
     getSessionData: sessionService.getSessionData.bind(sessionService),

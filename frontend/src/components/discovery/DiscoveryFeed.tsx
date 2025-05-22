@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Skeleton } from '@/components/ui/Skeleton';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
-import { products, Product } from '@/data/products';
-import { ScrollItem } from '@/components/common';
-import { SectionType, discoverySections } from '@/data/sections';
-import { ConsistentProductCard } from '@/components/products';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { products, Product } from "@/data/products";
+import { ScrollItem } from "@/components/common";
+import { SectionType, discoverySections } from "@/data/sections";
+import { ConsistentProductCard } from "@/components/products";
 // HeightDebugger removed for clean UI
 
 // Define types for our discovery feed
@@ -44,7 +44,7 @@ interface DiscoverySection {
   title: string;
   description: string;
   type: SectionType;
-  layout: 'grid' | 'masonry' | 'featured';
+  layout: "grid" | "masonry" | "featured";
   backgroundColor?: string;
   items: DiscoveryProduct[];
 }
@@ -72,27 +72,32 @@ const transformProduct = (product: Product): DiscoveryProduct => ({
   slug: product.slug,
   brand: product.brand,
   categories: product.categories,
-  rating: product.rating.average ? 
-    { average: product.rating.average, count: product.rating.count || 0 } : 
-    { average: product.rating.avnuRating.average, count: product.rating.avnuRating.count },
-  vendor: product.vendor ? {
-    id: product.vendor.id,
-    name: product.vendor.name
-  } : undefined,
+  rating: product.rating.average
+    ? { average: product.rating.average, count: product.rating.count || 0 }
+    : {
+        average: product.rating.avnuRating.average,
+        count: product.rating.avnuRating.count,
+      },
+  vendor: product.vendor
+    ? {
+        id: product.vendor.id,
+        name: product.vendor.name,
+      }
+    : undefined,
   isNew: product.isNew,
   isFeatured: product.isFeatured,
   isTrending: product.isTrending,
   isHandmade: product.isHandmade,
   isSustainable: product.isSustainable,
   isLocal: product.isLocal,
-  isBestseller: product.isBestseller
+  isBestseller: product.isBestseller,
 });
 
 // Enhanced mock data for the vertical discovery homepage
 const createMockDiscoveryData = (limit = 20): DiscoveryData => {
   // Get sections from our sections data
   const sectionsData = discoverySections;
-  
+
   // Create a map to store products by section type
   const sectionProducts: Record<SectionType, DiscoveryProduct[]> = {
     [SectionType.FEATURED]: [],
@@ -105,54 +110,73 @@ const createMockDiscoveryData = (limit = 20): DiscoveryData => {
     [SectionType.CATEGORY_SPOTLIGHT]: [],
     [SectionType.BRAND_SPOTLIGHT]: [],
     [SectionType.SEASONAL]: [],
-    [SectionType.BESTSELLERS]: []
+    [SectionType.BESTSELLERS]: [],
   };
-  
+
   // Assign products to sections based on their sectionTypes
-  products.forEach(product => {
+  products.forEach((product) => {
     if (!product.sectionTypes || product.sectionTypes.length === 0) {
       // If no section types, assign based on properties
-      if (product.isNew) sectionProducts[SectionType.NEW_ARRIVALS].push(transformProduct(product));
-      if (product.isFeatured) sectionProducts[SectionType.FEATURED].push(transformProduct(product));
-      if (product.isTrending) sectionProducts[SectionType.TRENDING].push(transformProduct(product));
-      if (product.isHandmade) sectionProducts[SectionType.HANDMADE].push(transformProduct(product));
-      if (product.isSustainable) sectionProducts[SectionType.SUSTAINABLE].push(transformProduct(product));
-      if (product.isLocal) sectionProducts[SectionType.LOCAL].push(transformProduct(product));
-      if (product.isBestseller) sectionProducts[SectionType.BESTSELLERS].push(transformProduct(product));
-      
+      if (product.isNew)
+        sectionProducts[SectionType.NEW_ARRIVALS].push(
+          transformProduct(product),
+        );
+      if (product.isFeatured)
+        sectionProducts[SectionType.FEATURED].push(transformProduct(product));
+      if (product.isTrending)
+        sectionProducts[SectionType.TRENDING].push(transformProduct(product));
+      if (product.isHandmade)
+        sectionProducts[SectionType.HANDMADE].push(transformProduct(product));
+      if (product.isSustainable)
+        sectionProducts[SectionType.SUSTAINABLE].push(
+          transformProduct(product),
+        );
+      if (product.isLocal)
+        sectionProducts[SectionType.LOCAL].push(transformProduct(product));
+      if (product.isBestseller)
+        sectionProducts[SectionType.BESTSELLERS].push(
+          transformProduct(product),
+        );
+
       // Randomly assign to FOR_YOU
-      if (Math.random() > 0.7) sectionProducts[SectionType.FOR_YOU].push(transformProduct(product));
+      if (Math.random() > 0.7)
+        sectionProducts[SectionType.FOR_YOU].push(transformProduct(product));
     } else {
       // Assign based on explicit section types
-      product.sectionTypes.forEach(sectionType => {
+      product.sectionTypes.forEach((sectionType) => {
         if (sectionProducts[sectionType]) {
           sectionProducts[sectionType].push(transformProduct(product));
         }
       });
     }
   });
-  
+
   // Create discovery sections with products
   const sectionsList = sectionsData.map((section) => ({
     id: section.id,
     title: section.title,
-    description: section.description || '',
+    description: section.description || "",
     type: section.type,
     layout: section.layout,
     backgroundColor: section.backgroundColor,
-    items: sectionProducts[section.type].slice(0, section.productCount || limit)
+    items: sectionProducts[section.type].slice(
+      0,
+      section.productCount || limit,
+    ),
   }));
-  
+
   // Sort sections by priority
   sectionsList.sort((a, b) => {
-    const aSection = sectionsData.find(s => s.id === a.id);
-    const bSection = sectionsData.find(s => s.id === b.id);
-    return ((aSection?.priority || 999) - (bSection?.priority || 999));
+    const aSection = sectionsData.find((s) => s.id === a.id);
+    const bSection = sectionsData.find((s) => s.id === b.id);
+    return (aSection?.priority || 999) - (bSection?.priority || 999);
   });
-  
+
   // Filter out sections with no products
-  const filteredSections = sectionsList.filter(section => section.items.length > 0);
-  
+  const filteredSections = sectionsList.filter(
+    (section) => section.items.length > 0,
+  );
+
   return {
     sections: filteredSections,
     metadata: {
@@ -160,8 +184,8 @@ const createMockDiscoveryData = (limit = 20): DiscoveryData => {
       trendingCount: sectionProducts[SectionType.TRENDING].length,
       newArrivalsCount: sectionProducts[SectionType.NEW_ARRIVALS].length,
       emergingBrandsCount: 5,
-      sponsoredCount: 0
-    }
+      sponsoredCount: 0,
+    },
   };
 };
 
@@ -170,44 +194,46 @@ interface DiscoveryFeedProps {
   showTitle?: boolean;
 }
 
-export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({ 
+export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
   limit = 20,
-  showTitle = true
+  showTitle = true,
 }) => {
   // Use local mock data instead of GraphQL query
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<{discoveryHomepage: DiscoveryData} | null>(null);
-  
+  const [data, setData] = useState<{ discoveryHomepage: DiscoveryData } | null>(
+    null,
+  );
+
   // Simulate loading state for a more realistic experience
   useEffect(() => {
     const timer = setTimeout(() => {
       setData({ discoveryHomepage: createMockDiscoveryData(limit) });
       setLoading(false);
     }, 800);
-    
+
     return () => clearTimeout(timer);
   }, [limit]);
-  
+
   // Animation variants for staggered animations
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
-        duration: 0.5
-      }
-    }
+        duration: 0.5,
+      },
+    },
   };
 
   const sections = data?.discoveryHomepage?.sections || [];
@@ -216,14 +242,15 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
     <div className="pb-32">
       {/* Add Height Debugger to diagnose card height issues */}
       {/* HeightDebugger removed for clean UI */}
-      
+
       {/* Header */}
       <div className="container mx-auto px-4 mb-8 md:mb-16">
         <h2 className="text-3xl md:text-4xl font-bold text-charcoal mb-4">
           Discover Products You'll Love
         </h2>
         <p className="text-gray-600 max-w-2xl">
-          Explore our curated collection of unique, high-quality products from independent brands and artisans.
+          Explore our curated collection of unique, high-quality products from
+          independent brands and artisans.
         </p>
       </div>
 
@@ -236,9 +263,11 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
                 <div className="h-4 w-80 bg-gray-200 rounded animate-pulse"></div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {Array(8).fill(0).map((_, j) => (
-                  <Skeleton key={j} className="h-80 rounded-lg" />
-                ))}
+                {Array(8)
+                  .fill(0)
+                  .map((_, j) => (
+                    <Skeleton key={j} className="h-80 rounded-lg" />
+                  ))}
               </div>
             </div>
           ))}
@@ -247,12 +276,14 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
 
       {!loading && sections.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No discovery items found. Check back soon!</p>
+          <p className="text-gray-500">
+            No discovery items found. Check back soon!
+          </p>
         </div>
       )}
 
       {sections.map((section: DiscoverySection) => (
-        <motion.div 
+        <motion.div
           key={section.id}
           className="mb-16 pb-12 border-b border-gray-100 last:border-0"
           variants={containerVariants}
@@ -263,12 +294,14 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
           <div className="flex justify-between items-end mb-8">
             <div>
               {showTitle && (
-                <h2 className="font-montserrat text-2xl font-medium text-charcoal mb-2">{section.title}</h2>
+                <h2 className="font-montserrat text-2xl font-medium text-charcoal mb-2">
+                  {section.title}
+                </h2>
               )}
               <p className="text-neutral-gray">{section.description}</p>
             </div>
-            <Link 
-              href={`/discover/${section.type.toLowerCase()}`} 
+            <Link
+              href={`/discover/${section.type.toLowerCase()}`}
               className="flex items-center text-sage hover:text-sage-dark transition-colors group"
             >
               <span className="text-sm font-medium mr-2">See All</span>
@@ -277,29 +310,30 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
           </div>
 
           {/* Product Grid - No animation wrappers to prevent layout shifts */}
-          <div 
+          <div
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            style={{ 
-              display: 'grid',
-              gridTemplateRows: 'repeat(auto-fill, 360px)', /* Force all grid rows to be exactly 360px tall */
-              contain: 'layout', /* Add CSS containment to the grid */
-              position: 'relative',
-              zIndex: 1
+            style={{
+              display: "grid",
+              gridTemplateRows:
+                "repeat(auto-fill, 360px)" /* Force all grid rows to be exactly 360px tall */,
+              contain: "layout" /* Add CSS containment to the grid */,
+              position: "relative",
+              zIndex: 1,
             }}
             data-testid="product-grid"
           >
             {section.items.map((product: DiscoveryProduct, index) => (
-              <div 
+              <div
                 key={product.id}
-                style={{ 
-                  height: '360px',
-                  width: '100%',
-                  contain: 'strict',
-                  position: 'relative'
+                style={{
+                  height: "360px",
+                  width: "100%",
+                  contain: "strict",
+                  position: "relative",
                 }}
                 data-testid="product-cell"
               >
-                <ConsistentProductCard 
+                <ConsistentProductCard
                   product={product}
                   badges={
                     <>
@@ -323,11 +357,12 @@ export const DiscoveryFeed: React.FC<DiscoveryFeedProps> = ({
                           Local
                         </span>
                       )}
-                      {product.salePrice && product.salePrice < product.price && (
-                        <span className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
-                          Sale
-                        </span>
-                      )}
+                      {product.salePrice &&
+                        product.salePrice < product.price && (
+                          <span className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
+                            Sale
+                          </span>
+                        )}
                     </>
                   }
                 />

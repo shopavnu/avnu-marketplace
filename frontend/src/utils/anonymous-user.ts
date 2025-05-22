@@ -1,6 +1,6 @@
 /**
  * Anonymous User Utility
- * 
+ *
  * This utility provides client-side functionality for anonymous user tracking
  * and personalization, working in conjunction with the backend AnonymousUserService.
  * It uses a combination of cookies (set by the server) and localStorage to
@@ -8,10 +8,10 @@
  */
 
 // Import storage utilities from the newly created storage-utils.ts file
-import { getLocalStorage, setLocalStorage } from './storage-utils';
+import { getLocalStorage, setLocalStorage } from "./storage-utils";
 
 // Constants
-const LOCAL_STORAGE_PREFIX = 'avnu_';
+const LOCAL_STORAGE_PREFIX = "avnu_";
 const RECENT_SEARCHES_KEY = `${LOCAL_STORAGE_PREFIX}recent_searches`;
 const RECENTLY_VIEWED_KEY = `${LOCAL_STORAGE_PREFIX}recently_viewed`;
 const USER_PREFERENCES_KEY = `${LOCAL_STORAGE_PREFIX}user_preferences`;
@@ -45,8 +45,8 @@ interface SearchData {
  * Interface for user preferences
  */
 interface UserPreferences {
-  theme?: 'light' | 'dark' | 'system';
-  listingViewMode?: 'grid' | 'list';
+  theme?: "light" | "dark" | "system";
+  listingViewMode?: "grid" | "list";
   sortPreference?: string;
   filterPreferences?: Record<string, any>;
   categoryPreferences?: string[];
@@ -59,18 +59,26 @@ interface UserPreferences {
  */
 export const getRecentSearches = (): SearchData[] => {
   const searches = getLocalStorage<SearchData[]>(RECENT_SEARCHES_KEY, []);
-  return searches.sort((a: SearchData, b: SearchData) => b.timestamp - a.timestamp);
+  return searches.sort(
+    (a: SearchData, b: SearchData) => b.timestamp - a.timestamp,
+  );
 };
 
 /**
  * Add a search to recent searches
  */
-export const addRecentSearch = (query: string, resultCount?: number, filters?: Record<string, any>): void => {
+export const addRecentSearch = (
+  query: string,
+  resultCount?: number,
+  filters?: Record<string, any>,
+): void => {
   const searches = getRecentSearches();
-  
+
   // Check if this search already exists
-  const existingIndex = searches.findIndex(s => s.query.toLowerCase() === query.toLowerCase());
-  
+  const existingIndex = searches.findIndex(
+    (s) => s.query.toLowerCase() === query.toLowerCase(),
+  );
+
   if (existingIndex !== -1) {
     // Update existing search with new timestamp and data
     searches[existingIndex] = {
@@ -87,17 +95,17 @@ export const addRecentSearch = (query: string, resultCount?: number, filters?: R
       resultCount,
       filters,
     });
-    
+
     // Limit to max number of searches
     if (searches.length > MAX_RECENT_SEARCHES) {
       searches.pop();
     }
   }
-  
+
   setLocalStorage(RECENT_SEARCHES_KEY, searches);
-  
+
   // Also track this interaction on the server
-  trackInteraction('search', {
+  trackInteraction("search", {
     query,
     resultCount,
     filters,
@@ -116,18 +124,24 @@ export const clearRecentSearches = (): void => {
  */
 export const getRecentlyViewedProducts = (): ProductViewData[] => {
   const products = getLocalStorage<ProductViewData[]>(RECENTLY_VIEWED_KEY, []);
-  return products.sort((a: ProductViewData, b: ProductViewData) => b.timestamp - a.timestamp);
+  return products.sort(
+    (a: ProductViewData, b: ProductViewData) => b.timestamp - a.timestamp,
+  );
 };
 
 /**
  * Add a product to recently viewed
  */
-export const addRecentlyViewedProduct = (productData: Omit<ProductViewData, 'timestamp'>): void => {
+export const addRecentlyViewedProduct = (
+  productData: Omit<ProductViewData, "timestamp">,
+): void => {
   const products = getRecentlyViewedProducts();
-  
+
   // Check if this product already exists
-  const existingIndex = products.findIndex(p => p.productId === productData.productId);
-  
+  const existingIndex = products.findIndex(
+    (p) => p.productId === productData.productId,
+  );
+
   if (existingIndex !== -1) {
     // Update existing product with new timestamp
     products[existingIndex] = {
@@ -141,17 +155,17 @@ export const addRecentlyViewedProduct = (productData: Omit<ProductViewData, 'tim
       ...productData,
       timestamp: Date.now(),
     });
-    
+
     // Limit to max number of products
     if (products.length > MAX_RECENTLY_VIEWED) {
       products.pop();
     }
   }
-  
+
   setLocalStorage(RECENTLY_VIEWED_KEY, products);
-  
+
   // Also track this interaction on the server
-  trackInteraction('product_view', {
+  trackInteraction("product_view", {
     productId: productData.productId,
     categoryId: productData.categoryId,
     brandId: productData.brandId,
@@ -162,9 +176,12 @@ export const addRecentlyViewedProduct = (productData: Omit<ProductViewData, 'tim
 /**
  * Track product view time
  */
-export const trackProductViewTime = (productId: string, viewTimeMs: number): void => {
+export const trackProductViewTime = (
+  productId: string,
+  viewTimeMs: number,
+): void => {
   // Track this interaction on the server
-  trackInteraction('product_view', {
+  trackInteraction("product_view", {
     productId,
     viewTimeMs,
   });
@@ -182,8 +199,8 @@ export const clearRecentlyViewedProducts = (): void => {
  */
 export const getUserPreferences = (): UserPreferences => {
   return getLocalStorage<UserPreferences>(USER_PREFERENCES_KEY, {
-    theme: 'system',
-    listingViewMode: 'grid',
+    theme: "system",
+    listingViewMode: "grid",
     lastUpdated: Date.now(),
   });
 };
@@ -191,15 +208,17 @@ export const getUserPreferences = (): UserPreferences => {
 /**
  * Update user preferences
  */
-export const updateUserPreferences = (preferences: Partial<Omit<UserPreferences, 'lastUpdated'>>): void => {
+export const updateUserPreferences = (
+  preferences: Partial<Omit<UserPreferences, "lastUpdated">>,
+): void => {
   const currentPreferences = getUserPreferences();
-  
+
   const updatedPreferences = {
     ...currentPreferences,
     ...preferences,
     lastUpdated: Date.now(),
   };
-  
+
   setLocalStorage(USER_PREFERENCES_KEY, updatedPreferences);
 };
 
@@ -209,24 +228,24 @@ export const updateUserPreferences = (preferences: Partial<Omit<UserPreferences,
 export const trackInteraction = async (
   type: string,
   data: Record<string, any>,
-  durationMs?: number
+  durationMs?: number,
 ): Promise<void> => {
   try {
     // Send interaction to server
-    await fetch('/api/personalization/track', {
-      method: 'POST',
+    await fetch("/api/personalization/track", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         type,
         data,
         durationMs,
       }),
-      credentials: 'include', // Important: include cookies
+      credentials: "include", // Important: include cookies
     });
   } catch (error) {
-    console.error('Failed to track interaction:', error);
+    console.error("Failed to track interaction:", error);
     // Fail silently to not disrupt user experience
   }
 };
@@ -234,9 +253,12 @@ export const trackInteraction = async (
 /**
  * Track category view
  */
-export const trackCategoryView = (categoryId: string, categoryName: string): void => {
-  trackInteraction('view', {
-    type: 'category',
+export const trackCategoryView = (
+  categoryId: string,
+  categoryName: string,
+): void => {
+  trackInteraction("view", {
+    type: "category",
     categoryId,
     categoryName,
   });
@@ -246,8 +268,8 @@ export const trackCategoryView = (categoryId: string, categoryName: string): voi
  * Track brand view
  */
 export const trackBrandView = (brandId: string, brandName: string): void => {
-  trackInteraction('view', {
-    type: 'brand',
+  trackInteraction("view", {
+    type: "brand",
     brandId,
     brandName,
   });
@@ -256,8 +278,11 @@ export const trackBrandView = (brandId: string, brandName: string): void => {
 /**
  * Track filter usage
  */
-export const trackFilterUsage = (filterType: string, filterValue: string): void => {
-  trackInteraction('filter', {
+export const trackFilterUsage = (
+  filterType: string,
+  filterValue: string,
+): void => {
+  trackInteraction("filter", {
     filterType,
     filterValue,
   });
@@ -266,8 +291,12 @@ export const trackFilterUsage = (filterType: string, filterValue: string): void 
 /**
  * Track scroll depth
  */
-export const trackScrollDepth = (pageType: string, scrollPercentage: number, visibleProductIds?: string[]): void => {
-  trackInteraction('scroll_depth', {
+export const trackScrollDepth = (
+  pageType: string,
+  scrollPercentage: number,
+  visibleProductIds?: string[],
+): void => {
+  trackInteraction("scroll_depth", {
     pageType,
     scrollPercentage,
     visibleProductIds,
@@ -279,17 +308,17 @@ export const trackScrollDepth = (pageType: string, scrollPercentage: number, vis
  */
 export const getPersonalizedRecommendations = async (): Promise<any> => {
   try {
-    const response = await fetch('/api/personalization/recommendations', {
-      credentials: 'include', // Important: include cookies
+    const response = await fetch("/api/personalization/recommendations", {
+      credentials: "include", // Important: include cookies
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to fetch recommendations');
+      throw new Error("Failed to fetch recommendations");
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Failed to get personalized recommendations:', error);
+    console.error("Failed to get personalized recommendations:", error);
     return { products: [] };
   }
 };
@@ -302,15 +331,15 @@ export const clearAllAnonymousUserData = async (): Promise<void> => {
   clearRecentSearches();
   clearRecentlyViewedProducts();
   setLocalStorage(USER_PREFERENCES_KEY, null);
-  
+
   // Clear server-side data
   try {
-    await fetch('/api/personalization/clear', {
-      method: 'POST',
-      credentials: 'include', // Important: include cookies
+    await fetch("/api/personalization/clear", {
+      method: "POST",
+      credentials: "include", // Important: include cookies
     });
   } catch (error) {
-    console.error('Failed to clear server-side data:', error);
+    console.error("Failed to clear server-side data:", error);
   }
 };
 

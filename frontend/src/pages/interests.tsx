@@ -1,28 +1,40 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import Head from 'next/head';
-import { primaryCategories, secondaryCategories, PrimaryCategory, SecondaryCategory } from '@/data/interests/index';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import Head from "next/head";
+import {
+  primaryCategories,
+  secondaryCategories,
+  PrimaryCategory,
+  SecondaryCategory,
+} from "@/data/interests/index";
 
 // Step types for our survey
-type Step = 'primary' | 'secondary' | 'signup';
+type Step = "primary" | "secondary" | "signup";
 
 export default function InterestsPage() {
   // Debug logging
-  console.log('Primary Categories:', primaryCategories);
+  console.log("Primary Categories:", primaryCategories);
 
   // State for tracking survey progress
-  const [step, setStep] = useState<Step>('primary');
-  const [selectedPrimaryCategories, setSelectedPrimaryCategories] = useState<string[]>([]);
-  const [selectedSecondaryCategories, setSelectedSecondaryCategories] = useState<string[]>([]);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [currentPrimaryCategory, setCurrentPrimaryCategory] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>("primary");
+  const [selectedPrimaryCategories, setSelectedPrimaryCategories] = useState<
+    string[]
+  >([]);
+  const [selectedSecondaryCategories, setSelectedSecondaryCategories] =
+    useState<string[]>([]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [currentPrimaryCategory, setCurrentPrimaryCategory] = useState<
+    string | null
+  >(null);
 
   // Handle primary category selection
   const handlePrimarySelection = (categoryId: string) => {
     if (selectedPrimaryCategories.includes(categoryId)) {
-      setSelectedPrimaryCategories(selectedPrimaryCategories.filter(id => id !== categoryId));
+      setSelectedPrimaryCategories(
+        selectedPrimaryCategories.filter((id) => id !== categoryId),
+      );
     } else {
       setSelectedPrimaryCategories([...selectedPrimaryCategories, categoryId]);
     }
@@ -31,16 +43,21 @@ export default function InterestsPage() {
   // Handle secondary category selection
   const handleSecondarySelection = (categoryId: string) => {
     if (selectedSecondaryCategories.includes(categoryId)) {
-      setSelectedSecondaryCategories(selectedSecondaryCategories.filter(id => id !== categoryId));
+      setSelectedSecondaryCategories(
+        selectedSecondaryCategories.filter((id) => id !== categoryId),
+      );
     } else {
-      setSelectedSecondaryCategories([...selectedSecondaryCategories, categoryId]);
+      setSelectedSecondaryCategories([
+        ...selectedSecondaryCategories,
+        categoryId,
+      ]);
     }
   };
 
   // Move to secondary categories for a specific primary category
   const showSecondaryCategories = (primaryCategoryId: string) => {
     setCurrentPrimaryCategory(primaryCategoryId);
-    setStep('secondary');
+    setStep("secondary");
   };
 
   // Handle form submission
@@ -51,16 +68,16 @@ export default function InterestsPage() {
       primaryInterests: selectedPrimaryCategories,
       secondaryInterests: selectedSecondaryCategories,
       email,
-      password
+      password,
     });
-    
+
     // For demo purposes, just show an alert
-    alert('Account created successfully! Your interests have been saved.');
+    alert("Account created successfully! Your interests have been saved.");
   };
 
   // Get relevant secondary categories for the current primary category
   const relevantSecondaryCategories = secondaryCategories.filter(
-    category => category.primaryCategoryId === currentPrimaryCategory
+    (category) => category.primaryCategoryId === currentPrimaryCategory,
   );
 
   // Animation variants
@@ -69,67 +86,77 @@ export default function InterestsPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
-      opacity: 1
-    }
+      opacity: 1,
+    },
   };
 
   return (
     <>
       <Head>
         <title>Discover Your Interests | avnu</title>
-        <meta name="description" content="Tell us what you're interested in and we'll personalize your shopping experience." />
+        <meta
+          name="description"
+          content="Tell us what you're interested in and we'll personalize your shopping experience."
+        />
       </Head>
 
       <main className="min-h-screen bg-warm-white py-12">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-5xl font-bold text-charcoal mb-4"
             >
               Discover Your Interests
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="text-lg text-gray-600 max-w-2xl mx-auto"
             >
-              Tell us what you&apos;re interested in and we&apos;ll personalize your shopping experience.
+              Tell us what you&apos;re interested in and we&apos;ll personalize
+              your shopping experience.
             </motion.p>
           </div>
 
           {/* Progress Indicator */}
-          <motion.div 
+          <motion.div
             className="flex justify-center mb-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center space-x-2">
-              <div className={`h-3 w-3 rounded-full ${step === 'primary' ? 'bg-sage' : 'bg-sage/30'}`} />
+              <div
+                className={`h-3 w-3 rounded-full ${step === "primary" ? "bg-sage" : "bg-sage/30"}`}
+              />
               <div className="h-0.5 w-8 bg-gray-200" />
-              <div className={`h-3 w-3 rounded-full ${step === 'secondary' ? 'bg-sage' : 'bg-sage/30'}`} />
+              <div
+                className={`h-3 w-3 rounded-full ${step === "secondary" ? "bg-sage" : "bg-sage/30"}`}
+              />
               <div className="h-0.5 w-8 bg-gray-200" />
-              <div className={`h-3 w-3 rounded-full ${step === 'signup' ? 'bg-sage' : 'bg-sage/30'}`} />
+              <div
+                className={`h-3 w-3 rounded-full ${step === "signup" ? "bg-sage" : "bg-sage/30"}`}
+              />
             </div>
           </motion.div>
 
           {/* Survey Steps */}
           <AnimatePresence mode="wait">
             {/* Step 1: Primary Categories */}
-            {step === 'primary' && (
+            {step === "primary" && (
               <motion.div
                 key="primary"
                 initial={{ opacity: 0, x: -20 }}
@@ -144,7 +171,7 @@ export default function InterestsPage() {
                   Select all that apply. You can always change these later.
                 </p>
 
-                <motion.div 
+                <motion.div
                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
                   variants={containerVariants}
                   initial="hidden"
@@ -157,28 +184,43 @@ export default function InterestsPage() {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.98 }}
                       className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 
-                        ${selectedPrimaryCategories.includes(category.id) 
-                          ? 'ring-4 ring-sage shadow-lg' 
-                          : 'ring-1 ring-gray-200 hover:shadow-md'}`}
+                        ${
+                          selectedPrimaryCategories.includes(category.id)
+                            ? "ring-4 ring-sage shadow-lg"
+                            : "ring-1 ring-gray-200 hover:shadow-md"
+                        }`}
                       onClick={() => handlePrimarySelection(category.id)}
                     >
                       <div className="relative w-full h-48 md:h-56 overflow-hidden rounded-t-xl">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20 z-10" />
-                        <div 
-                          className="absolute inset-0 bg-cover bg-center" 
+                        <div
+                          className="absolute inset-0 bg-cover bg-center"
                           style={{ backgroundImage: `url(${category.image})` }}
                         />
                         <div className="absolute inset-0 flex flex-col justify-end p-4 z-20">
-                          <h3 className="text-white text-xl font-semibold">{category.name}</h3>
-                          <p className="text-white/80 text-sm mt-1 line-clamp-2">{category.description}</p>
+                          <h3 className="text-white text-xl font-semibold">
+                            {category.name}
+                          </h3>
+                          <p className="text-white/80 text-sm mt-1 line-clamp-2">
+                            {category.description}
+                          </p>
                         </div>
                       </div>
 
                       {/* Selected indicator */}
                       {selectedPrimaryCategories.includes(category.id) && (
                         <div className="absolute top-3 right-3 bg-sage text-white rounded-full p-1 z-30">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                         </div>
                       )}
@@ -191,9 +233,11 @@ export default function InterestsPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={`px-8 py-3 rounded-full font-medium text-white transition-colors
-                      ${selectedPrimaryCategories.length > 0 
-                        ? 'bg-sage hover:bg-sage/90' 
-                        : 'bg-gray-300 cursor-not-allowed'}`}
+                      ${
+                        selectedPrimaryCategories.length > 0
+                          ? "bg-sage hover:bg-sage/90"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
                     disabled={selectedPrimaryCategories.length === 0}
                     onClick={() => {
                       if (selectedPrimaryCategories.length > 0) {
@@ -208,7 +252,7 @@ export default function InterestsPage() {
             )}
 
             {/* Step 2: Secondary Categories */}
-            {step === 'secondary' && currentPrimaryCategory && (
+            {step === "secondary" && currentPrimaryCategory && (
               <motion.div
                 key="secondary"
                 initial={{ opacity: 0, x: 20 }}
@@ -217,13 +261,18 @@ export default function InterestsPage() {
                 className="max-w-6xl mx-auto"
               >
                 <h2 className="text-2xl font-semibold text-charcoal mb-6 text-center">
-                  {primaryCategories.find(c => c.id === currentPrimaryCategory)?.name} - Select Specific Interests
+                  {
+                    primaryCategories.find(
+                      (c) => c.id === currentPrimaryCategory,
+                    )?.name
+                  }{" "}
+                  - Select Specific Interests
                 </h2>
                 <p className="text-gray-600 mb-8 text-center">
                   Choose the specific areas that interest you most.
                 </p>
 
-                <motion.div 
+                <motion.div
                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
                   variants={containerVariants}
                   initial="hidden"
@@ -236,28 +285,43 @@ export default function InterestsPage() {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.98 }}
                       className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 
-                        ${selectedSecondaryCategories.includes(category.id) 
-                          ? 'ring-4 ring-sage shadow-lg' 
-                          : 'ring-1 ring-gray-200 hover:shadow-md'}`}
+                        ${
+                          selectedSecondaryCategories.includes(category.id)
+                            ? "ring-4 ring-sage shadow-lg"
+                            : "ring-1 ring-gray-200 hover:shadow-md"
+                        }`}
                       onClick={() => handleSecondarySelection(category.id)}
                     >
                       <div className="relative w-full h-48 md:h-56 overflow-hidden rounded-t-xl">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20 z-10" />
-                        <div 
-                          className="absolute inset-0 bg-cover bg-center" 
+                        <div
+                          className="absolute inset-0 bg-cover bg-center"
                           style={{ backgroundImage: `url(${category.image})` }}
                         />
                         <div className="absolute inset-0 flex flex-col justify-end p-4 z-20">
-                          <h3 className="text-white text-xl font-semibold">{category.name}</h3>
-                          <p className="text-white/80 text-sm mt-1 line-clamp-2">{category.description}</p>
+                          <h3 className="text-white text-xl font-semibold">
+                            {category.name}
+                          </h3>
+                          <p className="text-white/80 text-sm mt-1 line-clamp-2">
+                            {category.description}
+                          </p>
                         </div>
                       </div>
 
                       {/* Selected indicator */}
                       {selectedSecondaryCategories.includes(category.id) && (
                         <div className="absolute top-3 right-3 bg-sage text-white rounded-full p-1 z-30">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                         </div>
                       )}
@@ -272,7 +336,7 @@ export default function InterestsPage() {
                     className="px-6 py-3 rounded-full font-medium text-gray-600 border border-gray-300 hover:bg-gray-50"
                     onClick={() => {
                       // Go back to primary categories
-                      setStep('primary');
+                      setStep("primary");
                     }}
                   >
                     Back
@@ -284,26 +348,31 @@ export default function InterestsPage() {
                     className="px-8 py-3 rounded-full font-medium text-white bg-sage hover:bg-sage/90"
                     onClick={() => {
                       // Check if there are more primary categories to explore
-                      const currentIndex = selectedPrimaryCategories.indexOf(currentPrimaryCategory);
+                      const currentIndex = selectedPrimaryCategories.indexOf(
+                        currentPrimaryCategory,
+                      );
                       if (currentIndex < selectedPrimaryCategories.length - 1) {
                         // Show next primary category's secondary categories
-                        showSecondaryCategories(selectedPrimaryCategories[currentIndex + 1]);
+                        showSecondaryCategories(
+                          selectedPrimaryCategories[currentIndex + 1],
+                        );
                       } else {
                         // Move to signup step
-                        setStep('signup');
+                        setStep("signup");
                       }
                     }}
                   >
-                    {selectedPrimaryCategories.indexOf(currentPrimaryCategory) < selectedPrimaryCategories.length - 1
-                      ? 'Next Category'
-                      : 'Continue to Signup'}
+                    {selectedPrimaryCategories.indexOf(currentPrimaryCategory) <
+                    selectedPrimaryCategories.length - 1
+                      ? "Next Category"
+                      : "Continue to Signup"}
                   </motion.button>
                 </div>
               </motion.div>
             )}
 
             {/* Step 3: Signup */}
-            {step === 'signup' && (
+            {step === "signup" && (
               <motion.div
                 key="signup"
                 initial={{ opacity: 0, x: 20 }}
@@ -318,7 +387,7 @@ export default function InterestsPage() {
                   Save your preferences and get personalized recommendations.
                 </p>
 
-                <motion.form 
+                <motion.form
                   onSubmit={handleSubmit}
                   className="bg-white rounded-xl shadow-md p-6 md:p-8"
                   variants={containerVariants}
@@ -326,7 +395,12 @@ export default function InterestsPage() {
                   animate="visible"
                 >
                   <motion.div className="mb-4" variants={itemVariants}>
-                    <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
+                    <label
+                      htmlFor="email"
+                      className="block text-gray-700 font-medium mb-2"
+                    >
+                      Email
+                    </label>
                     <input
                       type="email"
                       id="email"
@@ -339,7 +413,12 @@ export default function InterestsPage() {
                   </motion.div>
 
                   <motion.div className="mb-6" variants={itemVariants}>
-                    <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Password</label>
+                    <label
+                      htmlFor="password"
+                      className="block text-gray-700 font-medium mb-2"
+                    >
+                      Password
+                    </label>
                     <input
                       type="password"
                       id="password"
@@ -371,7 +450,11 @@ export default function InterestsPage() {
                     onClick={() => {
                       // Go back to the last primary category's secondary categories
                       if (selectedPrimaryCategories.length > 0) {
-                        showSecondaryCategories(selectedPrimaryCategories[selectedPrimaryCategories.length - 1]);
+                        showSecondaryCategories(
+                          selectedPrimaryCategories[
+                            selectedPrimaryCategories.length - 1
+                          ],
+                        );
                       }
                     }}
                   >

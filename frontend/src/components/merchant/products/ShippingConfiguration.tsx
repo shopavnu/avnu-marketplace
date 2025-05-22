@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { 
+import { useState } from "react";
+import {
   TruckIcon,
   PlusIcon,
   XMarkIcon,
-  GlobeAltIcon
-} from '@heroicons/react/24/outline';
+  GlobeAltIcon,
+} from "@heroicons/react/24/outline";
 
 interface ShippingRule {
   id: string;
@@ -35,155 +35,155 @@ interface ShippingConfigurationProps {
   onSave: (productId: string, config: ShippingConfiguration) => void;
 }
 
-const ShippingConfiguration = ({ 
-  productId, 
-  initialConfig, 
-  onSave 
+const ShippingConfiguration = ({
+  productId,
+  initialConfig,
+  onSave,
 }: ShippingConfigurationProps) => {
   const [config, setConfig] = useState<ShippingConfiguration>(initialConfig);
-  const [newRuleMinWeight, setNewRuleMinWeight] = useState<string>('');
-  const [newRuleMaxWeight, setNewRuleMaxWeight] = useState<string>('');
-  const [newRulePrice, setNewRulePrice] = useState<string>('');
-  const [newRuleLocation, setNewRuleLocation] = useState<string>('');
+  const [newRuleMinWeight, setNewRuleMinWeight] = useState<string>("");
+  const [newRuleMaxWeight, setNewRuleMaxWeight] = useState<string>("");
+  const [newRulePrice, setNewRulePrice] = useState<string>("");
+  const [newRuleLocation, setNewRuleLocation] = useState<string>("");
   const [newRuleLocations, setNewRuleLocations] = useState<string[]>([]);
-  const [newSpecialHandling, setNewSpecialHandling] = useState<string>('');
+  const [newSpecialHandling, setNewSpecialHandling] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Available shipping classes
   const shippingClasses = [
-    { id: 'standard', name: 'Standard Shipping' },
-    { id: 'bulky', name: 'Bulky Items' },
-    { id: 'fragile', name: 'Fragile Items' },
-    { id: 'express', name: 'Express Shipping' },
-    { id: 'international', name: 'International Shipping' }
+    { id: "standard", name: "Standard Shipping" },
+    { id: "bulky", name: "Bulky Items" },
+    { id: "fragile", name: "Fragile Items" },
+    { id: "express", name: "Express Shipping" },
+    { id: "international", name: "International Shipping" },
   ];
-  
+
   // Common special handling options
   const specialHandlingOptions = [
-    'Fragile',
-    'Refrigeration Required',
-    'Hazardous Materials',
-    'Oversized',
-    'Signature Required',
-    'Insurance Required'
+    "Fragile",
+    "Refrigeration Required",
+    "Hazardous Materials",
+    "Oversized",
+    "Signature Required",
+    "Insurance Required",
   ];
-  
+
   // Handle input changes
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
-    
-    if (name === 'enableFreeShipping') {
+
+    if (name === "enableFreeShipping") {
       const checkbox = e.target as HTMLInputElement;
-      setConfig(prev => ({
+      setConfig((prev) => ({
         ...prev,
-        enableFreeShipping: checkbox.checked
+        enableFreeShipping: checkbox.checked,
       }));
-    } else if (name === 'requiresShipping') {
+    } else if (name === "requiresShipping") {
       const checkbox = e.target as HTMLInputElement;
-      setConfig(prev => ({
+      setConfig((prev) => ({
         ...prev,
-        requiresShipping: checkbox.checked
+        requiresShipping: checkbox.checked,
       }));
-    } else if (name === 'freeShippingThreshold' || name === 'weight') {
-      setConfig(prev => ({
+    } else if (name === "freeShippingThreshold" || name === "weight") {
+      setConfig((prev) => ({
         ...prev,
-        [name]: parseFloat(value) || 0
+        [name]: parseFloat(value) || 0,
       }));
-    } else if (name.startsWith('dimensions.')) {
-      const dimension = name.split('.')[1];
-      setConfig(prev => ({
+    } else if (name.startsWith("dimensions.")) {
+      const dimension = name.split(".")[1];
+      setConfig((prev) => ({
         ...prev,
         dimensions: {
           ...prev.dimensions,
-          [dimension]: parseFloat(value) || 0
-        }
+          [dimension]: parseFloat(value) || 0,
+        },
       }));
     } else {
-      setConfig(prev => ({
+      setConfig((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
-  
+
   // Add a new location to the new rule
   const handleAddRuleLocation = () => {
     if (!newRuleLocation.trim()) return;
-    
+
     if (!newRuleLocations.includes(newRuleLocation.trim())) {
-      setNewRuleLocations(prev => [...prev, newRuleLocation.trim()]);
+      setNewRuleLocations((prev) => [...prev, newRuleLocation.trim()]);
     }
-    
-    setNewRuleLocation('');
+
+    setNewRuleLocation("");
   };
-  
+
   // Remove a location from the new rule
   const handleRemoveRuleLocation = (location: string) => {
-    setNewRuleLocations(prev => prev.filter(loc => loc !== location));
+    setNewRuleLocations((prev) => prev.filter((loc) => loc !== location));
   };
-  
+
   // Add a new shipping rule
   const handleAddShippingRule = () => {
     if (newRuleLocations.length === 0 || !newRulePrice) return;
-    
+
     const newRule: ShippingRule = {
       id: `rule-${Date.now()}`,
       price: parseFloat(newRulePrice) || 0,
-      locations: [...newRuleLocations]
+      locations: [...newRuleLocations],
     };
-    
+
     if (newRuleMinWeight) {
       newRule.minWeight = parseFloat(newRuleMinWeight);
     }
-    
+
     if (newRuleMaxWeight) {
       newRule.maxWeight = parseFloat(newRuleMaxWeight);
     }
-    
-    setConfig(prev => ({
+
+    setConfig((prev) => ({
       ...prev,
-      shippingRules: [...prev.shippingRules, newRule]
+      shippingRules: [...prev.shippingRules, newRule],
     }));
-    
+
     // Reset form
-    setNewRuleMinWeight('');
-    setNewRuleMaxWeight('');
-    setNewRulePrice('');
+    setNewRuleMinWeight("");
+    setNewRuleMaxWeight("");
+    setNewRulePrice("");
     setNewRuleLocations([]);
   };
-  
+
   // Remove a shipping rule
   const handleRemoveShippingRule = (ruleId: string) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
-      shippingRules: prev.shippingRules.filter(rule => rule.id !== ruleId)
+      shippingRules: prev.shippingRules.filter((rule) => rule.id !== ruleId),
     }));
   };
-  
+
   // Add a special handling option
   const handleAddSpecialHandling = () => {
     if (!newSpecialHandling.trim()) return;
-    
+
     if (!config.specialHandling.includes(newSpecialHandling.trim())) {
-      setConfig(prev => ({
+      setConfig((prev) => ({
         ...prev,
-        specialHandling: [...prev.specialHandling, newSpecialHandling.trim()]
+        specialHandling: [...prev.specialHandling, newSpecialHandling.trim()],
       }));
     }
-    
-    setNewSpecialHandling('');
+
+    setNewSpecialHandling("");
   };
-  
+
   // Remove a special handling option
   const handleRemoveSpecialHandling = (option: string) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
-      specialHandling: prev.specialHandling.filter(opt => opt !== option)
+      specialHandling: prev.specialHandling.filter((opt) => opt !== option),
     }));
   };
-  
+
   // Save configuration
   const handleSave = async () => {
     setIsSaving(true);
@@ -191,27 +191,31 @@ const ShippingConfiguration = ({
       await onSave(productId, config);
       // Show success message (in a real app)
     } catch (error) {
-      console.error('Error saving shipping configuration:', error);
+      console.error("Error saving shipping configuration:", error);
       // Show error message (in a real app)
     } finally {
       setIsSaving(false);
     }
   };
-  
+
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-        <h3 className="text-lg font-medium leading-6 text-gray-900">Shipping Configuration</h3>
+        <h3 className="text-lg font-medium leading-6 text-gray-900">
+          Shipping Configuration
+        </h3>
         <p className="mt-1 text-sm text-gray-500">
           Configure shipping options and pricing for this product.
         </p>
       </div>
-      
+
       <div className="px-4 py-5 sm:p-6 space-y-6">
         {/* Basic Shipping Settings */}
         <div>
-          <h4 className="text-base font-medium text-gray-900 mb-4">Basic Settings</h4>
-          
+          <h4 className="text-base font-medium text-gray-900 mb-4">
+            Basic Settings
+          </h4>
+
           <div className="space-y-4">
             {/* Requires Shipping */}
             <div className="relative flex items-start">
@@ -226,15 +230,19 @@ const ShippingConfiguration = ({
                 />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="requiresShipping" className="font-medium text-gray-700">
+                <label
+                  htmlFor="requiresShipping"
+                  className="font-medium text-gray-700"
+                >
                   This product requires shipping
                 </label>
                 <p className="text-gray-500">
-                  Uncheck this for digital or service products that don't require shipping.
+                  Uncheck this for digital or service products that don't
+                  require shipping.
                 </p>
               </div>
             </div>
-            
+
             {config.requiresShipping && (
               <>
                 {/* Free Shipping Threshold */}
@@ -250,18 +258,25 @@ const ShippingConfiguration = ({
                     />
                   </div>
                   <div className="ml-3 text-sm">
-                    <label htmlFor="enableFreeShipping" className="font-medium text-gray-700">
+                    <label
+                      htmlFor="enableFreeShipping"
+                      className="font-medium text-gray-700"
+                    >
                       Enable free shipping threshold
                     </label>
                     <p className="text-gray-500">
-                      Customers get free shipping when they spend over a certain amount.
+                      Customers get free shipping when they spend over a certain
+                      amount.
                     </p>
                   </div>
                 </div>
-                
+
                 {config.enableFreeShipping && (
                   <div className="ml-7">
-                    <label htmlFor="freeShippingThreshold" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="freeShippingThreshold"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Free Shipping Threshold ($)
                     </label>
                     <div className="mt-1 relative rounded-md shadow-sm">
@@ -285,11 +300,14 @@ const ShippingConfiguration = ({
                     </p>
                   </div>
                 )}
-                
+
                 {/* Weight & Dimensions */}
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-2">
-                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="weight"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Weight (kg)
                     </label>
                     <div className="mt-1">
@@ -306,14 +324,19 @@ const ShippingConfiguration = ({
                       />
                     </div>
                   </div>
-                  
+
                   <div className="sm:col-span-4">
-                    <label htmlFor="dimensions" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="dimensions"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Dimensions (cm)
                     </label>
                     <div className="mt-1 grid grid-cols-3 gap-3">
                       <div>
-                        <label htmlFor="dimensions.length" className="sr-only">Length</label>
+                        <label htmlFor="dimensions.length" className="sr-only">
+                          Length
+                        </label>
                         <div className="relative rounded-md shadow-sm">
                           <input
                             type="number"
@@ -332,7 +355,9 @@ const ShippingConfiguration = ({
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="dimensions.width" className="sr-only">Width</label>
+                        <label htmlFor="dimensions.width" className="sr-only">
+                          Width
+                        </label>
                         <div className="relative rounded-md shadow-sm">
                           <input
                             type="number"
@@ -351,7 +376,9 @@ const ShippingConfiguration = ({
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="dimensions.height" className="sr-only">Height</label>
+                        <label htmlFor="dimensions.height" className="sr-only">
+                          Height
+                        </label>
                         <div className="relative rounded-md shadow-sm">
                           <input
                             type="number"
@@ -372,10 +399,13 @@ const ShippingConfiguration = ({
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Shipping Class */}
                 <div>
-                  <label htmlFor="shippingClass" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="shippingClass"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Shipping Class
                   </label>
                   <select
@@ -393,19 +423,22 @@ const ShippingConfiguration = ({
                     ))}
                   </select>
                   <p className="mt-2 text-sm text-gray-500">
-                    Shipping classes help you group products with similar shipping requirements.
+                    Shipping classes help you group products with similar
+                    shipping requirements.
                   </p>
                 </div>
               </>
             )}
           </div>
         </div>
-        
+
         {/* Special Handling */}
         {config.requiresShipping && (
           <div className="pt-6 border-t border-gray-200">
-            <h4 className="text-base font-medium text-gray-900 mb-4">Special Handling</h4>
-            
+            <h4 className="text-base font-medium text-gray-900 mb-4">
+              Special Handling
+            </h4>
+
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2 mb-4">
                 {specialHandlingOptions.map((option) => (
@@ -416,23 +449,23 @@ const ShippingConfiguration = ({
                       if (config.specialHandling.includes(option)) {
                         handleRemoveSpecialHandling(option);
                       } else {
-                        setConfig(prev => ({
+                        setConfig((prev) => ({
                           ...prev,
-                          specialHandling: [...prev.specialHandling, option]
+                          specialHandling: [...prev.specialHandling, option],
                         }));
                       }
                     }}
                     className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       config.specialHandling.includes(option)
-                        ? 'bg-sage text-white'
-                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        ? "bg-sage text-white"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                     }`}
                   >
                     {option}
                   </button>
                 ))}
               </div>
-              
+
               <div className="flex rounded-md shadow-sm">
                 <input
                   type="text"
@@ -443,7 +476,7 @@ const ShippingConfiguration = ({
                   className="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md focus:ring-sage focus:border-sage sm:text-sm border-gray-300"
                   placeholder="Add custom handling requirement"
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddSpecialHandling();
                     }
@@ -460,20 +493,27 @@ const ShippingConfiguration = ({
             </div>
           </div>
         )}
-        
+
         {/* Weight-Based Shipping Rules */}
         {config.requiresShipping && (
           <div className="pt-6 border-t border-gray-200">
-            <h4 className="text-base font-medium text-gray-900 mb-4">Shipping Rules</h4>
-            
+            <h4 className="text-base font-medium text-gray-900 mb-4">
+              Shipping Rules
+            </h4>
+
             <div className="space-y-4">
               {/* Add New Rule Form */}
               <div className="bg-gray-50 p-4 rounded-md">
-                <h5 className="text-sm font-medium text-gray-700 mb-3">Add New Shipping Rule</h5>
-                
+                <h5 className="text-sm font-medium text-gray-700 mb-3">
+                  Add New Shipping Rule
+                </h5>
+
                 <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-3">
-                    <label htmlFor="newRuleMinWeight" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="newRuleMinWeight"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Min Weight (kg)
                     </label>
                     <input
@@ -488,9 +528,12 @@ const ShippingConfiguration = ({
                       placeholder="0.00"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-3">
-                    <label htmlFor="newRuleMaxWeight" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="newRuleMaxWeight"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Max Weight (kg)
                     </label>
                     <input
@@ -505,9 +548,12 @@ const ShippingConfiguration = ({
                       placeholder="0.00"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-2">
-                    <label htmlFor="newRulePrice" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="newRulePrice"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Shipping Price ($)
                     </label>
                     <div className="mt-1 relative rounded-md shadow-sm">
@@ -527,15 +573,21 @@ const ShippingConfiguration = ({
                       />
                     </div>
                   </div>
-                  
+
                   <div className="sm:col-span-4">
-                    <label htmlFor="newRuleLocation" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="newRuleLocation"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Locations
                     </label>
                     <div className="mt-1 flex rounded-md shadow-sm">
                       <div className="relative flex items-stretch flex-grow focus-within:z-10">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <GlobeAltIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          <GlobeAltIcon
+                            className="h-5 w-5 text-gray-400"
+                            aria-hidden="true"
+                          />
                         </div>
                         <input
                           type="text"
@@ -546,7 +598,7 @@ const ShippingConfiguration = ({
                           className="focus:ring-sage focus:border-sage block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300"
                           placeholder="Country, region, or 'Global'"
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               e.preventDefault();
                               handleAddRuleLocation();
                             }
@@ -558,16 +610,21 @@ const ShippingConfiguration = ({
                         onClick={handleAddRuleLocation}
                         className="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-sage focus:border-sage"
                       >
-                        <PlusIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <PlusIcon
+                          className="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
                         <span>Add</span>
                       </button>
                     </div>
                   </div>
                 </div>
-                
+
                 {newRuleLocations.length > 0 && (
                   <div className="mt-3">
-                    <h6 className="text-xs font-medium text-gray-700 mb-2">Selected Locations:</h6>
+                    <h6 className="text-xs font-medium text-gray-700 mb-2">
+                      Selected Locations:
+                    </h6>
                     <div className="flex flex-wrap gap-2">
                       {newRuleLocations.map((location) => (
                         <span
@@ -588,7 +645,7 @@ const ShippingConfiguration = ({
                     </div>
                   </div>
                 )}
-                
+
                 <div className="mt-4 flex justify-end">
                   <button
                     type="button"
@@ -596,12 +653,15 @@ const ShippingConfiguration = ({
                     disabled={newRuleLocations.length === 0 || !newRulePrice}
                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-sage hover:bg-sage/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage disabled:opacity-50"
                   >
-                    <PlusIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                    <PlusIcon
+                      className="-ml-0.5 mr-2 h-4 w-4"
+                      aria-hidden="true"
+                    />
                     Add Rule
                   </button>
                 </div>
               </div>
-              
+
               {/* Existing Rules */}
               {config.shippingRules.length > 0 ? (
                 <div className="mt-4 bg-white border border-gray-200 rounded-md overflow-hidden">
@@ -612,21 +672,24 @@ const ShippingConfiguration = ({
                           <div>
                             <h6 className="text-sm font-medium text-gray-900">
                               ${rule.price.toFixed(2)} Shipping
-                              {rule.minWeight !== undefined && rule.maxWeight !== undefined && (
-                                <span className="ml-2 text-gray-500">
-                                  ({rule.minWeight}kg - {rule.maxWeight}kg)
-                                </span>
-                              )}
-                              {rule.minWeight !== undefined && rule.maxWeight === undefined && (
-                                <span className="ml-2 text-gray-500">
-                                  (Over {rule.minWeight}kg)
-                                </span>
-                              )}
-                              {rule.minWeight === undefined && rule.maxWeight !== undefined && (
-                                <span className="ml-2 text-gray-500">
-                                  (Up to {rule.maxWeight}kg)
-                                </span>
-                              )}
+                              {rule.minWeight !== undefined &&
+                                rule.maxWeight !== undefined && (
+                                  <span className="ml-2 text-gray-500">
+                                    ({rule.minWeight}kg - {rule.maxWeight}kg)
+                                  </span>
+                                )}
+                              {rule.minWeight !== undefined &&
+                                rule.maxWeight === undefined && (
+                                  <span className="ml-2 text-gray-500">
+                                    (Over {rule.minWeight}kg)
+                                  </span>
+                                )}
+                              {rule.minWeight === undefined &&
+                                rule.maxWeight !== undefined && (
+                                  <span className="ml-2 text-gray-500">
+                                    (Up to {rule.maxWeight}kg)
+                                  </span>
+                                )}
                             </h6>
                             <div className="mt-1 flex flex-wrap gap-1">
                               {rule.locations.map((location) => (
@@ -660,7 +723,7 @@ const ShippingConfiguration = ({
             </div>
           </div>
         )}
-        
+
         {/* Save Button */}
         <div className="pt-6 border-t border-gray-200 flex justify-end">
           <button
@@ -671,7 +734,10 @@ const ShippingConfiguration = ({
           >
             {isSaving ? (
               <>
-                <TruckIcon className="animate-pulse -ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                <TruckIcon
+                  className="animate-pulse -ml-1 mr-2 h-5 w-5"
+                  aria-hidden="true"
+                />
                 Saving...
               </>
             ) : (

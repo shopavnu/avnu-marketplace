@@ -1,9 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useLazyQuery } from '@apollo/client';
-import { GET_SEARCH_SUGGESTIONS, GetSearchSuggestionsData, GetSearchSuggestionsVars, SearchSuggestionType } from '@/graphql/queries/searchSuggestions';
-import { debounce } from 'lodash';
-import { analyticsService } from '@/services/analytics.service';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLazyQuery } from "@apollo/client";
+import {
+  GET_SEARCH_SUGGESTIONS,
+  GetSearchSuggestionsData,
+  GetSearchSuggestionsVars,
+  SearchSuggestionType,
+} from "@/graphql/queries/searchSuggestions";
+import { debounce } from "lodash";
+import { analyticsService } from "@/services/analytics.service";
 
 interface SearchBarWithSuggestionsProps {
   value: string;
@@ -24,9 +29,10 @@ export default function SearchBarWithSuggestions({
 }: SearchBarWithSuggestionsProps) {
   const [isFocused, setIsFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const [getSuggestions, { data, loading }] = useLazyQuery<GetSearchSuggestionsData, GetSearchSuggestionsVars>(
-    GET_SEARCH_SUGGESTIONS
-  );
+  const [getSuggestions, { data, loading }] = useLazyQuery<
+    GetSearchSuggestionsData,
+    GetSearchSuggestionsVars
+  >(GET_SEARCH_SUGGESTIONS);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedGetSuggestions = useCallback(
@@ -45,7 +51,7 @@ export default function SearchBarWithSuggestions({
         });
       }
     }, 300),
-    [getSuggestions]
+    [getSuggestions],
   );
 
   useEffect(() => {
@@ -56,22 +62,22 @@ export default function SearchBarWithSuggestions({
   useEffect(() => {
     const suggestionsLength = data?.getSuggestions?.suggestions?.length || 0;
     if (suggestionsLength > 0 && isFocused) {
-      analyticsService.trackSuggestionImpression(
-        value,
-        suggestionsLength
-      );
+      analyticsService.trackSuggestionImpression(value, suggestionsLength);
     }
   }, [data?.getSuggestions?.suggestions, isFocused, value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setIsFocused(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -93,7 +99,8 @@ export default function SearchBarWithSuggestions({
   };
 
   const suggestions = data?.getSuggestions.suggestions || [];
-  const showDropdown = isFocused && (suggestions.length > 0 || recentSearches.length > 0);
+  const showDropdown =
+    isFocused && (suggestions.length > 0 || recentSearches.length > 0);
 
   return (
     <div ref={searchRef} className={`relative ${className}`}>
@@ -128,7 +135,7 @@ export default function SearchBarWithSuggestions({
           {value && (
             <button
               type="button"
-              onClick={() => onChange('')}
+              onClick={() => onChange("")}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-gray/60 hover:text-sage
                        transition-colors duration-200"
             >
@@ -165,9 +172,25 @@ export default function SearchBarWithSuggestions({
               {/* Loading indicator */}
               {loading && value.length >= 2 && (
                 <div className="px-3 py-2 text-sm text-neutral-gray flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-sage" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-4 w-4 text-sage"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Loading suggestions...
                 </div>
@@ -176,7 +199,9 @@ export default function SearchBarWithSuggestions({
               {/* Suggestions */}
               {suggestions.length > 0 && (
                 <div className="mb-2">
-                  <h3 className="text-sm font-medium text-neutral-gray px-3 py-2">Suggestions</h3>
+                  <h3 className="text-sm font-medium text-neutral-gray px-3 py-2">
+                    Suggestions
+                  </h3>
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={`suggestion-${index}`}
@@ -200,11 +225,15 @@ export default function SearchBarWithSuggestions({
                       </svg>
                       <div className="flex flex-col">
                         <span>
-                          <span className="font-medium">{suggestion.text.slice(0, value.length)}</span>
+                          <span className="font-medium">
+                            {suggestion.text.slice(0, value.length)}
+                          </span>
                           {suggestion.text.slice(value.length)}
                         </span>
                         {suggestion.category && (
-                          <span className="text-xs text-neutral-gray">in {suggestion.category}</span>
+                          <span className="text-xs text-neutral-gray">
+                            in {suggestion.category}
+                          </span>
                         )}
                       </div>
                       {suggestion.isPersonalized && (
@@ -225,7 +254,9 @@ export default function SearchBarWithSuggestions({
               {/* Recent Searches */}
               {recentSearches.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-neutral-gray px-3 py-2">Recent Searches</h3>
+                  <h3 className="text-sm font-medium text-neutral-gray px-3 py-2">
+                    Recent Searches
+                  </h3>
                   {recentSearches.map((search, index) => (
                     <button
                       key={`recent-${index}`}

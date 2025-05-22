@@ -75,7 +75,7 @@ export const setSessionStorage = <T>(key: string, value: T): void => {
  */
 export const isLocalStorageAvailable = (): boolean => {
   try {
-    const testKey = '__storage_test__';
+    const testKey = "__storage_test__";
     localStorage.setItem(testKey, testKey);
     localStorage.removeItem(testKey);
     return true;
@@ -90,7 +90,7 @@ export const isLocalStorageAvailable = (): boolean => {
  */
 export const isSessionStorageAvailable = (): boolean => {
   try {
-    const testKey = '__storage_test__';
+    const testKey = "__storage_test__";
     sessionStorage.setItem(testKey, testKey);
     sessionStorage.removeItem(testKey);
     return true;
