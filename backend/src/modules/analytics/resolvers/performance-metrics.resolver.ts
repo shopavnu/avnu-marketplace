@@ -57,7 +57,8 @@ export class PerformanceMetricsResolver {
   @UseGuards(AdminGuard)
   async apiPerformanceMetrics(
     @Args('period', { type: () => Int, nullable: true, defaultValue: 30 }) period?: number,
-    @Args('slowThreshold', { type: () => Int, nullable: true, defaultValue: 1000 }) slowThreshold?: number,
+    @Args('slowThreshold', { type: () => Int, nullable: true, defaultValue: 1000 })
+    slowThreshold?: number,
   ): Promise<any> {
     return this.performanceMetricsService.getApiPerformanceMetrics(period, slowThreshold);
   }
@@ -74,7 +75,8 @@ export class PerformanceMetricsResolver {
   @UseGuards(AdminGuard)
   async slowQueryMetrics(
     @Args('period', { type: () => Int, nullable: true, defaultValue: 30 }) period?: number,
-    @Args('slowThreshold', { type: () => Int, nullable: true, defaultValue: 500 }) slowThreshold?: number,
+    @Args('slowThreshold', { type: () => Int, nullable: true, defaultValue: 500 })
+    slowThreshold?: number,
   ): Promise<any> {
     return this.performanceMetricsService.getSlowQueryMetrics(period, slowThreshold);
   }

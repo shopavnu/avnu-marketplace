@@ -5,7 +5,6 @@ import {
   Body,
   Query,
   UseGuards,
-  Param,
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
@@ -23,7 +22,10 @@ export class UserBehaviorAnalyticsController {
   @Post('scroll')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Track vertical scrolling patterns' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Scrolling patterns tracked successfully' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Scrolling patterns tracked successfully',
+  })
   @ApiBody({ type: ScrollAnalytics })
   async trackScrolling(@Body() data: Partial<ScrollAnalytics>): Promise<ScrollAnalytics> {
     return this.userBehaviorAnalyticsService.trackScrolling(data);
@@ -41,7 +43,10 @@ export class UserBehaviorAnalyticsController {
   @Post('heatmap/batch')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Track batch heatmap data' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Batch heatmap data tracked successfully' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Batch heatmap data tracked successfully',
+  })
   @ApiBody({ type: [HeatmapData] })
   async trackBatchHeatmapData(@Body() dataItems: Partial<HeatmapData>[]): Promise<HeatmapData[]> {
     return this.userBehaviorAnalyticsService.trackBatchHeatmapData(dataItems);
@@ -50,8 +55,16 @@ export class UserBehaviorAnalyticsController {
   @Get('scroll')
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get vertical scrolling analytics' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Vertical scrolling analytics retrieved successfully' })
-  @ApiQuery({ name: 'period', required: false, type: Number, description: 'Period in days (default: 30)' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Vertical scrolling analytics retrieved successfully',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    type: Number,
+    description: 'Period in days (default: 30)',
+  })
   async getVerticalScrollingAnalytics(@Query('period') period?: number): Promise<any> {
     return this.userBehaviorAnalyticsService.getVerticalScrollingAnalytics(period || 30);
   }
@@ -60,9 +73,24 @@ export class UserBehaviorAnalyticsController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get heatmap analytics' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Heatmap analytics retrieved successfully' })
-  @ApiQuery({ name: 'pagePath', required: true, type: String, description: 'Page path to get heatmap data for' })
-  @ApiQuery({ name: 'period', required: false, type: Number, description: 'Period in days (default: 30)' })
-  @ApiQuery({ name: 'interactionType', required: false, enum: InteractionType, description: 'Interaction type filter' })
+  @ApiQuery({
+    name: 'pagePath',
+    required: true,
+    type: String,
+    description: 'Page path to get heatmap data for',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    type: Number,
+    description: 'Period in days (default: 30)',
+  })
+  @ApiQuery({
+    name: 'interactionType',
+    required: false,
+    enum: InteractionType,
+    description: 'Interaction type filter',
+  })
   async getHeatmapAnalytics(
     @Query('pagePath') pagePath: string,
     @Query('period') period?: number,
@@ -78,8 +106,16 @@ export class UserBehaviorAnalyticsController {
   @Get('vertical-funnel')
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get vertical navigation conversion funnel' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Vertical navigation funnel retrieved successfully' })
-  @ApiQuery({ name: 'period', required: false, type: Number, description: 'Period in days (default: 30)' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Vertical navigation funnel retrieved successfully',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    type: Number,
+    description: 'Period in days (default: 30)',
+  })
   async getVerticalNavigationFunnel(@Query('period') period?: number): Promise<any> {
     return this.userBehaviorAnalyticsService.getVerticalNavigationFunnel(period || 30);
   }

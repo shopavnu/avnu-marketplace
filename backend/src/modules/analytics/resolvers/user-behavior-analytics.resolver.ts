@@ -10,16 +10,12 @@ export class UserBehaviorAnalyticsResolver {
   constructor(private readonly userBehaviorAnalyticsService: UserBehaviorAnalyticsService) {}
 
   @Mutation(() => ScrollAnalytics)
-  async trackScrolling(
-    @Args('data') data: Partial<ScrollAnalytics>,
-  ): Promise<ScrollAnalytics> {
+  async trackScrolling(@Args('data') data: Partial<ScrollAnalytics>): Promise<ScrollAnalytics> {
     return this.userBehaviorAnalyticsService.trackScrolling(data);
   }
 
   @Mutation(() => HeatmapData)
-  async trackHeatmapData(
-    @Args('data') data: Partial<HeatmapData>,
-  ): Promise<HeatmapData> {
+  async trackHeatmapData(@Args('data') data: Partial<HeatmapData>): Promise<HeatmapData> {
     return this.userBehaviorAnalyticsService.trackHeatmapData(data);
   }
 
@@ -45,11 +41,7 @@ export class UserBehaviorAnalyticsResolver {
     @Args('period', { type: () => Int, nullable: true, defaultValue: 30 }) period?: number,
     @Args('interactionType', { nullable: true }) interactionType?: InteractionType,
   ): Promise<any> {
-    return this.userBehaviorAnalyticsService.getHeatmapAnalytics(
-      pagePath,
-      period,
-      interactionType,
-    );
+    return this.userBehaviorAnalyticsService.getHeatmapAnalytics(pagePath, period, interactionType);
   }
 
   @Query(() => Object)

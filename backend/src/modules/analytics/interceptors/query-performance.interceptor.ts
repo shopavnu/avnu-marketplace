@@ -6,7 +6,7 @@ import { PerformanceMetricsService } from '../services/performance-metrics.servi
 
 /**
  * Interceptor to track query performance metrics
- * 
+ *
  * This interceptor can be applied to resolver methods or controllers
  * to track the performance of database queries.
  */
@@ -19,16 +19,16 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const startTime = Date.now();
     const queryId = uuidv4();
-    
+
     // Get information about the query
     const handler = context.getHandler();
     const className = context.getClass().name;
     const methodName = handler.name;
     const queryType = `${className}.${methodName}`;
-    
+
     // Get query parameters
     let parameters = {};
-    
+
     if (context.getType() === 'http') {
       // For REST endpoints
       const request = context.switchToHttp().getRequest();
@@ -37,12 +37,12 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
         ...request.query,
         ...request.body,
       };
-    } else if (context.getType() === 'graphql') {
+    } else if (context.getType() === 'graphql' as any) {
       // For GraphQL resolvers
-      const gqlContext = context.getArgByIndex(2);
+      const _gqlContext = context.getArgByIndex(2);
       const info = context.getArgByIndex(3);
       const args = context.getArgByIndex(1);
-      
+
       parameters = {
         operation: info?.operation?.operation,
         fieldName: info?.fieldName,
@@ -52,43 +52,31 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap({
-        next: (data) => {
+        next: data => {
           const executionTime = Date.now() - startTime;
-          
+
           // Track query performance
-          this.trackQueryPerformance(
-            queryId,
-            executionTime,
-            queryType,
-            parameters,
-            data,
-          );
-          
+          this.trackQueryPerformance(queryId, executionTime, queryType, parameters, data);
+
           // Log slow queries
           if (executionTime > 500) {
-            this.logger.warn(
-              `Slow query detected: ${queryType} - ${executionTime}ms`,
-              { queryId, parameters },
-            );
+            this.logger.warn(`Slow query detected: ${queryType} - ${executionTime}ms`, {
+              queryId,
+              parameters,
+            });
           }
         },
-        error: (error) => {
+        error: error => {
           const executionTime = Date.now() - startTime;
-          
+
           // Track failed query
-          this.trackQueryPerformance(
+          this.trackQueryPerformance(queryId, executionTime, queryType, parameters, null, error);
+
+          this.logger.error(`Query error: ${queryType} - ${error.message}`, {
             queryId,
-            executionTime,
-            queryType,
             parameters,
-            null,
-            error,
-          );
-          
-          this.logger.error(
-            `Query error: ${queryType} - ${error.message}`,
-            { queryId, parameters, error: error.stack },
-          );
+            error: error.stack,
+          });
         },
       }),
     );
@@ -108,7 +96,7 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
     try {
       // Determine result count
       let resultCount = 0;
-      
+
       if (result) {
         if (Array.isArray(result)) {
           resultCount = result.length;
@@ -125,7 +113,7 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
           }
         }
       }
-      
+
       // Add error information to parameters if there was an error
       if (error) {
         parameters = {
@@ -136,7 +124,7 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
           },
         };
       }
-      
+
       // Track query performance
       this.performanceMetricsService
         .trackQueryPerformance(
@@ -146,17 +134,14 @@ export class QueryPerformanceInterceptor implements NestInterceptor {
           JSON.stringify(parameters),
           resultCount,
         )
-        .catch((trackingError) => {
-          this.logger.error(
-            `Failed to track query performance: ${trackingError.message}`,
-            { queryId, queryType },
-          );
+        .catch(trackingError => {
+          this.logger.error(`Failed to track query performance: ${trackingError.message}`, {
+            queryId,
+            queryType,
+          });
         });
     } catch (error) {
-      this.logger.error(
-        `Error in trackQueryPerformance: ${error.message}`,
-        { queryId, queryType },
-      );
+      this.logger.error(`Error in trackQueryPerformance: ${error.message}`, { queryId, queryType });
     }
   }
 }

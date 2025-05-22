@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThan, LessThan } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ApiPerformanceMetric } from '../entities/api-performance-metric.entity';
 import { ClientPerformanceMetric } from '../entities/client-performance-metric.entity';
 import { QueryPerformanceMetric } from '../entities/query-performance-metric.entity';
@@ -55,7 +55,9 @@ export class PerformanceMetricsService {
    * Track client-side performance metrics
    * @param data Client performance data
    */
-  async trackClientPerformance(data: Partial<ClientPerformanceMetric>): Promise<ClientPerformanceMetric> {
+  async trackClientPerformance(
+    data: Partial<ClientPerformanceMetric>,
+  ): Promise<ClientPerformanceMetric> {
     try {
       const metric = this.clientMetricRepository.create(data);
       return this.clientMetricRepository.save(metric);
@@ -138,10 +140,7 @@ export class PerformanceMetricsService {
         .select('metric.endpoint', 'endpoint')
         .addSelect('metric.method', 'method')
         .addSelect('COUNT(metric.id)', 'totalRequests')
-        .addSelect(
-          'SUM(CASE WHEN metric.statusCode >= 400 THEN 1 ELSE 0 END)',
-          'errorCount',
-        )
+        .addSelect('SUM(CASE WHEN metric.statusCode >= 400 THEN 1 ELSE 0 END)', 'errorCount')
         .addSelect(
           'CAST(SUM(CASE WHEN metric.statusCode >= 400 THEN 1 ELSE 0 END) AS FLOAT) / COUNT(metric.id)',
           'errorRate',

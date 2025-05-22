@@ -24,7 +24,7 @@ export class ApiPerformanceMiddleware implements NestMiddleware {
       const endpoint = req.originalUrl || req.url;
       const method = req.method;
       const statusCode = res.statusCode;
-      
+
       // Get user and session IDs if available
       const userId = (req as any).user?.id;
       const sessionId = req.headers['x-session-id'] as string;

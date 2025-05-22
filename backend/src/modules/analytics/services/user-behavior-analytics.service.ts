@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThan, LessThan } from 'typeorm';
+import { Repository, Between, MoreThan, In } from 'typeorm';
 import { ScrollAnalytics, ScrollDirection } from '../entities/scroll-analytics.entity';
 import { HeatmapData, InteractionType } from '../entities/heatmap-data.entity';
 import { UserEngagement, EngagementType } from '../entities/user-engagement.entity';
@@ -116,11 +116,11 @@ export class UserBehaviorAnalyticsService {
         .createQueryBuilder('scroll')
         .select(
           'CASE ' +
-            'WHEN scroll.maxScrollPercentage < 25 THEN \'0-25%\' ' +
-            'WHEN scroll.maxScrollPercentage >= 25 AND scroll.maxScrollPercentage < 50 THEN \'25-50%\' ' +
-            'WHEN scroll.maxScrollPercentage >= 50 AND scroll.maxScrollPercentage < 75 THEN \'50-75%\' ' +
-            'WHEN scroll.maxScrollPercentage >= 75 AND scroll.maxScrollPercentage < 90 THEN \'75-90%\' ' +
-            'ELSE \'90-100%\' ' +
+            "WHEN scroll.maxScrollPercentage < 25 THEN '0-25%' " +
+            "WHEN scroll.maxScrollPercentage >= 25 AND scroll.maxScrollPercentage < 50 THEN '25-50%' " +
+            "WHEN scroll.maxScrollPercentage >= 50 AND scroll.maxScrollPercentage < 75 THEN '50-75%' " +
+            "WHEN scroll.maxScrollPercentage >= 75 AND scroll.maxScrollPercentage < 90 THEN '75-90%' " +
+            "ELSE '90-100%' " +
             'END',
           'depthRange',
         )
@@ -132,9 +132,8 @@ export class UserBehaviorAnalyticsService {
         .getRawMany();
 
       // Get correlation between scroll depth and conversion
-      const scrollDepthConversionCorrelation = await this.getScrollDepthConversionCorrelation(
-        startDate,
-      );
+      const scrollDepthConversionCorrelation =
+        await this.getScrollDepthConversionCorrelation(startDate);
 
       return {
         avgScrollDepthByPage,
@@ -287,7 +286,7 @@ export class UserBehaviorAnalyticsService {
           // Get product views for these sessions
           const productViews = await this.userEngagementRepository.count({
             where: {
-              sessionId: sessionIds,
+              sessionId: In(sessionIds),
               engagementType: EngagementType.PRODUCT_VIEW,
               timestamp: Between(startDate, new Date()),
             },
@@ -296,7 +295,7 @@ export class UserBehaviorAnalyticsService {
           // Get add to carts for these sessions
           const addToCarts = await this.userEngagementRepository.count({
             where: {
-              sessionId: sessionIds,
+              sessionId: In(sessionIds),
               engagementType: EngagementType.ADD_TO_CART,
               timestamp: Between(startDate, new Date()),
             },
@@ -305,7 +304,7 @@ export class UserBehaviorAnalyticsService {
           // Get checkout starts for these sessions
           const checkoutStarts = await this.userEngagementRepository.count({
             where: {
-              sessionId: sessionIds,
+              sessionId: In(sessionIds),
               engagementType: EngagementType.CHECKOUT_START,
               timestamp: Between(startDate, new Date()),
             },
@@ -314,7 +313,7 @@ export class UserBehaviorAnalyticsService {
           // Get checkout completions for these sessions
           const checkoutCompletions = await this.userEngagementRepository.count({
             where: {
-              sessionId: sessionIds,
+              sessionId: In(sessionIds),
               engagementType: EngagementType.CHECKOUT_COMPLETE,
               timestamp: Between(startDate, new Date()),
             },
