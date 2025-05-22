@@ -8,9 +8,16 @@ import ErrorBoundary from "../components/common/ErrorBoundary";
 import GraphQLErrorHandler from "../components/common/GraphQLErrorHandler";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "../context/ThemeContext";
+import { useEffect } from "react";
+import { initializePersonalization } from "../utils/discovery-integration";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
+
+  // Initialize personalization service on client-side
+  useEffect(() => {
+    initializePersonalization();
+  }, []);
 
   // Use EnhancedLayout for the homepage and product pages, regular Layout for admin/merchant pages
   const useEnhancedLayout =
@@ -18,7 +25,9 @@ export default function App({ Component, pageProps }: AppProps) {
     router.pathname.startsWith("/product") ||
     router.pathname.startsWith("/category") ||
     router.pathname.startsWith("/brand") ||
-    router.pathname.startsWith("/search");
+    router.pathname.startsWith("/search") ||
+    router.pathname.startsWith("/final-discovery") ||
+    router.pathname.startsWith("/discovery");
 
   return (
     <ErrorBoundary>

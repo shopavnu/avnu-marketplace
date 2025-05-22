@@ -11,10 +11,14 @@ import {
 import { categories, Category } from "@/data/categories";
 import VerticalSection from "@/components/common/VerticalSection";
 import CategoryPills from "@/components/common/CategoryPills";
-import OptimizedPersonalizedGrid from "@/components/discovery/OptimizedPersonalizedGrid";
+import { 
+  OptimizedPersonalizedGrid, 
+  RecentlyViewedSection 
+} from "@/components/discovery";
 import useProgressiveLoading from "@/hooks/useProgressiveLoading";
 import PriorityContentLoader from "@/components/common/PriorityContentLoader";
 import { ProductGridSkeleton } from "@/components/common/SkeletonLoader";
+import { trackCategoryView, useInfiniteRecommendations } from "@/utils/discovery-integration";
 
 interface FinalDiscoveryPageProps {
   initialSections: Section[];
@@ -34,9 +38,12 @@ const FinalDiscoveryPage: React.FC<FinalDiscoveryPageProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [mounted, setMounted] = useState(false);
 
-  // Set mounted state on client-side
+  // Set mounted state on client-side and initialize personalization tracking
   useEffect(() => {
     setMounted(true);
+    
+    // Track discovery page view for personalization
+    trackCategoryView('discovery-page');
   }, []);
 
   // Populate sections with products
@@ -232,6 +239,15 @@ const FinalDiscoveryPage: React.FC<FinalDiscoveryPageProps> = ({
         `,
           }}
         />
+        
+        {/* Recently Viewed Products */}
+        <section className="mt-12 mb-16 max-w-7xl mx-auto px-4">
+          <RecentlyViewedSection 
+            title="Recently Viewed"
+            maxItems={4}
+            showWhenEmpty={false}
+          />
+        </section>
       </main>
     </>
   );

@@ -13,6 +13,8 @@ import {
   DiscoveryFeed,
   CategoryGrid,
   PersonalizedGrid,
+  HomePageDiscoverySection,
+  RecentlyViewedSection,
 } from "@/components/discovery";
 import ClientOnly from "@/components/common/ClientOnly";
 import { ScrollSection, ScrollItem } from "@/components/common";
@@ -94,7 +96,7 @@ export default function Home() {
           </ClientOnly>
         </ScrollSection>
 
-        {/* Personalized "For You" Masonry Grid */}
+        {/* Enhanced Personalized Discovery Section */}
         <ScrollSection
           fadeIn={true}
           slideUp={true}
@@ -102,12 +104,7 @@ export default function Home() {
           className="py-16"
         >
           <ClientOnly>
-            <PersonalizedGrid
-              title="For You"
-              description="Products we think you'll love based on your preferences"
-              products={products}
-              maxProducts={12}
-            />
+            <HomePageDiscoverySection />
           </ClientOnly>
         </ScrollSection>
 
@@ -147,6 +144,23 @@ export default function Home() {
               </ScrollItem>
             </ClientOnly>
           </div>
+        </ScrollSection>
+
+        {/* Recently Viewed Products */}
+        <ScrollSection
+          fadeIn={true}
+          slideUp={true}
+          bgColor="bg-sage/5"
+          className="py-16"
+        >
+          <ClientOnly>
+            <RecentlyViewedSection 
+              title="Recently Viewed"
+              maxItems={4}
+              className="max-w-7xl mx-auto px-4"
+              showWhenEmpty={false}
+            />
+          </ClientOnly>
         </ScrollSection>
       </main>
 

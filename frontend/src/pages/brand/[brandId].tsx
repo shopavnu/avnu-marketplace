@@ -10,6 +10,8 @@ import ProductCard from "@/components/products/ProductCard"; // Import ProductCa
 import { ConsistentProductCard } from "@/components/products"; // Import our consistent card components
 import { Brand } from "@/types/brand"; // Import from central types
 import { Product } from "@/types/products"; // Import Product type
+import { DiscoverySectionWrapper, RecentlyViewedSection } from "@/components/discovery"; // Import discovery components
+import { trackCategoryView } from "@/utils/discovery-integration"; // Import tracking function
 
 const BrandDetailPage: React.FC = () => {
   const router = useRouter();
@@ -28,6 +30,11 @@ const BrandDetailPage: React.FC = () => {
           (p) => p.brand === foundBrand.name,
         );
         setBrandProducts(filteredProducts);
+        
+        // Track brand view for personalization
+        if (typeof brandId === 'string') {
+          trackCategoryView(brandId);
+        }
       } else {
         setBrandProducts([]); // Reset if brand not found
       }
@@ -292,6 +299,40 @@ const BrandDetailPage: React.FC = () => {
               </motion.div>
             )}
           </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Discovery Section - Related Products */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 }}
+        className="bg-sage/5 py-12"
+      >
+        <div className="container mx-auto px-4">
+          <DiscoverySectionWrapper
+            title="You Might Also Like"
+            subtitle="Personalized recommendations based on your browsing"
+            maxItems={4}
+            columns={4}
+            showSeeAllLink={true}
+            seeAllUrl="/final-discovery"
+          />
+        </div>
+      </motion.div>
+
+      {/* Recently Viewed Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.4 }}
+        className="bg-white py-12"
+      >
+        <div className="container mx-auto px-4">
+          <RecentlyViewedSection 
+            maxItems={4}
+            showWhenEmpty={false}
+          />
         </div>
       </motion.div>
     </div>
