@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { 
-  Clerk, 
-  ClerkExpressWithAuth, 
-  ClerkExpressRequireAuth
-} from '@clerk/clerk-sdk-node';
+import { Clerk, ClerkExpressWithAuth, ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,11 +9,11 @@ export class ClerkAuthService {
 
   constructor(private configService: ConfigService) {
     const secretKey = this.configService.get<string>('CLERK_SECRET_KEY');
-    
+
     if (!secretKey) {
       throw new Error('CLERK_SECRET_KEY is not defined in the environment variables');
     }
-    
+
     this.clerk = Clerk({ secretKey });
     this.verifyToken = this.clerk.verifyToken;
   }

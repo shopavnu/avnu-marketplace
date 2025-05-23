@@ -14,7 +14,6 @@ export declare class BrandsController {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -23,6 +22,7 @@ export declare class BrandsController {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     })[]>;
     findOne(id: string, includeProducts?: boolean): Promise<{
@@ -37,7 +37,6 @@ export declare class BrandsController {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -46,16 +45,17 @@ export declare class BrandsController {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     getBrandProducts(id: string): Promise<{
         products: ({
             variants: {
                 id: string;
+                productId: string;
                 optionName: string;
                 optionValue: string;
                 stock: number;
-                productId: string;
             }[];
         } & {
             id: string;
@@ -68,7 +68,6 @@ export declare class BrandsController {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -77,6 +76,7 @@ export declare class BrandsController {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     create(data: {
@@ -96,7 +96,6 @@ export declare class BrandsController {
     }, userId: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -105,6 +104,7 @@ export declare class BrandsController {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     update(id: string, data: {
@@ -124,7 +124,6 @@ export declare class BrandsController {
     }, userId: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -133,12 +132,12 @@ export declare class BrandsController {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     remove(id: string, userId: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -147,6 +146,7 @@ export declare class BrandsController {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
 }

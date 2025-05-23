@@ -1,4 +1,12 @@
-import { IsString, IsNumber, IsOptional, IsUrl, IsArray, ValidateNested, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsUrl,
+  IsArray,
+  ValidateNested,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class VariantDto {

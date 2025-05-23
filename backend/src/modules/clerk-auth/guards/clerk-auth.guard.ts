@@ -9,12 +9,10 @@ const IS_PUBLIC_KEY = 'isPublic';
 export class ClerkAuthGuard implements CanActivate {
   constructor(
     private clerkAuthService: ClerkAuthService,
-    private reflector: Reflector
+    private reflector: Reflector,
   ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     // Check if route is marked as public
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -26,14 +24,14 @@ export class ClerkAuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    
+
     // If using ClerkExpressWithAuth middleware, the user will be attached to req.auth
     if (request.auth?.userId) {
       return true;
     }
 
     // For GraphQL, check the context for auth info
-    if (context.getType() === 'graphql' as any) {
+    if (context.getType() === ('graphql' as any)) {
       const gqlContext = context.getArgByIndex(2); // GraphQL context is the 3rd argument
       if (gqlContext?.auth?.userId) {
         return true;

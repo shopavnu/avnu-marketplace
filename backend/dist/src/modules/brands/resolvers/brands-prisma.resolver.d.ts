@@ -14,7 +14,6 @@ export declare class BrandsPrismaResolver {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -23,6 +22,7 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     })[]>;
     getBrand(id: string, includeProducts?: boolean): Promise<{
@@ -37,7 +37,6 @@ export declare class BrandsPrismaResolver {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -46,12 +45,12 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     createBrand(name: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -60,12 +59,12 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     updateBrand(id: string, name?: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -74,12 +73,12 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     deleteBrand(id: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -88,6 +87,7 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
     searchBrands(query: string): Promise<({
@@ -102,7 +102,6 @@ export declare class BrandsPrismaResolver {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -111,16 +110,17 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     })[]>;
     getBrandWithProducts(id: string): Promise<{
         products: ({
             variants: {
                 id: string;
+                productId: string;
                 optionName: string;
                 optionValue: string;
                 stock: number;
-                productId: string;
             }[];
         } & {
             id: string;
@@ -133,7 +133,6 @@ export declare class BrandsPrismaResolver {
     } & {
         id: string;
         name: string;
-        createdAt: Date;
         description: string | null;
         logoUrl: string | null;
         websiteUrl: string | null;
@@ -142,6 +141,7 @@ export declare class BrandsPrismaResolver {
         foundedYear: number | null;
         location: string | null;
         values: string[];
+        createdAt: Date;
         updatedAt: Date | null;
     }>;
 }

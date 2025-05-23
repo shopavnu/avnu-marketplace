@@ -32,10 +32,7 @@ export class BrandsPrismaResolver {
   }
 
   @Mutation('updateBrand')
-  async updateBrand(
-    @Args('id') id: string,
-    @Args('name', { nullable: true }) name?: string,
-  ) {
+  async updateBrand(@Args('id') id: string, @Args('name', { nullable: true }) name?: string) {
     return this.brandsService.update(id, { name });
   }
 

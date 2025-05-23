@@ -5,13 +5,9 @@ import { PrismaClient } from '@prisma/client';
 export class BrandsPrismaService {
   constructor(private prisma: PrismaClient) {}
 
-  async findAll(options?: {
-    skip?: number;
-    take?: number;
-    includeProducts?: boolean;
-  }) {
+  async findAll(options?: { skip?: number; take?: number; includeProducts?: boolean }) {
     const { skip = 0, take = 10, includeProducts = false } = options || {};
-    
+
     return this.prisma.brand.findMany({
       skip,
       take,
@@ -52,21 +48,24 @@ export class BrandsPrismaService {
     });
   }
 
-  async update(id: string, data: {
-    name?: string;
-    description?: string;
-    logoUrl?: string;
-    websiteUrl?: string;
-    socialLinks?: {
-      instagram?: string;
-      twitter?: string;
-      facebook?: string;
-    };
-    supportedCausesInfo?: string;
-    foundedYear?: number;
-    location?: string;
-    values?: string[];
-  }) {
+  async update(
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      logoUrl?: string;
+      websiteUrl?: string;
+      socialLinks?: {
+        instagram?: string;
+        twitter?: string;
+        facebook?: string;
+      };
+      supportedCausesInfo?: string;
+      foundedYear?: number;
+      location?: string;
+      values?: string[];
+    },
+  ) {
     return this.prisma.brand.update({
       where: { id },
       data,

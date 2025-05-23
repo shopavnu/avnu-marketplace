@@ -5,9 +5,8 @@ export declare class ProductsPrismaResolver {
     getProducts(skip?: number, take?: number): Promise<({
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -15,29 +14,29 @@ export declare class ProductsPrismaResolver {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     })[]>;
     getProduct(id: string): Promise<{
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -45,29 +44,29 @@ export declare class ProductsPrismaResolver {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     }>;
     createProduct(title: string, description: string, price: number, imageUrl: string, brandId: string, variants?: any[]): Promise<{
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -75,29 +74,29 @@ export declare class ProductsPrismaResolver {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     }>;
     updateProduct(id: string, title?: string, description?: string, price?: number, imageUrl?: string, brandId?: string): Promise<{
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -105,37 +104,37 @@ export declare class ProductsPrismaResolver {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     }>;
     deleteProduct(id: string): Promise<{
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     }>;
     searchProducts(query: string): Promise<({
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -143,36 +142,37 @@ export declare class ProductsPrismaResolver {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     })[]>;
     getProductsByBrand(brandId: string): Promise<({
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     })[]>;

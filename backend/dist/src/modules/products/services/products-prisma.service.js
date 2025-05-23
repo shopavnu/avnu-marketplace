@@ -46,7 +46,7 @@ let ProductsPrismaService = class ProductsPrismaService {
                 brandId: data.brandId,
                 variants: data.variants
                     ? {
-                        create: data.variants.map((variant) => ({
+                        create: data.variants.map(variant => ({
                             optionName: variant.optionName,
                             optionValue: variant.optionValue,
                             stock: variant.stock,

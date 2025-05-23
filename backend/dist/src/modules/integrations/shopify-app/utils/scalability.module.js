@@ -29,7 +29,7 @@ exports.ShopifyScalabilityModule = ShopifyScalabilityModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([shopify_bulk_operation_job_entity_1.ShopifyBulkOperationJob]),
             ioredis_1.RedisModule.forRootAsync({
                 imports: [config_1.ConfigModule],
-                useFactory: (configService) => ({
+                useFactory: (_configService) => ({
                     type: 'single',
                     url: `redis://${process.env.REDIS_HOST || 'localhost'}:${parseInt(process.env.REDIS_PORT || '6379', 10)}`,
                 }),

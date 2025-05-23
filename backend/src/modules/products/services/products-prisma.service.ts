@@ -12,7 +12,7 @@ export class ProductsPrismaService {
     includeBrand?: boolean;
   }) {
     const { skip = 0, take = 10, includeVariants = true, includeBrand = true } = options || {};
-    
+
     return this.prisma.product.findMany({
       skip,
       take,
@@ -54,7 +54,7 @@ export class ProductsPrismaService {
         brandId: data.brandId,
         variants: data.variants
           ? {
-              create: data.variants.map((variant) => ({
+              create: data.variants.map(variant => ({
                 optionName: variant.optionName,
                 optionValue: variant.optionValue,
                 stock: variant.stock,
@@ -69,13 +69,16 @@ export class ProductsPrismaService {
     });
   }
 
-  async update(id: string, data: {
-    title?: string;
-    description?: string;
-    price?: number;
-    imageUrl?: string;
-    brandId?: string;
-  }) {
+  async update(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      price?: number;
+      imageUrl?: string;
+      brandId?: string;
+    },
+  ) {
     return this.prisma.product.update({
       where: { id },
       data,

@@ -5,9 +5,8 @@ export declare class ProductsController {
     list(skip?: number, take?: number): Promise<({
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -15,29 +14,29 @@ export declare class ProductsController {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     })[]>;
     findOne(id: string): Promise<{
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -45,29 +44,29 @@ export declare class ProductsController {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     }>;
     search(query: string): Promise<({
         brand: {
             id: string;
-            name: string;
-            createdAt: Date;
             description: string | null;
+            name: string;
             logoUrl: string | null;
             websiteUrl: string | null;
             socialLinks: import("@prisma/client/runtime/library").JsonValue | null;
@@ -75,20 +74,21 @@ export declare class ProductsController {
             foundedYear: number | null;
             location: string | null;
             values: string[];
+            createdAt: Date;
             updatedAt: Date | null;
         };
         variants: {
             id: string;
+            productId: string;
             optionName: string;
             optionValue: string;
             stock: number;
-            productId: string;
         }[];
     } & {
         id: string;
-        description: string;
         brandId: string;
         title: string;
+        description: string;
         price: number;
         imageUrl: string;
     })[]>;

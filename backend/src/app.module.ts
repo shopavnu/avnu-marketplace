@@ -130,8 +130,6 @@ registerEnumType(ExperimentStatus, {
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Apply Clerk auth middleware globally
-    consumer
-      .apply(ClerkAuthMiddleware)
-      .forRoutes('*');
+    consumer.apply(ClerkAuthMiddleware).forRoutes('*');
   }
 }

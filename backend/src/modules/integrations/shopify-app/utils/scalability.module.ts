@@ -37,7 +37,7 @@ import { ShopifyClientService as _ShopifyClientService } from '../services/shopi
     TypeOrmModule.forFeature([ShopifyBulkOperationJob]),
     RedisModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (_configService: ConfigService) => ({
         type: 'single',
         url: `redis://${process.env.REDIS_HOST || 'localhost'}:${parseInt(process.env.REDIS_PORT || '6379', 10)}`,
       }),

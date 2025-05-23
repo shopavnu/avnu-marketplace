@@ -49,9 +49,7 @@ const experiment_entity_1 = require("./modules/ab-testing/entities/experiment.en
 });
 let AppModule = class AppModule {
     configure(consumer) {
-        consumer
-            .apply(clerk_auth_1.ClerkAuthMiddleware)
-            .forRoutes('*');
+        consumer.apply(clerk_auth_1.ClerkAuthMiddleware).forRoutes('*');
     }
 };
 exports.AppModule = AppModule;
