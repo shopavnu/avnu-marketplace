@@ -1,9 +1,9 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddRecommendationTables1714600000000 = void 0;
 class AddRecommendationTables1714600000000 {
-  async up(queryRunner) {
-    await queryRunner.query(`
+    async up(queryRunner) {
+        await queryRunner.query(`
       CREATE TYPE similarity_type_enum AS ENUM (
         'attribute_based',
         'view_based',
@@ -26,7 +26,7 @@ class AddRecommendationTables1714600000000 {
       CREATE INDEX idx_product_similarities_similarity_type ON product_similarities(similarity_type);
       CREATE UNIQUE INDEX idx_product_similarities_unique ON product_similarities(source_product_id, target_product_id, similarity_type);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TYPE recommendation_algorithm_type_enum AS ENUM (
         'content_based',
         'collaborative_filtering',
@@ -58,7 +58,7 @@ class AddRecommendationTables1714600000000 {
 
       CREATE UNIQUE INDEX idx_recommendation_configs_name ON recommendation_configs(name);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TYPE recommendation_type_enum AS ENUM (
         'similar_products',
         'frequently_bought_together',
@@ -96,7 +96,7 @@ class AddRecommendationTables1714600000000 {
       CREATE INDEX idx_product_recommendations_product_id ON product_recommendations(product_id);
       CREATE INDEX idx_product_recommendations_recommendation_type ON product_recommendations(recommendation_type);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       INSERT INTO recommendation_configs 
         (name, description, algorithm_type, is_active, version, parameters, supported_recommendation_types)
       VALUES 
@@ -137,20 +137,20 @@ class AddRecommendationTables1714600000000 {
           ARRAY['trending', 'top_rated']
         );
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       ALTER TYPE session_interaction_type_enum ADD VALUE IF NOT EXISTS 'RECOMMENDATION_IMPRESSION';
       ALTER TYPE session_interaction_type_enum ADD VALUE IF NOT EXISTS 'RECOMMENDATION_CLICK';
       ALTER TYPE session_interaction_type_enum ADD VALUE IF NOT EXISTS 'RECOMMENDATION_CONVERSION';
     `);
-  }
-  async down(queryRunner) {
-    await queryRunner.query(`DROP TABLE IF EXISTS product_recommendations;`);
-    await queryRunner.query(`DROP TYPE IF EXISTS recommendation_type_enum;`);
-    await queryRunner.query(`DROP TABLE IF EXISTS recommendation_configs;`);
-    await queryRunner.query(`DROP TYPE IF EXISTS recommendation_algorithm_type_enum;`);
-    await queryRunner.query(`DROP TABLE IF EXISTS product_similarities;`);
-    await queryRunner.query(`DROP TYPE IF EXISTS similarity_type_enum;`);
-  }
+    }
+    async down(queryRunner) {
+        await queryRunner.query(`DROP TABLE IF EXISTS product_recommendations;`);
+        await queryRunner.query(`DROP TYPE IF EXISTS recommendation_type_enum;`);
+        await queryRunner.query(`DROP TABLE IF EXISTS recommendation_configs;`);
+        await queryRunner.query(`DROP TYPE IF EXISTS recommendation_algorithm_type_enum;`);
+        await queryRunner.query(`DROP TABLE IF EXISTS product_similarities;`);
+        await queryRunner.query(`DROP TYPE IF EXISTS similarity_type_enum;`);
+    }
 }
 exports.AddRecommendationTables1714600000000 = AddRecommendationTables1714600000000;
 //# sourceMappingURL=1714600000000-AddRecommendationTables.js.map

@@ -8,36 +8,25 @@ import { TransactionService } from '../../common/transaction/transaction.service
 import { VendorConfigService } from '../../config/vendor-config.service';
 import { VendorEventBus } from '../../events/vendor-event-bus.service';
 export declare class VendorRepositoriesUpdated {
-  readonly vendor: Repository<Vendor>;
-  readonly vendorApplication: Repository<VendorApplication>;
-  readonly vendorDocument: Repository<VendorDocument>;
-  readonly vendorBankingDetails: Repository<VendorBankingDetails>;
-  readonly vendorAddress: Repository<VendorAddress>;
-  constructor(
-    vendor: Repository<Vendor>,
-    vendorApplication: Repository<VendorApplication>,
-    vendorDocument: Repository<VendorDocument>,
-    vendorBankingDetails: Repository<VendorBankingDetails>,
-    vendorAddress: Repository<VendorAddress>,
-  );
+    readonly vendor: Repository<Vendor>;
+    readonly vendorApplication: Repository<VendorApplication>;
+    readonly vendorDocument: Repository<VendorDocument>;
+    readonly vendorBankingDetails: Repository<VendorBankingDetails>;
+    readonly vendorAddress: Repository<VendorAddress>;
+    constructor(vendor: Repository<Vendor>, vendorApplication: Repository<VendorApplication>, vendorDocument: Repository<VendorDocument>, vendorBankingDetails: Repository<VendorBankingDetails>, vendorAddress: Repository<VendorAddress>);
 }
 export declare class VendorCreationService {
-  private readonly _repositories;
-  private readonly _transactionService;
-  private readonly _eventBus;
-  private readonly _configService;
-  private readonly _logger;
-  constructor(
-    _repositories: VendorRepositoriesUpdated,
-    _transactionService: TransactionService,
-    _eventBus: VendorEventBus,
-    _configService: VendorConfigService,
-  );
-  createVendorFromApplication(applicationId: string): Promise<Vendor>;
-  private _createVendorEntity;
-  private _createVendorAssociatedRecords;
-  private _createBankingDetails;
-  private _createBusinessAddress;
-  private _linkDocumentsToVendor;
-  private _publishVendorCreatedEvent;
+    private readonly _repositories;
+    private readonly _transactionService;
+    private readonly _eventBus;
+    private readonly _configService;
+    private readonly _logger;
+    constructor(_repositories: VendorRepositoriesUpdated, _transactionService: TransactionService, _eventBus: VendorEventBus, _configService: VendorConfigService);
+    createVendorFromApplication(applicationId: string): Promise<Vendor>;
+    private _createVendorEntity;
+    private _createVendorAssociatedRecords;
+    private _createBankingDetails;
+    private _createBusinessAddress;
+    private _linkDocumentsToVendor;
+    private _publishVendorCreatedEvent;
 }

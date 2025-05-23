@@ -8,7 +8,7 @@ export declare class MerchantAuthController {
     }): Promise<{
         success: boolean;
     }>;
-    authenticateWooCommerce(body: {
+    authenticateWooCommerce(_body: {
         storeUrl: string;
         consumerKey: string;
         consumerSecret: string;

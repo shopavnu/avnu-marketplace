@@ -1,7 +1,7 @@
 export declare class RegisterDto {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  profileImage?: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    profileImage?: string;
 }

@@ -1,1 +1,2 @@
-export declare class AccessibilityModule {}
+export declare class AccessibilityModule {
+}

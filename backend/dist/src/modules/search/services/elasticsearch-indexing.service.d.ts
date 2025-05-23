@@ -6,36 +6,29 @@ import { Brand } from '../../products/entities/brand.entity';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 export declare class ElasticsearchIndexingService {
-  private readonly elasticsearchService;
-  private readonly configService;
-  private readonly eventEmitter;
-  private readonly productRepository;
-  private readonly merchantRepository;
-  private readonly brandRepository;
-  private readonly logger;
-  private readonly bulkBatchSize;
-  private readonly indexingConcurrency;
-  constructor(
-    elasticsearchService: ElasticsearchService,
-    configService: ConfigService,
-    eventEmitter: EventEmitter2,
-    productRepository: Repository<Product>,
-    merchantRepository: Repository<Merchant>,
-    brandRepository: Repository<Brand>,
-  );
-  indexMerchant(merchant: Merchant): Promise<void>;
-  updateMerchant(merchant: Merchant): Promise<void>;
-  deleteMerchant(merchantId: string): Promise<void>;
-  bulkIndexMerchants(merchants: Merchant[]): Promise<void>;
-  indexBrand(brand: Brand): Promise<void>;
-  updateBrand(brand: Brand): Promise<void>;
-  deleteBrand(brandId: string): Promise<void>;
-  bulkIndexBrands(brands: Brand[]): Promise<void>;
-  bulkUpdateProducts(products: Product[]): Promise<void>;
-  reindexAllProducts(): Promise<void>;
-  reindexAllMerchants(): Promise<void>;
-  reindexAllBrands(): Promise<void>;
-  private serializeMerchant;
-  private serializeBrand;
-  private serializeProduct;
+    private readonly elasticsearchService;
+    private readonly configService;
+    private readonly eventEmitter;
+    private readonly productRepository;
+    private readonly merchantRepository;
+    private readonly brandRepository;
+    private readonly logger;
+    private readonly bulkBatchSize;
+    private readonly indexingConcurrency;
+    constructor(elasticsearchService: ElasticsearchService, configService: ConfigService, eventEmitter: EventEmitter2, productRepository: Repository<Product>, merchantRepository: Repository<Merchant>, brandRepository: Repository<Brand>);
+    indexMerchant(merchant: Merchant): Promise<void>;
+    updateMerchant(merchant: Merchant): Promise<void>;
+    deleteMerchant(merchantId: string): Promise<void>;
+    bulkIndexMerchants(merchants: Merchant[]): Promise<void>;
+    indexBrand(brand: Brand): Promise<void>;
+    updateBrand(brand: Brand): Promise<void>;
+    deleteBrand(brandId: string): Promise<void>;
+    bulkIndexBrands(brands: Brand[]): Promise<void>;
+    bulkUpdateProducts(products: Product[]): Promise<void>;
+    reindexAllProducts(): Promise<void>;
+    reindexAllMerchants(): Promise<void>;
+    reindexAllBrands(): Promise<void>;
+    private serializeMerchant;
+    private serializeBrand;
+    private serializeProduct;
 }

@@ -1,1 +1,2 @@
-export declare class ShopifyControllersModule {}
+export declare class ShopifyControllersModule {
+}

@@ -1,9 +1,9 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateUserPreferenceProfile1714414890000 = void 0;
 class CreateUserPreferenceProfile1714414890000 {
-  async up(queryRunner) {
-    await queryRunner.query(`
+    async up(queryRunner) {
+        await queryRunner.query(`
       CREATE TABLE "user_preference_profiles" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "userId" uuid NOT NULL,
@@ -31,21 +31,21 @@ class CreateUserPreferenceProfile1714414890000 {
         CONSTRAINT "FK_user_preference_profiles_user" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE INDEX "IDX_user_preference_profiles_userId" ON "user_preference_profiles" ("userId")
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       ALTER TYPE "public"."session_interactions_type_enum" ADD VALUE IF NOT EXISTS 'scroll_depth'
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       ALTER TYPE "public"."session_interactions_type_enum" ADD VALUE IF NOT EXISTS 'product_view'
     `);
-  }
-  async down(queryRunner) {
-    await queryRunner.query(`
+    }
+    async down(queryRunner) {
+        await queryRunner.query(`
       DROP TABLE "user_preference_profiles"
     `);
-  }
+    }
 }
 exports.CreateUserPreferenceProfile1714414890000 = CreateUserPreferenceProfile1714414890000;
 //# sourceMappingURL=1714414890000-CreateUserPreferenceProfile.js.map

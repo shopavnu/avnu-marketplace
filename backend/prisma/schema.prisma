@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  wishlist  WishlistItem[]
+  orders    Order[]
+}
+
+model Brand {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?  @db.Text
+  logoUrl           String?
+  websiteUrl        String?
+  socialLinks       Json?    // Stored as JSON: { instagram, twitter, facebook }
+  supportedCausesInfo String?  @db.Text
+  foundedYear       Int?
+  location          String?
+  values            String[]  // Array of values/principles
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime? @updatedAt
+  products          Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  brandId     String
+  title       String
+  description String
+  price       Float
+  imageUrl    String
+  brand       Brand    @relation(fields: [brandId], references: [id])
+  variants    Variant[]
+  wishlist    WishlistItem[]
+}
+
+model Variant {
+  id          String  @id @default(cuid())
+  productId   String
+  optionName  String   // e.g. Color
+  optionValue String  // e.g. Sage
+  stock       Int
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  total     Float
+  createdAt DateTime @default(now())
+  items     OrderItem[]
+  user      User        @relation(fields: [userId], references: [id])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  variantId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+}
+
+model WishlistItem {
+  id        String  @id @default(cuid())
+  userId    String
+  productId String
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}

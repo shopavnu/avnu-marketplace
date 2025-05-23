@@ -37,7 +37,7 @@ let QueryPerformanceInterceptor = QueryPerformanceInterceptor_1 = class QueryPer
             };
         }
         else if (context.getType() === 'graphql') {
-            const gqlContext = context.getArgByIndex(2);
+            const _gqlContext = context.getArgByIndex(2);
             const info = context.getArgByIndex(3);
             const args = context.getArgByIndex(1);
             parameters = {
@@ -47,17 +47,24 @@ let QueryPerformanceInterceptor = QueryPerformanceInterceptor_1 = class QueryPer
             };
         }
         return next.handle().pipe((0, operators_1.tap)({
-            next: (data) => {
+            next: data => {
                 const executionTime = Date.now() - startTime;
                 this.trackQueryPerformance(queryId, executionTime, queryType, parameters, data);
                 if (executionTime > 500) {
-                    this.logger.warn(`Slow query detected: ${queryType} - ${executionTime}ms`, { queryId, parameters });
+                    this.logger.warn(`Slow query detected: ${queryType} - ${executionTime}ms`, {
+                        queryId,
+                        parameters,
+                    });
                 }
             },
-            error: (error) => {
+            error: error => {
                 const executionTime = Date.now() - startTime;
                 this.trackQueryPerformance(queryId, executionTime, queryType, parameters, null, error);
-                this.logger.error(`Query error: ${queryType} - ${error.message}`, { queryId, parameters, error: error.stack });
+                this.logger.error(`Query error: ${queryType} - ${error.message}`, {
+                    queryId,
+                    parameters,
+                    error: error.stack,
+                });
             },
         }));
     }
@@ -94,8 +101,11 @@ let QueryPerformanceInterceptor = QueryPerformanceInterceptor_1 = class QueryPer
             }
             this.performanceMetricsService
                 .trackQueryPerformance(queryId, executionTime, queryType, JSON.stringify(parameters), resultCount)
-                .catch((trackingError) => {
-                this.logger.error(`Failed to track query performance: ${trackingError.message}`, { queryId, queryType });
+                .catch(trackingError => {
+                this.logger.error(`Failed to track query performance: ${trackingError.message}`, {
+                    queryId,
+                    queryType,
+                });
             });
         }
         catch (error) {

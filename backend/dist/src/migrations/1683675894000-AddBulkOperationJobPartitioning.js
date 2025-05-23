@@ -1,16 +1,16 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddBulkOperationJobPartitioning1683675894000 = void 0;
 class AddBulkOperationJobPartitioning1683675894000 {
-  async up(queryRunner) {
-    await queryRunner.query(`
+    async up(queryRunner) {
+        await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS shopify_bulk_operation_jobs_temp AS 
       SELECT * FROM shopify_bulk_operation_jobs;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       DROP TABLE IF EXISTS shopify_bulk_operation_jobs CASCADE;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TABLE shopify_bulk_operation_jobs (
         id UUID PRIMARY KEY,
         merchant_id VARCHAR NOT NULL,
@@ -34,33 +34,33 @@ class AddBulkOperationJobPartitioning1683675894000 {
         updated_at TIMESTAMP NOT NULL DEFAULT now()
       ) PARTITION BY HASH (merchant_id);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE INDEX idx_shopify_bulk_operation_jobs_merchant_id 
       ON shopify_bulk_operation_jobs (merchant_id);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE INDEX idx_shopify_bulk_operation_jobs_status
       ON shopify_bulk_operation_jobs (status);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE INDEX idx_shopify_bulk_operation_jobs_updated_at
       ON shopify_bulk_operation_jobs (updated_at);
     `);
-    for (let i = 0; i < 8; i++) {
-      await queryRunner.query(`
+        for (let i = 0; i < 8; i++) {
+            await queryRunner.query(`
         CREATE TABLE shopify_bulk_operation_jobs_p${i} 
         PARTITION OF shopify_bulk_operation_jobs
         FOR VALUES WITH (MODULUS 8, REMAINDER ${i});
       `);
-    }
-    await queryRunner.query(`
+        }
+        await queryRunner.query(`
       INSERT INTO shopify_bulk_operation_jobs 
       SELECT * FROM shopify_bulk_operation_jobs_temp;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       DROP TABLE shopify_bulk_operation_jobs_temp;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE OR REPLACE FUNCTION maintain_shopify_bulk_operation_partitions()
       RETURNS void AS $$
       DECLARE
@@ -95,25 +95,25 @@ class AddBulkOperationJobPartitioning1683675894000 {
       END;
       $$ LANGUAGE plpgsql;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE EXTENSION IF NOT EXISTS pg_cron;
       
       SELECT cron.schedule('0 0 * * 0', $$
         SELECT maintain_shopify_bulk_operation_partitions();
       $$, 'Maintain Shopify bulk operation job partitions');
     `);
-  }
-  async down(queryRunner) {
-    await queryRunner.query(`
+    }
+    async down(queryRunner) {
+        await queryRunner.query(`
       DROP TABLE IF EXISTS shopify_bulk_operation_jobs CASCADE;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       DROP FUNCTION IF EXISTS maintain_shopify_bulk_operation_partitions();
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       SELECT cron.unschedule('Maintain Shopify bulk operation job partitions');
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TABLE shopify_bulk_operation_jobs (
         id UUID PRIMARY KEY,
         merchant_id VARCHAR NOT NULL,
@@ -143,7 +143,7 @@ class AddBulkOperationJobPartitioning1683675894000 {
       CREATE INDEX idx_shopify_bulk_operation_jobs_status
       ON shopify_bulk_operation_jobs (status);
     `);
-  }
+    }
 }
 exports.AddBulkOperationJobPartitioning1683675894000 = AddBulkOperationJobPartitioning1683675894000;
 //# sourceMappingURL=1683675894000-AddBulkOperationJobPartitioning.js.map

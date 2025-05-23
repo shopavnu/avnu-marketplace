@@ -1,51 +1,45 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddShopifyWebhookIndices1683675895000 = void 0;
 class AddShopifyWebhookIndices1683675895000 {
-  async up(queryRunner) {
-    const webhooksTableExists = await queryRunner.hasTable('shopify_webhooks');
-    if (webhooksTableExists) {
-      const topicIndexExists = await this.indexExists(queryRunner, 'idx_shopify_webhooks_topic');
-      const shopIndexExists = await this.indexExists(queryRunner, 'idx_shopify_webhooks_shop');
-      const processedAtIndexExists = await this.indexExists(
-        queryRunner,
-        'idx_shopify_webhooks_processed_at',
-      );
-      if (!topicIndexExists) {
-        await queryRunner.query(`
+    async up(queryRunner) {
+        const webhooksTableExists = await queryRunner.hasTable('shopify_webhooks');
+        if (webhooksTableExists) {
+            const topicIndexExists = await this.indexExists(queryRunner, 'idx_shopify_webhooks_topic');
+            const shopIndexExists = await this.indexExists(queryRunner, 'idx_shopify_webhooks_shop');
+            const processedAtIndexExists = await this.indexExists(queryRunner, 'idx_shopify_webhooks_processed_at');
+            if (!topicIndexExists) {
+                await queryRunner.query(`
           CREATE INDEX idx_shopify_webhooks_topic ON shopify_webhooks (topic);
         `);
-      }
-      if (!shopIndexExists) {
-        await queryRunner.query(`
+            }
+            if (!shopIndexExists) {
+                await queryRunner.query(`
           CREATE INDEX idx_shopify_webhooks_shop ON shopify_webhooks (shop_domain);
         `);
-      }
-      if (!processedAtIndexExists) {
-        await queryRunner.query(`
+            }
+            if (!processedAtIndexExists) {
+                await queryRunner.query(`
           CREATE INDEX idx_shopify_webhooks_processed_at ON shopify_webhooks (processed_at);
         `);
-      }
-      const compoundIndexExists = await this.indexExists(
-        queryRunner,
-        'idx_shopify_webhooks_shop_topic',
-      );
-      if (!compoundIndexExists) {
-        await queryRunner.query(`
+            }
+            const compoundIndexExists = await this.indexExists(queryRunner, 'idx_shopify_webhooks_shop_topic');
+            if (!compoundIndexExists) {
+                await queryRunner.query(`
           CREATE INDEX idx_shopify_webhooks_shop_topic ON shopify_webhooks (shop_domain, topic);
         `);
-      }
-    }
-    const logsTableExists = await queryRunner.hasTable('shopify_webhook_logs');
-    if (logsTableExists) {
-      await queryRunner.query(`
+            }
+        }
+        const logsTableExists = await queryRunner.hasTable('shopify_webhook_logs');
+        if (logsTableExists) {
+            await queryRunner.query(`
         CREATE TABLE shopify_webhook_logs_temp AS SELECT * FROM shopify_webhook_logs;
       `);
-      await queryRunner.query(`
+            await queryRunner.query(`
         DROP TABLE shopify_webhook_logs;
       `);
-    }
-    await queryRunner.query(`
+        }
+        await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS shopify_webhook_logs (
         id UUID PRIMARY KEY,
         webhook_id VARCHAR NOT NULL,
@@ -60,45 +54,45 @@ class AddShopifyWebhookIndices1683675895000 {
         created_at TIMESTAMP NOT NULL DEFAULT now()
       ) PARTITION BY RANGE (received_at);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE INDEX idx_shopify_webhook_logs_shop_domain ON shopify_webhook_logs (shop_domain);
       CREATE INDEX idx_shopify_webhook_logs_topic ON shopify_webhook_logs (topic);
       CREATE INDEX idx_shopify_webhook_logs_received_at ON shopify_webhook_logs (received_at);
       CREATE INDEX idx_shopify_webhook_logs_processed_successfully ON shopify_webhook_logs (processed_successfully);
     `);
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    for (let i = 3; i >= 0; i--) {
-      const month = (currentMonth - i + 12) % 12;
-      const year = currentYear - Math.floor((currentMonth - i + 12) / 12);
-      const nextMonth = (month + 1) % 12;
-      const nextYear = month === 11 ? year + 1 : year;
-      const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-      const endDate = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-01`;
-      await queryRunner.query(`
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        for (let i = 3; i >= 0; i--) {
+            const month = (currentMonth - i + 12) % 12;
+            const year = currentYear - Math.floor((currentMonth - i + 12) / 12);
+            const nextMonth = (month + 1) % 12;
+            const nextYear = month === 11 ? year + 1 : year;
+            const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+            const endDate = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-01`;
+            await queryRunner.query(`
         CREATE TABLE IF NOT EXISTS shopify_webhook_logs_${year}_${String(month + 1).padStart(2, '0')}
         PARTITION OF shopify_webhook_logs
         FOR VALUES FROM ('${startDate}') TO ('${endDate}');
       `);
-    }
-    const nextMonth = (currentMonth + 1) % 12;
-    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-    const nextNextMonth = (nextMonth + 1) % 12;
-    const nextNextYear = nextMonth === 11 ? nextYear + 1 : nextYear;
-    await queryRunner.query(`
+        }
+        const nextMonth = (currentMonth + 1) % 12;
+        const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+        const nextNextMonth = (nextMonth + 1) % 12;
+        const nextNextYear = nextMonth === 11 ? nextYear + 1 : nextYear;
+        await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS shopify_webhook_logs_${nextYear}_${String(nextMonth + 1).padStart(2, '0')}
       PARTITION OF shopify_webhook_logs
       FOR VALUES FROM ('${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-01') 
       TO ('${nextNextYear}-${String(nextNextMonth + 1).padStart(2, '0')}-01');
     `);
-    if (logsTableExists) {
-      await queryRunner.query(`
+        if (logsTableExists) {
+            await queryRunner.query(`
         INSERT INTO shopify_webhook_logs SELECT * FROM shopify_webhook_logs_temp;
         DROP TABLE shopify_webhook_logs_temp;
       `);
-    }
-    await queryRunner.query(`
+        }
+        await queryRunner.query(`
       CREATE OR REPLACE FUNCTION create_webhook_log_partition_for_month()
       RETURNS void AS $$
       DECLARE
@@ -124,14 +118,14 @@ class AddShopifyWebhookIndices1683675895000 {
       END;
       $$ LANGUAGE plpgsql;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE EXTENSION IF NOT EXISTS pg_cron;
       
       SELECT cron.schedule('0 0 1 * *', $$
         SELECT create_webhook_log_partition_for_month();
       $$, 'Create webhook log partition for next month');
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE OR REPLACE FUNCTION cleanup_old_webhook_log_partitions(months_to_keep INTEGER DEFAULT 12)
       RETURNS void AS $$
       DECLARE
@@ -167,29 +161,29 @@ class AddShopifyWebhookIndices1683675895000 {
       END;
       $$ LANGUAGE plpgsql;
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       SELECT cron.schedule('0 0 1 */3 *', $$
         SELECT cleanup_old_webhook_log_partitions(12);
       $$, 'Cleanup old webhook log partitions');
     `);
-  }
-  async down(queryRunner) {
-    const webhooksTableExists = await queryRunner.hasTable('shopify_webhooks');
-    if (webhooksTableExists) {
-      await queryRunner.query(`
+    }
+    async down(queryRunner) {
+        const webhooksTableExists = await queryRunner.hasTable('shopify_webhooks');
+        if (webhooksTableExists) {
+            await queryRunner.query(`
         DROP INDEX IF EXISTS idx_shopify_webhooks_topic;
         DROP INDEX IF EXISTS idx_shopify_webhooks_shop;
         DROP INDEX IF EXISTS idx_shopify_webhooks_processed_at;
         DROP INDEX IF EXISTS idx_shopify_webhooks_shop_topic;
       `);
-    }
-    const logsTableExists = await queryRunner.hasTable('shopify_webhook_logs');
-    if (logsTableExists) {
-      await queryRunner.query(`
+        }
+        const logsTableExists = await queryRunner.hasTable('shopify_webhook_logs');
+        if (logsTableExists) {
+            await queryRunner.query(`
         CREATE TABLE shopify_webhook_logs_temp AS SELECT * FROM shopify_webhook_logs;
         DROP TABLE shopify_webhook_logs CASCADE;
       `);
-      await queryRunner.query(`
+            await queryRunner.query(`
         CREATE TABLE shopify_webhook_logs (
           id UUID PRIMARY KEY,
           webhook_id VARCHAR NOT NULL,
@@ -208,27 +202,24 @@ class AddShopifyWebhookIndices1683675895000 {
         CREATE INDEX idx_shopify_webhook_logs_topic ON shopify_webhook_logs (topic);
         CREATE INDEX idx_shopify_webhook_logs_received_at ON shopify_webhook_logs (received_at);
       `);
-      await queryRunner.query(`
+            await queryRunner.query(`
         INSERT INTO shopify_webhook_logs SELECT * FROM shopify_webhook_logs_temp;
         DROP TABLE shopify_webhook_logs_temp;
       `);
-    }
-    await queryRunner.query(`
+        }
+        await queryRunner.query(`
       DROP FUNCTION IF EXISTS create_webhook_log_partition_for_month();
       DROP FUNCTION IF EXISTS cleanup_old_webhook_log_partitions(INTEGER);
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       SELECT cron.unschedule('Create webhook log partition for next month');
       SELECT cron.unschedule('Cleanup old webhook log partitions');
     `);
-  }
-  async indexExists(queryRunner, indexName) {
-    const result = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM pg_indexes WHERE indexname = $1`,
-      [indexName],
-    );
-    return result[0].count > 0;
-  }
+    }
+    async indexExists(queryRunner, indexName) {
+        const result = await queryRunner.query(`SELECT COUNT(*) as count FROM pg_indexes WHERE indexname = $1`, [indexName]);
+        return result[0].count > 0;
+    }
 }
 exports.AddShopifyWebhookIndices1683675895000 = AddShopifyWebhookIndices1683675895000;
 //# sourceMappingURL=1683675895000-AddShopifyWebhookIndices.js.map

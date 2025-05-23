@@ -97,11 +97,11 @@ let UserBehaviorAnalyticsService = UserBehaviorAnalyticsService_1 = class UserBe
             const scrollDepthDistribution = await this.scrollAnalyticsRepository
                 .createQueryBuilder('scroll')
                 .select('CASE ' +
-                'WHEN scroll.maxScrollPercentage < 25 THEN \'0-25%\' ' +
-                'WHEN scroll.maxScrollPercentage >= 25 AND scroll.maxScrollPercentage < 50 THEN \'25-50%\' ' +
-                'WHEN scroll.maxScrollPercentage >= 50 AND scroll.maxScrollPercentage < 75 THEN \'50-75%\' ' +
-                'WHEN scroll.maxScrollPercentage >= 75 AND scroll.maxScrollPercentage < 90 THEN \'75-90%\' ' +
-                'ELSE \'90-100%\' ' +
+                "WHEN scroll.maxScrollPercentage < 25 THEN '0-25%' " +
+                "WHEN scroll.maxScrollPercentage >= 25 AND scroll.maxScrollPercentage < 50 THEN '25-50%' " +
+                "WHEN scroll.maxScrollPercentage >= 50 AND scroll.maxScrollPercentage < 75 THEN '50-75%' " +
+                "WHEN scroll.maxScrollPercentage >= 75 AND scroll.maxScrollPercentage < 90 THEN '75-90%' " +
+                "ELSE '90-100%' " +
                 'END', 'depthRange')
                 .addSelect('COUNT(scroll.id)', 'sessionCount')
                 .where('scroll.timestamp >= :startDate', { startDate })
@@ -219,28 +219,28 @@ let UserBehaviorAnalyticsService = UserBehaviorAnalyticsService_1 = class UserBe
                 }
                 const productViews = await this.userEngagementRepository.count({
                     where: {
-                        sessionId: sessionIds,
+                        sessionId: (0, typeorm_2.In)(sessionIds),
                         engagementType: user_engagement_entity_1.EngagementType.PRODUCT_VIEW,
                         timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     },
                 });
                 const addToCarts = await this.userEngagementRepository.count({
                     where: {
-                        sessionId: sessionIds,
+                        sessionId: (0, typeorm_2.In)(sessionIds),
                         engagementType: user_engagement_entity_1.EngagementType.ADD_TO_CART,
                         timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     },
                 });
                 const checkoutStarts = await this.userEngagementRepository.count({
                     where: {
-                        sessionId: sessionIds,
+                        sessionId: (0, typeorm_2.In)(sessionIds),
                         engagementType: user_engagement_entity_1.EngagementType.CHECKOUT_START,
                         timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     },
                 });
                 const checkoutCompletions = await this.userEngagementRepository.count({
                     where: {
-                        sessionId: sessionIds,
+                        sessionId: (0, typeorm_2.In)(sessionIds),
                         engagementType: user_engagement_entity_1.EngagementType.CHECKOUT_COMPLETE,
                         timestamp: (0, typeorm_2.Between)(startDate, new Date()),
                     },

@@ -1,1 +1,2 @@
-export declare class VendorApplicationModule {}
+export declare class VendorApplicationModule {
+}

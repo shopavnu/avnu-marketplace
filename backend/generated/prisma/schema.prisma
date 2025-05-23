@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Basic marketplace models
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String?
+  role      String    @default("user") // user, merchant, admin
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[] @relation("MerchantProducts")
+  orders    Order[]   @relation("UserOrders")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal     @default(0)
+  stock       Int         @default(0)
+  images      String[] // URLs to product images
+  merchantId  String
+  merchant    User        @relation("MerchantProducts", fields: [merchantId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  categories  Category[]  @relation("ProductCategories")
+  orderItems  OrderItem[]
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  products    Product[]  @relation("ProductCategories")
+  parentId    String? // For nested categories
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation("UserOrders", fields: [userId], references: [id])
+  status          String      @default("pending") // pending, paid, shipped, delivered, cancelled
+  total           Decimal     @default(0)
+  items           OrderItem[]
+  paymentIntentId String? // Stripe payment intent ID
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  price     Decimal // Price at time of purchase
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orderId, productId])
+}

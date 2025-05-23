@@ -1,1 +1,2 @@
-export declare class ShopifyWebhooksModule {}
+export declare class ShopifyWebhooksModule {
+}

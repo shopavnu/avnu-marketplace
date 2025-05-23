@@ -1,6 +1,113 @@
 // Create a mock decorator function that returns the target
 const mockDecorator = () => (target: any) => target;
 const mockPropertyDecorator = () => () => jest.fn();
+const mockMethodDecorator = () => () => jest.fn();
+const mockParameterDecorator = () => () => jest.fn();
+
+// Mock class-validator decorators
+jest.mock('class-validator', () => {
+  return {
+    IsString: mockPropertyDecorator,
+    IsInt: mockPropertyDecorator,
+    IsOptional: mockPropertyDecorator,
+    Min: mockPropertyDecorator,
+    Max: mockPropertyDecorator,
+    IsDate: mockPropertyDecorator,
+    IsBoolean: mockPropertyDecorator,
+    IsEmail: mockPropertyDecorator,
+    IsUrl: mockPropertyDecorator,
+    IsNotEmpty: mockPropertyDecorator,
+    IsEnum: mockPropertyDecorator,
+    Matches: mockPropertyDecorator,
+    ValidateNested: mockPropertyDecorator,
+    Length: mockPropertyDecorator,
+  };
+});
+
+// Mock class-transformer decorators
+jest.mock('class-transformer', () => {
+  return {
+    Type: mockPropertyDecorator,
+    Transform: mockPropertyDecorator,
+    Expose: mockPropertyDecorator,
+    Exclude: mockPropertyDecorator,
+  };
+});
+
+// Mock NestJS decorators
+jest.mock('@nestjs/common', () => {
+  const original = jest.requireActual('@nestjs/common');
+  return {
+    ...original,
+    Injectable: mockDecorator,
+    Inject: mockParameterDecorator,
+    Controller: mockDecorator,
+    Get: mockMethodDecorator,
+    Post: mockMethodDecorator,
+    Put: mockMethodDecorator,
+    Delete: mockMethodDecorator,
+    Patch: mockMethodDecorator,
+    UseGuards: mockMethodDecorator,
+    Query: mockParameterDecorator,
+    Param: mockParameterDecorator,
+    Body: mockParameterDecorator,
+    Headers: mockParameterDecorator,
+  };
+});
+
+jest.mock('@nestjs/typeorm', () => {
+  return {
+    InjectRepository: mockParameterDecorator,
+    TypeOrmModule: {
+      forFeature: jest.fn(),
+      forRoot: jest.fn(),
+    },
+    getRepositoryToken: jest.fn(),
+  };
+});
+
+jest.mock('@nestjs-modules/ioredis', () => {
+  return {
+    InjectRedis: mockParameterDecorator,
+    RedisModule: {
+      forRoot: jest.fn(),
+      forRootAsync: jest.fn(),
+    },
+  };
+});
+
+// Mock EventEmitter2
+jest.mock('@nestjs/event-emitter', () => {
+  return {
+    EventEmitter2: jest.fn().mockImplementation(() => ({
+      emit: jest.fn(),
+      on: jest.fn(),
+    })),
+    OnEvent: mockMethodDecorator,
+  };
+});
+
+// Mock GraphQL and Apollo
+jest.mock('@nestjs/graphql', () => {
+  return {
+    Args: mockParameterDecorator,
+    Resolver: mockDecorator,
+    Query: mockMethodDecorator,
+    Mutation: mockMethodDecorator,
+    Field: mockPropertyDecorator,
+    InputType: mockDecorator,
+    ObjectType: mockDecorator,
+    Int: jest.fn(),
+    Float: jest.fn(),
+    ID: jest.fn(),
+  };
+});
+
+jest.mock('@nestjs/apollo', () => {
+  return {
+    ApolloDriver: jest.fn(),
+  };
+});
 
 // Mock TypeORM decorators and functions
 jest.mock('typeorm', () => {
@@ -14,6 +121,7 @@ jest.mock('typeorm', () => {
     ManyToOne: mockPropertyDecorator,
     OneToMany: mockPropertyDecorator,
     ManyToMany: mockPropertyDecorator,
+    OneToOne: mockPropertyDecorator,
     JoinColumn: mockPropertyDecorator,
     JoinTable: mockPropertyDecorator,
     Index: mockPropertyDecorator,

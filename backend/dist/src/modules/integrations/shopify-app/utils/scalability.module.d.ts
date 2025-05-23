@@ -1,1 +1,2 @@
-export declare class ShopifyScalabilityModule {}
+export declare class ShopifyScalabilityModule {
+}

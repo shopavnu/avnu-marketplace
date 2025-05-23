@@ -34,7 +34,7 @@ let MerchantAuthController = class MerchantAuthController {
         });
         return { success: result };
     }
-    async authenticateWooCommerce(body) {
+    async authenticateWooCommerce(_body) {
         return { success: false };
     }
 };

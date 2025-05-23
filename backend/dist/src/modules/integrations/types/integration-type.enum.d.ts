@@ -1,3 +1,3 @@
 export declare enum IntegrationType {
-  SHOPIFY = 'shopify',
+    SHOPIFY = "shopify"
 }

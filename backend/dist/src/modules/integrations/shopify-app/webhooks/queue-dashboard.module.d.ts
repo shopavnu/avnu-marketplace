@@ -1,1 +1,2 @@
-export declare class QueueDashboardModule {}
+export declare class QueueDashboardModule {
+}

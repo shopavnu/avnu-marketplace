@@ -1,1 +1,2 @@
-export declare class VendorDashboardModule {}
+export declare class VendorDashboardModule {
+}

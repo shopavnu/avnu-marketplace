@@ -1,9 +1,9 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateOrdersTables1715487600000 = void 0;
 class CreateOrdersTables1715487600000 {
-  async up(queryRunner) {
-    await queryRunner.query(`
+    async up(queryRunner) {
+        await queryRunner.query(`
       CREATE TABLE "orders" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "userId" varchar(100) NOT NULL,
@@ -21,7 +21,7 @@ class CreateOrdersTables1715487600000 {
         CONSTRAINT "PK_orders" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TABLE "order_items" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "orderId" uuid NOT NULL,
@@ -37,7 +37,7 @@ class CreateOrdersTables1715487600000 {
         CONSTRAINT "FK_order_items_order" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TABLE "order_fulfillments" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "orderId" uuid NOT NULL,
@@ -55,7 +55,7 @@ class CreateOrdersTables1715487600000 {
         CONSTRAINT "FK_order_fulfillments_order" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE INDEX "IDX_orders_userId" ON "orders" ("userId");
       CREATE INDEX "IDX_orders_status" ON "orders" ("status");
       CREATE INDEX "IDX_orders_paymentStatus" ON "orders" ("paymentStatus");
@@ -64,7 +64,7 @@ class CreateOrdersTables1715487600000 {
       CREATE INDEX "IDX_order_items_productId" ON "order_items" ("productId");
       CREATE INDEX "IDX_order_fulfillments_orderId" ON "order_fulfillments" ("orderId");
     `);
-    await queryRunner.query(`
+        await queryRunner.query(`
       DO $$
       BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'orders_status_enum') THEN
@@ -85,18 +85,18 @@ class CreateOrdersTables1715487600000 {
       END
       $$;
     `);
-  }
-  async down(queryRunner) {
-    await queryRunner.query(`DROP TABLE IF EXISTS "order_fulfillments";`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "order_items";`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "orders";`);
-    await queryRunner.query(`
+    }
+    async down(queryRunner) {
+        await queryRunner.query(`DROP TABLE IF EXISTS "order_fulfillments";`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "order_items";`);
+        await queryRunner.query(`DROP TABLE IF EXISTS "orders";`);
+        await queryRunner.query(`
       DROP TYPE IF EXISTS "public"."order_fulfillments_status_enum";
       DROP TYPE IF EXISTS "public"."orders_syncstatus_enum";
       DROP TYPE IF EXISTS "public"."orders_paymentstatus_enum";
       DROP TYPE IF EXISTS "public"."orders_status_enum";
     `);
-  }
+    }
 }
 exports.CreateOrdersTables1715487600000 = CreateOrdersTables1715487600000;
 //# sourceMappingURL=1715487600000-CreateOrdersTables.js.map

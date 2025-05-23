@@ -1,1 +1,2 @@
-export declare class PersonalizationModule {}
+export declare class PersonalizationModule {
+}

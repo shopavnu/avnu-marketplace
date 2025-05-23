@@ -1,3 +1,3 @@
 export declare class SearchFiltersInput {
-  filters?: Record<string, any>;
+    filters?: Record<string, any>;
 }

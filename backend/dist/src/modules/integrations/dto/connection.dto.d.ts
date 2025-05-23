@@ -1,6 +1,6 @@
 export declare class ConnectionIdDto {
-  connectionId: string;
+    connectionId: string;
 }
 export declare class MerchantIdDto {
-  merchantId: string;
+    merchantId: string;
 }
