@@ -218,7 +218,8 @@ export class SearchSuggestionService {
         index: 'search_suggestions', // Dedicated suggestions index
         body: {
           suggest: {
-            completion: { // Suggester name (kept as 'completion' based on test expectations)
+            completion: {
+              // Suggester name (kept as 'completion' based on test expectations)
               prefix: query,
               completion: suggesterConfigTextCompletion, // Suggester configuration
             },
@@ -249,7 +250,8 @@ export class SearchSuggestionService {
           index: 'products,merchants,brands', // Fallback indices
           body: {
             suggest: {
-              completion: { // Suggester name
+              completion: {
+                // Suggester name
                 prefix: query,
                 completion: suggesterConfigNameCompletion, // Suggester configuration
               },
@@ -309,7 +311,11 @@ export class SearchSuggestionService {
   /**
    * Get popular search suggestions based on search history
    */
-  async getPopularSuggestions(query: string, limit: number = 5, category?: string): Promise<SearchSuggestionType[]> {
+  async getPopularSuggestions(
+    query: string,
+    limit: number = 5,
+    category?: string,
+  ): Promise<SearchSuggestionType[]> {
     if (!this.isFeatureEnabled || !query || query.length < 2) {
       return Promise.resolve([]);
     }
@@ -335,7 +341,7 @@ export class SearchSuggestionService {
         filteredPopular = filteredPopular.filter(item => {
           // Assuming popularQueriesFromAnalytics items have 'query' and 'count'.
           // We derive the category from item.query for filtering and mapping.
-          // If SearchAnalyticsService.getPopularSearchQueries starts returning a category field, 
+          // If SearchAnalyticsService.getPopularSearchQueries starts returning a category field,
           // we can use item.category directly.
           const itemCategory = this.getCategoryFromQuery(item.query);
           return itemCategory === category;

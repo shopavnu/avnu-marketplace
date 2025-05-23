@@ -5,7 +5,6 @@ import { Logger } from '@nestjs/common';
 import { SearchSuggestionService } from '../services/search-suggestion.service';
 import { PersonalizationService } from '../../personalization/services/personalization.service';
 import { SearchAnalyticsService } from '../services/search-analytics.service';
-import { AnalyticsService } from '../../analytics/services/analytics.service';
 
 describe('Search Suggestions', () => {
   let searchSuggestionService: SearchSuggestionService;
@@ -35,7 +34,7 @@ describe('Search Suggestions', () => {
           SEARCH_SUGGESTIONS_ENABLED: true,
           SEARCH_SUGGESTIONS_MAX_LIMIT: 10,
           POPULAR_SEARCHES_ANALYTICS_LIMIT: 20, // Add this key
-          POPULAR_SEARCHES_DAYS_RANGE: 7,       // Add this key
+          POPULAR_SEARCHES_DAYS_RANGE: 7, // Add this key
         };
         return config[key] || null;
       }),
@@ -57,7 +56,9 @@ describe('Search Suggestions', () => {
     _personalizationService = module.get(
       PersonalizationService,
     ) as jest.Mocked<PersonalizationService>;
-    searchAnalyticsService = module.get(SearchAnalyticsService) as jest.Mocked<SearchAnalyticsService>;
+    searchAnalyticsService = module.get(
+      SearchAnalyticsService,
+    ) as jest.Mocked<SearchAnalyticsService>;
   });
 
   describe('Basic Functionality', () => {
@@ -254,7 +255,7 @@ describe('Search Suggestions', () => {
       // Verify analytics service was called with the right parameters
       expect(searchAnalyticsService.getPopularSearchQueries).toHaveBeenCalledWith(
         expect.any(Number), // days (e.g., 7)
-        20,                 // limit used for the analytics query (fixed at 20 in service)
+        20, // limit used for the analytics query (fixed at 20 in service)
       );
     });
 
