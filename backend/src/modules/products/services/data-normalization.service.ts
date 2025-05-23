@@ -332,8 +332,8 @@ export class DataNormalizationService {
       case DataSource.MANUAL:
       case DataSource.API:
       default:
-        // For manual/API data, just use as-is with basic validation
-        normalizedProduct = productData;
+        // For manual/API data, clone to avoid modifying original, then apply basic validation
+        normalizedProduct = { ...productData };
         break;
     }
 
@@ -414,7 +414,7 @@ export class DataNormalizationService {
       shopifyProduct.options.forEach(option => {
         const name = option.name.toLowerCase();
         if (['size', 'color', 'material', 'weight', 'dimensions'].includes(name)) {
-          attributes[name] = option.values[0];
+          attributes[name] = option.values;
         }
       });
     }
@@ -625,7 +625,7 @@ export class DataNormalizationService {
             product.title = 'Untitled Product';
             break;
           case 'description':
-            product.description = 'No description provided.';
+            product.description = 'No description available';
             break;
           case 'price':
             product.price = 0;

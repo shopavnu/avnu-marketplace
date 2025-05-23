@@ -41,6 +41,7 @@ describe('BulkImportService', () => {
             findAll: jest.fn(),
             findByIds: jest.fn(),
             update: jest.fn(),
+            findOne: jest.fn(),
           },
         },
       ],
@@ -294,7 +295,11 @@ describe('BulkImportService', () => {
       ];
 
       // Setup mocks
-      (productsService.findByIds as jest.Mock).mockResolvedValue(existingProducts);
+      (productsService.findOne as jest.Mock).mockImplementation(async (id: string) => {
+        if (id === 'prod1') return existingProducts[0];
+        if (id === 'prod2') return existingProducts[1];
+        return undefined;
+      });
 
       (dataNormalizationService.normalizeProduct as jest.Mock)
         .mockResolvedValueOnce(normalizedProducts[0])

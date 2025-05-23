@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { WebhookRegistry } from './webhook-registry';
 import { WebhookMonitorService } from './webhook-monitor.service';
@@ -33,7 +33,7 @@ export class WebhookRetryService {
   private scheduledRetries: Map<string, NodeJS.Timeout> = new Map();
 
   constructor(
-    private readonly webhookRegistry: WebhookRegistry,
+    @Inject(forwardRef(() => WebhookRegistry)) private readonly webhookRegistry: WebhookRegistry,
     private readonly webhookMonitor: WebhookMonitorService,
   ) {}
 

@@ -86,6 +86,7 @@ describe('ProgressiveLoadingService', () => {
       const result = await service.loadProgressively({
         limit: 2,
         priority: LoadingPriority.HIGH,
+        fullDetails: true, // Ensure full details are requested for HIGH priority
         withMetadata: true,
       });
 

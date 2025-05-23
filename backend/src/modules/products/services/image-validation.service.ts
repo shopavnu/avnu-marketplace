@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as probeImageSize from 'probe-image-size';
+import probeImageSize from 'probe-image-size';
 import isUrl from 'is-url';
 import axios from 'axios';
 
@@ -177,7 +177,12 @@ export class ImageValidationService {
         size: result.length,
       };
     } catch (error) {
+      if (error.message && (error.message.includes('Input buffer contains unsupported image format') || error.message.includes('unsupported image format'))) {
+        this.logger.error(`Invalid image format for ${imageUrl}: ${error.message}`);
+        throw new BadRequestException('Invalid image format. Please upload a valid JPG, PNG, or WEBP image.');
+      }
       this.logger.error(`Failed to validate image ${imageUrl}: ${error.message}`);
+      // For other errors, we still return a validation result, or could choose to re-throw
       return {
         isValid: false,
         error: `Failed to validate image: ${error.message}`,

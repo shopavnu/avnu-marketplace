@@ -11,6 +11,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "isolatedModules": true
+    "isolatedModules": false,
+    "module": "commonjs",
+    "target": "ES2020"
   }
 }

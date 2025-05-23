@@ -25,6 +25,8 @@ import { UserBehavior } from './entities/user-behavior.entity';
 import { SessionEntity } from './entities/session.entity';
 import { SessionInteractionEntity } from './entities/session-interaction.entity';
 import { UserPreferenceProfile } from './entities/user-preference-profile.entity';
+import { ProductsModule } from '../products/products.module';
+import { MerchantsModule } from '../merchants/merchants.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { UserPreferenceProfile } from './entities/user-preference-profile.entity
       SessionInteractionEntity,
       UserPreferenceProfile,
     ]),
+    ProductsModule,
+    MerchantsModule,
   ],
   controllers: [
     PersonalizationController,

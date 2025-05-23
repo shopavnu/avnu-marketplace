@@ -29,7 +29,7 @@ import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { OrderStatus, PaymentStatus, FulfillmentStatus, SyncStatus } from '../enums';
-import { PaginationDto } from '../../../common/dto/pagination.dto.js';
+import { PaginationDto } from '../../../common/dto/pagination.dto';
 import { Order } from '../entities/order.entity';
 
 /**

@@ -3,14 +3,22 @@ module.exports = {
   rootDir: '.',
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
+  setupFiles: ['<rootDir>/jest-reflect-metadata-setup.ts'],
+  
   setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
+  unmockedModulePathPatterns: [
+    'reflect-metadata',
+  ],
   transform: {
     '^.+\\.(t|j)s$': [
       'ts-jest',
       {
         tsconfig: 'tsconfig.test.json',
+        diagnostics: false,
+        isolatedModules: false,
+        compiler: 'typescript',
         // These settings help with decorator issues
-        diagnostics: {
+        /* diagnostics: {
           ignoreCodes: [
             1343, // Class decorator
             1344, // Property decorator
@@ -20,7 +28,7 @@ module.exports = {
             2307, // Cannot find module
             2749, // Cannot find namespace
           ],
-        },
+        }, */
       },
     ],
   },

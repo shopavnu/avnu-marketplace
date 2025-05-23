@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DistributedWebhookProcessor } from './distributed-webhook-processor';
+import { ShopifyWebhooksModule } from './webhooks.module';
 import { WebhookRegistry as _WebhookRegistry } from './webhook-registry';
 import { WebhookValidator as _WebhookValidator } from './webhook-validator';
 import { ShopifyWebhookDeduplicator as _ShopifyWebhookDeduplicator } from '../utils/webhook-deduplicator';
@@ -15,6 +16,7 @@ import { ShopifyStructuredLogger as _ShopifyStructuredLogger } from '../utils/st
  */
 @Module({
   imports: [
+    forwardRef(() => ShopifyWebhooksModule), // Added to provide WebhookRegistry and other dependencies
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

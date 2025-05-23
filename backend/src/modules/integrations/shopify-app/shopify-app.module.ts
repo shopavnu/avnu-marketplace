@@ -26,6 +26,7 @@ import { ShopifyProductService } from './services/shopify-product.service';
 import { ShopifyBulkOperationService } from './services/shopify-bulk-operation.service';
 import { ShopifyFulfillmentService } from './services/shopify-fulfillment.service';
 import { ShopifyVersionManagerService } from './services/shopify-version-manager.service';
+import { ShopifyClientExtensions } from './services/shopify-client-extensions';
 
 // Entities
 import { MerchantPlatformConnection } from '../entities/merchant-platform-connection.entity';
@@ -70,6 +71,7 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     ShopifyFulfillmentService,
     ShopifyVersionManagerService,
     ShopifyWebhookRegistryService,
+    ShopifyClientExtensions,
 
     // Register services with interface tokens for dependency injection
     {
@@ -102,8 +104,6 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     ShopifyAppService,
     ShopifyAuthService,
     ShopifyWebhookService,
-    WebhookRegistry,
-    WebhookValidator,
     ShopifyWebhookRegistryService,
 
     // Enhanced services
@@ -114,6 +114,7 @@ import { SHOPIFY_CONSTANTS } from '../../common/config/shopify-config';
     ShopifyBulkOperationService,
     ShopifyFulfillmentService,
     ShopifyVersionManagerService,
+    ShopifyClientExtensions,
 
     // Export services by their interface tokens
     SHOPIFY_CONSTANTS.INJECTION_TOKENS.SHOPIFY_CLIENT_SERVICE,

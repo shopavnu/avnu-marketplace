@@ -3,21 +3,6 @@ import { BatchSectionsController } from './batch-sections.controller';
 import { BatchSectionsService } from '../services/batch-sections.service';
 import { Logger as _Logger } from '@nestjs/common';
 
-// Mock the NestJS Logger to avoid console output during tests
-jest.mock('@nestjs/common', () => {
-  const original = jest.requireActual('@nestjs/common');
-  return {
-    ...original,
-    Logger: jest.fn().mockImplementation(() => ({
-      log: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      verbose: jest.fn(),
-    })),
-  };
-});
-
 describe('BatchSectionsController', () => {
   let controller: BatchSectionsController;
   let _mockBatchSectionsService: jest.Mocked<BatchSectionsService>;

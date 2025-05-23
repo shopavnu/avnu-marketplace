@@ -153,7 +153,9 @@ export class SearchSuggestionService {
         limit,
       );
 
-      this.logger.debug(`Returning ${combinedSuggestions.length} suggestions`);
+      this.logger.debug(
+        `SearchSuggestionService - combinedSuggestions: ${JSON.stringify(combinedSuggestions, null, 2)}`,
+      );
 
       if (combinedSuggestions.length > 0) {
         this.searchAnalyticsService
@@ -268,6 +270,7 @@ export class SearchSuggestionService {
       // Map suggestions to a consistent format
       const mappedSuggestions = suggestions.map(option => {
         try {
+          // Ensure option and option._source are defined
           if (!option || !option._source) {
             this.logger.warn(
               `Skipping suggestion due to missing option or _source: ${JSON.stringify(option)}`,
@@ -275,7 +278,7 @@ export class SearchSuggestionService {
             return null; // Mark for filtering
           }
           const source = option._source;
-          const text = source.text || source.name;
+          const text = source?.query_text_completion || source?.text || option?.text; // Prioritize query_text_completion
           const typeFromSource = source.type;
           const indexName = option._index;
 

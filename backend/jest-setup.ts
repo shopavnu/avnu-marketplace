@@ -1,39 +1,52 @@
+
+// Set a dummy CLERK_SECRET_KEY for test environments
+process.env.CLERK_SECRET_KEY = 'test_clerk_secret_key_for_jest_runs';
+
 // Create a mock decorator function that returns the target
 const mockDecorator = () => (target: any) => target;
 const mockPropertyDecorator = () => () => jest.fn();
 const mockMethodDecorator = () => () => jest.fn();
 const mockParameterDecorator = () => () => jest.fn();
 
-// Mock class-validator decorators
 /* jest.mock('class-validator', () => {
+  const originalModule = jest.requireActual('class-validator');
   return {
-    IsString: mockPropertyDecorator,
-    IsInt: mockPropertyDecorator,
-    IsOptional: mockPropertyDecorator,
-    Min: mockPropertyDecorator,
-    Max: mockPropertyDecorator,
-    IsDate: mockPropertyDecorator,
-    IsBoolean: mockPropertyDecorator,
-    IsEmail: mockPropertyDecorator,
-    IsUrl: mockPropertyDecorator,
-    IsNotEmpty: mockPropertyDecorator,
-    IsEnum: mockPropertyDecorator,
-    Matches: mockPropertyDecorator,
-    ValidateNested: mockPropertyDecorator,
-    Length: mockPropertyDecorator,
+    ...originalModule,
+    // If specific functions from class-validator need to be mocked for certain tests,
+    // they can be overridden here. For DTO validation tests, we want actual decorators.
   };
 }); */
 
-// Mock class-transformer decorators
-jest.mock('class-transformer', () => {
+/* jest.mock('class-transformer', () => {
+  const originalModule = jest.requireActual('class-transformer');
   return {
-    Type: mockPropertyDecorator,
-    Transform: mockPropertyDecorator,
-    Expose: mockPropertyDecorator,
-    Exclude: mockPropertyDecorator,
-    plainToInstance: jest.fn((dtoClass, plainObject) => plainObject),
+    ...originalModule, // Use actual implementations for all decorators and functions.
   };
-});
+}); */
+
+/* jest.mock('@nestjs/common', () => {
+  const originalModule = jest.requireActual('@nestjs/common');
+  return {
+    ...originalModule,
+    // Specific overrides can be placed here if needed globally,
+    // but for now, ensure all decorators are the actual implementations.
+  };
+}); */
+
+/* jest.mock('@nestjs/swagger', () => {
+  const originalModule = jest.requireActual('@nestjs/swagger');
+  return {
+    ...originalModule,
+  };
+}); */
+
+/* jest.mock('@nestjs/graphql', () => {
+  const originalModule = jest.requireActual('@nestjs/graphql');
+  return {
+    ...originalModule,
+    // Specific overrides can be placed here if needed globally.
+  };
+}); */
 
 // Mock NestJS decorators
 /* jest.mock('@nestjs/common', () => {
@@ -56,26 +69,32 @@ jest.mock('class-transformer', () => {
   };
 }); */
 
-jest.mock('@nestjs/typeorm', () => {
+/* jest.mock('@nestjs/typeorm', () => {
+  const originalModule = jest.requireActual('@nestjs/typeorm');
   return {
-    InjectRepository: mockParameterDecorator,
+    ...originalModule, // Use actual implementations by default, including InjectRepository
+    // TypeOrmModule static methods are still mocked if they interfere with unit tests
     TypeOrmModule: {
-      forFeature: jest.fn(),
-      forRoot: jest.fn(),
+      ...originalModule.TypeOrmModule,
+      forFeature: jest.fn(() => originalModule.TypeOrmModule.forFeature([])),
+      forRoot: jest.fn(() => originalModule.TypeOrmModule.forRoot({})),
     },
-    getRepositoryToken: (entity) => entity, // Return entity itself as token
+    // getRepositoryToken and InjectRepository will now use their actual implementations from originalModule
   };
-});
+}); */
 
-jest.mock('@nestjs-modules/ioredis', () => {
+/* jest.mock('@nestjs-modules/ioredis', () => {
+  const originalModule = jest.requireActual('@nestjs-modules/ioredis');
   return {
-    InjectRedis: mockParameterDecorator,
+    ...originalModule, // Spread original module to get actual InjectRedis
+    // Keep RedisModule methods mocked as they are often setup/config related
     RedisModule: {
+      ...originalModule.RedisModule, // Spread original RedisModule static properties if any
       forRoot: jest.fn(),
       forRootAsync: jest.fn(),
     },
   };
-});
+}); */
 
 // Mock EventEmitter2
 /* jest.mock('@nestjs/event-emitter', () => {
@@ -89,70 +108,68 @@ jest.mock('@nestjs-modules/ioredis', () => {
 }); */
 
 // Mock GraphQL and Apollo
-jest.mock('@nestjs/graphql', () => {
+/* jest.mock('@nestjs/graphql', () => {
+  const originalModule = jest.requireActual('@nestjs/graphql');
   return {
-    Args: mockParameterDecorator,
-    Resolver: mockDecorator,
-    Query: mockMethodDecorator,
-    Mutation: mockMethodDecorator,
-    Field: mockPropertyDecorator,
-    InputType: mockDecorator,
-    ObjectType: mockDecorator,
-    Int: jest.fn(),
-    Float: jest.fn(),
-    ID: jest.fn(),
-    registerEnumType: jest.fn(),
-    createUnionType: jest.fn(),
-  };
-});
+    ...originalModule, // Use actual implementations by default
+    // Selectively mock decorators related to runtime resolver behavior if needed
+    Args: mockParameterDecorator,        // Keep mocked if desired
+    Resolver: mockDecorator,           // Keep mocked if desired
+    Query: mockMethodDecorator,         // Keep mocked if desired
+    Mutation: mockMethodDecorator,     // Keep mocked if desired
+    Subscription: mockMethodDecorator,  // Add if you use subscriptions and want to mock
+    ResolveField: mockMethodDecorator,  // Add if you use field resolvers and want to mock
 
-jest.mock('@nestjs/apollo', () => {
+    // Ensure core DTO/Type decorators and utilities use their REAL implementations
+    // These are already covered by ...originalModule, but listed for clarity
+    // Field: originalModule.Field, (already covered)
+    // InputType: originalModule.InputType, (already covered)
+    // ObjectType: originalModule.ObjectType, (already covered)
+    // PartialType: originalModule.PartialType, (already covered)
+    // Int: originalModule.Int, (already covered)
+    // Float: originalModule.Float, (already covered)
+    // ID: originalModule.ID, (already covered)
+    // registerEnumType: originalModule.registerEnumType, (already covered)
+    // createUnionType: originalModule.createUnionType, (already covered)
+  };
+}); */
+
+/* jest.mock('@nestjs/apollo', () => {
   return {
     ApolloDriver: jest.fn(),
   };
-});
+}); */
 
 // Mock TypeORM decorators and functions
-jest.mock('typeorm', () => {
+/* jest.mock('typeorm', () => {
+  const originalModule = jest.requireActual('typeorm');
   return {
-    Entity: mockDecorator,
-    PrimaryGeneratedColumn: mockPropertyDecorator,
-    Column: mockPropertyDecorator,
-    CreateDateColumn: mockPropertyDecorator,
-    UpdateDateColumn: mockPropertyDecorator,
-    DeleteDateColumn: mockPropertyDecorator,
-    ManyToOne: mockPropertyDecorator,
-    OneToMany: mockPropertyDecorator,
-    ManyToMany: mockPropertyDecorator,
-    OneToOne: mockPropertyDecorator,
-    JoinColumn: mockPropertyDecorator,
-    JoinTable: mockPropertyDecorator,
-    Index: mockPropertyDecorator,
-    Unique: mockPropertyDecorator,
-    // Repository: jest.fn().mockImplementation(() => ({
-    //   find: jest.fn().mockResolvedValue([]),
-    //   findOne: jest.fn().mockResolvedValue({}),
-    //   save: jest.fn().mockResolvedValue({}),
-    //   update: jest.fn().mockResolvedValue({}),
-    //   delete: jest.fn().mockResolvedValue({}),
-    //   createQueryBuilder: jest.fn().mockReturnValue({
-    //     where: jest.fn().mockReturnThis(),
-    //     andWhere: jest.fn().mockReturnThis(),
-    //     leftJoinAndSelect: jest.fn().mockReturnThis(),
-    //     orderBy: jest.fn().mockReturnThis(),
-    //     getOne: jest.fn().mockResolvedValue({}),
-    //     getMany: jest.fn().mockResolvedValue([]),
-    //   }),
-    // })),
+    ...originalModule, // Use actual implementations for all decorators and functions by default
+
+    // If you need to mock specific functions like getRepository or Repository methods for unit tests,
+    // you can override them here. For example:
     // getRepository: jest.fn().mockImplementation(() => ({
     //   find: jest.fn().mockResolvedValue([]),
-    //   findOne: jest.fn().mockResolvedValue({}),
-    //   save: jest.fn().mockResolvedValue({}),
-    //   update: jest.fn().mockResolvedValue({}),
-    //   delete: jest.fn().mockResolvedValue({}),
+    //   findOne: jest.fn().mockResolvedValue(null),
+    //   save: jest.fn(entity => Promise.resolve(entity)),
+    //   // ... other repository methods
     // })),
+    // DataSource: jest.fn().mockImplementation(() => ({
+    //   getRepository: jest.fn().mockImplementation(() => ({
+    //      find: jest.fn().mockResolvedValue([]),
+    //      findOne: jest.fn().mockResolvedValue(null),
+    //      save: jest.fn(entity => Promise.resolve(entity)),
+    //   })),
+    //   initialize: jest.fn().mockResolvedValue(undefined),
+    //   destroy: jest.fn().mockResolvedValue(undefined),
+    //   // ... other DataSource methods
+    // })),
+
+    // Ensure all decorators (Entity, Column, PrimaryGeneratedColumn, etc.)
+    // use their REAL implementations from originalModule.
+    // This is achieved by spreading ...originalModule above.
   };
-});
+}); */
 
 
 // Suppress console errors during tests
