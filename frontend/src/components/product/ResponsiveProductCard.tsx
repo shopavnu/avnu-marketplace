@@ -337,7 +337,7 @@ const ResponsiveProductCard: React.FC<ResponsiveProductCardProps> = ({
               maxHeight: `calc(${currentDimensions.titleLineHeight}em * ${currentDimensions.titleLines})`, // Enforce maximum height
               overflow: "hidden",
               display: "-webkit-box",
-              WebkitLineClamp: currentDimensions.titleLines,
+              WebkitLineClamp: String(currentDimensions.titleLines),
               WebkitBoxOrient: "vertical",
               textOverflow: "ellipsis",
               wordBreak: "break-word", // Prevent long words from overflowing

@@ -15,7 +15,7 @@ const mockRecommendationService = RecommendationService as jest.Mocked<
 jest.mock("../../product/ProductCard", () => {
   return jest.fn((props) => (
     <div
-      data-testid={`mocked-product-card-${props.product.id}`}
+      data-testid={props.testId || `mocked-product-card-${props.product.id}`}
       onClick={() => props.onClick && props.onClick(props.product)}
     >
       <div>{props.product.title}</div>
@@ -35,6 +35,11 @@ jest.mock("../../../hooks/useSession", () => ({
 }));
 
 describe("SimilarProducts Component", () => {
+  beforeEach(() => {
+    // Reset mocks before each test to ensure test isolation
+    mockRecommendationService.getSimilarProducts.mockReset();
+    // If other RecommendationService methods are used by SimilarProducts, reset them too.
+  });
   const mockProducts = [
     {
       id: "product-1",
@@ -83,18 +88,20 @@ describe("SimilarProducts Component", () => {
       </BrowserRouter>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("You May Also Like")).toBeInTheDocument();
-      expect(screen.getByText("Test Product 1")).toBeInTheDocument();
-      expect(screen.getByText("Test Product 2")).toBeInTheDocument();
+    await screen.findByText("Test Product 1"); // Wait for product to appear
+    expect(screen.queryByTestId("similar-products-loading")).not.toBeInTheDocument();
 
-      // Verify ProductCard is used with correct props
+    expect(screen.getByRole('heading', { name: /You may also like/i, level: 2 })).toBeInTheDocument();
+    expect(screen.getByText("Test Product 2")).toBeInTheDocument();
+
+    // Verify ProductCard is used with correct props for each product
+    mockProducts.forEach(product => {
       expect(ProductCard).toHaveBeenCalledWith(
         expect.objectContaining({
-          product: mockProducts[0],
-          testId: `similar-product-${mockProducts[0].id}`,
+          product: product,
+          testId: `similar-product-${product.id}`,
         }),
-        expect.anything(),
+        expect.anything(), // The second argument to ProductCard mock calls is the context
       );
     });
   });
@@ -131,9 +138,8 @@ describe("SimilarProducts Component", () => {
       </BrowserRouter>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("similar-products-empty")).toBeInTheDocument();
-    });
+    await screen.findByTestId("similar-products-empty");
+    expect(screen.queryByTestId("similar-products-loading")).not.toBeInTheDocument();
   });
 
   it("should render error state when API call fails", async () => {
@@ -147,9 +153,8 @@ describe("SimilarProducts Component", () => {
       </BrowserRouter>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("similar-products-error")).toBeInTheDocument();
-    });
+    await screen.findByTestId("similar-products-error");
+    expect(screen.queryByTestId("similar-products-loading")).not.toBeInTheDocument();
   });
 
   it("should respect the limit prop", async () => {
@@ -166,7 +171,8 @@ describe("SimilarProducts Component", () => {
     await waitFor(() => {
       expect(mockRecommendationService.getSimilarProducts).toHaveBeenCalledWith(
         "test-product-id",
-        1,
+        'hybrid', // Default similarityType
+        1
       );
     });
   });
@@ -198,16 +204,17 @@ describe("SimilarProducts Component", () => {
 
     // Click on the first product card
     fireEvent.click(
-      screen.getByTestId(`mocked-product-card-${mockProducts[0].id}`),
+      screen.getByTestId(`similar-product-${mockProducts[0].id}`),
     );
 
     expect(trackInteractionMock).toHaveBeenCalledWith(
       "RECOMMENDATION_CLICK",
       expect.objectContaining({
-        productId: "test-product-id",
         recommendationType: "similar_products",
-        recommendedProductId: mockProducts[0].id,
-      }),
+        similarityType: "hybrid",
+        sourceProductId: "test-product-id",
+        targetProductId: mockProducts[0].id
+      })
     );
   });
 
@@ -223,16 +230,19 @@ describe("SimilarProducts Component", () => {
     );
 
     await waitFor(() => {
-      // Verify ProductCard component is used for each product
+      // Verify ProductCard component is used for each product with correct props
       mockProducts.forEach((product) => {
         expect(ProductCard).toHaveBeenCalledWith(
           expect.objectContaining({
-            product,
+            product: product,
             testId: `similar-product-${product.id}`,
+            // Add other props that are expected to be passed and are relevant for sizing consistency if necessary
           }),
-          expect.anything(),
+          expect.anything() // Context for the mock call
         );
       });
+      // Additionally, one might check the number of times ProductCard was called:
+      // expect(ProductCard).toHaveBeenCalledTimes(mockProducts.length);
     });
   });
 });

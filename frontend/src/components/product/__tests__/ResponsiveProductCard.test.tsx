@@ -110,11 +110,25 @@ describe("ResponsiveProductCard Component", () => {
       /This is an extremely long product description/,
     );
 
-    // Check that content is truncated (not showing the full text)
-    expect(title.textContent).not.toEqual(mockProducts.longContent.title);
-    expect(description.textContent).not.toEqual(
-      mockProducts.longContent.description,
-    );
+    // Check that title has CSS truncation styles applied.
+    // In JSDOM, textContent will still hold the full title for CSS-based truncation.
+    // Check key CSS properties for truncation that are reliably testable in JSDOM.
+    // We acknowledge JSDOM limitations in verifying -webkit-box-orient and -webkit-line-clamp.
+    expect(title).toHaveStyle({
+      display: "-webkit-box", // Prerequisite for line-clamping
+      overflow: "hidden",    // Prerequisite for line-clamping
+      'text-overflow': "ellipsis", // Visual cue for truncation
+    });
+    // Confirm the full text content is present in the DOM for the title,
+    // as CSS-based truncation doesn't alter textContent.
+    expect(title.textContent).toEqual(mockProducts.longContent.title);
+
+    // Check that description content is programmatically truncated by the
+    // getResponsiveDescription() method, which uses the mocked truncateText.
+    // For desktop (default test setup), description maxLength is 150.
+    const expectedTruncatedDescription =
+      mockProducts.longContent.description.substring(0, 150) + "...";
+    expect(description.textContent).toEqual(expectedTruncatedDescription);
   });
 
   it("handles missing content with fallbacks", () => {
