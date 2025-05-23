@@ -42,9 +42,9 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
         try {
             this.logger.debug(`Getting suggestions for query: "${query}", limit: ${limit}`);
             const promisesToSettle = [];
-            promisesToSettle.push(this.getPrefixSuggestions(query, limit));
+            promisesToSettle.push(this.getPrefixSuggestions(query, limit, input.categories?.[0]));
             if (includePopular) {
-                promisesToSettle.push(this.getPopularSuggestions(query, limit));
+                promisesToSettle.push(this.getPopularSuggestions(query, limit, input.categories?.[0]));
             }
             else {
                 promisesToSettle.push(Promise.resolve([]));
@@ -117,22 +117,28 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
             };
         }
     }
-    async getPrefixSuggestions(query, limit) {
+    async getPrefixSuggestions(query, limit, category) {
         try {
+            const suggesterConfigTextCompletion = {
+                field: 'text.completion',
+                size: limit,
+                skip_duplicates: true,
+                fuzzy: {
+                    fuzziness: 1,
+                },
+            };
+            if (category) {
+                suggesterConfigTextCompletion.contexts = {
+                    category: [category],
+                };
+            }
             const response = await this.elasticsearchService.search({
                 index: 'search_suggestions',
                 body: {
                     suggest: {
                         completion: {
                             prefix: query,
-                            completion: {
-                                field: 'text.completion',
-                                size: limit,
-                                skip_duplicates: true,
-                                fuzzy: {
-                                    fuzziness: 1,
-                                },
-                            },
+                            completion: suggesterConfigTextCompletion,
                         },
                     },
                 },
@@ -140,20 +146,26 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
             const options = response.suggest?.completion?.[0]?.options;
             let suggestions = Array.isArray(options) ? options : [];
             if (suggestions.length < limit) {
+                const suggesterConfigNameCompletion = {
+                    field: 'name.completion',
+                    size: limit - suggestions.length,
+                    skip_duplicates: true,
+                    fuzzy: {
+                        fuzziness: 1,
+                    },
+                };
+                if (category) {
+                    suggesterConfigNameCompletion.contexts = {
+                        category: [category],
+                    };
+                }
                 const fallbackResponse = await this.elasticsearchService.search({
                     index: 'products,merchants,brands',
                     body: {
                         suggest: {
                             completion: {
                                 prefix: query,
-                                completion: {
-                                    field: 'name.completion',
-                                    size: limit - suggestions.length,
-                                    skip_duplicates: true,
-                                    fuzzy: {
-                                        fuzziness: 1,
-                                    },
-                                },
+                                completion: suggesterConfigNameCompletion,
                             },
                         },
                     },
@@ -199,14 +211,22 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
             return Promise.resolve([]);
         }
     }
-    async getPopularSuggestions(query, limit = 5) {
+    async getPopularSuggestions(query, limit = 5, category) {
         if (!this.isFeatureEnabled || !query || query.length < 2) {
             return Promise.resolve([]);
         }
         try {
-            const popularQueries = await this.searchAnalyticsService.getPopularSearchQueries(7, 20);
-            const matchingQueries = popularQueries
-                .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
+            const popularAnalyticsLimit = this.configService.get('POPULAR_SEARCHES_ANALYTICS_LIMIT', 20);
+            const daysRange = this.configService.get('POPULAR_SEARCHES_DAYS_RANGE', 7);
+            const popularQueriesFromAnalytics = await this.searchAnalyticsService.getPopularSearchQueries(daysRange, popularAnalyticsLimit);
+            let filteredPopular = popularQueriesFromAnalytics.filter(item => item.query.toLowerCase().includes(query.toLowerCase()));
+            if (category) {
+                filteredPopular = filteredPopular.filter(item => {
+                    const itemCategory = this.getCategoryFromQuery(item.query);
+                    return itemCategory === category;
+                });
+            }
+            const matchingQueries = filteredPopular
                 .map(item => ({
                 text: item.query,
                 score: Math.min(10, 5 + Math.log(item.count)),

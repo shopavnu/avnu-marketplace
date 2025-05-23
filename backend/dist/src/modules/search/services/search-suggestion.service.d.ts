@@ -18,7 +18,7 @@ export declare class SearchSuggestionService {
     constructor(elasticsearchService: ElasticsearchService, configService: ConfigService, personalizationService: PersonalizationService, searchAnalyticsService: SearchAnalyticsService);
     getSuggestions(input: SearchSuggestionInput, user?: User): Promise<SearchSuggestionsResponseType>;
     private getPrefixSuggestions;
-    getPopularSuggestions(query: string, limit?: number): Promise<SearchSuggestionType[]>;
+    getPopularSuggestions(query: string, limit?: number, category?: string): Promise<SearchSuggestionType[]>;
     private getPersonalizedSuggestions;
     private combineAndDeduplicate;
     private getCategoryFromQuery;

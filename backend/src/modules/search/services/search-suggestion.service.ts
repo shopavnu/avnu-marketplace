@@ -61,11 +61,11 @@ export class SearchSuggestionService {
       const promisesToSettle: Promise<SearchSuggestionType[]>[] = [];
 
       // Prefix Suggestions
-      promisesToSettle.push(this.getPrefixSuggestions(query, limit));
+      promisesToSettle.push(this.getPrefixSuggestions(query, limit, input.categories?.[0]));
 
       // Popular Suggestions
       if (includePopular) {
-        promisesToSettle.push(this.getPopularSuggestions(query, limit));
+        promisesToSettle.push(this.getPopularSuggestions(query, limit, input.categories?.[0]));
       } else {
         promisesToSettle.push(Promise.resolve([])); // Placeholder for consistent array length and type
       }
@@ -196,48 +196,62 @@ export class SearchSuggestionService {
   private async getPrefixSuggestions(
     query: string,
     limit: number,
+    category?: string,
   ): Promise<SearchSuggestionType[]> {
     try {
-      // Use the dedicated search suggestions index
+      const suggesterConfigTextCompletion: any = {
+        field: 'text.completion',
+        size: limit,
+        skip_duplicates: true,
+        fuzzy: {
+          fuzziness: 1,
+        },
+      };
+
+      if (category) {
+        suggesterConfigTextCompletion.contexts = {
+          category: [category], // Add category context if provided
+        };
+      }
+
       const response = await this.elasticsearchService.search({
-        index: 'search_suggestions',
+        index: 'search_suggestions', // Dedicated suggestions index
         body: {
           suggest: {
-            completion: {
+            completion: { // Suggester name (kept as 'completion' based on test expectations)
               prefix: query,
-              completion: {
-                field: 'text.completion',
-                size: limit,
-                skip_duplicates: true,
-                fuzzy: {
-                  fuzziness: 1,
-                },
-              },
+              completion: suggesterConfigTextCompletion, // Suggester configuration
             },
           },
         },
       });
 
-      // Process suggestions from the suggestions index
       const options = response.suggest?.completion?.[0]?.options;
       let suggestions = Array.isArray(options) ? options : [];
 
-      // If we don't have enough suggestions, fall back to product/merchant/brand indices
       if (suggestions.length < limit) {
+        const suggesterConfigNameCompletion: any = {
+          field: 'name.completion',
+          size: limit - suggestions.length, // Dynamic size for fallback
+          skip_duplicates: true,
+          fuzzy: {
+            fuzziness: 1,
+          },
+        };
+
+        if (category) {
+          suggesterConfigNameCompletion.contexts = {
+            category: [category], // Add category context if provided
+          };
+        }
+
         const fallbackResponse = await this.elasticsearchService.search({
-          index: 'products,merchants,brands',
+          index: 'products,merchants,brands', // Fallback indices
           body: {
             suggest: {
-              completion: {
+              completion: { // Suggester name
                 prefix: query,
-                completion: {
-                  field: 'name.completion',
-                  size: limit - suggestions.length,
-                  skip_duplicates: true,
-                  fuzzy: {
-                    fuzziness: 1,
-                  },
-                },
+                completion: suggesterConfigNameCompletion, // Suggester configuration
               },
             },
           },
@@ -295,27 +309,49 @@ export class SearchSuggestionService {
   /**
    * Get popular search suggestions based on search history
    */
-  async getPopularSuggestions(query: string, limit: number = 5): Promise<SearchSuggestionType[]> {
+  async getPopularSuggestions(query: string, limit: number = 5, category?: string): Promise<SearchSuggestionType[]> {
     if (!this.isFeatureEnabled || !query || query.length < 2) {
       return Promise.resolve([]);
     }
 
     try {
-      // Get popular search queries from analytics
-      const popularQueries = await this.searchAnalyticsService.getPopularSearchQueries(7, 20);
+      const popularAnalyticsLimit = this.configService.get<number>(
+        'POPULAR_SEARCHES_ANALYTICS_LIMIT',
+        20,
+      );
+      const daysRange = this.configService.get<number>('POPULAR_SEARCHES_DAYS_RANGE', 7);
+      const popularQueriesFromAnalytics = await this.searchAnalyticsService.getPopularSearchQueries(
+        daysRange,
+        popularAnalyticsLimit,
+      );
 
-      // Filter and score popular queries that match the input query
-      const matchingQueries = popularQueries
-        .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
+      // Filter popular queries: first by the input query
+      let filteredPopular = popularQueriesFromAnalytics.filter(item =>
+        item.query.toLowerCase().includes(query.toLowerCase()),
+      );
+
+      // Then, filter by category if provided
+      if (category) {
+        filteredPopular = filteredPopular.filter(item => {
+          // Assuming popularQueriesFromAnalytics items have 'query' and 'count'.
+          // We derive the category from item.query for filtering and mapping.
+          // If SearchAnalyticsService.getPopularSearchQueries starts returning a category field, 
+          // we can use item.category directly.
+          const itemCategory = this.getCategoryFromQuery(item.query);
+          return itemCategory === category;
+        });
+      }
+
+      const matchingQueries = filteredPopular
         .map(item => ({
           text: item.query,
           score: Math.min(10, 5 + Math.log(item.count)), // Score based on popularity
-          category: this.getCategoryFromQuery(item.query),
+          category: this.getCategoryFromQuery(item.query), // Derive category for the final suggestion object
           type: 'search',
           isPopular: true,
           isPersonalized: false,
         }))
-        .slice(0, limit);
+        .slice(0, limit); // Apply limit at the end
 
       return matchingQueries;
     } catch (error) {
@@ -323,14 +359,6 @@ export class SearchSuggestionService {
       return Promise.resolve([]);
     }
   }
-
-  /**
-   * Get personalized suggestions based on user behavior
-   * @param query The query prefix
-   * @param userId User ID
-   * @param limit Maximum number of suggestions
-   * @returns Array of personalized suggestions
-   */
   private async getPersonalizedSuggestions(
     query: string,
     user: User,
