@@ -26,6 +26,7 @@
     "test": "jest --config jest.config.js",
     "test:watch": "jest --config jest.config.js --watch",
     "test:cov": "jest --config jest.config.js --coverage",
+    "test:ci": "jest --config jest.config.js src/modules/merchants/services/ad-budget-management.service.spec.ts src/modules/merchants/services/ad-placement.service.spec.ts src/modules/merchants/resolvers/ad-placement.resolver.spec.ts src/modules/merchants/resolvers/ad-budget-management.resolver.spec.ts src/modules/products/services/pagination-cache.service.spec.ts src/modules/products/services/query-analytics.service.spec.ts src/modules/search/services/entity-relevance-scorer.service.spec.ts src/modules/search/services/search-cache.service.spec.ts src/modules/search/services/search-experiment.service.spec.ts",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:perf": "jest --config ./test/jest-performance.json",
