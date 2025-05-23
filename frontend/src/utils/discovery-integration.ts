@@ -193,7 +193,7 @@ export const isProductFavorited = (productId: string): boolean => {
   return personalizationService.isProductFavorited(productId);
 };
 
-export default {
+const discoveryIntegrationService = {
   initializePersonalization,
   trackProductView,
   trackCategoryView,
@@ -204,3 +204,5 @@ export default {
   toggleFavoriteProduct,
   isProductFavorited,
 };
+
+export default discoveryIntegrationService;

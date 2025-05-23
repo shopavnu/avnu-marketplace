@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { productsApi } from '@/services/api';
 import { Product } from '@/types/products';
 
@@ -20,7 +20,7 @@ export function useProducts({
   const [skip, setSkip] = useState<number>(initialSkip);
   const [take] = useState<number>(initialTake);
 
-  const fetchProducts = async (skipParam = skip, takeParam = take) => {
+  const fetchProducts = useCallback(async (skipParam = skip, takeParam = take) => {
     if (!hasMore && skipParam > 0) return;
     
     setLoading(true);
@@ -42,24 +42,25 @@ export function useProducts({
     } finally {
       setLoading(false);
     }
-  };
+  }, [hasMore, skip, take, productsApi, setLoading, setProducts, setHasMore, setSkip, setError]);
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     setSkip(0);
     setHasMore(true);
-    fetchProducts(0);
-  };
+    // Call fetchProducts with explicit arguments for clarity in this context
+    fetchProducts(0, take);
+  }, [fetchProducts, take, setSkip, setHasMore]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   return {
     products,
     loading,
     error,
     hasMore,
-    fetchMore: () => fetchProducts(),
+    fetchMore: useCallback(() => fetchProducts(), [fetchProducts]),
     refresh
   };
 }

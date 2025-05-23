@@ -32,7 +32,7 @@ export default function App({ Component, pageProps }: AppProps) {
     router.pathname.startsWith("/discovery");
 
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <div className={`${geistSans.variable} ${geistMono.variable}`}>
         <ErrorBoundary>
           <ThemeProvider>

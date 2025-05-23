@@ -180,10 +180,8 @@
   margin: 0 0 4px 0;
   font-weight: 600;
   overflow: hidden;
-  display: -webkit-box;
-  display: box;
-  -webkit-box-orient: vertical;
-  box-orient: vertical;
+  display: flex;
+  flex-direction: column;
   text-overflow: ellipsis;
   word-break: break-word;
 }
@@ -192,10 +190,8 @@
   margin: 0 0 8px 0;
   color: #666;
   overflow: hidden;
-  display: -webkit-box;
-  display: box;
-  -webkit-box-orient: vertical;
-  box-orient: vertical;
+  display: flex;
+  flex-direction: column;
   text-overflow: ellipsis;
   word-break: break-word;
 }
