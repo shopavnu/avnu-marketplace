@@ -10,7 +10,6 @@ module.exports = {
       {
         tsconfig: 'tsconfig.test.json',
         // These settings help with decorator issues
-        isolatedModules: true,
         diagnostics: {
           ignoreCodes: [
             1343, // Class decorator

@@ -11,4 +11,5 @@ export declare class SearchSuggestionsResponseType {
     total: number;
     isPersonalized: boolean;
     originalQuery?: string;
+    error?: string;
 }

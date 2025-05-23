@@ -5,7 +5,7 @@ const mockMethodDecorator = () => () => jest.fn();
 const mockParameterDecorator = () => () => jest.fn();
 
 // Mock class-validator decorators
-jest.mock('class-validator', () => {
+/* jest.mock('class-validator', () => {
   return {
     IsString: mockPropertyDecorator,
     IsInt: mockPropertyDecorator,
@@ -22,7 +22,7 @@ jest.mock('class-validator', () => {
     ValidateNested: mockPropertyDecorator,
     Length: mockPropertyDecorator,
   };
-});
+}); */
 
 // Mock class-transformer decorators
 jest.mock('class-transformer', () => {
@@ -31,11 +31,12 @@ jest.mock('class-transformer', () => {
     Transform: mockPropertyDecorator,
     Expose: mockPropertyDecorator,
     Exclude: mockPropertyDecorator,
+    plainToInstance: jest.fn((dtoClass, plainObject) => plainObject),
   };
 });
 
 // Mock NestJS decorators
-jest.mock('@nestjs/common', () => {
+/* jest.mock('@nestjs/common', () => {
   const original = jest.requireActual('@nestjs/common');
   return {
     ...original,
@@ -53,7 +54,7 @@ jest.mock('@nestjs/common', () => {
     Body: mockParameterDecorator,
     Headers: mockParameterDecorator,
   };
-});
+}); */
 
 jest.mock('@nestjs/typeorm', () => {
   return {
@@ -62,7 +63,7 @@ jest.mock('@nestjs/typeorm', () => {
       forFeature: jest.fn(),
       forRoot: jest.fn(),
     },
-    getRepositoryToken: jest.fn(),
+    getRepositoryToken: (entity) => entity, // Return entity itself as token
   };
 });
 
@@ -77,7 +78,7 @@ jest.mock('@nestjs-modules/ioredis', () => {
 });
 
 // Mock EventEmitter2
-jest.mock('@nestjs/event-emitter', () => {
+/* jest.mock('@nestjs/event-emitter', () => {
   return {
     EventEmitter2: jest.fn().mockImplementation(() => ({
       emit: jest.fn(),
@@ -85,7 +86,7 @@ jest.mock('@nestjs/event-emitter', () => {
     })),
     OnEvent: mockMethodDecorator,
   };
-});
+}); */
 
 // Mock GraphQL and Apollo
 jest.mock('@nestjs/graphql', () => {
@@ -100,6 +101,8 @@ jest.mock('@nestjs/graphql', () => {
     Int: jest.fn(),
     Float: jest.fn(),
     ID: jest.fn(),
+    registerEnumType: jest.fn(),
+    createUnionType: jest.fn(),
   };
 });
 
@@ -126,133 +129,31 @@ jest.mock('typeorm', () => {
     JoinTable: mockPropertyDecorator,
     Index: mockPropertyDecorator,
     Unique: mockPropertyDecorator,
-    Repository: jest.fn().mockImplementation(() => ({
-      find: jest.fn().mockResolvedValue([]),
-      findOne: jest.fn().mockResolvedValue({}),
-      save: jest.fn().mockResolvedValue({}),
-      update: jest.fn().mockResolvedValue({}),
-      delete: jest.fn().mockResolvedValue({}),
-      createQueryBuilder: jest.fn().mockReturnValue({
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue({}),
-        getMany: jest.fn().mockResolvedValue([]),
-      }),
-    })),
-    getRepository: jest.fn().mockImplementation(() => ({
-      find: jest.fn().mockResolvedValue([]),
-      findOne: jest.fn().mockResolvedValue({}),
-      save: jest.fn().mockResolvedValue({}),
-      update: jest.fn().mockResolvedValue({}),
-      delete: jest.fn().mockResolvedValue({}),
-    })),
+    // Repository: jest.fn().mockImplementation(() => ({
+    //   find: jest.fn().mockResolvedValue([]),
+    //   findOne: jest.fn().mockResolvedValue({}),
+    //   save: jest.fn().mockResolvedValue({}),
+    //   update: jest.fn().mockResolvedValue({}),
+    //   delete: jest.fn().mockResolvedValue({}),
+    //   createQueryBuilder: jest.fn().mockReturnValue({
+    //     where: jest.fn().mockReturnThis(),
+    //     andWhere: jest.fn().mockReturnThis(),
+    //     leftJoinAndSelect: jest.fn().mockReturnThis(),
+    //     orderBy: jest.fn().mockReturnThis(),
+    //     getOne: jest.fn().mockResolvedValue({}),
+    //     getMany: jest.fn().mockResolvedValue([]),
+    //   }),
+    // })),
+    // getRepository: jest.fn().mockImplementation(() => ({
+    //   find: jest.fn().mockResolvedValue([]),
+    //   findOne: jest.fn().mockResolvedValue({}),
+    //   save: jest.fn().mockResolvedValue({}),
+    //   update: jest.fn().mockResolvedValue({}),
+    //   delete: jest.fn().mockResolvedValue({}),
+    // })),
   };
 });
 
-// Mock NestJS decorators
-jest.mock('@nestjs/common', () => {
-  const original = jest.requireActual('@nestjs/common');
-  return {
-    ...original,
-    Injectable: mockDecorator,
-    Inject: mockPropertyDecorator,
-    Optional: mockPropertyDecorator,
-    Controller: mockDecorator,
-    Get: mockPropertyDecorator,
-    Post: mockPropertyDecorator,
-    Put: mockPropertyDecorator,
-    Delete: mockPropertyDecorator,
-    Patch: mockPropertyDecorator,
-    UseGuards: mockDecorator,
-    UsePipes: mockDecorator,
-    UseInterceptors: mockDecorator,
-    Param: mockPropertyDecorator,
-    Body: mockPropertyDecorator,
-    Query: mockPropertyDecorator,
-    Headers: mockPropertyDecorator,
-    Req: mockPropertyDecorator,
-    Res: mockPropertyDecorator,
-  };
-});
-
-// Mock GraphQL decorators
-jest.mock('@nestjs/graphql', () => {
-  return {
-    Args: mockPropertyDecorator,
-    Resolver: mockDecorator,
-    Query: mockPropertyDecorator,
-    Mutation: mockPropertyDecorator,
-    Field: mockPropertyDecorator,
-    ObjectType: mockDecorator,
-    InputType: mockDecorator,
-    ArgsType: mockDecorator,
-    Int: jest.fn().mockReturnValue(Number),
-    Float: jest.fn().mockReturnValue(Number),
-    ID: jest.fn().mockReturnValue(String),
-    registerEnumType: jest.fn(),
-  };
-});
-
-// Mock class-validator decorators
-jest.mock('class-validator', () => {
-  return {
-    IsString: mockPropertyDecorator,
-    IsNumber: mockPropertyDecorator,
-    IsBoolean: mockPropertyDecorator,
-    IsDate: mockPropertyDecorator,
-    IsOptional: mockPropertyDecorator,
-    IsArray: mockPropertyDecorator,
-    IsEnum: mockPropertyDecorator,
-    IsNotEmpty: mockPropertyDecorator,
-    Min: mockPropertyDecorator,
-    Max: mockPropertyDecorator,
-    ValidateNested: mockPropertyDecorator,
-    IsEmail: mockPropertyDecorator,
-    Length: mockPropertyDecorator,
-  };
-});
-
-// Mock class-transformer decorators
-jest.mock('class-transformer', () => {
-  return {
-    Type: mockPropertyDecorator,
-    Transform: mockPropertyDecorator,
-    Exclude: mockPropertyDecorator,
-    Expose: mockPropertyDecorator,
-  };
-});
-
-// Mock EventEmitter2
-jest.mock('@nestjs/event-emitter', () => {
-  return {
-    EventEmitter2: jest.fn().mockImplementation(() => ({
-      emit: jest.fn(),
-      on: jest.fn(),
-      once: jest.fn(),
-      removeListener: jest.fn(),
-    })),
-  };
-});
-
-// Mock getRepositoryToken
-jest.mock('@nestjs/typeorm', () => {
-  return {
-    getRepositoryToken: jest.fn().mockReturnValue('repositoryToken'),
-    InjectRepository: jest.fn(),
-    TypeOrmModule: {
-      forRoot: jest.fn().mockReturnValue({
-        module: class MockTypeOrmRootModule {},
-        providers: [],
-      }),
-      forFeature: jest.fn().mockReturnValue({
-        module: class MockTypeOrmFeatureModule {},
-        providers: [],
-      }),
-    },
-  };
-});
 
 // Suppress console errors during tests
 console.error = jest.fn();

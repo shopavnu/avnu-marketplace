@@ -30,8 +30,8 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
     }
     async getSuggestions(input, user) {
         const { query, limit = this.defaultLimit, includePopular = true, includePersonalized = true, } = input;
-        if (!query || query.length < 2) {
-            this.logger.debug('Query too short, returning empty results');
+        if (!this.isFeatureEnabled || !query || query.length < 2) {
+            this.logger.debug('Query too short or feature disabled, returning empty results');
             return {
                 suggestions: [],
                 total: 0,
@@ -40,14 +40,57 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
             };
         }
         try {
-            const prefixSuggestions = await this.getPrefixSuggestions(query, limit);
-            const popularSuggestions = includePopular
-                ? await this.getPopularSuggestions(query, limit)
-                : [];
-            const personalizedSuggestions = includePersonalized && user
-                ? await this.getPersonalizedSuggestions(query, user, limit)
-                : [];
-            const combinedSuggestions = this.combineAndDeduplicate(prefixSuggestions, popularSuggestions, personalizedSuggestions, limit);
+            this.logger.debug(`Getting suggestions for query: "${query}", limit: ${limit}`);
+            const promisesToSettle = [];
+            promisesToSettle.push(this.getPrefixSuggestions(query, limit));
+            if (includePopular) {
+                promisesToSettle.push(this.getPopularSuggestions(query, limit));
+            }
+            else {
+                promisesToSettle.push(Promise.resolve([]));
+            }
+            if (includePersonalized && user) {
+                promisesToSettle.push(this.getPersonalizedSuggestions(query, user, limit));
+            }
+            else {
+                promisesToSettle.push(Promise.resolve([]));
+            }
+            this.logger.debug(`DEBUG: getSuggestions - promisesToSettle.length: ${promisesToSettle.length}`);
+            const settledResults = await Promise.allSettled(promisesToSettle);
+            const prefixPromiseResult = settledResults.length > 0
+                ? settledResults[0]
+                : { status: 'rejected', reason: new Error('settledResults[0] is undefined (synthetic)') };
+            const popularPromiseResult = settledResults.length > 1
+                ? settledResults[1]
+                : { status: 'rejected', reason: new Error('settledResults[1] is undefined (synthetic)') };
+            const personalizedPromiseResult = settledResults.length > 2
+                ? settledResults[2]
+                : { status: 'rejected', reason: new Error('settledResults[2] is undefined (synthetic)') };
+            this.logger.debug(`DEBUG: getSuggestions - prefixPromiseResult: ${JSON.stringify(prefixPromiseResult)}`);
+            this.logger.debug(`DEBUG: getSuggestions - popularPromiseResult: ${JSON.stringify(popularPromiseResult)}`);
+            this.logger.debug(`DEBUG: getSuggestions - personalizedPromiseResult: ${JSON.stringify(personalizedPromiseResult)}`);
+            const prefixSuggestions = prefixPromiseResult.status === 'fulfilled' ? prefixPromiseResult.value : [];
+            if (prefixPromiseResult.status === 'rejected') {
+                this.logger.error(`DEBUG: getSuggestions - prefixPromise failed: ${prefixPromiseResult.reason?.message}`, prefixPromiseResult.reason?.stack);
+            }
+            const popularSuggestionsList = popularPromiseResult.status === 'fulfilled' ? popularPromiseResult.value : [];
+            if (popularPromiseResult.status === 'rejected') {
+                this.logger.warn(`Failed to get popular suggestions: ${popularPromiseResult.reason?.message}`, popularPromiseResult.reason?.stack);
+            }
+            const personalizedSuggestionsList = personalizedPromiseResult.status === 'fulfilled' ? personalizedPromiseResult.value : [];
+            if (personalizedPromiseResult.status === 'rejected') {
+                const reasonMessage = personalizedPromiseResult.reason instanceof Error
+                    ? personalizedPromiseResult.reason.message
+                    : String(personalizedPromiseResult.reason);
+                const reasonStack = personalizedPromiseResult.reason instanceof Error
+                    ? personalizedPromiseResult.reason.stack
+                    : undefined;
+                this.logger.warn(`Failed to get personalized suggestions: ${reasonMessage}`, reasonStack);
+                if (reasonMessage === 'settledResults[2] is undefined') {
+                    this.logger.debug('Personalized suggestions were not applicable or the promise was not added.');
+                }
+            }
+            const combinedSuggestions = this.combineAndDeduplicate(prefixSuggestions, popularSuggestionsList, personalizedSuggestionsList, limit);
             this.logger.debug(`Returning ${combinedSuggestions.length} suggestions`);
             if (combinedSuggestions.length > 0) {
                 this.searchAnalyticsService
@@ -59,17 +102,18 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
             return {
                 suggestions: combinedSuggestions,
                 total: combinedSuggestions.length,
-                isPersonalized: personalizedSuggestions.length > 0,
+                isPersonalized: personalizedSuggestionsList.length > 0,
                 originalQuery: query,
             };
         }
         catch (error) {
-            this.logger.error(`Error getting suggestions: ${error.message}`, error.stack);
+            this.logger.error(`Error getting suggestions for query "${query}": ${error.message}`, error.stack);
             return {
                 suggestions: [],
                 total: 0,
                 isPersonalized: false,
                 originalQuery: query,
+                error: error.message || 'Unknown error in getSuggestions',
             };
         }
     }
@@ -119,26 +163,45 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
                     suggestions = [...suggestions, ...fallbackOptions];
                 }
             }
-            return suggestions.map(option => {
-                const source = option._source;
-                return {
-                    text: source.text || source.name,
-                    score: source.score || source.popularity || 1.0,
-                    category: source.category,
-                    type: source.type || option._index.replace(/s$/, ''),
-                    isPopular: false,
-                    isPersonalized: false,
-                };
+            const mappedSuggestions = suggestions.map(option => {
+                try {
+                    if (!option || !option._source) {
+                        this.logger.warn(`Skipping suggestion due to missing option or _source: ${JSON.stringify(option)}`);
+                        return null;
+                    }
+                    const source = option._source;
+                    const text = source.text || source.name;
+                    const typeFromSource = source.type;
+                    const indexName = option._index;
+                    if (text === undefined || text === null) {
+                        this.logger.warn(`Skipping suggestion due to missing text: ${JSON.stringify(option)}`);
+                        return null;
+                    }
+                    return {
+                        text: String(text),
+                        score: Number(source.score || source.popularity || 1.0),
+                        category: source.category || undefined,
+                        type: typeFromSource || (indexName ? String(indexName).replace(/s$/, '') : 'unknown'),
+                        isPopular: false,
+                        isPersonalized: false,
+                    };
+                }
+                catch (mapError) {
+                    this.logger.error(`Error during suggestion mapping: ${mapError.message}, option: ${JSON.stringify(option)}`);
+                    return null;
+                }
             });
+            const validSuggestions = mappedSuggestions.filter(s => s !== null);
+            return Promise.resolve(validSuggestions);
         }
         catch (error) {
-            this.logger.error(`Error getting prefix suggestions for "${query}": ${error.message}`, error.stack, SearchSuggestionService_1.name);
-            return [];
+            this.logger.error(`Error getting prefix suggestions for "${query}": ${error.message}`);
+            return Promise.resolve([]);
         }
     }
     async getPopularSuggestions(query, limit = 5) {
         if (!this.isFeatureEnabled || !query || query.length < 2) {
-            return [];
+            return Promise.resolve([]);
         }
         try {
             const popularQueries = await this.searchAnalyticsService.getPopularSearchQueries(7, 20);
@@ -156,26 +219,30 @@ let SearchSuggestionService = SearchSuggestionService_1 = class SearchSuggestion
             return matchingQueries;
         }
         catch (error) {
-            this.logger.error(`Error getting popular suggestions: ${error.message}`, error.stack);
-            return [];
+            this.logger.error(`Error getting popular suggestions: ${error.message}`);
+            return Promise.resolve([]);
         }
     }
     async getPersonalizedSuggestions(query, user, limit) {
         const userId = user.id;
         try {
             const personalizedSuggestions = await this.personalizationService.getPersonalizedSuggestions(query, userId, limit);
-            return personalizedSuggestions.map(suggestion => ({
-                text: suggestion.text,
-                score: suggestion.relevance,
-                category: suggestion.category,
-                type: suggestion.type,
-                isPopular: false,
-                isPersonalized: true,
-            }));
+            this.logger.debug(`DEBUG: getPersonalizedSuggestions - raw suggestions from service: ${JSON.stringify(personalizedSuggestions)}`);
+            return personalizedSuggestions.map(suggestion => {
+                this.logger.debug(`DEBUG: getPersonalizedSuggestions - mapping suggestion: ${JSON.stringify(suggestion)}`);
+                return {
+                    text: suggestion.text,
+                    score: suggestion.relevance,
+                    category: suggestion.category,
+                    type: suggestion.type,
+                    isPopular: false,
+                    isPersonalized: true,
+                };
+            });
         }
         catch (error) {
             this.logger.error(`Error getting personalized suggestions for user ${userId}: ${error.message}`, error.stack, SearchSuggestionService_1.name);
-            return [];
+            return Promise.resolve([]);
         }
     }
     combineAndDeduplicate(prefixSuggestions, popularSuggestions, personalizedSuggestions, limit) {

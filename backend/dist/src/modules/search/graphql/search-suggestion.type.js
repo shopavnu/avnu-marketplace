@@ -67,6 +67,10 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], SearchSuggestionsResponseType.prototype, "originalQuery", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], SearchSuggestionsResponseType.prototype, "error", void 0);
 exports.SearchSuggestionsResponseType = SearchSuggestionsResponseType = __decorate([
     (0, graphql_1.ObjectType)()
 ], SearchSuggestionsResponseType);

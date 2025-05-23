@@ -40,4 +40,7 @@ export class SearchSuggestionsResponseType {
 
   @Field({ nullable: true })
   originalQuery?: string;
+
+  @Field({ nullable: true })
+  error?: string;
 }
