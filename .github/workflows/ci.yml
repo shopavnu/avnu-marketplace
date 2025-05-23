@@ -59,8 +59,20 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
 
-      - name: Run backend tests (passing tests only)
-        run: npm run test:ci
+
+      - name: Debug DATABASE_URL and Test Connection
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        run: |
+          echo "DATABASE_URL for debug is: $DATABASE_URL"
+          echo "Attempting psql connection..."
+          PGPASSWORD=postgres psql -h localhost -U postgres -d avnu_test -c "SELECT 1;" || echo "psql command failed, client might not be installed or DB not accessible."
+        working-directory: ./backend
+
+      - name: Run backend tests
+        run: npm test
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
@@ -71,10 +83,9 @@ jobs:
         run: npm run build
         working-directory: ./backend
 
-      # Frontend tests temporarily skipped
-      # - name: Run frontend tests
-      #   run: npm test
-      #   working-directory: ./frontend
+      - name: Run frontend tests
+        run: npm test
+        working-directory: ./frontend
 
       - name: Build frontend
         run: npm run build
