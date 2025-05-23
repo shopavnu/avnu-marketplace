@@ -2,10 +2,10 @@ import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
-  UserIcon,
   Cog6ToothIcon,
   HeartIcon,
 } from "@heroicons/react/24/outline";
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import ClientOnly from "@/components/common/ClientOnly";
 import CartDropdown from "@/components/cart/CartDropdown";
 
@@ -87,16 +87,29 @@ export default function Header() {
                 </div>
               </Link>
 
-              {/* User Profile Icon */}
-              <Link
-                href="/account"
-                className="p-2 text-charcoal hover:text-sage transition-colors duration-200"
-                aria-label="User Account"
-              >
-                <div className="w-6 h-6 rounded-full bg-sage/10 flex items-center justify-center">
-                  <UserIcon className="w-4 h-4 text-sage" />
-                </div>
-              </Link>
+              {/* Clerk Authentication Components */}
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="p-2 text-charcoal hover:text-sage transition-colors duration-200">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="p-2 text-charcoal hover:text-sage transition-colors duration-200">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-6 h-6"
+                    }
+                  }}
+                />
+              </SignedIn>
 
               {/* Mobile Menu Button - Visible only on mobile */}
               <button className="p-2 text-charcoal hover:text-sage transition-colors duration-200 md:hidden">

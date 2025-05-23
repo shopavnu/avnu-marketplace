@@ -10,6 +10,8 @@ import { useRouter } from "next/router";
 import { ThemeProvider } from "../context/ThemeContext";
 import { useEffect } from "react";
 import { initializePersonalization } from "../utils/discovery-integration";
+import { ClerkProvider } from "@clerk/nextjs";
+import { geistSans, geistMono } from "../utils/fonts";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -30,28 +32,32 @@ export default function App({ Component, pageProps }: AppProps) {
     router.pathname.startsWith("/discovery");
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <ApolloProvider>
-          {useEnhancedLayout ? (
-            <EnhancedLayout>
-              <ApiUrlDebug />
-              <GraphQLErrorHandler />
-              <ErrorBoundary>
-                <Component {...pageProps} />
-              </ErrorBoundary>
-            </EnhancedLayout>
-          ) : (
-            <Layout>
-              <ApiUrlDebug />
-              <GraphQLErrorHandler />
-              <ErrorBoundary>
-                <Component {...pageProps} />
-              </ErrorBoundary>
-            </Layout>
-          )}
-        </ApolloProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <ClerkProvider>
+      <div className={`${geistSans.variable} ${geistMono.variable}`}>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <ApolloProvider>
+              {useEnhancedLayout ? (
+                <EnhancedLayout>
+                  <ApiUrlDebug />
+                  <GraphQLErrorHandler />
+                  <ErrorBoundary>
+                    <Component {...pageProps} />
+                  </ErrorBoundary>
+                </EnhancedLayout>
+              ) : (
+                <Layout>
+                  <ApiUrlDebug />
+                  <GraphQLErrorHandler />
+                  <ErrorBoundary>
+                    <Component {...pageProps} />
+                  </ErrorBoundary>
+                </Layout>
+              )}
+            </ApolloProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
+      </div>
+    </ClerkProvider>
   );
 }
