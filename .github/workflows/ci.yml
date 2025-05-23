@@ -49,17 +49,21 @@ jobs:
         run: npx prisma generate
         working-directory: ./backend
 
+      - name: Fix linting issues
+        run: npm run lint -- --fix
+        working-directory: ./backend
+
       - name: Migrate DB
         run: npx prisma migrate deploy
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
 
       - name: Run backend tests
         run: npm test
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
 
