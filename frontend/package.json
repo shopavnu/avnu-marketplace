@@ -6,12 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint || true"
+    "lint": "next lint || true",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^3.16.1",
+    "@clerk/nextjs": "^6.20.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@headlessui/react": "^1.7.17",
