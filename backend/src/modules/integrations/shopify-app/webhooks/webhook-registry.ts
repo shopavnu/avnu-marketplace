@@ -21,7 +21,9 @@ export class WebhookRegistry {
    */
   constructor(
     @Optional() private readonly webhookMonitor?: WebhookMonitorService,
-    @Optional() @Inject(forwardRef(() => WebhookRetryService)) private readonly webhookRetry?: WebhookRetryService,
+    @Optional()
+    @Inject(forwardRef(() => WebhookRetryService))
+    private readonly webhookRetry?: WebhookRetryService,
   ) {}
 
   /**

@@ -3,7 +3,14 @@ import { Args, Query, Resolver } from '@nestjs/graphql';
 import { ElasticsearchService } from '../services/elasticsearch.service';
 import { SearchOptions, SortOrder } from '../dto/search-options.dto';
 import { Logger } from '@nestjs/common';
-import { SearchResponseType, ProductResultType, MerchantResultType, BrandResultType, PaginationType, FacetType } from '../graphql/search-response.type';
+import {
+  SearchResponseType,
+  ProductResultType,
+  MerchantResultType,
+  BrandResultType,
+  PaginationType,
+  FacetType,
+} from '../graphql/search-response.type';
 import { Product } from '../../products/entities/product.entity';
 import { Merchant } from '../../merchants/entities/merchant.entity';
 import { Category } from '../../categories/entities/category.entity';
@@ -53,7 +60,8 @@ export class SearchResolverStrict {
           serviceFilters.inStock = filter.values[0].toLowerCase() === 'true';
         } else if (filter.field === 'brandName' && filter.values && filter.values.length > 0) {
           serviceFilters.brandName = filter.values[0];
-        } else if (filter.field === 'values' && filter.values) { // Generic values filter
+        } else if (filter.field === 'values' && filter.values) {
+          // Generic values filter
           serviceFilters.values = filter.values;
         }
       }
@@ -143,9 +151,9 @@ export class SearchResolverStrict {
       productResult.tags = Array.isArray(product.tags) ? product.tags : [];
       productResult.images = Array.isArray(product.images) ? product.images : [];
       productResult.thumbnailImage = product.thumbnail || undefined;
-      
+
       // Other ProductResultType fields can be mapped here if data is available in Product entity
-      // productResult.highlights = undefined; 
+      // productResult.highlights = undefined;
       // productResult.salePrice = undefined;
       // productResult.onSale = product.isOnSale; // If using getter from entity
       // productResult.rating = undefined;
@@ -197,7 +205,7 @@ export class SearchResolverStrict {
    * @param brands The brand entities
    * @returns Mapped brand types
    */
-  private mapBrandsToResultType(brands: any[]): BrandResultType[] { 
+  private mapBrandsToResultType(brands: any[]): BrandResultType[] {
     return brands.map(brand => {
       const brandResult = new BrandResultType();
       brandResult.id = String(brand.id);

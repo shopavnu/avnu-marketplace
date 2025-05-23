@@ -4,7 +4,6 @@ import { ImageValidationService } from './image-validation.service';
 import * as probeImageSizeImport from 'probe-image-size'; // Import the mock
 import axios from 'axios';
 
-
 // Mock dependencies
 jest.mock('axios');
 jest.mock('probe-image-size'); // Now uses manual mock from __mocks__ directory
@@ -22,7 +21,12 @@ describe('ImageValidationService', () => {
 
   beforeEach(async () => {
     (probeImageSizeImport as jest.Mock).mockClear(); // Clear previous test's specific mock settings
-    (probeImageSizeImport as jest.Mock).mockResolvedValue({ width: 800, height: 800, type: 'jpeg', length: 102400 });
+    (probeImageSizeImport as jest.Mock).mockResolvedValue({
+      width: 800,
+      height: 800,
+      type: 'jpeg',
+      length: 102400,
+    });
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ImageValidationService,
