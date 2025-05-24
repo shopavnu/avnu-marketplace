@@ -169,8 +169,10 @@ describe('SearchSuggestionResolver', () => {
       await resolver.getSuggestions(input);
 
       // Check that performance logging happened
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Completed search suggestion request in'),
+      expect(logSpy).toHaveBeenNthCalledWith(
+        2, // Check the second call
+        expect.stringMatching(/^Completed search suggestion request for "test" in \d+ms$/),
+        SearchSuggestionResolver.name,
       );
     });
   });

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
+import { BullModule, getQueueToken } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { RouterModule } from '@nestjs/core';
 import { createBullBoard } from '@bull-board/api';
 import { BullAdapter } from '@bull-board/api/bullAdapter';
@@ -45,21 +46,21 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
   controllers: [],
   providers: [
     {
-      provide: 'BULL_BOARD',
-      useFactory: (configService: ConfigService) => {
+      provide: 'BULL_BOARD_ADAPTER', // Renamed for clarity
+      useFactory: (shopifyWebhooksQueue: Queue) => {
         // Create Express server for Bull Board UI
         const serverAdapter = new ExpressAdapter();
         serverAdapter.setBasePath('/admin/queues');
 
         // Create Bull Board with queues
         createBullBoard({
-          queues: [new BullAdapter(configService.get('bull_shopify_webhooks_queue'))],
+          queues: [new BullAdapter(shopifyWebhooksQueue)],
           serverAdapter,
         });
 
         return serverAdapter;
       },
-      inject: [ConfigService],
+      inject: [getQueueToken('shopify-webhooks')],
     },
   ],
 })

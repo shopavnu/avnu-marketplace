@@ -1,24 +1,44 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-interface ProductCardSkeletonProps {
-  height?: string;
-  imageHeight?: string;
-}
+// Define dimensions based on device types, similar to ResponsiveProductCard
+const SKELETON_DIMENSIONS = {
+  desktop: { height: "360px", imageHeight: "200px" },
+  tablet: { height: "320px", imageHeight: "180px" },
+  mobile: { height: "280px", imageHeight: "160px" },
+};
+
+interface ProductCardSkeletonProps {}
 
 /**
  * Skeleton loader for product cards that maintains consistent dimensions
- * to prevent layout shifts when actual content loads
+ * by being responsive to screen size, preventing layout shifts.
  */
-const ProductCardSkeleton: React.FC<ProductCardSkeletonProps> = ({
-  height = "360px",
-  imageHeight = "200px",
-}) => {
+const ProductCardSkeleton: React.FC<ProductCardSkeletonProps> = () => {
+  const [dimensions, setDimensions] = useState(SKELETON_DIMENSIONS.desktop);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setDimensions(SKELETON_DIMENSIONS.mobile);
+      } else if (width < 1024) {
+        setDimensions(SKELETON_DIMENSIONS.tablet);
+      } else {
+        setDimensions(SKELETON_DIMENSIONS.desktop);
+      }
+    };
+
+    handleResize(); // Set initial dimensions
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div
       className="product-card-skeleton"
       style={{
         width: "100%",
-        height: height,
+        height: dimensions.height,
         backgroundColor: "white",
         borderRadius: "12px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
@@ -33,7 +53,7 @@ const ProductCardSkeleton: React.FC<ProductCardSkeletonProps> = ({
       <div
         className="skeleton-image"
         style={{
-          height: imageHeight,
+          height: dimensions.imageHeight,
           backgroundColor: "#f0f0f0",
           backgroundImage:
             "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)",

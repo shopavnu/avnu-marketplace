@@ -9,9 +9,10 @@ import { SearchSuggestionsResponseType } from '../graphql/search-suggestion.type
 @Injectable()
 @Resolver(() => SearchSuggestionsResponseType)
 export class SearchSuggestionResolver {
-  private readonly logger = new Logger(SearchSuggestionResolver.name);
-
-  constructor(private readonly searchSuggestionService: SearchSuggestionService) {}
+  constructor(
+    private readonly searchSuggestionService: SearchSuggestionService,
+    private readonly logger: Logger,
+  ) {}
 
   @Query(() => SearchSuggestionsResponseType, { name: 'searchSuggestions' })
   async getSuggestions(

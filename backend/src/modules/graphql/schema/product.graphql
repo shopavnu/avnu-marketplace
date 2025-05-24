@@ -1,0 +1,55 @@
+type Product {
+  id: ID!
+  title: String!
+  description: String!
+  price: Float!
+  imageUrl: String!
+  createdAt: String!
+  updatedAt: String!
+  brand: Brand
+  variants: [Variant!]
+}
+
+type Variant {
+  id: ID!
+  optionName: String!
+  optionValue: String!
+  stock: Int!
+  productId: String!
+  product: Product!
+}
+
+type Query {
+  products(skip: Int, take: Int): [Product!]!
+  product(id: ID!): Product
+  searchProducts(query: String!): [Product!]!
+  productsByBrand(brandId: ID!): [Product!]!
+}
+
+type Mutation {
+  createProduct(
+    title: String!
+    description: String!
+    price: Float!
+    imageUrl: String!
+    brandId: ID!
+    variants: [VariantInput!]
+  ): Product!
+  
+  updateProduct(
+    id: ID!
+    title: String
+    description: String
+    price: Float
+    imageUrl: String
+    brandId: ID
+  ): Product!
+  
+  deleteProduct(id: ID!): Product!
+}
+
+input VariantInput {
+  optionName: String!
+  optionValue: String!
+  stock: Int!
+}

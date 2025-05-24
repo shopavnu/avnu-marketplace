@@ -1,0 +1,20 @@
+type Brand {
+  id: ID!
+  name: String!
+  createdAt: String!
+  updatedAt: String!
+  products: [Product!]
+}
+
+type Query {
+  brands(skip: Int, take: Int, includeProducts: Boolean): [Brand!]!
+  brand(id: ID!, includeProducts: Boolean): Brand
+  searchBrands(query: String!): [Brand!]!
+  brandWithProducts(id: ID!): Brand
+}
+
+type Mutation {
+  createBrand(name: String!): Brand!
+  updateBrand(id: ID!, name: String): Brand!
+  deleteBrand(id: ID!): Brand!
+}

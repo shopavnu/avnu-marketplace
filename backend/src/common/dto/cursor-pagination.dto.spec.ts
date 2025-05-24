@@ -17,7 +17,7 @@ describe('CursorPaginationDto', () => {
     const dto = plainToInstance(CursorPaginationDto, {});
 
     // Default limit should be applied
-    expect(dto.limit).toBe(10);
+    expect(dto.limit).toBe(20);
 
     const errors = await validate(dto);
     expect(errors.length).toBe(0);

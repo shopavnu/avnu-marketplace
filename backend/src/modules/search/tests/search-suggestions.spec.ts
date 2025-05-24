@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { SearchSuggestionService } from '../services/search-suggestion.service';
 import { PersonalizationService } from '../../personalization/services/personalization.service';
-import { AnalyticsService } from '../../analytics/services/analytics.service';
+import { SearchAnalyticsService } from '../services/search-analytics.service';
 
 describe('Search Suggestions', () => {
   let searchSuggestionService: SearchSuggestionService;
   let elasticsearchService: jest.Mocked<ElasticsearchService>;
   let _personalizationService: jest.Mocked<PersonalizationService>;
-  let analyticsService: jest.Mocked<AnalyticsService>;
+  let searchAnalyticsService: jest.Mocked<SearchAnalyticsService>;
 
   beforeEach(async () => {
     // Create mock services
@@ -22,9 +22,10 @@ describe('Search Suggestions', () => {
       getPersonalizedSuggestions: jest.fn(),
     };
 
-    const analyticsMock = {
-      getPopularSearches: jest.fn(),
-      trackEngagement: jest.fn(),
+    const searchAnalyticsServiceMock = {
+      trackSuggestionImpression: jest.fn().mockResolvedValue(undefined),
+      getPopularSearchQueries: jest.fn().mockResolvedValue([]),
+      // Add any other SearchAnalyticsService methods if they are called by SearchSuggestionService
     };
 
     const configMock = {
@@ -32,6 +33,8 @@ describe('Search Suggestions', () => {
         const config = {
           SEARCH_SUGGESTIONS_ENABLED: true,
           SEARCH_SUGGESTIONS_MAX_LIMIT: 10,
+          POPULAR_SEARCHES_ANALYTICS_LIMIT: 20, // Add this key
+          POPULAR_SEARCHES_DAYS_RANGE: 7, // Add this key
         };
         return config[key] || null;
       }),
@@ -42,7 +45,7 @@ describe('Search Suggestions', () => {
         SearchSuggestionService,
         { provide: ElasticsearchService, useValue: elasticsearchMock },
         { provide: PersonalizationService, useValue: personalizationMock },
-        { provide: AnalyticsService, useValue: analyticsMock },
+        { provide: SearchAnalyticsService, useValue: searchAnalyticsServiceMock },
         { provide: ConfigService, useValue: configMock },
         { provide: Logger, useValue: { log: jest.fn(), error: jest.fn(), warn: jest.fn() } },
       ],
@@ -53,7 +56,9 @@ describe('Search Suggestions', () => {
     _personalizationService = module.get(
       PersonalizationService,
     ) as jest.Mocked<PersonalizationService>;
-    analyticsService = module.get(AnalyticsService) as jest.Mocked<AnalyticsService>;
+    searchAnalyticsService = module.get(
+      SearchAnalyticsService,
+    ) as jest.Mocked<SearchAnalyticsService>;
   });
 
   describe('Basic Functionality', () => {
@@ -110,7 +115,7 @@ describe('Search Suggestions', () => {
       });
 
       // Mock empty popular suggestions
-      analyticsService.getPopularSearches.mockResolvedValueOnce([]);
+      searchAnalyticsService.getPopularSearchQueries.mockResolvedValueOnce([]);
 
       // Call the service
       const result = await searchSuggestionService.getSuggestions({
@@ -165,7 +170,7 @@ describe('Search Suggestions', () => {
       });
 
       // Mock empty popular suggestions
-      analyticsService.getPopularSearches.mockResolvedValueOnce([]);
+      searchAnalyticsService.getPopularSearchQueries.mockResolvedValueOnce([]);
 
       // Call the service
       const result = await searchSuggestionService.getSuggestions({
@@ -248,11 +253,9 @@ describe('Search Suggestions', () => {
       );
 
       // Verify analytics service was called with the right parameters
-      expect(analyticsService.getPopularSearches).toHaveBeenCalledWith(
-        'test',
-        expect.any(Number),
-        ['clothing'],
-        expect.any(Number),
+      expect(searchAnalyticsService.getPopularSearchQueries).toHaveBeenCalledWith(
+        expect.any(Number), // days (e.g., 7)
+        20, // limit used for the analytics query (fixed at 20 in service)
       );
     });
 
@@ -292,7 +295,7 @@ describe('Search Suggestions', () => {
         },
       });
 
-      analyticsService.getPopularSearches.mockResolvedValueOnce([]);
+      searchAnalyticsService.getPopularSearchQueries.mockResolvedValueOnce([]);
 
       // Call the service
       await searchSuggestionService.getSuggestions({
@@ -303,15 +306,8 @@ describe('Search Suggestions', () => {
         includeCategoryContext: true,
       });
 
-      // Verify analytics tracking was called
-      expect(analyticsService.trackEngagement).toHaveBeenCalledWith(
-        expect.objectContaining({
-          engagementType: expect.any(String),
-          entityType: 'search',
-          pagePath: '/search/suggestions',
-          metadata: expect.any(String),
-        }),
-      );
+      // Verify analytics tracking was called (should not be, as no suggestions are returned)
+      expect(searchAnalyticsService.trackSuggestionImpression).not.toHaveBeenCalled();
     });
   });
 });

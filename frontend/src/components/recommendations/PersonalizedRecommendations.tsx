@@ -37,64 +37,65 @@ const PersonalizedRecommendations: React.FC<
 
   const fetchRecommendations = async (refresh: boolean = false) => {
     setLoading(true);
+    setError(false); // Reset error state
+    let productsToSet: Product[] = [];
+    let personalized = false;
+
     try {
-      let fetchedProducts: Product[] = [];
-
       if (isAuthenticated) {
-        // Try to get personalized recommendations for authenticated users
-        fetchedProducts =
-          await RecommendationService.getPersonalizedRecommendations(
-            limit,
-            refresh,
-            excludePurchased,
-            freshness,
-          );
-
-        // Filter out suppressed products
-        fetchedProducts = fetchedProducts.filter(
-          (product) => !product.isSuppressed,
+        // Authenticated user: try personalized first
+        let rawFetched = await RecommendationService.getPersonalizedRecommendations(
+          limit, refresh, excludePurchased, freshness
         );
-        setIsPersonalized(fetchedProducts.length > 0);
+        productsToSet = (Array.isArray(rawFetched) ? rawFetched : []).filter(p => !p.isSuppressed);
+        if (productsToSet.length > 0) {
+          personalized = true;
+        }
+      } else {
+        // Not authenticated: try "general" personalized recommendations (e.g., based on site-wide popularity if hasEnoughData)
+        // This assumes getPersonalizedRecommendations can return general recs for non-auth users
+        let rawFetched = await RecommendationService.getPersonalizedRecommendations(
+          limit, refresh, excludePurchased, freshness
+        );
+        productsToSet = (Array.isArray(rawFetched) ? rawFetched : []).filter(p => !p.isSuppressed);
+        if (productsToSet.length > 0) {
+          personalized = true;
+        }
       }
 
-      // Fall back to trending products if no personalized recommendations or not authenticated
-      if (fetchedProducts.length === 0) {
-        fetchedProducts = await RecommendationService.getTrendingProducts(
-          limit,
-          excludePurchased,
-        );
-
-        // Filter out suppressed products
-        fetchedProducts = fetchedProducts.filter(
-          (product) => !product.isSuppressed,
-        );
-        setIsPersonalized(false);
+      // Fallback to trending if no products found yet (either auth or non-auth path)
+      if (productsToSet.length === 0) {
+        personalized = false; // Explicitly set to false as we are now fetching trending
+        let rawTrending = await RecommendationService.getTrendingProducts(limit, excludePurchased);
+        productsToSet = (Array.isArray(rawTrending) ? rawTrending : []).filter(p => !p.isSuppressed);
       }
 
-      // If we need more products to reach the limit after filtering, fetch additional ones
-      if (fetchedProducts.length < limit) {
-        const additionalCount = limit - fetchedProducts.length;
-        const additionalProducts =
-          await RecommendationService.getTrendingProducts(additionalCount + 5); // Fetch extra to account for possible suppressed products
-
-        // Filter out suppressed products and any duplicates
-        const filteredAdditional = additionalProducts
-          .filter((product) => !product.isSuppressed)
-          .filter(
-            (product) => !fetchedProducts.some((p) => p.id === product.id),
-          );
-
-        // Add additional products up to the limit
-        fetchedProducts = [
-          ...fetchedProducts,
-          ...filteredAdditional.slice(0, additionalCount),
-        ];
+      // Fill with more trending if still under limit and trending was the source
+      if (productsToSet.length < limit) {
+        const additionalCount = limit - productsToSet.length;
+        // Only fetch more trending if we are already in a trending context or personalized failed to fill
+        // This prevents adding trending products if personalized partially filled the list but was less than limit.
+        // If personalized is true here, it means the initial personalized fetch (auth or non-auth) got some results but less than limit.
+        // The original logic would then top up with trending. We need to decide if that's desired.
+        // For now, let's assume if personalized got *any* results, we stick with those, even if < limit.
+        // If personalized is false, it means we fell back to trending, so topping up trending is fine.
+        if (!personalized || productsToSet.length === 0) { // If personalized is false, or if it was true but yielded zero (should not happen if personalized is true due to above logic)
+          const rawAdditionalTrending = await RecommendationService.getTrendingProducts(additionalCount + 5); // Fetch extra
+          const filteredAdditional = (Array.isArray(rawAdditionalTrending) ? rawAdditionalTrending : [])
+            .filter(p => !p.isSuppressed)
+            .filter(p => !productsToSet.some(existing => existing.id === p.id));
+          productsToSet = [...productsToSet, ...filteredAdditional.slice(0, additionalCount)];
+        }
       }
+      
+      setIsPersonalized(personalized);
+      setProducts(productsToSet);
 
-      setProducts(fetchedProducts);
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
+    } catch (err) {
+      console.error("Error fetching recommendations:", err);
       setError(true);
+      setProducts([]); // Clear products on error
+      setIsPersonalized(false); // Reset on error
     } finally {
       setLoading(false);
     }

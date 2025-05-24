@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { ImageValidationService } from './image-validation.service';
+import * as probeImageSizeImport from 'probe-image-size'; // Import the mock
 import axios from 'axios';
-import * as probeImageSize from 'probe-image-size';
 
 // Mock dependencies
 jest.mock('axios');
-jest.mock('probe-image-size');
+jest.mock('probe-image-size'); // Now uses manual mock from __mocks__ directory
 jest.mock('is-url', () => ({
   __esModule: true,
   default: jest.fn().mockImplementation(url => {
@@ -17,8 +17,16 @@ jest.mock('is-url', () => ({
 describe('ImageValidationService', () => {
   let service: ImageValidationService;
   let _configService: ConfigService;
+  // mockedProbeImageSizeFn is declared outside, accessible here
 
   beforeEach(async () => {
+    (probeImageSizeImport as jest.Mock).mockClear(); // Clear previous test's specific mock settings
+    (probeImageSizeImport as jest.Mock).mockResolvedValue({
+      width: 800,
+      height: 800,
+      type: 'jpeg',
+      length: 102400,
+    });
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ImageValidationService,
@@ -67,7 +75,7 @@ describe('ImageValidationService', () => {
         type: 'jpeg',
         length: 102400, // 100KB
       };
-      (probeImageSize as jest.Mock).mockResolvedValue(mockProbeResult);
+      (probeImageSizeImport as jest.Mock).mockResolvedValue(mockProbeResult);
 
       // Mock axios head response for file size
       (axios.head as jest.Mock).mockResolvedValue({
@@ -93,7 +101,7 @@ describe('ImageValidationService', () => {
         type: 'jpeg',
         length: 51200, // 50KB
       };
-      (probeImageSize as jest.Mock).mockResolvedValue(mockProbeResult);
+      (probeImageSizeImport as jest.Mock).mockResolvedValue(mockProbeResult);
 
       const result = await service.validateImage('https://example.com/small-image.jpg');
 
@@ -109,7 +117,7 @@ describe('ImageValidationService', () => {
         type: 'jpeg',
         length: 1024000, // 1MB
       };
-      (probeImageSize as jest.Mock).mockResolvedValue(mockProbeResult);
+      (probeImageSizeImport as jest.Mock).mockResolvedValue(mockProbeResult);
 
       const result = await service.validateImage('https://example.com/large-image.jpg');
 
@@ -125,7 +133,7 @@ describe('ImageValidationService', () => {
         type: 'bmp',
         length: 102400, // 100KB
       };
-      (probeImageSize as jest.Mock).mockResolvedValue(mockProbeResult);
+      (probeImageSizeImport as jest.Mock).mockResolvedValue(mockProbeResult);
 
       const result = await service.validateImage('https://example.com/image.bmp');
 
@@ -141,7 +149,7 @@ describe('ImageValidationService', () => {
         type: 'jpeg',
         length: 102400, // 100KB
       };
-      (probeImageSize as jest.Mock).mockResolvedValue(mockProbeResult);
+      (probeImageSizeImport as jest.Mock).mockResolvedValue(mockProbeResult);
 
       const result = await service.validateImage('https://example.com/image.jpg', {
         requiredAspectRatio: 1, // Square aspect ratio required
@@ -154,7 +162,7 @@ describe('ImageValidationService', () => {
 
     it('should handle probe errors gracefully', async () => {
       // Mock probe-image-size to throw an error
-      (probeImageSize as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (probeImageSizeImport as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       const result = await service.validateImage('https://example.com/broken-image.jpg');
 

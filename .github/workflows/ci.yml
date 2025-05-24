@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      # Add PostgreSQL service for testing
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: avnu_test
+        ports:
+          - 5432:5432
+        # Provide health check to ensure PostgreSQL is available before tests run
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies (Backend)
+        run: npm ci
+        working-directory: ./backend
+
+      - name: Install dependencies (Frontend)
+        run: npm ci
+        working-directory: ./frontend
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: ./backend
+
+      - name: Fix linting issues
+        run: npm run lint -- --fix
+        working-directory: ./backend
+
+      - name: Migrate DB
+        run: npx prisma migrate deploy
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
+
+
+      - name: Debug DATABASE_URL and Test Connection
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        run: |
+          echo "DATABASE_URL for debug is: $DATABASE_URL"
+          echo "Attempting psql connection..."
+          PGPASSWORD=postgres psql -h localhost -U postgres -d avnu_test -c "SELECT 1;" || echo "psql command failed, client might not be installed or DB not accessible."
+        working-directory: ./backend
+
+      - name: Run backend tests
+        run: npm test
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/avnu_test
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+      - name: Build backend
+        run: npm run build
+        working-directory: ./backend
+
+      - name: Run frontend tests
+        run: npm test
+        working-directory: ./frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}

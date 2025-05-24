@@ -28,6 +28,9 @@ describe("ProductCard Component", () => {
     return render(ui, { wrapper: BrowserRouter });
   };
 
+  // Helper to get the sale badge element
+  const getSaleBadge = (container: HTMLElement) => container.querySelector('.sale-badge');
+
   it("renders the product card correctly", () => {
     renderWithRouter(
       <ProductCard
@@ -87,7 +90,17 @@ describe("ProductCard Component", () => {
       />,
     );
 
-    expect(screen.getByText("20% OFF")).toBeInTheDocument();
+    const { container } = renderWithRouter(
+      <ProductCard
+        product={productWithDiscount}
+        onClick={mockOnClick}
+        trackImpression={mockTrackImpression}
+        showBadges={true}
+      />,
+    );
+    const saleBadge = getSaleBadge(container);
+    expect(saleBadge).toBeInTheDocument();
+    expect(saleBadge).toHaveTextContent(`${productWithDiscount.discountPercentage}% OFF`);
   });
 
   it("does not render badges when showBadges is false", () => {
@@ -106,7 +119,16 @@ describe("ProductCard Component", () => {
       />,
     );
 
-    expect(screen.queryByText("20% OFF")).not.toBeInTheDocument();
+    const { container } = renderWithRouter(
+      <ProductCard
+        product={productWithDiscount}
+        onClick={mockOnClick}
+        trackImpression={mockTrackImpression}
+        showBadges={false}
+      />,
+    );
+    const saleBadge = getSaleBadge(container);
+    expect(saleBadge).not.toBeInTheDocument();
   });
 
   it("uses custom testId when provided", () => {

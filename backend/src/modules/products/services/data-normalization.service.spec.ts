@@ -255,10 +255,11 @@ describe('DataNormalizationService', () => {
         updatedAt: new Date(),
       };
 
+      const originalExistingProductImages = [...existingProduct.images]; // Defensive copy
       const result = await service.normalizeProduct(existingProduct as any);
 
       // Verify images were processed
-      expect(service['processProductImages']).toHaveBeenCalledWith(existingProduct.images);
+      expect(service['processProductImages']).toHaveBeenCalledWith(originalExistingProductImages);
 
       // Verify virtual properties were calculated
       expect(result.isOnSale).toBe(true);
@@ -298,6 +299,7 @@ describe('DataNormalizationService', () => {
         },
       };
 
+      const originalUpdateDtoImages = [...updateDto.images]; // Defensive copy
       const result = await service.updateProductWithDto('product123', updateDto);
 
       // Verify slug was generated from title
@@ -308,7 +310,7 @@ describe('DataNormalizationService', () => {
       expect(result.description).toBe('sanitized-<p>Updated description</p>');
 
       // Verify images were processed
-      expect(service['processProductImages']).toHaveBeenCalledWith(updateDto.images);
+      expect(service['processProductImages']).toHaveBeenCalledWith(originalUpdateDtoImages);
       expect(result.images).toEqual(['https://example.com/processed-update.webp']);
 
       // Verify attributes were preserved

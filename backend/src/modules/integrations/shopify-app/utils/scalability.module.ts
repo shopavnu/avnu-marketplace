@@ -1,7 +1,8 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { ShopifyAppModule } from '../shopify-app.module'; // Added import
 
 // Import our scalability utilities
 import { ShopifyConnectionPoolManager } from './connection-pool-manager';
@@ -33,11 +34,12 @@ import { ShopifyClientService as _ShopifyClientService } from '../services/shopi
 @Global()
 @Module({
   imports: [
+    forwardRef(() => ShopifyAppModule), // Used forwardRef
     ConfigModule,
     TypeOrmModule.forFeature([ShopifyBulkOperationJob]),
     RedisModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (_configService: ConfigService) => ({
         type: 'single',
         url: `redis://${process.env.REDIS_HOST || 'localhost'}:${parseInt(process.env.REDIS_PORT || '6379', 10)}`,
       }),

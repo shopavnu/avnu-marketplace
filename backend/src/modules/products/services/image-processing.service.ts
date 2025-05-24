@@ -223,16 +223,11 @@ export class ImageProcessingService {
     }
   }
 
-  private handleProcessingError(imageUrl: string, error: Error): ProcessedImage {
-    this.logger.warn(`Using original image URL due to processing error: ${error.message}`);
-    return {
-      originalUrl: imageUrl,
-      processedUrl: imageUrl,
-      width: 800, // Default width
-      height: 800, // Default height
-      format: 'unknown',
-      size: 0,
-    };
+  private handleProcessingError(imageUrl: string, originalError: Error): never {
+    this.logger.error(
+      `Failed to process image ${imageUrl}. Falling back to original. Original error: ${originalError.message}`,
+    );
+    throw new Error('Failed to process image');
   }
 
   /**

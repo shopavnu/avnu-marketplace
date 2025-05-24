@@ -1,4 +1,4 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import { Injectable, Logger, Optional, Inject, forwardRef } from '@nestjs/common';
 import { WebhookHandler, WebhookContext, WebhookHandlerResult } from './webhook-handler.interface';
 import { ShopifyWebhookTopic } from '../../../common/types/shopify-models.types';
 import { WebhookMonitorService } from './webhook-monitor.service';
@@ -21,7 +21,9 @@ export class WebhookRegistry {
    */
   constructor(
     @Optional() private readonly webhookMonitor?: WebhookMonitorService,
-    @Optional() private readonly webhookRetry?: WebhookRetryService,
+    @Optional()
+    @Inject(forwardRef(() => WebhookRetryService))
+    private readonly webhookRetry?: WebhookRetryService,
   ) {}
 
   /**

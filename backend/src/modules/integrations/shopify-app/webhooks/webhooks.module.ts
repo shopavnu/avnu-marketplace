@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { MerchantPlatformConnection } from '../../entities/merchant-platform-connection.entity';
@@ -52,7 +52,7 @@ import { ShopifyBulkOperationJob } from '../entities/shopify-bulk-operation-job.
     TypeOrmModule.forFeature([MerchantPlatformConnection, ShopifyBulkOperationJob]),
     ConfigModule.forFeature(shopifyConfig),
     ShopifyScalabilityModule,
-    WebhookQueueModule,
+    forwardRef(() => WebhookQueueModule),
     QueueDashboardModule,
   ],
   controllers: [ShopifyWebhookController, QueueDashboardController],
@@ -63,7 +63,6 @@ import { ShopifyBulkOperationJob } from '../entities/shopify-bulk-operation-job.
     WebhookMonitorService,
     WebhookRetryService,
     WebhookMetricsService,
-    DistributedWebhookProcessor,
 
     // Scalability utilities
     ShopifyConnectionPoolManager,
@@ -86,6 +85,7 @@ import { ShopifyBulkOperationJob } from '../entities/shopify-bulk-operation-job.
     WebhookMonitorService,
     WebhookRetryService,
     WebhookMetricsService,
+    // DistributedWebhookProcessor is now provided and exported by WebhookQueueModule
 
     // Scalability utilities
     ShopifyConnectionPoolManager,
@@ -93,6 +93,13 @@ import { ShopifyBulkOperationJob } from '../entities/shopify-bulk-operation-job.
     ShopifyStructuredLogger,
     ShopifyCacheManager,
     ShopifyWebhookDeduplicator,
+
+    // Webhook handlers
+    ProductWebhookHandler,
+    OrderWebhookHandler,
+    AppUninstalledWebhookHandler,
+    CustomerWebhookHandler,
+    InventoryWebhookHandler,
   ],
 })
 export class ShopifyWebhooksModule {}

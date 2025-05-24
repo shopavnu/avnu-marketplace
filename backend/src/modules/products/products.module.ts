@@ -86,6 +86,7 @@ import { AccessibilityController } from './controllers/accessibility.controller'
     AccessibilityResolver,
   ],
   exports: [
+    TypeOrmModule, // Re-export TypeOrmModule to make repositories available
     ProductsService,
     ProductService,
     CategoryService,

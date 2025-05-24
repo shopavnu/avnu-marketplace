@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import PersonalizedRecommendations from "../PersonalizedRecommendations";
 import { RecommendationService } from "../../../services/recommendation.service";
+import { Product } from "../../../types/product";
 
 // Mock the recommendation service
 jest.mock("../../../services/recommendation.service");
@@ -31,8 +32,51 @@ jest.mock("../../../hooks/useUserPreferences", () => ({
   }),
 }));
 
+jest.mock("../../../hooks/useAuth", () => ({
+  useAuth: jest.fn(),
+}));
+
 describe("PersonalizedRecommendations Component", () => {
-  const mockProducts = [
+  beforeEach(() => {
+    // Define a fresh copy of mockProducts for each test to prevent mutation issues
+    const freshMockProducts: Product[] = [
+      {
+        id: "product-1",
+        title: "Test Product 1",
+        description: "Test description 1",
+        price: 19.99,
+        images: ["image-url-1.jpg"],
+        slug: "test-product-1",
+        categories: ['category-1-slug', 'general'],
+        merchantId: 'merchant-1',
+        brandName: 'Brand A',
+        attributes: { 'color': 'Red', 'material': 'Cotton' },
+        isSuppressed: false, // Ensure default state
+      },
+      {
+        id: "product-2",
+        title: "Test Product 2",
+        description: "Test description 2",
+        price: 29.99,
+        images: ["image-url-2.jpg"],
+        slug: "test-product-2",
+        categories: ['category-2-slug', 'sale'],
+        merchantId: 'merchant-2',
+        brandName: 'Brand B',
+        attributes: { 'size': 'Large' },
+        isSuppressed: false, // Ensure default state
+      },
+    ];
+
+    // Reset mocks before each test to ensure test isolation
+    mockRecommendationService.getPersonalizedRecommendations.mockReset().mockResolvedValue([...freshMockProducts]);
+    mockRecommendationService.getTrendingProducts.mockReset().mockResolvedValue([...freshMockProducts]);
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null, loading: false, error: null });
+  });
+
+  const mockUseAuth = require("../../../hooks/useAuth").useAuth;
+  const mockRecommendationService = require("../../../services/recommendation.service").RecommendationService;
+  const mockProducts: Product[] = [
     {
       id: "product-1",
       title: "Test Product 1",
@@ -40,6 +84,10 @@ describe("PersonalizedRecommendations Component", () => {
       price: 19.99,
       images: ["image-url-1.jpg"],
       slug: "test-product-1",
+      categories: ['category-1-slug', 'general'],
+      merchantId: 'merchant-1',
+      brandName: 'Brand A',
+      attributes: { 'color': 'Red', 'material': 'Cotton' },
     },
     {
       id: "product-2",
@@ -48,12 +96,12 @@ describe("PersonalizedRecommendations Component", () => {
       price: 29.99,
       images: ["image-url-2.jpg"],
       slug: "test-product-2",
+      categories: ['category-2-slug', 'sale'],
+      merchantId: 'merchant-2',
+      brandName: 'Brand B',
+      attributes: { 'size': 'Large' },
     },
   ];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
   it("should render loading state initially", () => {
     mockRecommendationService.getPersonalizedRecommendations = jest
@@ -89,6 +137,12 @@ describe("PersonalizedRecommendations Component", () => {
       expect(screen.getByText("Recommended For You")).toBeInTheDocument();
       expect(screen.getByText("Test Product 1")).toBeInTheDocument();
       expect(screen.getByText("Test Product 2")).toBeInTheDocument();
+
+      // Verify ProductCard is used for each product with the correct testId
+      mockProducts.forEach(product => {
+        expect(screen.getByTestId(`personalized-recommendation-${product.id}`)).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId("personalized-recommendations-loading")).not.toBeInTheDocument();
     });
   });
 
@@ -110,26 +164,52 @@ describe("PersonalizedRecommendations Component", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Trending Now")).toBeInTheDocument();
+      // First, check for a product card, as this indicates data has loaded
+      expect(screen.getByTestId(`trending-recommendation-${mockProducts[0].id}`)).toBeInTheDocument();
+
+      // Then check for the heading
+      expect(screen.getByRole('heading', { name: /Trending Now/i, level: 2 })).toBeInTheDocument();
+      
+      // Check for product titles
       expect(screen.getByText("Test Product 1")).toBeInTheDocument();
       expect(screen.getByText("Test Product 2")).toBeInTheDocument();
-    });
+
+      // Verify ProductCard is used for each product with the correct testId
+      mockProducts.forEach(product => {
+        expect(screen.getByTestId(`trending-recommendation-${product.id}`)).toBeInTheDocument();
+      });
+    }, { timeout: 5000 });
   });
 
   it("should refresh recommendations when refresh button is clicked", async () => {
-    mockRecommendationService.getPersonalizedRecommendations = jest
-      .fn()
-      .mockResolvedValueOnce(mockProducts)
-      .mockResolvedValueOnce([
-        {
-          id: "product-3",
-          title: "Test Product 3",
-          description: "Test description 3",
-          price: 39.99,
-          images: ["image-url-3.jpg"],
-          slug: "test-product-3",
-        },
-      ]);
+    // Ensure isAuthenticated is true for this test
+    mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: 'test-user' } });
+
+    const refreshedProducts: Product[] = [
+      {
+        id: "product-3",
+        title: "Test Product 3",
+        description: "Test description 3",
+        price: 39.99,
+        images: ["image-url-3.jpg"],
+        slug: "test-product-3",
+        categories: ['category-3-slug', 'new-arrival'],
+        merchantId: 'merchant-3',
+        brandName: 'Brand C',
+        featured: false,
+        isOnSale: false,
+        discountPercentage: 0,
+        inStock: true, // Renamed from isAvailable
+        quantity: 10,
+        attributes: { 'style': 'Modern', 'season': 'Summer' },
+        isSuppressed: false,
+        tags: ['tag1', 'tag2'], // Added example tags as it's in Product type
+      },
+    ];
+
+    mockRecommendationService.getPersonalizedRecommendations = jest.fn()
+      .mockResolvedValueOnce(mockProducts.slice(0, 2))
+      .mockResolvedValueOnce(refreshedProducts);
 
     render(
       <BrowserRouter>
@@ -156,6 +236,9 @@ describe("PersonalizedRecommendations Component", () => {
       .fn()
       .mockResolvedValue(mockProducts);
 
+    // Ensure isAuthenticated is true for this test
+    mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: 'test-user' } });
+
     render(
       <BrowserRouter>
         <PersonalizedRecommendations limit={1} />
@@ -165,7 +248,7 @@ describe("PersonalizedRecommendations Component", () => {
     await waitFor(() => {
       expect(
         mockRecommendationService.getPersonalizedRecommendations,
-      ).toHaveBeenCalledWith(1);
+      ).toHaveBeenCalledWith(1, expect.any(Boolean), expect.any(Boolean), expect.any(Number));
     });
   });
 

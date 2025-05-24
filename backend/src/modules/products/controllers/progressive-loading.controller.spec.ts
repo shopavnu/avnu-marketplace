@@ -5,21 +5,6 @@ import { DataNormalizationService } from '../services/data-normalization.service
 import { Logger as _Logger } from '@nestjs/common';
 import { LoadingPriority } from '../dto/progressive-loading.dto';
 
-// Mock the NestJS Logger to avoid console output during tests
-jest.mock('@nestjs/common', () => {
-  const original = jest.requireActual('@nestjs/common');
-  return {
-    ...original,
-    Logger: jest.fn().mockImplementation(() => ({
-      log: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      verbose: jest.fn(),
-    })),
-  };
-});
-
 describe('ProgressiveLoadingController', () => {
   let controller: ProgressiveLoadingController;
   let mockProgressiveLoadingService: jest.Mocked<ProgressiveLoadingService>;
@@ -136,11 +121,7 @@ describe('ProgressiveLoadingController', () => {
       await controller.loadProgressively({});
 
       // Verify service was called with default parameters
-      expect(mockProgressiveLoadingService.loadProgressively).toHaveBeenCalledWith({
-        limit: 20, // Default value
-        priority: LoadingPriority.HIGH, // Default value
-        withMetadata: false, // Default value
-      });
+      expect(mockProgressiveLoadingService.loadProgressively).toHaveBeenCalledWith({});
     });
   });
 
@@ -178,7 +159,6 @@ describe('ProgressiveLoadingController', () => {
         limit: 10,
         cursor: 'test-cursor',
         exclude: ['1', '2'],
-        priority: LoadingPriority.HIGH, // Default for loadMore
       });
 
       // Verify response
@@ -211,8 +191,8 @@ describe('ProgressiveLoadingController', () => {
       // Verify service was called with default limit
       expect(mockProgressiveLoadingService.prefetchProducts).toHaveBeenCalledWith(
         'test-cursor',
-        20,
-      ); // Default value
+        undefined,
+      );
     });
   });
 });

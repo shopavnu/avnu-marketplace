@@ -113,7 +113,9 @@ describe('ImageProcessingService', () => {
       expect(fs.writeFileSync).toHaveBeenCalled();
 
       // Verify the result is the expected URL
-      expect(result).toBe('http://localhost:3000/uploads/products/test-uuid-1234.webp');
+      expect(result.processedUrl).toBe(
+        'http://localhost:3000/uploads/products/test-uuid-1234.webp',
+      );
     });
 
     it('should generate a thumbnail if requested', async () => {
@@ -143,6 +145,7 @@ describe('ImageProcessingService', () => {
         generateThumbnail: true,
         thumbnailWidth: 200,
         thumbnailHeight: 200,
+        generateResponsiveSizes: false, // Explicitly disable for this test
       });
 
       // Verify sharp was called twice (once for main image, once for thumbnail)
@@ -152,7 +155,9 @@ describe('ImageProcessingService', () => {
       expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
 
       // Verify the result is the expected URL
-      expect(result).toBe('http://localhost:3000/uploads/products/test-uuid-1234.webp');
+      expect(result.processedUrl).toBe(
+        'http://localhost:3000/uploads/products/test-uuid-1234.webp',
+      );
     });
 
     it('should handle errors gracefully', async () => {

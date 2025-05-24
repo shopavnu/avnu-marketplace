@@ -1,14 +1,17 @@
-import { Test } from '@nestjs/testing';
-import { SearchModule } from '../search.module';
+import { Test, TestingModule } from '@nestjs/testing';
+// import { SearchModule } from '../search.module';
 import { SearchSuggestionService } from '../services/search-suggestion.service';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { AnalyticsService } from '../../analytics/services/analytics.service';
+import { SearchAnalyticsService } from '../services/search-analytics.service';
 import { PersonalizationService } from '../../personalization/services/personalization.service';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 describe('Search Suggestions Integration', () => {
   let searchSuggestionService: SearchSuggestionService;
+  let moduleRef: TestingModule; // Declare moduleRef to be accessible in afterAll
 
   // Mock services
   const elasticsearchMock = {
@@ -16,8 +19,9 @@ describe('Search Suggestions Integration', () => {
   };
 
   const analyticsMock = {
-    getPopularSearches: jest.fn(),
-    trackEngagement: jest.fn(),
+    getPopularSearchQueries: jest.fn(),
+    trackSuggestionImpression: jest.fn().mockResolvedValue(undefined),
+    // Add any other methods from SearchAnalyticsService that might be called indirectly or in other tests
   };
 
   const personalizationMock = {
@@ -35,12 +39,25 @@ describe('Search Suggestions Integration', () => {
   };
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [SearchModule],
+    moduleRef = await Test.createTestingModule({
+      imports: [
+        // GraphQLModule.forRoot<ApolloDriverConfig>({
+        //   driver: ApolloDriver,
+        //   autoSchemaFile: true, // Using in-memory schema generation for tests
+        // }),
+      ],
+      providers: [
+        SearchSuggestionService,
+        ConfigService,
+        PersonalizationService,
+        SearchAnalyticsService,
+        ElasticsearchService,
+        Logger,
+      ],
     })
       .overrideProvider(ElasticsearchService)
       .useValue(elasticsearchMock)
-      .overrideProvider(AnalyticsService)
+      .overrideProvider(SearchAnalyticsService)
       .useValue(analyticsMock)
       .overrideProvider(PersonalizationService)
       .useValue(personalizationMock)
@@ -55,6 +72,12 @@ describe('Search Suggestions Integration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    if (moduleRef) {
+      await moduleRef.close();
+    }
   });
 
   it('should return empty suggestions for short queries', async () => {
@@ -114,7 +137,7 @@ describe('Search Suggestions Integration', () => {
     });
 
     // Mock popular searches
-    analyticsMock.getPopularSearches.mockResolvedValue([
+    analyticsMock.getPopularSearchQueries.mockResolvedValue([
       {
         query: 'test query',
         count: 10,
@@ -133,7 +156,7 @@ describe('Search Suggestions Integration', () => {
     expect(result).toBeDefined();
     expect(result.suggestions.length).toBeGreaterThan(0);
     expect(elasticsearchMock.search).toHaveBeenCalled();
-    expect(analyticsMock.getPopularSearches).toHaveBeenCalled();
+    expect(analyticsMock.getPopularSearchQueries).toHaveBeenCalled();
   });
 
   it('should track suggestion requests', async () => {
@@ -146,23 +169,33 @@ describe('Search Suggestions Integration', () => {
               text: 'test',
               offset: 0,
               length: 4,
-              options: [],
+              options: [
+                {
+                  text: 'test electronics suggestion',
+                  _source: {
+                    query_text_completion: 'test electronics suggestion',
+                    query_text: 'test electronics suggestion',
+                    category: 'electronics',
+                  },
+                },
+              ],
             },
           ],
         },
       });
     });
 
-    analyticsMock.getPopularSearches.mockResolvedValue([]);
+    analyticsMock.getPopularSearchQueries.mockResolvedValue([]);
 
     await searchSuggestionService.getSuggestions({
       query: 'test',
       limit: 5,
-      includePopular: true,
+      includePopular: false,
       includePersonalized: false,
       includeCategoryContext: true,
+      categories: ['electronics'],
     });
 
-    expect(analyticsMock.trackEngagement).toHaveBeenCalled();
+    expect(analyticsMock.trackSuggestionImpression).toHaveBeenCalled();
   });
 });

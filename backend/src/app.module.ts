@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -10,6 +10,10 @@ import { CacheModule } from '@nestjs/cache-manager';
 const redisStore = require('cache-manager-redis-store').default;
 import { CommonModule } from '@common/common.module';
 import { HealthModule } from './health/health.module';
+import { PrismaModule } from './prisma';
+import { ProductsPrismaModule } from '@modules/products/products-prisma.module';
+import { BrandsPrismaModule } from '@modules/brands/brands-prisma.module';
+import { ClerkAuthModule, ClerkAuthMiddleware } from '@modules/clerk-auth';
 
 // Import feature modules
 import { AuthModule } from '@modules/auth/auth.module';
@@ -54,6 +58,10 @@ registerEnumType(ExperimentStatus, {
     }),
     CommonModule,
     HealthModule,
+    PrismaModule,
+    ProductsPrismaModule,
+    BrandsPrismaModule,
+    ClerkAuthModule,
 
     // Database
     TypeOrmModule.forRootAsync({
@@ -116,5 +124,12 @@ registerEnumType(ExperimentStatus, {
     AdvertisingModule,
     AccessibilityModule,
   ],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply Clerk auth middleware globally
+    consumer.apply(ClerkAuthMiddleware).forRoutes('*');
+  }
+}
