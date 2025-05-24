@@ -8,6 +8,7 @@ import {
   PlusIcon,
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
+
 // Define a local ProductComplete interface to avoid type conflicts
 interface ProductComplete {
   id: string;
@@ -29,6 +30,7 @@ interface ProductComplete {
   categories: string[];
   tags: string[];
 }
+
 import { brands as allBrands } from "@/data/brands";
 
 // Add custom CSS for scrollbar styling
@@ -138,6 +140,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
       };
     }
   }, []);
+  
   // Mock cart data - in a real app, this would come from a cart context or state management
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -173,34 +176,31 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
           description: "Handcrafted ceramic vase with natural glazes",
           price: 45.99,
           image:
-            "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1615874694520-474822394e73?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
           images: [
-            "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1615874694520-474822394e73?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
+            "https://images.unsplash.com/photo-1616678478691-4c677a6b6f4a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
           ],
-          brand: "Terra & Clay",
+          brand: "Brand 1",
           category: "Home",
           subCategory: "Decor",
           attributes: {
-            color: "Blue",
             material: "Ceramic",
-            size: "Medium",
-            weight: "2.5 lbs",
-            dimensions: "8 x 5 x 5 inches",
+            color: "Natural",
+            dimensions: "8 x 4 inches",
           },
           isNew: true,
           rating: {
-            avnuRating: { average: 4.8, count: 24 },
-            shopifyRating: { average: 4.7, count: 15 },
+            average: 4.8,
+            count: 15,
           },
           vendor: {
-            id: "vendor-1",
-            name: "Terra & Clay",
-            causes: ["sustainable", "handmade"],
-            isLocal: true,
+            name: "EarthCraft Pottery",
+            isVerified: true,
+            location: "Portland, OR",
             shippingInfo: {
-              isFree: false,
-              minimumForFree: 75,
-              baseRate: 5.99,
+              minimumForFree: 50,
+              standardRate: 5.99,
             },
           },
           inStock: true,
@@ -218,33 +218,31 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
           description: "Soft, organic cotton throw with hand-woven details",
           price: 39.99,
           image:
-            "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
           images: [
-            "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
+            "https://images.unsplash.com/photo-1595501566202-2c518a3b7155?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
           ],
-          brand: "Pure Living",
+          brand: "Brand 2",
           category: "Home",
           subCategory: "Textiles",
           attributes: {
-            color: "Natural",
-            material: "Cotton",
-            size: "Large",
-            weight: "1.2 lbs",
-            dimensions: "20 x 20 inches",
+            material: "Organic Cotton",
+            color: "Natural/Blue",
+            dimensions: "50 x 60 inches",
           },
           isNew: false,
           rating: {
-            avnuRating: { average: 4.5, count: 18 },
+            average: 4.5,
+            count: 28,
           },
           vendor: {
-            id: "vendor-2",
-            name: "Pure Living",
-            causes: ["organic", "sustainable"],
-            isLocal: false,
+            name: "Pure Textiles",
+            isVerified: true,
+            location: "San Francisco, CA",
             shippingInfo: {
-              isFree: false,
-              minimumForFree: 50,
-              baseRate: 4.99,
+              minimumForFree: 75,
+              standardRate: 6.99,
             },
           },
           inStock: true,
@@ -353,201 +351,214 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
+        <div 
           ref={dropdownRef}
           className="absolute top-full right-0 mt-2 w-[380px] max-h-[80vh] bg-white rounded-lg shadow-xl z-50 overflow-hidden"
-          variants={dropdownVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
         >
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-medium text-lg text-charcoal">Your Cart</h3>
-            <button
-              onClick={onClose}
-              className="p-1 text-gray-400 hover:text-charcoal transition-colors"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
+          <motion.div
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            style={{ width: '100%', height: '100%' }}
+          >
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-medium text-lg text-charcoal">Your Cart</h3>
+              <button
+                onClick={onClose}
+                className="p-1 text-gray-400 hover:text-charcoal transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
 
-          <div className="overflow-y-auto max-h-[80vh] cart-items-scroll">
-            {cartItems.length === 0 ? (
-              <div className="p-8 text-center">
-                <ShoppingBagIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">Your cart is empty</p>
-                <Link
-                  href="/shop"
-                  className="mt-4 inline-block px-4 py-2 bg-sage text-white rounded-full text-sm font-medium hover:bg-sage/90 transition-colors"
-                >
-                  Start Shopping
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div className="p-4">
-                  {/* Items grouped by brand */}
-                  {Object.entries(itemsByBrand).map(
-                    ([brandName, items], brandIndex) => (
-                      <div
-                        key={brandName}
-                        className={`${brandIndex > 0 ? "pt-4 mt-4 border-t border-gray-100" : ""}`}
-                      >
-                        {/* Brand Header */}
-                        <div className="flex items-center justify-between mb-2">
-                          <Link
-                            href={`/brand/${getBrandIdFromName(brandName)}`}
-                            className="text-sage hover:underline text-sm font-medium"
-                          >
-                            {brandName}
-                          </Link>
-                          <span className="text-xs text-gray-500">
-                            {items.length}{" "}
-                            {items.length === 1 ? "item" : "items"}
-                          </span>
-                        </div>
-
-                        {/* Brand Items */}
-                        <motion.div
-                          initial="hidden"
-                          animate="visible"
-                          variants={{
-                            visible: {
-                              transition: {
-                                staggerChildren: 0.1,
-                              },
-                            },
-                          }}
-                        >
-                          {items.map((item) => (
-                            <motion.div
-                              key={item.product.id}
-                              variants={itemVariants}
-                              className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-b-0"
-                            >
-                              {/* Product Image */}
-                              <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-gray-50">
-                                <Image
-                                  src={item.product.image}
-                                  alt={item.product.title}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-
-                              {/* Product Details */}
-                              <div className="flex-grow min-w-0">
-                                <h4 className="text-sm font-medium text-charcoal truncate">
-                                  {item.product.title}
-                                </h4>
-                                <div className="flex items-center justify-between mt-1">
-                                  <div className="text-sm text-gray-500">
-                                    ${item.product.price.toFixed(2)}
-                                  </div>
-
-                                  {/* Quantity Controls */}
-                                  <div className="flex items-center">
-                                    <button
-                                      onClick={() =>
-                                        updateQuantity(
-                                          item.product.id,
-                                          item.quantity - 1,
-                                        )
-                                      }
-                                      className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-charcoal"
-                                      disabled={item.quantity <= 1}
-                                    >
-                                      <MinusIcon className="w-3 h-3" />
-                                    </button>
-                                    <span className="w-6 text-center text-sm">
-                                      {item.quantity}
-                                    </span>
-                                    <button
-                                      onClick={() =>
-                                        updateQuantity(
-                                          item.product.id,
-                                          item.quantity + 1,
-                                        )
-                                      }
-                                      className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-charcoal"
-                                    >
-                                      <PlusIcon className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Remove Button */}
-                              <button
-                                onClick={() => removeItem(item.product.id)}
-                                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                              >
-                                <XMarkIcon className="w-4 h-4" />
-                              </button>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-
-                        {/* Free Shipping Progress Bar */}
-                        {brandTotals.find((bt) => bt.brandName === brandName)
-                          ?.threshold && (
-                          <FreeShippingProgressBar
-                            brandName={brandName}
-                            currentAmount={
-                              brandTotals.find(
-                                (bt) => bt.brandName === brandName,
-                              )?.total || 0
-                            }
-                            threshold={
-                              brandTotals.find(
-                                (bt) => bt.brandName === brandName,
-                              )?.threshold || 0
-                            }
-                          />
-                        )}
-                      </div>
-                    ),
-                  )}
-                </div>
-
-                {/* Cart Summary */}
-                <div className="p-4 bg-gray-50 border-t border-gray-100 mt-2">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+            <div className="overflow-auto cart-items-scroll" style={{ maxHeight: "50vh" }}>
+              {cartItems.length === 0 ? (
+                <div className="p-6 text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-4 bg-gray-100 rounded-full">
+                      <ShoppingBagIcon className="w-8 h-8 text-gray-400" />
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm mb-3">
-                    <span className="text-gray-600">Estimated Tax</span>
-                    <span className="font-medium">
-                      ${estimatedTax.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-medium mb-4">
-                    <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-
-                  {/* Checkout Button */}
-                  <Link
-                    href="/checkout"
-                    className="block w-full text-center py-3 bg-sage text-white rounded-full font-medium hover:bg-sage/90 transition-colors"
-                    onClick={onClose}
-                  >
-                    Proceed to Checkout
-                  </Link>
-
-                  {/* Continue Shopping */}
+                  <h4 className="text-lg font-medium text-charcoal mb-2">
+                    Your cart is empty
+                  </h4>
+                  <p className="text-neutral-gray text-sm mb-4">
+                    Looks like you haven&apos;t added any items to your cart yet.
+                  </p>
                   <button
                     onClick={onClose}
-                    className="w-full py-2 mt-2 text-sm text-charcoal hover:text-sage transition-colors"
+                    className="inline-block px-6 py-2 bg-sage text-white rounded-full font-medium hover:bg-sage/90 transition-colors"
                   >
-                    Continue Shopping
+                    Start Shopping
                   </button>
                 </div>
-              </>
-            )}
-          </div>
-        </motion.div>
+              ) : (
+                <>
+                  <div>
+                    {Object.entries(itemsByBrand).map(
+                      ([brandName, items], index) => (
+                        <div key={brandName} className="pt-2 px-4">
+                          {/* Brand Header */}
+                          <div className="flex items-center mb-2">
+                            <Link
+                              href={`/brands/${getBrandIdFromName(brandName)}`}
+                              className="text-sm font-medium text-charcoal hover:text-sage transition-colors"
+                              onClick={onClose}
+                            >
+                              {brandName}
+                            </Link>
+                          </div>
+
+                          {/* Brand Items */}
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "0.5rem",
+                            }}
+                          >
+                            {items.map((item) => (
+                              <div
+                                key={item.product.id}
+                                className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-b-0"
+                              >
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.75rem',
+                                  width: '100%'
+                                }}>
+                                  <motion.div
+                                    variants={itemVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                  >
+                                    {/* Product Image */}
+                                    <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-gray-50">
+                                      <Image
+                                        src={item.product.image}
+                                        alt={item.product.title}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                  </motion.div>
+
+                                  {/* Product Details */}
+                                  <div className="flex-grow">
+                                    <h4 className="text-charcoal font-medium text-sm">
+                                      {item.product.title}
+                                    </h4>
+                                    <div className="flex items-center justify-between mt-1">
+                                      <div className="text-sage font-medium">
+                                        ${item.product.price.toFixed(2)}
+                                      </div>
+                                      <div className="flex items-center space-x-1">
+                                        <button
+                                          onClick={() =>
+                                            updateQuantity(
+                                              item.product.id,
+                                              item.quantity - 1,
+                                            )
+                                          }
+                                          disabled={item.quantity <= 1}
+                                          className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-charcoal disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                          <MinusIcon className="w-3 h-3" />
+                                        </button>
+                                        <span className="w-6 text-center text-sm">
+                                          {item.quantity}
+                                        </span>
+                                        <button
+                                          onClick={() =>
+                                            updateQuantity(
+                                              item.product.id,
+                                              item.quantity + 1,
+                                            )
+                                          }
+                                          className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-charcoal"
+                                        >
+                                          <PlusIcon className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Remove Button */}
+                                  <button
+                                    onClick={() => removeItem(item.product.id)}
+                                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                  >
+                                    <XMarkIcon className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Free Shipping Progress Bar */}
+                          {brandTotals.find((bt) => bt.brandName === brandName)
+                            ?.threshold && (
+                            <FreeShippingProgressBar
+                              brandName={brandName}
+                              currentAmount={
+                                brandTotals.find(
+                                  (bt) => bt.brandName === brandName,
+                                )?.total || 0
+                              }
+                              threshold={
+                                brandTotals.find(
+                                  (bt) => bt.brandName === brandName,
+                                )?.threshold || 0
+                              }
+                            />
+                          )}
+                        </div>
+                      ),
+                    )}
+                  </div>
+
+                  {/* Cart Summary */}
+                  <div className="p-4 bg-gray-50 border-t border-gray-100 mt-2">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mb-3">
+                      <span className="text-gray-600">Estimated Tax</span>
+                      <span className="font-medium">
+                        ${estimatedTax.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-medium mb-4">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
+
+                    {/* Checkout Button */}
+                    <Link
+                      href="/checkout"
+                      className="block w-full text-center py-3 bg-sage text-white rounded-full font-medium hover:bg-sage/90 transition-colors"
+                      onClick={onClose}
+                    >
+                      Proceed to Checkout
+                    </Link>
+
+                    {/* Continue Shopping */}
+                    <button
+                      onClick={onClose}
+                      className="w-full py-2 mt-2 text-sm text-charcoal hover:text-sage transition-colors"
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
