@@ -42,7 +42,7 @@ export function useProducts({
     } finally {
       setLoading(false);
     }
-  }, [hasMore, skip, take, productsApi, setLoading, setProducts, setHasMore, setSkip, setError]);
+  }, [hasMore, skip, take, setLoading, setProducts, setHasMore, setSkip, setError]);
 
   const refresh = useCallback(() => {
     setSkip(0);
