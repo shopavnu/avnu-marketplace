@@ -55,18 +55,19 @@ export default function BrandCard({
             {/* Subtle gradient for text visibility */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
             {/* Logo Overlay */}
-            <motion.div
-              className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-1.5 shadow-md"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Image
-                src={brand.logo}
-                alt={`${brand.name} logo`}
-                width={36}
-                height={36}
-                className="rounded-full"
-              />
-            </motion.div>
+            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-1.5 shadow-md">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+              >
+                <Image
+                  src={brand.logo}
+                  alt={`${brand.name} logo`}
+                  width={36}
+                  height={36}
+                  className="rounded-full"
+                />
+              </motion.div>
+            </div>
 
             {/* Featured Badge */}
             {featured && (
