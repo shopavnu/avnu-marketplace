@@ -1,13 +1,22 @@
 {
-  "name": "avnu-marketplace-frontend",
+  "name": "avnu-marketplace",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint || true",
-    "lint:fix": "next lint --fix"
+    "dev": "npm run dev:frontend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run start:dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start": "npm run start:frontend",
+    "start:frontend": "cd frontend && npm run start",
+    "start:backend": "cd backend && npm run start",
+    "docker:dev": "docker compose up",
+    "docker:build": "docker compose build",
+    "lint": "npm run lint:frontend",
+    "lint:frontend": "cd frontend && npm run lint || true",
+    "lint:backend": "cd backend && npm run lint || true"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",

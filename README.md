@@ -96,18 +96,51 @@ Avnu Marketplace is a comprehensive e-commerce platform that connects merchants 
 ## Development Setup
 
 ### Prerequisites
-- Node.js (v14+)
+- Node.js (v20+)
 - npm or yarn
-- Docker (for Elasticsearch)
+- Docker and Docker Compose
 
-### Frontend Setup
+### Quick Start with Docker
+
+The easiest way to set up the entire platform is using Docker Compose:
+
+```bash
+# Clone the repository
+git clone https://github.com/shopavnu/avnu-marketplace.git
+cd avnu-marketplace
+
+# Build the application
+npm run build # Builds both frontend and backend
+
+# Start the application with Docker Compose
+docker compose up
+```
+
+This will start all services:
+- Web application at http://localhost:3000
+- API at http://localhost:8080
+- Background worker
+- PostgreSQL database
+- Redis cache
+- Elasticsearch
+
+For development with hot-reloading:
+
+```bash
+# Use the development setup
+docker compose up web api worker
+```
+
+### Manual Setup (Alternative)
+
+#### Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Backend Setup
+#### Backend Setup
 ```bash
 cd backend
 npm install
