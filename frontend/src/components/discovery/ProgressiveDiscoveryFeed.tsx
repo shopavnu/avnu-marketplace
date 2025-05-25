@@ -90,7 +90,7 @@ const ProgressiveDiscoveryFeed: React.FC<ProgressiveDiscoveryFeedProps> = ({
   useEffect(() => {
     const refs: Record<string, React.RefObject<HTMLDivElement>> = {};
     sections.forEach((section) => {
-      refs[section.id] = React.createRef<HTMLDivElement>();
+      refs[section.id] = React.createRef<HTMLDivElement>() as unknown as React.RefObject<HTMLDivElement>;
     });
     setSectionRefs(refs);
   }, [sections]);
