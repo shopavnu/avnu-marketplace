@@ -30,12 +30,10 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "./types/framer-motion.d.ts"
   ],
   "exclude": [
     "node_modules"
-  ],
-  "files": [
-    "./types/framer-motion.d.ts"
   ]
 }
