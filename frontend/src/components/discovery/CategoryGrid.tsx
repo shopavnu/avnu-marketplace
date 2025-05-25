@@ -61,7 +61,9 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
             <div className="mb-6">
               {title && (
                 <motion.h2
-                  className="text-2xl font-montserrat font-medium text-charcoal"
+                  {...{ // Explicitly group HTML attributes
+                    className: "text-2xl font-montserrat font-medium text-charcoal"
+                  }}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
