@@ -22,12 +22,10 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "*": [
-        "node_modules/*"
       ]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
     "next-env.d.ts",
