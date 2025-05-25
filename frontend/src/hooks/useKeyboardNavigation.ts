@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UseKeyboardNavigationProps {
-  rootElement: React.RefObject<HTMLElement>;
+  rootElement: React.RefObject<HTMLElement | null>;
   selector?: string;
   enableVertical?: boolean;
   enableHorizontal?: boolean;
