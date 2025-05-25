@@ -1,9 +1,16 @@
-import { useState } from "react";
+import React, { useState, FormEvent } from "react";
 import Head from "next/head";
-import { motion } from "framer-motion";
+import { motion, MotionProps } from "framer-motion";
 import Image from "next/image";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
+
+// Define a strongly-typed motion.form component
+type MotionFormProps = React.FormHTMLAttributes<HTMLFormElement> & MotionProps;
+
+const MotionForm: React.FC<MotionFormProps> = (props) => {
+  return <motion.form {...props} />;
+};
 
 // Define platforms and categories
 const platforms = [
@@ -253,7 +260,7 @@ export default function ForBrands() {
               </button>
             </motion.div>
           ) : (
-            <motion.form
+            <MotionForm
               onSubmit={handleSubmit}
               className="bg-white p-6 md:p-8 rounded-2xl shadow-md"
               initial={{ opacity: 0, y: 20 }}
@@ -556,7 +563,7 @@ export default function ForBrands() {
                   {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>
               </div>
-            </motion.form>
+            </MotionForm>
           )}
         </section>
 
