@@ -3,6 +3,20 @@ import 'framer-motion';
 import React from 'react'; // Ensure React is imported for CSSProperties
 
 declare module 'framer-motion' {
+  // Ensure original UseScrollOptions is imported or referenced if needed, 
+  // though module augmentation should extend it.
+  // import { UseScrollOptions as OriginalUseScrollOptions } from 'framer-motion'; // This might be needed if we're not purely augmenting
+
+  // Augment UseScrollOptions for useScroll hook
+  export interface UseScrollOptions {
+    target?: React.RefObject<HTMLElement | null>; // Allow target to be a ref to HTMLElement or null
+    container?: React.RefObject<HTMLElement | null>;
+    offset?: string[] | number[];
+    smooth?: number;
+    axis?: 'x' | 'y';
+    // Add other properties from the original UseScrollOptions if necessary
+  }
+
   export interface MotionProps {
     className?: string;
     style?: React.CSSProperties;
