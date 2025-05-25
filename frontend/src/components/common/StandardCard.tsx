@@ -22,7 +22,9 @@ const StandardCard: React.FC<StandardCardProps> = ({
 }) => {
   return (
     <motion.div
-      className="h-[400px] group relative bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+      {...{
+        className: "h-[400px] group relative bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300",
+      }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
       <Link href={linkPath} className="block h-full flex flex-col">
