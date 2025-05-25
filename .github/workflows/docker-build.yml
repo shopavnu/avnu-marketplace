@@ -53,8 +53,9 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:${{ steps.vars.outputs.SHORT_SHA }}
             ${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:latest
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:buildcache,mode=max
+          no-cache: true # Disable all caching for this build step
+          # cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:buildcache
+          # cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:buildcache,mode=max
 
       # Build and push Backend image
       - name: Build and push Backend Docker image
