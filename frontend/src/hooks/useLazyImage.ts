@@ -12,7 +12,7 @@ interface LazyImageResult {
   isLoaded: boolean;
   isInView: boolean;
   currentSrc: string;
-  ref: React.RefObject<HTMLElement>;
+  ref: React.RefObject<HTMLElement | null>;
   onLoad: () => void;
   onError: () => void;
 }
