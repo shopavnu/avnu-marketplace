@@ -1,4 +1,3 @@
-THIS_IS_AN_INTENTIONAL_SYNTAX_ERROR;
 // types/framer-motion.d.ts
 import 'framer-motion';
 import React from 'react'; // Ensure React is imported for CSSProperties
