@@ -9,7 +9,7 @@ declare module 'framer-motion' {
 
   // Augment UseScrollOptions for useScroll hook
   export interface UseScrollOptions {
-    target?: React.RefObject<HTMLElement | null>; // Allow target to be a ref to HTMLElement or null
+    target?: React.RefObject<string>; // Diagnostic: Changed to string a ref to HTMLElement or null
     container?: React.RefObject<HTMLElement | null>;
     offset?: string[] | number[];
     smooth?: number;
