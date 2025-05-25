@@ -20,7 +20,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="group h-full"
+      {...{ // Explicitly group HTML attributes
+        className: "group h-full"
+      }}
     >
       <Link
         href={`/category/${category.slug}`}
