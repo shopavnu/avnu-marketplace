@@ -74,7 +74,9 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
               )}
               {description && (
                 <motion.p
-                  className="text-neutral-gray mt-2"
+                  {...{ // Explicitly group HTML attributes
+                    className: "text-neutral-gray mt-2"
+                  }}
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
