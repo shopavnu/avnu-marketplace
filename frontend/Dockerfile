@@ -9,7 +9,14 @@ RUN npm ci --legacy-peer-deps
 # Copy source code
 COPY . .
 
+# Define build-time argument for Clerk publishable key
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+# Set environment variable from the build-time argument
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+
 # Build the application
+RUN ls -R /app/types
+RUN cat /app/tsconfig.json
 RUN npm run build
 
 # Production stage
