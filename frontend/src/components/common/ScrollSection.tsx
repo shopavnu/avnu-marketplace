@@ -25,10 +25,10 @@ const ScrollSection: React.FC<ScrollSectionProps> = ({
   threshold = 0.1,
   id,
 }) => {
-  const sectionRef: React.RefObject<HTMLElement> = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef as React.RefObject<HTMLElement>, { threshold, triggerOnce: true });
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef as unknown as React.RefObject<HTMLElement>, { threshold, triggerOnce: true });
   const { scrollYProgress } = useScroll({
-    target: sectionRef as React.RefObject<HTMLElement>,
+    target: sectionRef as unknown as React.RefObject<HTMLElement>,
     offset: ["start end", "end start"],
   });
 
