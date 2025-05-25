@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { motion } from "framer-motion";
+import { motion, MotionProps } from "framer-motion";
 import {
   ScrollSection,
   ScrollItem,
@@ -8,6 +8,13 @@ import {
 } from "@/components/common";
 import { products } from "@/data/products";
 import MasonryProductCard from "@/components/products/MasonryProductCard";
+
+// Define a strongly-typed motion.a component
+type MotionAnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & MotionProps;
+
+const MotionAnchor: React.FC<MotionAnchorProps> = (props) => {
+  return <motion.a {...props} />;
+};
 
 export default function ScrollAnimationsExample() {
   return (
@@ -230,14 +237,14 @@ export default function ScrollAnimationsExample() {
             Avnu Marketplace homepage
           </p>
           <ScrollItem>
-            <motion.a
+            <MotionAnchor
               href="/"
               className="inline-block px-8 py-3 bg-sage text-white rounded-full font-medium"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               Return to Homepage
-            </motion.a>
+            </MotionAnchor>
           </ScrollItem>
         </div>
       </ScrollSection>
