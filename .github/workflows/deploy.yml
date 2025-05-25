@@ -28,22 +28,12 @@ jobs:
         run: |
           cd backend
           npm test
-
-      - name: Trigger Render deploy
-        env:
-          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-        run: |
-          if [ -n "$RENDER_DEPLOY_HOOK_URL" ]; then
-            curl -X POST $RENDER_DEPLOY_HOOK_URL
-          else
-            echo "No RENDER_DEPLOY_HOOK_URL set, skipping deploy hook"
-          fi
           
   deploy-render:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: render-examples/deploy-action@v1
+      - uses: johnbeynon/render-deploy-action@v0.0.8
         with:
           service-id: ${{ secrets.RENDER_SERVICE_ID }}
           api-key:   ${{ secrets.RENDER_API_KEY }}
