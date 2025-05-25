@@ -1,19 +1,15 @@
 // src/types/framer-motion.d.ts
 import 'framer-motion';
+import React from 'react'; // Ensure React is imported for CSSProperties
 
 declare module 'framer-motion' {
-  // This extends the existing HTMLMotionProps to ensure standard HTML attributes are recognized.
-  // Framer Motion's own types should already include most standard HTML attributes,
-  // but sometimes explicit augmentation is needed, especially if there are conflicts
-  // or specific setups that confuse TypeScript's inference.
-  export interface HTMLMotionProps<T extends keyof JSX.IntrinsicElements>
-    extends React.HTMLAttributes<HTMLElementTagNameMap[T]> {
-    // No need to explicitly add 'className' here as React.HTMLAttributes<...> includes it.
-    // This augmentation primarily helps TypeScript correctly merge and recognize these attributes
-    // on motion components.
+  export interface MotionProps {
+    className?: string;
+    style?: React.CSSProperties;
+    id?: string;
+    // Add other common HTML attributes if needed
+    // e.g., onClick?: React.MouseEventHandler<any>;
+    // role?: string;
+    // 'aria-label'?: string;
   }
-
-  // You might also need to augment MotionProps if the issue is more general
-  // export interface MotionProps extends React.HTMLAttributes<any> {}
-  // However, start with augmenting HTMLMotionProps as it's more specific.
 }
