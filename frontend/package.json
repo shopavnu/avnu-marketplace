@@ -52,7 +52,7 @@
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20.11.16",
-    "@types/react": "^19.1.5",
+    "@types/react": "^18.3.22",
     "@types/testing-library__jest-dom": "^5.14.9",
     "@types/testing-library__react": "^10.0.1",
     "@types/uuid": "^10.0.0",
