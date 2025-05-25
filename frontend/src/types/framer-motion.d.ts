@@ -7,6 +7,7 @@ declare module 'framer-motion' {
     className?: string;
     style?: React.CSSProperties;
     id?: string;
+    onClick?: React.MouseEventHandler<any>;
     // Add other common HTML attributes if needed
     // e.g., onClick?: React.MouseEventHandler<any>;
     // role?: string;
