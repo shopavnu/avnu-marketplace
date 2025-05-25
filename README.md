@@ -93,6 +93,18 @@ Avnu Marketplace is a comprehensive e-commerce platform that connects merchants 
    - Created `hotfix/vercel-deployment` branch with all fixes
    - Ensured all builds pass with no errors for seamless deployment
 
+## CI/CD and Deployment Automation
+
+This project utilizes GitHub Actions for Continuous Integration and Continuous Deployment (CI/CD).
+
+- **Dockerization**: The frontend, backend, and worker services are containerized using Docker.
+- **Image Registry**: Docker images are built and pushed to GitHub Container Registry (ghcr.io).
+- **Backend/Worker Deployment**: The backend and worker services are deployed to Render, pulling their Docker images from ghcr.io. Deployments to Render are triggered automatically by the CI/CD pipeline upon pushes to the main branch.
+- **Frontend Deployment**: The frontend is deployed to Vercel (details in the Vercel deployment section if applicable, or manage via Vercel's GitHub integration).
+
+Key Workflows:
+- `.github/workflows/docker-build.yml`: Handles building Docker images for all services, pushing them to ghcr.io, and triggering deployments on Render for the backend and worker services.
+
 ## Development Setup
 
 ### Prerequisites
