@@ -18,15 +18,15 @@ jobs:
           - service: frontend
             dockerfile: frontend/Dockerfile
             image: avnu-marketplace-web
-            build_context: ./frontend # Added
+            build_context: .
           - service: backend
             dockerfile: backend/Dockerfile
             image: avnu-marketplace-api
-            build_context: ./backend  # Added
+            build_context: .
           - service: worker
             dockerfile: backend/Dockerfile.worker
             image: avnu-marketplace-worker
-            build_context: ./backend  # Added
+            build_context: .
 
     steps:
       - name: Checkout code

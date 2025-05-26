@@ -225,7 +225,7 @@ export class PerformanceMetricsCollector {
     // @ts-ignore - TypeScript doesn't know about the Network Information API
     // Use type assertion for deprecated browser API properties
     const connection =
-      navigator.connection ||
+      (navigator as any).connection ||
       (navigator as any).mozConnection ||
       (navigator as any).webkitConnection;
 
