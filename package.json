@@ -2,6 +2,10 @@
   "name": "avnu-marketplace",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "npm run dev:frontend",
     "dev:frontend": "cd frontend && npm run dev",
@@ -16,7 +20,8 @@
     "docker:build": "docker compose build",
     "lint": "npm run lint:frontend",
     "lint:frontend": "cd frontend && npm run lint || true",
-    "lint:backend": "cd backend && npm run lint || true"
+    "lint:backend": "cd backend && npm run lint || true",
+    "preinstall": "npx only-allow npm"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
