@@ -12,8 +12,12 @@ RUN npm ci --legacy-peer-deps
 # Copy source code
 COPY . .
 
-# Build the application
-# Build the backend application, targeting the 'backend' workspace
+# Explicitly install backend workspace dependencies to ensure links/stubs
+WORKDIR /app/backend
+RUN npm install --legacy-peer-deps
+WORKDIR /app
+
+# Prisma generate (if needed, assuming schema is copied by 'COPY . .')
 # Ensure 'backend' is the correct name in your root package.json's workspaces array
 # The build output will typically be in /app/backend/dist
 RUN npm run build --workspace=backend
