@@ -36,7 +36,7 @@ const PersonalizedRecommendations: React.FC<
       if (!userPreferences || !userPreferences.hasEnoughData) {
         // If no preferences or not enough data, fetch featured products instead
         try {
-          const response = await axios.get("/api/products/featured", {
+          const response = await axios.get<Product[]>("/api/products/featured", {
             params: { limit },
           });
           setProducts(response.data);
@@ -52,7 +52,7 @@ const PersonalizedRecommendations: React.FC<
 
       try {
         // Get personalized product IDs
-        const recommendationIds = await axios.get(
+        const recommendationIds = await axios.get<string[]>(
           "/api/user-preference-profile/recommendations",
           {
             params: { limit },
@@ -61,13 +61,13 @@ const PersonalizedRecommendations: React.FC<
 
         if (recommendationIds.data.length === 0) {
           // Fallback to featured products if no recommendations
-          const response = await axios.get("/api/products/featured", {
+          const response = await axios.get<Product[]>("/api/products/featured", {
             params: { limit },
           });
           setProducts(response.data);
         } else {
           // Fetch full product details for recommended products
-          const response = await axios.post("/api/products/batch", {
+          const response = await axios.post<Product[]>("/api/products/batch", {
             ids: recommendationIds.data,
           });
           setProducts(response.data);
