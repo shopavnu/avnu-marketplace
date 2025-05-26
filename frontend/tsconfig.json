@@ -21,10 +21,11 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": [
-        "frontend/src/*"
+        "./src/*"
       ]
     },
-    "baseUrl": "../",
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
   "include": [
     "next-env.d.ts",
