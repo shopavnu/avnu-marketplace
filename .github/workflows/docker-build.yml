@@ -78,7 +78,7 @@ jobs:
       - name: Build and push Worker Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          context: .
           file: ./backend/Dockerfile.worker
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
