@@ -7,6 +7,7 @@
     "backend"
   ],
   "scripts": {
+    "clean-build:backend": "rm -rf node_modules package-lock.json && npm install && npm run build --workspace=backend",
     "dev": "npm run dev:frontend",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run start:dev",
@@ -129,6 +130,7 @@
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.2.29",
+    "husky": "^9.1.7",
     "jest": "^30.0.0-beta.3",
     "typescript": "^5.3.3"
   }
