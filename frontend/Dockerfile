@@ -1,56 +1,71 @@
+# Dockerfile
+# Stage 1: Build the application
 FROM node:20-alpine AS builder
 
+# Set WORKDIR to represent the monorepo root in the container
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Set build-time arguments
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_API_URL
+
+# Set environment variables from build-time arguments for the build stage
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Copy root package.json and package-lock.json
 # These are essential for installing dependencies for the entire monorepo
 COPY package.json ./
 COPY package-lock.json ./
+# If you have a .npmrc file at the root of your monorepo and need it for `npm ci`,
+# uncomment the following line:
+# COPY .npmrc ./
+
+# Install ALL monorepo dependencies using the root package-lock.json
 RUN npm ci --legacy-peer-deps
 
-# Copy source code
-COPY . .
+# Diagnostic: List contents of Clerk package and server subdir
 
-# Define build-time argument for Clerk publishable key
-ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-# Set environment variable from the build-time argument
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+# Copy the entire frontend directory from the build context (monorepo root)
+# into /app/frontend in the builder stage.
+COPY ./frontend ./frontend
 
-# Build the application
-# Build the frontend application, targeting the 'frontend' workspace
-# Ensure 'frontend' is the correct name in your root package.json's workspaces array
-# The build output will typically be in /app/frontend/.next
-RUN npm run build --workspace=frontend
+# Set the working directory to the frontend app for the build
+WORKDIR /app/frontend
 
-# Production stage
-FROM node:20-alpine
+# Build the Next.js application (this will use frontend/package.json scripts)
+RUN npm run build
 
-# Set environment variables
-ENV NODE_ENV=production
+# Stage 2: Production image
+FROM node:20-alpine AS runtime
 
+# Set WORKDIR for the running application
 WORKDIR /app
 
-# Copy built application from builder stage
-# Copy built application artifacts from the builder stage
-# Source paths are relative to /app in the builder stage (monorepo root)
-# Destination paths are relative to /app in this production stage
-COPY --from=builder /app/frontend/.next ./.next
-COPY --from=builder /app/frontend/public ./public
-COPY --from=builder /app/frontend/next.config.js ./next.config.js
+ENV NODE_ENV production
 
-# Copy the frontend's package.json to be the main package.json for this image
-# This is important so that "npm start" uses the scripts defined in frontend's package.json
+# Pass ARG values to ENV for runtime
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+# Copy build artifacts from the builder stage.
+# The built frontend app is in /app/frontend/ in the builder.
+COPY --from=builder /app/frontend/next.config.js ./next.config.js
+COPY --from=builder /app/frontend/public ./public
+COPY --from=builder /app/frontend/.next ./.next
+
+# Copy the frontend's package.json to /app in the runtime stage.
+# This is needed for the `npm run start` command.
 COPY --from=builder /app/frontend/package.json ./package.json
 
-# Copy the node_modules from the builder stage.
-# This includes all dependencies for the monorepo.
-# While not the smallest possible, it ensures all necessary dependencies for the frontend are present.
-# For optimization, consider Next.js standalone output or multi-stage builds that isolate workspace dependencies.
+# Copy the node_modules from the monorepo root in the builder stage.
+# These were installed by `npm ci` at the root and should contain dependencies
+# for all workspaces, including the frontend.
 COPY --from=builder /app/node_modules ./node_modules
 
-# Expose the application port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# CMD will use /app/package.json (which is frontend's) and /app/node_modules (from monorepo root)
+CMD ["npm", "run", "start"]
