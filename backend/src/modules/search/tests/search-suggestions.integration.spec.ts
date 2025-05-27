@@ -6,8 +6,8 @@ import { SearchAnalyticsService } from '../services/search-analytics.service';
 import { PersonalizationService } from '../../personalization/services/personalization.service';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule as _GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver as _ApolloDriver, ApolloDriverConfig as _ApolloDriverConfig } from '@nestjs/apollo';
 
 describe('Search Suggestions Integration', () => {
   let searchSuggestionService: SearchSuggestionService;

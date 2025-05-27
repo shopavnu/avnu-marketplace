@@ -18,7 +18,7 @@ import { WebhookMonitorService } from './webhook-monitor.service';
 import { WebhookRetryService } from './webhook-retry.service';
 import { WebhookMetricsService } from './webhook-metrics.service';
 import { WebhookQueueModule } from './webhook-queue.module';
-import { DistributedWebhookProcessor } from './distributed-webhook-processor';
+import { DistributedWebhookProcessor as _DistributedWebhookProcessor } from './distributed-webhook-processor';
 import { ShopifyWebhookController } from './webhook-controller';
 import { QueueDashboardController } from './queue-dashboard.controller';
 import { QueueDashboardModule } from './queue-dashboard.module';

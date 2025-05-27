@@ -24,3 +24,8 @@ Thumbs.db
 .vscode
 .idea
 *.swp
+
+# Test directories
+backend/src/test
+backend/test
+frontend/src/tests

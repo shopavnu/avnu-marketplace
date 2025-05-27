@@ -6,7 +6,7 @@ import { OrdersModule } from '../orders/orders.module';
 import { MerchantsModule } from '../merchants/merchants.module';
 import { ShopifyService } from './services/shopify.service';
 // WooCommerce references removed as part of Shopify-first approach
-import { BaseIntegrationService } from './services/base-integration.service';
+import { BaseIntegrationService as _BaseIntegrationService } from './services/base-integration.service';
 import { IntegrationsController } from './integrations.controller';
 import { MerchantAuthController } from './controllers/merchant-auth.controller';
 import { IntegrationsService } from './integrations.service';
