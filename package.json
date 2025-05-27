@@ -131,6 +131,7 @@
     "@types/react": "^18.2.52",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "bs-logger": "^0.2.6",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.2.29",
     "husky": "^9.1.7",
