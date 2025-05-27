@@ -50,6 +50,9 @@ jobs:
         with:
           context: .
           file: ./frontend/Dockerfile
+          build-args: |
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+            CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.OWNER }}/avnu-frontend:${{ steps.vars.outputs.SHORT_SHA }}
