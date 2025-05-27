@@ -134,8 +134,10 @@
     "bs-logger": "^0.2.6",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.2.29",
+    "exit": "^0.1.2",
     "husky": "^9.1.7",
     "jest": "^30.0.0-beta.3",
+    "lodash.memoize": "^4.1.2",
     "typescript": "^5.3.3"
   }
 }
