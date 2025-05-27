@@ -46,7 +46,7 @@ jobs:
           cache-dependency-path: 'backend/package-lock.json'
       
       - name: Install dependencies
-        run: cd backend && npm ci
+        run: npm ci
         
       - name: Run ESLint
         run: cd backend && npm run lint

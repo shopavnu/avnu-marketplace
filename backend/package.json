@@ -97,7 +97,8 @@
     "stripe": "^12.18.0",
     "typeorm": "^0.3.17",
     "uuid": "^11.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "date-fns": "^3.6.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",
