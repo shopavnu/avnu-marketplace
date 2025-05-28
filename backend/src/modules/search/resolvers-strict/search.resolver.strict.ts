@@ -9,7 +9,7 @@ import {
   MerchantResultType,
   BrandResultType,
   PaginationType,
-  FacetType,
+  FacetType as _FacetType,
 } from '../graphql/search-response.type';
 import { Product } from '../../products/entities/product.entity';
 import { Merchant } from '../../merchants/entities/merchant.entity';
