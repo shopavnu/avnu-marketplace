@@ -13,6 +13,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/src/main.js",
     "start:dev": "npx nest start --watch",
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
     "start:debug": "npx nest start --debug --watch",
     "start:prod": "node start-prod.js",
     "init-search-indices": "node scripts/init-search-indices.js",
