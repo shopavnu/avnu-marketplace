@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/src/main.js",
+    "start": "node -r tsconfig-paths/register dist/src/main.js",
     "start:dev": "npx nest start --watch",
     "start:debug": "npx nest start --debug --watch",
     "start:prod": "node start-prod.js",
@@ -72,6 +72,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
     "express": "^4.18.2",
     "graphql": "^16.10.0",
     "graphql-http": "^1.22.4",
@@ -97,8 +98,7 @@
     "stripe": "^12.18.0",
     "typeorm": "^0.3.17",
     "uuid": "^11.1.0",
-    "winston": "^3.17.0",
-    "date-fns": "^3.6.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",
