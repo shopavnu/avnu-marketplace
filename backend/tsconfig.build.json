@@ -10,7 +10,14 @@
     "strictNullChecks": false,
     "noImplicitThis": false,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "baseUrl": "./src",
+    "paths": {
+      "@app/*": ["./*"],
+      "@config/*": ["config/*"],
+      "@modules/*": ["modules/*"],
+      "@common/*": ["common/*"]
+    }
   },
   "exclude": [
     "node_modules",

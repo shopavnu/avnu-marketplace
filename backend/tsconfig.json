@@ -10,7 +10,6 @@
     "target": "ES2020",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./src",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -20,12 +19,6 @@
     "noFallthroughCasesInSwitch": false,
     "useDefineForClassFields": false,
     "ignoreDeprecations": "5.0",
-    "paths": {
-      "@app/*": ["./*"],
-      "@config/*": ["config/*"],
-      "@modules/*": ["modules/*"],
-      "@common/*": ["common/*"]
-    }
   },
   "exclude": ["scripts/**/*", "node_modules", "dist", "__mocks__/**/*"]
 }
