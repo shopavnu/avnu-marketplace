@@ -10,7 +10,7 @@
     "target": "ES2020",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "../",
+    "baseUrl": "./src",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -21,10 +21,10 @@
     "useDefineForClassFields": false,
     "ignoreDeprecations": "5.0",
     "paths": {
-      "@app/*": ["backend/src/*"],
-      "@config/*": ["backend/src/config/*"],
-      "@modules/*": ["backend/src/modules/*"],
-      "@common/*": ["backend/src/common/*"]
+      "@app/*": ["./*"],
+      "@config/*": ["config/*"],
+      "@modules/*": ["modules/*"],
+      "@common/*": ["common/*"]
     }
   },
   "exclude": ["scripts/**/*", "node_modules", "dist", "__mocks__/**/*"]
