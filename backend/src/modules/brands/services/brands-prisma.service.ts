@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class BrandsPrismaService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   async findAll(options?: { skip?: number; take?: number; includeProducts?: boolean }) {
     const { skip = 0, take = 10, includeProducts = false } = options || {};
