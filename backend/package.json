@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node -r tsconfig-paths/register dist/src/main.js",
+    "start": "TS_NODE_PROJECT=tsconfig.json node -r tsconfig-paths/register dist/src/main.js",
     "start:dev": "npx nest start --watch",
     "start:debug": "npx nest start --debug --watch",
     "start:prod": "node start-prod.js",
