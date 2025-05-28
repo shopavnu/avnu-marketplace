@@ -9,7 +9,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json --outDir dist/src",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/src/main.js",
     "start:dev": "npx nest start --watch",
