@@ -8,7 +8,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 // No need for type imports as we're using direct configuration
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const redisStore = require('cache-manager-redis-store').default;
-import { CommonModule } from '@common/common.module';
+import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma';
 import { ProductsPrismaModule } from '@modules/products/products-prisma.module';

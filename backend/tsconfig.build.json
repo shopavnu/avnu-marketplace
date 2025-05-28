@@ -13,7 +13,7 @@
     "noUnusedParameters": false,
     "baseUrl": "./src",
     "paths": {
-      "@app/*": ["./*"],
+      "@app/*": ["*"],
       "@config/*": ["config/*"],
       "@modules/*": ["modules/*"],
       "@common/*": ["common/*"],
