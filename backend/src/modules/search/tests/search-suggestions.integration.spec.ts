@@ -7,7 +7,7 @@ import { PersonalizationService } from '../../personalization/services/personali
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { GraphQLModule as _GraphQLModule } from '@nestjs/graphql';
-import { 
+import {
   ApolloDriver as _ApolloDriver,
   ApolloDriverConfig as _ApolloDriverConfig,
 } from '@nestjs/apollo';
