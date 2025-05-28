@@ -16,7 +16,8 @@
       "@app/*": ["./*"],
       "@config/*": ["config/*"],
       "@modules/*": ["modules/*"],
-      "@common/*": ["common/*"]
+      "@common/*": ["common/*"],
+      "@common/common.module": ["common/common.module"]
     }
   },
   "exclude": [
