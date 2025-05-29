@@ -75,7 +75,7 @@ function createRedisClient(
   const redisOptions: IORedis.RedisOptions = {
     host: configService.get('REDIS_HOST', 'localhost'),
     port: configService.get<number>('REDIS_PORT', 6379),
-    password: configService.get('REDIS_PASSWORD', ''),
+    password: configService.get('REDIS_PASSWORD'), // do not default to empty string
     tls: configService.get('REDIS_TLS_ENABLED') === 'true' ? {} : undefined,
     reconnectOnError: err => {
       // Only reconnect on specific errors
@@ -91,6 +91,15 @@ function createRedisClient(
     enableOfflineQueue: true, // Queue commands when disconnected
     ...options,
   };
+
+  // Debug log to verify Redis config (do not print actual password)
+  console.log('[ioredis] Creating Redis client:', {
+    host: redisOptions.host,
+    port: redisOptions.port,
+    db: redisOptions.db,
+    keyPrefix: redisOptions.keyPrefix,
+    passwordIsSet: !!redisOptions.password
+  });
 
   const client = new Redis(redisOptions);
 
