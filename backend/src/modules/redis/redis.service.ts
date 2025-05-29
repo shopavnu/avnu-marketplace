@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import client from '../../../redisClient';
+import client from '../../redisClient';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
