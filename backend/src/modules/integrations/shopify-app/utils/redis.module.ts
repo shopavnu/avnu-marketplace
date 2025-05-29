@@ -98,7 +98,7 @@ function createRedisClient(
     port: redisOptions.port,
     db: redisOptions.db,
     keyPrefix: redisOptions.keyPrefix,
-    passwordIsSet: !!redisOptions.password
+    passwordIsSet: !!redisOptions.password,
   });
 
   const client = new Redis(redisOptions);
