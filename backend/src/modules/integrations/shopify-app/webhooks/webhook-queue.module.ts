@@ -20,19 +20,25 @@ import { ShopifyStructuredLogger as _ShopifyStructuredLogger } from '../utils/st
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-          password: configService.get('REDIS_PASSWORD', ''),
-          db: configService.get('REDIS_QUEUE_DB', 1), // Use a separate DB from cache
-        },
-        prefix: 'shopify:', // Prefix for queue names
-        defaultJobOptions: {
-          removeOnComplete: 100, // Keep only the latest 100 completed jobs
-          removeOnFail: 1000, // Keep the latest 1000 failed jobs for debugging
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        // Debug log to verify Redis password is set (does not print actual password)
+        console.log('[Bull Redis] REDIS_HOST:', configService.get('REDIS_HOST'));
+        console.log('[Bull Redis] REDIS_PORT:', configService.get('REDIS_PORT'));
+        console.log('[Bull Redis] REDIS_PASSWORD is set:', !!configService.get('REDIS_PASSWORD'));
+        return {
+          redis: {
+            host: configService.get('REDIS_HOST', 'localhost'),
+            port: configService.get('REDIS_PORT', 6379),
+            password: configService.get('REDIS_PASSWORD'), // do not default to empty string
+            db: configService.get('REDIS_QUEUE_DB', 1), // Use a separate DB from cache
+          },
+          prefix: 'shopify:', // Prefix for queue names
+          defaultJobOptions: {
+            removeOnComplete: 100, // Keep only the latest 100 completed jobs
+            removeOnFail: 1000, // Keep the latest 1000 failed jobs for debugging
+          },
+        };
+      },
     }),
     BullModule.registerQueue({
       name: 'shopify-webhooks',
