@@ -75,6 +75,7 @@ function createRedisClient(
   const redisOptions: IORedis.RedisOptions = {
     host: configService.get('REDIS_HOST', 'localhost'),
     port: configService.get<number>('REDIS_PORT', 6379),
+    username: configService.get('REDIS_USERNAME', 'default'),
     password: configService.get('REDIS_PASSWORD'), // do not default to empty string
     tls: configService.get('REDIS_TLS_ENABLED') === 'true' ? {} : undefined,
     reconnectOnError: err => {
@@ -98,6 +99,7 @@ function createRedisClient(
     port: redisOptions.port,
     db: redisOptions.db,
     keyPrefix: redisOptions.keyPrefix,
+    username: redisOptions.username,
     passwordIsSet: !!redisOptions.password,
   });
 
