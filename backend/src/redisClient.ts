@@ -19,9 +19,10 @@ const redisOptions: RedisOptions = {
   enableOfflineQueue: true,
 };
 
+const { password: _password, ...optionsToLog } = redisOptions; // Destructure to remove password
 console.log('[ioredis DEBUG] redisClient.ts options:', {
-  ...redisOptions,
-  passwordIsSet: !!redisOptions.password, // Log whether password string exists, not its value
+  ...optionsToLog,
+  passwordIsSet: !!_password, // Log whether password string exists
 });
 
 const client = new Redis(redisOptions);
