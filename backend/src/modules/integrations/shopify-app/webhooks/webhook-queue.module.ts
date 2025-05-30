@@ -1,79 +1,87 @@
+import { BullModule } from '@nestjs/bullmq'; // bullmq uses different import
 import { Module, forwardRef } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DistributedWebhookProcessor } from './distributed-webhook-processor';
-import { ShopifyWebhooksModule } from './webhooks.module';
-import { WebhookRegistry as _WebhookRegistry } from './webhook-registry';
-import { WebhookValidator as _WebhookValidator } from './webhook-validator';
-import { ShopifyWebhookDeduplicator as _ShopifyWebhookDeduplicator } from '../utils/webhook-deduplicator';
-import { ShopifyStructuredLogger as _ShopifyStructuredLogger } from '../utils/structured-logger';
+import { Logger } from '@nestjs/common'; // Import Logger
 
-/**
- * Module for distributed webhook processing using Bull queue
- *
- * This module sets up Bull queue with Redis for reliable webhook processing
- * across multiple instances.
- */
+// Keep existing imports for processors, services etc.
+import { DistributedWebhookProcessor } from './distributed-webhook-processor'; // Assuming this is the correct processor for bullmq
+import { ShopifyWebhooksModule } from './webhooks.module';
+// Remove unused imports if any, or ensure they are compatible with bullmq
+// import { WebhookRegistry as _WebhookRegistry } from './webhook-registry';
+// import { WebhookValidator as _WebhookValidator } from './webhook-validator';
+// import { ShopifyWebhookDeduplicator as _ShopifyWebhookDeduplicator } from '../utils/webhook-deduplicator';
+// import { ShopifyStructuredLogger as _ShopifyStructuredLogger } from '../utils/structured-logger';
+
 @Module({
   imports: [
-    forwardRef(() => ShopifyWebhooksModule), // Added to provide WebhookRegistry and other dependencies
+    forwardRef(() => ShopifyWebhooksModule), 
+    ConfigModule, // Ensure ConfigModule is available
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const host = configService.get<string>('REDIS_HOST');
-        const port = parseInt(configService.get<string>('REDIS_PORT') || '6379', 10);
-        const username = configService.get<string>('REDIS_USERNAME') || 'default';
-        const password = configService.get<string>('REDIS_PASSWORD');
+      useFactory: async (configService: ConfigService) => {
+        const logger = new Logger('WebhookQueueModule'); // Instantiate Logger
 
-        console.log('[Bull Redis] Attempting to connect with options:');
-        console.log(`[Bull Redis]   Host: ${host}`);
-        console.log(`[Bull Redis]   Port: ${port}`);
-        console.log(`[Bull Redis]   Username: ${username}`);
-        console.log(`[Bull Redis]   Password is set: ${!!password}`);
-        // DO NOT log the actual password value here in production code
+        // Raw environment variables for BullMQ connection
+        const rawRedisHost = configService.get<string>('REDIS_HOST');
+        const rawRedisPort = configService.get<string>('REDIS_PORT');
+        const rawRedisUsername = configService.get<string>('REDIS_USERNAME');
+        const rawRedisPassword = configService.get<string>('REDIS_PASSWORD');
+        const rawRedisTlsEnabled = configService.get<string>('REDIS_TLS_ENABLED');
 
-        const redisOptions: any = {
-          host,
-          port,
+        logger.log(`BullMQ Raw REDIS_HOST: ${rawRedisHost}`);
+        logger.log(`BullMQ Raw REDIS_PORT: ${rawRedisPort}`);
+        logger.log(`BullMQ Raw REDIS_USERNAME: ${rawRedisUsername}`);
+        logger.log(`BullMQ Raw REDIS_PASSWORD is set: ${!!rawRedisPassword}`);
+        logger.log(`BullMQ Raw REDIS_TLS_ENABLED: "${rawRedisTlsEnabled}", type: ${typeof rawRedisTlsEnabled}`);
+
+        // Robust parsing for REDIS_TLS_ENABLED
+        const enableTls = typeof rawRedisTlsEnabled === 'string' && 
+                          rawRedisTlsEnabled.toLowerCase().trim() === 'true';
+        
+        logger.log(`BullMQ Parsed enableTls: ${enableTls}`);
+
+        const connectionOptions = {
+          host: rawRedisHost,
+          port: Number(rawRedisPort),
+          username: rawRedisUsername || 'default',
+          password: rawRedisPassword,
+          tls: enableTls ? {} : undefined, // Explicitly set TLS options for BullMQ
         };
 
-        if (username) {
-          redisOptions.username = username;
-        }
-        if (password) {
-          redisOptions.password = password;
-        }
-
-        // Add TLS option if REDIS_TLS_ENABLED is true
-        const tlsEnabled = configService.get<string>('REDIS_TLS_ENABLED');
-        if (tlsEnabled === 'true') {
-          redisOptions.tls = {}; // Enable TLS, ioredis will use default TLS options
-          // or you can specify certs etc. if needed: { ca: fs.readFileSync('path/to/ca.crt') }
-          console.log('[Bull Redis]   TLS: enabled');
-        } else {
-          console.log('[Bull Redis]   TLS: disabled');
-        }
+        // Log the connection options that will be used (mask password)
+        const loggableConnectionOptions = {
+          ...connectionOptions,
+          password: connectionOptions.password ? '********' : undefined,
+        };
+        logger.log('BullMQ attempting to connect to Redis with options:');
+        logger.log(JSON.stringify(loggableConnectionOptions, null, 2));
 
         return {
-          connection: redisOptions, // Changed from 'redis' to 'connection' for BullMQ v5+
+          connection: connectionOptions,
           defaultJobOptions: {
-            removeOnComplete: 100, // Keep only the latest 100 completed jobs
-            removeOnFail: 1000, // Keep the latest 1000 failed jobs for debugging
+            attempts: 3, // Number of times to retry a job if it fails
+            backoff: {
+              type: 'exponential',
+              delay: 1000, // Initial delay in ms
+            },
+            removeOnComplete: true, // Remove job from queue once completed
+            removeOnFail: 100, // Keep 100 failed jobs
           },
         };
       },
     }),
     BullModule.registerQueue({
-      name: 'shopify-webhooks',
-      limiter: {
-        max: 200, // Max 200 jobs processed per time window
-        duration: 1000, // Per 1 second (effectively 200 jobs/sec)
-        bounceBack: false, // Don't bounce jobs back to queue
-      },
+      name: 'shopify-webhooks', // Ensure this name matches your processor
+      // BullMQ specific limiter options might differ from bull
+      // Example limiter for BullMQ (adjust as needed):
+      // limiter: {
+      //   max: 200,
+      //   duration: 1000,
+      // },
     }),
   ],
-  providers: [DistributedWebhookProcessor],
-  exports: [DistributedWebhookProcessor],
+  providers: [DistributedWebhookProcessor], // Ensure processor is correctly set up for bullmq
+  exports: [BullModule], // Export BullModule to make queues available in other modules
 })
 export class WebhookQueueModule {}
