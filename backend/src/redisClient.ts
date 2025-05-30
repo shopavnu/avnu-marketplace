@@ -21,7 +21,7 @@ const redisOptions: RedisOptions = {
 
 console.log('[ioredis DEBUG] redisClient.ts options:', {
   ...redisOptions,
-  password: !!redisOptions.password,
+  passwordIsSet: !!redisOptions.password, // Log whether password string exists, not its value
 });
 
 const client = new Redis(redisOptions);
