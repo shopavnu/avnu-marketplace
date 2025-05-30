@@ -93,11 +93,9 @@ function createRedisClient(
     },
     // Default options that can be overridden
     lazyConnect: true, // Don't connect immediately
-
-  // Log the entire redisOptions for troubleshooting
   };
+  // Log the entire redisOptions for troubleshooting
   console.log('[ioredis DEBUG] Redis options:', redisOptions);
-
   // Continue with Redis client creation
     enableOfflineQueue: true, // Queue commands when disconnected
     ...options,
