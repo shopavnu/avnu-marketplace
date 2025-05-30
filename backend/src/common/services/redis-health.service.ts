@@ -19,18 +19,18 @@ export class RedisHealthService implements OnModuleInit {
     this.healthCheckTTL = this.configService.get<number>('REDIS_HEALTH_CHECK_TTL', 60); // 60 seconds
     // Debug log for cacheManager store
     console.log(
-    '[ioredis DEBUG] RedisHealthService constructed. cacheManager.store type:',
-    typeof this.cacheManager.store,
-  );
+      '[ioredis DEBUG] RedisHealthService constructed. cacheManager.store type:',
+      typeof this.cacheManager.store,
+    );
     // Type guard and safe cast for debug logging only
     const storeAny = this.cacheManager.store as any;
     if (storeAny && typeof storeAny.getClient === 'function') {
       const client = storeAny.getClient();
       if (client && client.constructor) {
         console.log(
-    '[ioredis DEBUG] RedisHealthService underlying client constructor:',
-    client.constructor.name,
-  );
+          '[ioredis DEBUG] RedisHealthService underlying client constructor:',
+          client.constructor.name,
+        );
       }
     }
   }
