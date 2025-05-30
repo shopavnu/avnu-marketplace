@@ -15,7 +15,9 @@ export class ClerkAuthService {
     this.clerkSecretKey = this.configService.get<string>('CLERK_SECRET_KEY');
 
     if (!this.clerkJwtKey && !this.clerkSecretKey) {
-      throw new Error('Neither CLERK_JWT_KEY nor CLERK_SECRET_KEY is defined in the environment variables');
+      throw new Error(
+        'Neither CLERK_JWT_KEY nor CLERK_SECRET_KEY is defined in the environment variables',
+      );
     }
 
     // Initialize the Clerk backend client
@@ -47,9 +49,7 @@ export class ClerkAuthService {
    */
   async verifyToken(token: string): Promise<JwtPayload | null> {
     if (!this.clerkJwtKey && !this.clerkSecretKey) {
-      console.error(
-        'Clerk JWT Key or Secret Key not provided. Token verification skipped.',
-      );
+      console.error('Clerk JWT Key or Secret Key not provided. Token verification skipped.');
       return null;
     }
 
@@ -63,7 +63,12 @@ export class ClerkAuthService {
       // { data: JwtPayload; errors?: never } | { data?: never; errors: TokenVerificationError[] }
 
       // Check for the 'errors' property to identify the FailedJwtReturn case
-      if ('errors' in result && result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+      if (
+        'errors' in result &&
+        result.errors &&
+        Array.isArray(result.errors) &&
+        result.errors.length > 0
+      ) {
         console.error('Token verification failed (returned errors):', result.errors);
         return null;
       }
@@ -74,9 +79,12 @@ export class ClerkAuthService {
         // and result.data as JwtPayload. If not, assert the type.
         return result.data as JwtPayload;
       }
-      
+
       // Fallback: This case should ideally not be reached if the discriminated union is strictly one or the other.
-      console.warn('Token verification result was inconclusive (neither expected data nor errors structure found).', result);
+      console.warn(
+        'Token verification result was inconclusive (neither expected data nor errors structure found).',
+        result,
+      );
       return null;
     } catch (error) {
       // This catch block handles unexpected errors during the verification process itself (e.g., network issues if not networkless)

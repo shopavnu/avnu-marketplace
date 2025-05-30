@@ -19,6 +19,22 @@
     "noFallthroughCasesInSwitch": false,
     "useDefineForClassFields": false,
     "ignoreDeprecations": "5.0",
+    "moduleResolution": "node", // Explicitly set moduleResolution
+    "baseUrl": ".", // Needed for paths to work
+    "paths": {
+      "@clerk/backend": [
+        "node_modules/@clerk/backend/dist/index.d.ts",
+        "../node_modules/@clerk/backend/dist/index.d.ts"
+      ],
+      "@clerk/express": [
+        "node_modules/@clerk/express/dist/index.d.ts",
+        "../node_modules/@clerk/express/dist/index.d.ts"
+      ]  
+    }
   },
+  "include": [ // Added include array
+    "src/**/*",
+    "test/**/*"
+  ],
   "exclude": ["scripts/**/*", "node_modules", "dist", "__mocks__/**/*"]
 }
