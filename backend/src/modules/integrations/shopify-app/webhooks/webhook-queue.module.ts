@@ -85,6 +85,6 @@ import { ShopifyWebhooksModule } from './webhooks.module';
     }),
   ],
   providers: [DistributedWebhookProcessor], // Ensure processor is correctly set up for bullmq
-  exports: [BullModule], // Export BullModule to make queues available in other modules
+  exports: [BullModule, DistributedWebhookProcessor], // Export BullModule and DistributedWebhookProcessor
 })
 export class WebhookQueueModule {}
