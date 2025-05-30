@@ -12,7 +12,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "baseUrl": "./src",
-    "outDir": "./dist",
+    "outDir": "./dist/src",
     "paths": {
       "@app/*": ["*"],
       "@config/*": ["config/*"],
