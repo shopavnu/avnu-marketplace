@@ -72,10 +72,14 @@ function createRedisClient(
   configService: ConfigService,
   options: IORedis.RedisOptions = {},
 ): IORedis.Redis {
+  // Explicit debug log for REDIS_USERNAME
+  console.log('[ioredis DEBUG] REDIS_USERNAME:', configService.get('REDIS_USERNAME'));
+
   const redisOptions: IORedis.RedisOptions = {
     host: configService.get('REDIS_HOST', 'localhost'),
     port: configService.get<number>('REDIS_PORT', 6379),
-    username: configService.get('REDIS_USERNAME', 'default'),
+    // Hardcoding username for Redis Cloud troubleshooting
+    username: 'default',
     password: configService.get('REDIS_PASSWORD'), // do not default to empty string
     tls: configService.get('REDIS_TLS_ENABLED') === 'true' ? {} : undefined,
     reconnectOnError: err => {
@@ -89,6 +93,12 @@ function createRedisClient(
     },
     // Default options that can be overridden
     lazyConnect: true, // Don't connect immediately
+
+  // Log the entire redisOptions for troubleshooting
+  };
+  console.log('[ioredis DEBUG] Redis options:', redisOptions);
+
+  // Continue with Redis client creation
     enableOfflineQueue: true, // Queue commands when disconnected
     ...options,
   };
