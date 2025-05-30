@@ -35,7 +35,7 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
             host: configService.get('REDIS_HOST', 'localhost'),
             port: configService.get('REDIS_PORT', 6379),
             password: configService.get('REDIS_PASSWORD'), // do not default to empty string
-            db: configService.get('REDIS_QUEUE_DB', 1),
+            db: configService.get('REDIS_QUEUE_DB', 0), // Default to DB 0
           },
         };
       },
