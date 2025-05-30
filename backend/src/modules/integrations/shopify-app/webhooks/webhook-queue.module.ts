@@ -21,18 +21,42 @@ import { ShopifyStructuredLogger as _ShopifyStructuredLogger } from '../utils/st
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        // Debug log to verify Redis password is set (does not print actual password)
-        console.log('[Bull Redis] REDIS_HOST:', configService.get('REDIS_HOST'));
-        console.log('[Bull Redis] REDIS_PORT:', configService.get('REDIS_PORT'));
-        console.log('[Bull Redis] REDIS_PASSWORD is set:', !!configService.get('REDIS_PASSWORD'));
+        const host = configService.get<string>('REDIS_HOST');
+        const port = parseInt(configService.get<string>('REDIS_PORT') || '6379', 10);
+        const username = configService.get<string>('REDIS_USERNAME') || 'default';
+        const password = configService.get<string>('REDIS_PASSWORD');
+
+        console.log('[Bull Redis] Attempting to connect with options:');
+        console.log(`[Bull Redis]   Host: ${host}`);
+        console.log(`[Bull Redis]   Port: ${port}`);
+        console.log(`[Bull Redis]   Username: ${username}`);
+        console.log(`[Bull Redis]   Password is set: ${!!password}`);
+        // DO NOT log the actual password value here in production code
+
+        const redisOptions: any = {
+          host,
+          port,
+        };
+
+        if (username) {
+          redisOptions.username = username;
+        }
+        if (password) {
+          redisOptions.password = password;
+        }
+        
+        // Add TLS option if REDIS_TLS_ENABLED is true
+        const tlsEnabled = configService.get<string>('REDIS_TLS_ENABLED');
+        if (tlsEnabled === 'true') {
+          redisOptions.tls = {}; // Enable TLS, ioredis will use default TLS options
+                                  // or you can specify certs etc. if needed: { ca: fs.readFileSync('path/to/ca.crt') }
+          console.log('[Bull Redis]   TLS: enabled');
+        } else {
+          console.log('[Bull Redis]   TLS: disabled');
+        }
+
         return {
-          redis: {
-            host: configService.get('REDIS_HOST', 'localhost'),
-            port: configService.get('REDIS_PORT', 6379),
-            password: configService.get('REDIS_PASSWORD'), // do not default to empty string
-            db: configService.get('REDIS_QUEUE_DB', 1), // Use a separate DB from cache
-          },
-          prefix: 'shopify:', // Prefix for queue names
+          connection: redisOptions, // Changed from 'redis' to 'connection' for BullMQ v5+
           defaultJobOptions: {
             removeOnComplete: 100, // Keep only the latest 100 completed jobs
             removeOnFail: 1000, // Keep the latest 1000 failed jobs for debugging
