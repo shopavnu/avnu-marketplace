@@ -44,12 +44,12 @@ import { ShopifyStructuredLogger as _ShopifyStructuredLogger } from '../utils/st
         if (password) {
           redisOptions.password = password;
         }
-        
+
         // Add TLS option if REDIS_TLS_ENABLED is true
         const tlsEnabled = configService.get<string>('REDIS_TLS_ENABLED');
         if (tlsEnabled === 'true') {
           redisOptions.tls = {}; // Enable TLS, ioredis will use default TLS options
-                                  // or you can specify certs etc. if needed: { ca: fs.readFileSync('path/to/ca.crt') }
+          // or you can specify certs etc. if needed: { ca: fs.readFileSync('path/to/ca.crt') }
           console.log('[Bull Redis]   TLS: enabled');
         } else {
           console.log('[Bull Redis]   TLS: disabled');
