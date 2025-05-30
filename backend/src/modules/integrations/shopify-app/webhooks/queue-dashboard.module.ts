@@ -26,7 +26,10 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
         // Debug log to verify Redis password is set (does not print actual password)
         console.log('[BullMQ Dashboard Redis] REDIS_HOST:', configService.get('REDIS_HOST'));
         console.log('[BullMQ Dashboard Redis] REDIS_PORT:', configService.get('REDIS_PORT'));
-        console.log('[BullMQ Dashboard Redis] REDIS_PASSWORD is set:', !!configService.get('REDIS_PASSWORD'));
+        console.log(
+          '[BullMQ Dashboard Redis] REDIS_PASSWORD is set:',
+          !!configService.get('REDIS_PASSWORD'),
+        );
         return {
           connection: {
             host: configService.get('REDIS_HOST', 'localhost'),
