@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
+
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { MerchantPlatformConnection } from '../../entities/merchant-platform-connection.entity';
@@ -55,7 +55,6 @@ import { ShopifyBulkOperationJob } from '../entities/shopify-bulk-operation-job.
     ShopifyScalabilityModule,
     forwardRef(() => WebhookQueueModule),
     QueueDashboardModule,
-    BullModule.registerQueue({ name: 'shopify-webhooks' }),
   ],
   controllers: [ShopifyWebhookController, QueueDashboardController],
   providers: [

@@ -14,7 +14,7 @@ import { ShopifyWebhooksModule } from './webhooks.module';
 
 @Module({
   imports: [
-    forwardRef(() => ShopifyWebhooksModule), 
+    forwardRef(() => ShopifyWebhooksModule),
     ConfigModule, // Ensure ConfigModule is available
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -33,12 +33,15 @@ import { ShopifyWebhooksModule } from './webhooks.module';
         logger.log(`BullMQ Raw REDIS_PORT: ${rawRedisPort}`);
         logger.log(`BullMQ Raw REDIS_USERNAME: ${rawRedisUsername}`);
         logger.log(`BullMQ Raw REDIS_PASSWORD is set: ${!!rawRedisPassword}`);
-        logger.log(`BullMQ Raw REDIS_TLS_ENABLED: "${rawRedisTlsEnabled}", type: ${typeof rawRedisTlsEnabled}`);
+        logger.log(
+          `BullMQ Raw REDIS_TLS_ENABLED: "${rawRedisTlsEnabled}", type: ${typeof rawRedisTlsEnabled}`,
+        );
 
         // Robust parsing for REDIS_TLS_ENABLED
-        const enableTls = typeof rawRedisTlsEnabled === 'string' && 
-                          rawRedisTlsEnabled.toLowerCase().trim() === 'true';
-        
+        const enableTls =
+          typeof rawRedisTlsEnabled === 'string' &&
+          rawRedisTlsEnabled.toLowerCase().trim() === 'true';
+
         logger.log(`BullMQ Parsed enableTls: ${enableTls}`);
 
         const connectionOptions = {

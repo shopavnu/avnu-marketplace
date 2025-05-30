@@ -18,8 +18,8 @@ logger.log(`Raw REDIS_PASSWORD is set: ${!!rawRedisPassword}`);
 logger.log(`Raw REDIS_TLS_ENABLED: "${rawRedisTlsEnabled}", type: ${typeof rawRedisTlsEnabled}`);
 
 // Robust parsing for REDIS_TLS_ENABLED
-const enableTls = typeof rawRedisTlsEnabled === 'string' && 
-                  rawRedisTlsEnabled.toLowerCase().trim() === 'true';
+const enableTls =
+  typeof rawRedisTlsEnabled === 'string' && rawRedisTlsEnabled.toLowerCase().trim() === 'true';
 
 logger.log(`Parsed enableTls: ${enableTls}`);
 
@@ -32,15 +32,15 @@ const redisOptions: RedisOptions = {
   lazyConnect: true,
   enableOfflineQueue: true,
   maxRetriesPerRequest: 3, // Optional: helps with transient network issues
-  connectTimeout: 15000,   // Optional: increased timeout
+  connectTimeout: 15000, // Optional: increased timeout
   // It might be useful to add a name for the connection for logging/debugging purposes in Redis itself
-  // connectionName: `avnu-marketplace-backend-${process.env.NODE_ENV || 'unknown'}`, 
+  // connectionName: `avnu-marketplace-backend-${process.env.NODE_ENV || 'unknown'}`,
 };
 
 // Log the options that will be used (mask password)
-const loggableOptions = { 
-  ...redisOptions, 
-  password: redisOptions.password ? '********' : undefined 
+const loggableOptions = {
+  ...redisOptions,
+  password: redisOptions.password ? '********' : undefined,
 };
 logger.log('Attempting to connect to Redis with options:');
 logger.log(JSON.stringify(loggableOptions, null, 2));
@@ -51,7 +51,7 @@ redisClient.on('connect', () => {
   logger.log('Successfully connected to Redis.');
 });
 
-redisClient.on('error', (err) => {
+redisClient.on('error', err => {
   logger.error('Redis connection error:', err.message);
   // Log the options again on error to correlate with failure
   logger.error('Redis options at time of error: ' + JSON.stringify(loggableOptions, null, 2));
