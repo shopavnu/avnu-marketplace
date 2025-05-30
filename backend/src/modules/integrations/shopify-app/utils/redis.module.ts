@@ -67,10 +67,7 @@ export class RedisModule {}
 /**
  * Create a Redis client with appropriate error handling and configuration
  */
-function createRedisClient(
-  configService: ConfigService,
-  options: RedisOptions = {},
-): Redis {
+function createRedisClient(configService: ConfigService, options: RedisOptions = {}): Redis {
   // Explicit debug log for REDIS_USERNAME
   console.log('[ioredis DEBUG] REDIS_USERNAME:', configService.get('REDIS_USERNAME'));
 
