@@ -30,11 +30,13 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
           '[BullMQ Dashboard Redis] REDIS_PASSWORD is set:',
           !!configService.get('REDIS_PASSWORD'),
         );
+        console.log('[BullMQ Dashboard Redis] REDIS_USERNAME:', configService.get('REDIS_USERNAME'));
         return {
           connection: {
             host: configService.get('REDIS_HOST', 'localhost'),
             port: configService.get('REDIS_PORT', 6379),
             password: configService.get('REDIS_PASSWORD'), // do not default to empty string
+            username: configService.get('REDIS_USERNAME'), // Add username
             db: configService.get('REDIS_QUEUE_DB', 0), // Default to DB 0
           },
         };
