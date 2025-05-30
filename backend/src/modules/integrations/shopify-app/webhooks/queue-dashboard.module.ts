@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { BullModule, getQueueToken } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { BullModule, getQueueToken } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { RouterModule } from '@nestjs/core';
 import { createBullBoard } from '@bull-board/api';
-import { BullAdapter } from '@bull-board/api/bullAdapter';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ShopifyScalabilityModule } from '../utils/scalability.module';
@@ -24,17 +24,16 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         // Debug log to verify Redis password is set (does not print actual password)
-        console.log('[Bull Redis] REDIS_HOST:', configService.get('REDIS_HOST'));
-        console.log('[Bull Redis] REDIS_PORT:', configService.get('REDIS_PORT'));
-        console.log('[Bull Redis] REDIS_PASSWORD is set:', !!configService.get('REDIS_PASSWORD'));
+        console.log('[BullMQ Dashboard Redis] REDIS_HOST:', configService.get('REDIS_HOST'));
+        console.log('[BullMQ Dashboard Redis] REDIS_PORT:', configService.get('REDIS_PORT'));
+        console.log('[BullMQ Dashboard Redis] REDIS_PASSWORD is set:', !!configService.get('REDIS_PASSWORD'));
         return {
-          redis: {
+          connection: {
             host: configService.get('REDIS_HOST', 'localhost'),
             port: configService.get('REDIS_PORT', 6379),
             password: configService.get('REDIS_PASSWORD'), // do not default to empty string
             db: configService.get('REDIS_QUEUE_DB', 1),
           },
-          prefix: 'shopify:',
         };
       },
     }),
@@ -60,7 +59,7 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
 
         // Create Bull Board with queues
         createBullBoard({
-          queues: [new BullAdapter(shopifyWebhooksQueue)],
+          queues: [new BullMQAdapter(shopifyWebhooksQueue)],
           serverAdapter,
         });
 
