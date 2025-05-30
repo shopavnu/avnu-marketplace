@@ -1,21 +1,11 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import client from '../../redisClient';
 
+console.log('[ioredis DEBUG] RedisService using ioredis client from redisClient.ts');
+
 @Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
+export class RedisService {
   get client() {
     return client;
-  }
-
-  async onModuleInit() {
-    if (!client.isOpen) {
-      await client.connect();
-    }
-  }
-
-  async onModuleDestroy() {
-    if (client.isOpen) {
-      await client.disconnect();
-    }
   }
 }
