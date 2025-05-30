@@ -1,5 +1,5 @@
 import { Injectable, Logger as _Logger } from '@nestjs/common';
-import { InjectQueue, Processor } from '@nestjs/bullmq';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq'; // Added WorkerHost
 import { Queue, Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import { WebhookRegistry } from './webhook-registry';
@@ -44,7 +44,7 @@ interface WebhookJobData {
  */
 @Injectable()
 @Processor('shopify-webhooks')
-export class DistributedWebhookProcessor {
+export class DistributedWebhookProcessor extends WorkerHost { // Extended WorkerHost
   private readonly logger: ShopifyStructuredLogger;
 
   constructor(
@@ -55,6 +55,7 @@ export class DistributedWebhookProcessor {
     private readonly configService: ConfigService,
     logger: ShopifyStructuredLogger,
   ) {
+    super();
     this.logger = logger;
   }
 
