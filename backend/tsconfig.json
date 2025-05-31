@@ -29,7 +29,10 @@
       "@clerk/express": [
         "node_modules/@clerk/express/dist/index.d.ts",
         "../node_modules/@clerk/express/dist/index.d.ts"
-      ]  
+      ],
+      "@common/*": [
+        "src/common/*"
+      ]
     }
   },
   "include": [ // Added include array

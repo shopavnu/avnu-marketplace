@@ -9,11 +9,17 @@ export class ElasticsearchService implements OnModuleInit {
   private _client: Client;
 
   constructor(private readonly configService: ConfigService) {
+    const node = this.configService.get<string>('ELASTICSEARCH_NODE');
+    const apiKey = this.configService.get<string>('ELASTICSEARCH_API_KEY');
+
+    if (!node || !apiKey) {
+      throw new Error('ELASTICSEARCH_NODE and ELASTICSEARCH_API_KEY environment variables must be set.');
+    }
+
     this._client = new Client({
-      node: this.configService.get<string>('ELASTICSEARCH_NODE'),
+      node: node,
       auth: {
-        username: this.configService.get<string>('ELASTICSEARCH_USERNAME'),
-        password: this.configService.get<string>('ELASTICSEARCH_PASSWORD'),
+        apiKey: apiKey,
       },
     });
   }
