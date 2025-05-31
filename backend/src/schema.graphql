@@ -335,6 +335,10 @@ type Query {
   analyzeQuery(query: String!): ProcessedQueryResult!
   searchSuggestions(query: String!, limit: Int): [String!]!
   classifyQuery(query: String!): ClassificationResult!
+  getBudgetUtilizationReport(campaignId: ID!): BudgetUtilizationReport!
+  getCampaignForecast(campaignId: ID!): CampaignForecast!
+  getAdPlacements(options: AdPlacementOptionsInput!): [AdPlacement!]!
+  getProductAdRecommendations(productId: ID!): ProductAdRecommendation!
 }
 
 type Mutation {
@@ -2111,12 +2115,4 @@ enum BehaviorType {
   favorite
   add_to_cart
   purchase
-}
-
-type Query {
-  # ... existing queries ...
-  getBudgetUtilizationReport(campaignId: ID!): BudgetUtilizationReport!
-  getCampaignForecast(campaignId: ID!): CampaignForecast!
-  getAdPlacements(options: AdPlacementOptionsInput!): [AdPlacement!]!
-  getProductAdRecommendations(productId: ID!): ProductAdRecommendation!
 }

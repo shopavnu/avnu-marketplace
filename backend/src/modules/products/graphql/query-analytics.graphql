@@ -13,7 +13,7 @@ type QueryAnalytics {
   resultSizes: [Int!]!
 }
 
-type Query {
+extend type Query {
   queryAnalytics: [QueryAnalytics!]!
   slowQueries: [QueryAnalytics!]!
   queryAnalyticsById(queryId: String!): QueryAnalytics

@@ -1,6 +1,6 @@
 scalar JSON
 
-type Query {
+extend type Query {
   # Get dashboard overview with key metrics
   dashboardOverview(period: Int = 30): JSON!
 

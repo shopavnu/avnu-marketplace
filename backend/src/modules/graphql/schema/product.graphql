@@ -19,7 +19,7 @@ type Variant {
   product: Product!
 }
 
-type Query {
+extend type Query {
   productsList(skip: Int, take: Int): [Product!]!
   product(id: ID!): Product
   searchProductsSimple(query: String!): [Product!]!

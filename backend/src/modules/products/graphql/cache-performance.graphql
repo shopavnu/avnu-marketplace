@@ -39,7 +39,7 @@ type CachePerformanceMetrics {
   cacheStats: CacheStats!
 }
 
-type Query {
+extend type Query {
   cachePerformanceMetrics: CachePerformanceMetrics!
 }
 

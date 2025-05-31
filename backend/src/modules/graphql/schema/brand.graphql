@@ -6,7 +6,7 @@ type Brand {
   products: [Product!]
 }
 
-type Query {
+extend type Query {
   brands(skip: Int, take: Int, includeProducts: Boolean): [Brand!]!
   brand(id: ID!, includeProducts: Boolean): Brand
   searchBrandsSimpleList(query: String!): [Brand!]!
