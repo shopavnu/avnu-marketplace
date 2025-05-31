@@ -39,6 +39,6 @@ module.exports = {
     '^@config/(.*)$': '<rootDir>/src/config/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@common/(.*)$': '<rootDir>/src/common/$1',
-    '^bullmq$': '<rootDir>/../node_modules/bullmq'
+    '^bullmq$': '<rootDir>/node_modules/bullmq'
   },
 };
