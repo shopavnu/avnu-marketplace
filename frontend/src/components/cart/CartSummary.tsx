@@ -38,7 +38,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
   // Calculate shipping based on brand thresholds
   let totalShipping = 0;
   
-  Object.entries(itemsByBrand).forEach(([brandName, brandItems]) => {
+  Object.entries(itemsByBrand).forEach(([brandName, brandItems]: [string, CartItem[]]) => {
     const { freeShipping } = getShippingInfo(brandName);
     if (!freeShipping) {
       // Use a default shipping cost of $5.99 per brand if not free
@@ -111,7 +111,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
       </div>
 
       {/* Brand-specific shipping info */}
-      {Object.entries(itemsByBrand).map(([brandName, brandItems]) => {
+      {Object.entries(itemsByBrand).map(([brandName, brandItems]: [string, CartItem[]]) => {
         const { freeShipping, amountToFreeShipping, threshold } = getShippingInfo(brandName);
         
         // Only show threshold information if there's a threshold and it's not already free
