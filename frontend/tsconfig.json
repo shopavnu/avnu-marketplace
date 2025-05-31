@@ -22,12 +22,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@clerk/nextjs": ["../../node_modules/@clerk/nextjs"],
-      "@clerk/nextjs/*": ["../../node_modules/@clerk/nextjs/*"],
-      "*": [
-        "../../node_modules/*",
-        "../../node_modules/@types/*"
       ]
     },
     "baseUrl": ".",
