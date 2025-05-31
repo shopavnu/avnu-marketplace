@@ -39,7 +39,9 @@
       ]
     }
   },
-  "include": [ // Added include array
+  "include": [
+    "src",
+    "src/types",
     "src/**/*",
     "test/**/*"
   ],
