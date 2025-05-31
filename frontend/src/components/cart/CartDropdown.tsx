@@ -1,35 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   XMarkIcon,
   MinusIcon,
   PlusIcon,
   ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
+import useCartStore from "@/stores/useCartStore";
+import { CartItem } from "@/types/cart";
 
-// Define a local ProductComplete interface to avoid type conflicts
-interface ProductComplete {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  image: string;
-  images: string[];
-  brand: string;
-  category: string;
-  subCategory: string;
-  attributes: Record<string, string>;
-  isNew: boolean;
-  rating: any;
-  vendor: any;
-  inStock: boolean;
-  createdAt: string;
-  slug: string;
-  categories: string[];
-  tags: string[];
-}
+// Import CartItem type from our types
 
 import { brands as allBrands } from "@/data/brands";
 
@@ -71,11 +53,7 @@ const getBrandIdFromName = (brandName: string): string => {
   return brandName.toLowerCase().replace(/\s+/g, "-");
 };
 
-// Cart item type
-export interface CartItem {
-  product: ProductComplete;
-  quantity: number;
-}
+// Using CartItem from our types file now
 
 // Free Shipping Progress Bar Component
 interface FreeShippingProgressBarProps {
@@ -128,6 +106,16 @@ interface CartDropdownProps {
 }
 
 const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
+  // Get cart data from Zustand store
+  const { 
+    items, 
+    removeItem, 
+    updateQuantity, 
+    getCartTotal,
+    getItemsGroupedByBrand,
+    closeCart 
+  } = useCartStore();
+  
   // Add scrollbar styles to head
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -140,22 +128,21 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
       };
     }
   }, []);
-  
-  // Mock cart data - in a real app, this would come from a cart context or state management
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      closeCart();
+      onClose();
+    }
+  };
 
+  useEffect(() => {
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -165,150 +152,28 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
-  // Load mock cart data on mount
-  useEffect(() => {
-    // In a real app, this would be fetched from an API or local storage
-    const mockCartItems: CartItem[] = [
-      {
-        product: {
-          id: "product-1",
-          title: "Ceramic Vase",
-          description: "Handcrafted ceramic vase with natural glazes",
-          price: 45.99,
-          image:
-            "https://images.unsplash.com/photo-1615874694520-474822394e73?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1615874694520-474822394e73?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
-            "https://images.unsplash.com/photo-1616678478691-4c677a6b6f4a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
-          ],
-          brand: "Brand 1",
-          category: "Home",
-          subCategory: "Decor",
-          attributes: {
-            material: "Ceramic",
-            color: "Natural",
-            dimensions: "8 x 4 inches",
-          },
-          isNew: true,
-          rating: {
-            average: 4.8,
-            count: 15,
-          },
-          vendor: {
-            name: "EarthCraft Pottery",
-            isVerified: true,
-            location: "Portland, OR",
-            shippingInfo: {
-              minimumForFree: 50,
-              standardRate: 5.99,
-            },
-          },
-          inStock: true,
-          createdAt: new Date().toISOString(),
-          slug: "ceramic-vase",
-          categories: ["Home", "Decor"],
-          tags: ["featured", "handmade"],
-        },
-        quantity: 1,
-      },
-      {
-        product: {
-          id: "product-2",
-          title: "Organic Cotton Throw",
-          description: "Soft, organic cotton throw with hand-woven details",
-          price: 39.99,
-          image:
-            "https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
-            "https://images.unsplash.com/photo-1595501566202-2c518a3b7155?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
-          ],
-          brand: "Brand 2",
-          category: "Home",
-          subCategory: "Textiles",
-          attributes: {
-            material: "Organic Cotton",
-            color: "Natural/Blue",
-            dimensions: "50 x 60 inches",
-          },
-          isNew: false,
-          rating: {
-            average: 4.5,
-            count: 28,
-          },
-          vendor: {
-            name: "Pure Textiles",
-            isVerified: true,
-            location: "San Francisco, CA",
-            shippingInfo: {
-              minimumForFree: 75,
-              standardRate: 6.99,
-            },
-          },
-          inStock: true,
-          createdAt: new Date().toISOString(),
-          slug: "organic-cotton-throw",
-          categories: ["Home", "Textiles"],
-          tags: ["bestseller", "organic"],
-        },
-        quantity: 2,
-      },
-    ];
-
-    setCartItems(mockCartItems);
-  }, []);
-
-  // Calculate totals
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  );
-  const estimatedTax = subtotal * 0.08; // 8% tax rate
+  // Calculate cart totals
+  const subtotal = getCartTotal();
+  const estimatedTax = subtotal * 0.08; // Example tax rate
   const total = subtotal + estimatedTax;
 
-  // Group items by brand
-  const itemsByBrand = cartItems.reduce(
-    (groups, item) => {
-      const brandName = item.product.brand;
-      if (!groups[brandName]) {
-        groups[brandName] = [];
-      }
-      groups[brandName].push(item);
-      return groups;
-    },
-    {} as Record<string, CartItem[]>,
-  );
+  // Group items by brand using our store utility function
+  const itemsByBrand = getItemsGroupedByBrand();
 
-  // Calculate brand totals for shipping progress
+  // Brand shipping thresholds and totals
+  // In a real app, this would be fetched from an API
   const brandTotals = Object.entries(itemsByBrand).map(([brandName, items]) => {
-    const brandTotal = items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+    const total = items.reduce(
+      (acc, item) => acc + item.product.price * item.quantity,
       0,
     );
-    const shippingThreshold =
-      items[0].product.vendor.shippingInfo.minimumForFree || 0;
-    return { brandName, total: brandTotal, threshold: shippingThreshold };
+    return {
+      brandName,
+      total,
+      // Simulate different thresholds by brand - this would be fetched from brand settings in a real app
+      threshold: brandName === "EcoWear" ? 50 : brandName === "ZeroWaste" ? 35 : 0,
+    };
   });
-
-  // Handle quantity changes
-  const updateQuantity = (productId: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId
-          ? { ...item, quantity: newQuantity }
-          : item,
-      ),
-    );
-  };
-
-  // Handle item removal
-  const removeItem = (productId: string) => {
-    setCartItems((prev) =>
-      prev.filter((item) => item.product.id !== productId),
-    );
-  };
 
   // Animation variants
   const dropdownVariants = {
@@ -373,7 +238,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="overflow-auto cart-items-scroll" style={{ maxHeight: "50vh" }}>
-              {cartItems.length === 0 ? (
+              {items.length === 0 ? (
                 <div className="p-6 text-center">
                   <div className="flex justify-center mb-4">
                     <div className="p-4 bg-gray-100 rounded-full">
@@ -548,7 +413,10 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
 
                     {/* Continue Shopping */}
                     <button
-                      onClick={onClose}
+                      onClick={() => {
+                        closeCart();
+                        onClose();
+                      }}
                       className="w-full py-2 mt-2 text-sm text-charcoal hover:text-sage transition-colors"
                     >
                       Continue Shopping
