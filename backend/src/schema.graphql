@@ -1962,6 +1962,14 @@ type DashboardExperimentVariant {
   trafficPercentage: Float!
 }
 
+enum ExperimentStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
 type ExperimentType {
   id: ID!
   name: String!
@@ -2101,13 +2109,7 @@ type AllSearchResults {
   adPlacements: [AdPlacement!]!
 }
 
-enum ExperimentStatus {
-  DRAFT
-  RUNNING
-  PAUSED
-  COMPLETED
-  ARCHIVED
-}
+# Removed duplicate ExperimentStatus enum - already defined and used earlier in the schema
 
 enum BehaviorType {
   view

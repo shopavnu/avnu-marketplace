@@ -69,17 +69,25 @@ registerEnumType(ExperimentStatus, {
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get('DB_USER') || 'avnu',
-        password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_NAME') || 'avnu_db',
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNC', true),
-        logging: configService.get<boolean>('DB_LOGGING', true),
-      }),
+      useFactory: (configService: ConfigService) => {
+        const nodeEnv = configService.get('NODE_ENV', 'development');
+        // Only allow synchronize=true in development by default
+        const defaultSyncValue = nodeEnv === 'development';
+        
+        return {
+          type: 'postgres',
+          host: configService.get('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 5432),
+          username: configService.get('DB_USER') || 'avnu',
+          password: configService.get('DB_PASSWORD', 'postgres'),
+          database: configService.get('DB_NAME') || 'avnu_db',
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          // Only sync in development by default, always require explicit opt-in for production
+          synchronize: configService.get<boolean>('DB_SYNC', defaultSyncValue),
+          // Warn about synchronize being enabled in non-development environments
+          logging: configService.get<boolean>('DB_LOGGING', true),
+        };
+      },
     }),
 
     // GraphQL - temporarily disabled schema generation for debugging
