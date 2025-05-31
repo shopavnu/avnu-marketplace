@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import useCart from '@/hooks/useCart';
 import { formatCurrency } from '@/utils/formatters';
+import { CartItem } from '@/types/cart';
 
 interface CartSummaryProps {
   showImages?: boolean;
@@ -51,7 +52,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
     <div className={`${className}`}>
       {/* Cart Items */}
       <div className="space-y-4 mb-4">
-        {items.map((item) => (
+        {items.map((item: CartItem) => (
           <div key={`${item.product.id}-${item.product.variant?.id || 'default'}`} className="flex items-start">
             {showImages && (
               <div className="w-16 h-16 relative rounded overflow-hidden flex-shrink-0">
