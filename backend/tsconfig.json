@@ -21,6 +21,7 @@
     "ignoreDeprecations": "5.0",
     "moduleResolution": "node", // Explicitly set moduleResolution
     "baseUrl": ".", // Needed for paths to work
+    "types": ["node", "jest", "geojson"], // Explicitly include type definitions
     "paths": {
       "@clerk/backend": [
         "node_modules/@clerk/backend/dist/index.d.ts",
