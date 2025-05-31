@@ -1,0 +1,24 @@
+enum SimilarityType {
+  ATTRIBUTE_BASED
+  COLLABORATIVE_FILTERING
+  CONTENT_BASED
+  HYBRID
+  PURCHASE_BASED
+  VIEW_BASED
+  CATEGORY_BASED
+  PRICE_BASED
+  BRAND_BASED
+  EMBEDDING_BASED
+}
+
+extend type Query {
+  similarProducts(productId: String!, type: SimilarityType, limit: Int): [Product!]!
+}
+
+extend type Mutation {
+  trackRecommendationImpression(recommendationId: String!): Boolean!
+  trackRecommendationClick(recommendationId: String!): Boolean!
+  trackRecommendationConversion(recommendationId: String!): Boolean!
+  updateProductSimilarities(productId: String!): Boolean!
+  batchUpdateSimilarities(productIds: [String!]!): Boolean!
+}

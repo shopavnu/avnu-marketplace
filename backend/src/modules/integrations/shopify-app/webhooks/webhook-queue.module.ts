@@ -49,6 +49,7 @@ import { ShopifyWebhooksModule } from './webhooks.module';
           port: Number(rawRedisPort),
           username: rawRedisUsername || 'default',
           password: rawRedisPassword,
+          db: 0, // Explicitly set to 0, though it's the default
           tls: enableTls ? {} : undefined, // Explicitly set TLS options for BullMQ
         };
 

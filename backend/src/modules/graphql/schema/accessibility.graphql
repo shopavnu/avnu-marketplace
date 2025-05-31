@@ -1,0 +1,124 @@
+# Ensure GraphQLISODateTime is defined in your common scalars or adjust as needed
+# scalar GraphQLISODateTime # Assuming this is globally available
+
+type NavigationSection {
+  id: ID!
+  name: String!
+  route: String!
+  selector: String!
+  childSelectors: [String!]
+  priority: Int!
+  description: String
+  ariaLabel: String
+  parentSectionId: String
+  isActive: Boolean!
+  createdAt: GraphQLISODateTime! # Or String! if GraphQLISODateTime is not set up
+  updatedAt: GraphQLISODateTime! # Or String!
+}
+
+input CreateNavigationSectionInput {
+  name: String!
+  route: String!
+  selector: String!
+  priority: Int!
+  description: String
+  ariaLabel: String
+  parentSectionId: String
+  childSelectors: [String!]
+}
+
+input UpdateNavigationSectionInput {
+  name: String
+  route: String
+  selector: String
+  priority: Int
+  description: String
+  ariaLabel: String
+  parentSectionId: String
+  childSelectors: [String!]
+  isActive: Boolean
+}
+
+extend type Query {
+  navigationSections(route: String!): [NavigationSection!]!
+}
+
+type ShortcutKey {
+  key: String!
+  altKey: Boolean
+  ctrlKey: Boolean
+  shiftKey: Boolean
+  metaKey: Boolean
+}
+
+input ShortcutKeyInput {
+  key: String!
+  altKey: Boolean
+  ctrlKey: Boolean
+  shiftKey: Boolean
+  metaKey: Boolean
+}
+
+type KeyboardShortcut {
+  id: ID!
+  name: String!
+  description: String!
+  shortcutKey: ShortcutKey!
+  userId: String
+  sectionId: String
+  route: String
+  action: String
+  isGlobal: Boolean!
+  isActive: Boolean!
+  createdAt: GraphQLISODateTime! # Or String!
+  updatedAt: GraphQLISODateTime! # Or String!
+}
+
+extend type Query {
+  keyboardShortcuts(userId: String!, route: String): [KeyboardShortcut!]!
+}
+
+type FocusState {
+  id: ID!
+  userId: String!
+  sessionId: String!
+  route: String!
+  sectionId: String!
+  elementId: String
+  elementSelector: String
+  context: String
+  lastActive: GraphQLISODateTime! # Or String!
+  isActive: Boolean!
+  createdAt: GraphQLISODateTime! # Or String!
+  updatedAt: GraphQLISODateTime! # Or String!
+}
+
+extend type Query {
+  lastFocusState(userId: String!, sessionId: String!, route: String): FocusState # Nullable based on resolver
+}
+
+extend type Mutation {
+  saveFocusState(
+    userId: String!
+    sessionId: String!
+    route: String!
+    sectionId: String!
+    elementId: String
+    elementSelector: String
+    context: String
+  ): FocusState!
+  clearFocusStates(userId: String!, sessionId: String!): Boolean!
+  saveUserShortcut(
+    userId: String!
+    name: String!
+    description: String!
+    shortcutKey: ShortcutKeyInput!
+    action: String
+    route: String
+    sectionId: String
+  ): KeyboardShortcut!
+  resetUserShortcuts(userId: String!): Boolean!
+  createNavigationSection(input: CreateNavigationSectionInput!): NavigationSection!
+  updateNavigationSection(id: ID!, input: UpdateNavigationSectionInput!): NavigationSection!
+  deleteNavigationSection(id: ID!): Boolean!
+}

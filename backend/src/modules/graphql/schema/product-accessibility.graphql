@@ -1,0 +1,5 @@
+# Product Accessibility Schema
+
+extend type Mutation {
+  generateProductAltText(productId: String!): ProductAccessibilityDto!
+}

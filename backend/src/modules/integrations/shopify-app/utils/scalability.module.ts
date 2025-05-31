@@ -50,7 +50,9 @@ import { ShopifyClientService as _ShopifyClientService } from '../services/shopi
         const db = configService.get<number>('REDIS_CACHE_DB', 0); // Using a different DB for cache if needed, else 0
 
         // Log the connection parameters (excluding password for security)
-        console.log(`[@nestjs-modules/ioredis] Connecting to Redis: host=${host}, port=${port}, username=${username}, tls=${enableTls}, db=${db}`);
+        console.log(
+          `[@nestjs-modules/ioredis] Connecting to Redis: host=${host}, port=${port}, username=${username}, tls=${enableTls}, db=${db}`,
+        );
 
         return {
           type: 'single',

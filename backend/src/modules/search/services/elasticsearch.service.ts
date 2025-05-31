@@ -13,7 +13,9 @@ export class ElasticsearchService implements OnModuleInit {
     const apiKey = this.configService.get<string>('ELASTICSEARCH_API_KEY');
 
     if (!node || !apiKey) {
-      throw new Error('ELASTICSEARCH_NODE and ELASTICSEARCH_API_KEY environment variables must be set.');
+      throw new Error(
+        'ELASTICSEARCH_NODE and ELASTICSEARCH_API_KEY environment variables must be set.',
+      );
     }
 
     this._client = new Client({

@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -56,7 +56,7 @@ registerEnumType(ExperimentStatus, {
     RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: ['.env.local', `.env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
     CommonModule,
     HealthModule,
@@ -86,7 +86,16 @@ registerEnumType(ExperimentStatus, {
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       // Using schema first approach temporarily to bypass schema generation issues
-      typePaths: ['./src/**/*.graphql'],
+      typePaths: [
+        './src/**/*.graphql',
+        './src/modules/graphql/schema/order.graphql',
+        './src/modules/graphql/schema/common.graphql',
+        './src/modules/graphql/schema/personalization.graphql',
+        './src/modules/graphql/schema/recommendations.graphql',
+        './src/modules/graphql/schema/advertising.graphql',
+        './src/modules/graphql/schema/accessibility.graphql',
+        './src/modules/graphql/schema/product-accessibility.graphql',
+      ],
       playground: true,
       debug: true,
     }),
@@ -96,15 +105,39 @@ registerEnumType(ExperimentStatus, {
       isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        // Redis client options
-        ttl: configService.get('REDIS_TTL', 60 * 60), // 1 hour default
-        url: `redis://${configService.get('REDIS_HOST', 'localhost')}:${configService.get('REDIS_PORT', 6379)}`,
-        password: configService.get('REDIS_PASSWORD', ''),
-        database: configService.get('REDIS_DB', 0),
-        max: configService.get('REDIS_MAX_ITEMS', 1000), // Maximum number of items in cache
-      }),
+      useFactory: (configService: ConfigService) => {
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
+        const port = configService.get<number>('REDIS_PORT', 6379);
+        const password = configService.get<string>('REDIS_PASSWORD');
+        const username = configService.get<string>('REDIS_USERNAME', 'default');
+        const tlsEnabled =
+          configService.get<string>('REDIS_TLS_ENABLED', 'false')?.toLowerCase() === 'true';
+
+        const redisOptions: any = {
+          store: redisStore,
+          host: host,
+          port: port,
+          ttl: configService.get('REDIS_TTL', 60 * 60),
+          password: password,
+          username: username,
+          db: configService.get<number>('REDIS_DB', 0),
+          max: configService.get<number>('REDIS_MAX_ITEMS', 1000),
+        };
+
+        if (tlsEnabled) {
+          redisOptions.tls = {}; // Enable TLS
+        }
+
+        const logger = new Logger('CacheModuleRedisConfig');
+        logger.log(`Using REDIS_HOST: ${host}`);
+        logger.log(`Using REDIS_PORT: ${port}`);
+        logger.log(`Using REDIS_USERNAME: ${username}`);
+        logger.log(`REDIS_PASSWORD is set: ${!!password}`);
+        logger.log(`Using REDIS_TLS_ENABLED: ${tlsEnabled}`);
+        logger.log(`Using REDIS_DB: ${redisOptions.db}`);
+
+        return redisOptions;
+      },
     }),
 
     // Feature modules

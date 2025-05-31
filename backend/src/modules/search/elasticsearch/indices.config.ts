@@ -63,7 +63,7 @@ export class IndicesConfigService {
                 product_analyzer: {
                   type: 'custom',
                   tokenizer: 'standard',
-                  filter: ['lowercase', 'asciifolding', 'synonym'],
+                  filter: ['lowercase', 'asciifolding'],
                 },
                 product_index_analyzer: {
                   type: 'custom',
@@ -72,11 +72,11 @@ export class IndicesConfigService {
                 },
               },
               filter: {
-                synonym: {
-                  type: 'synonym',
-                  synonyms_path: 'analysis/synonyms.txt',
-                  updateable: true,
-                },
+                // synonym: { // TODO: Configure synonyms for cloud Elasticsearch
+                //   type: 'synonym',
+                //   synonyms_path: 'analysis/synonyms.txt', // Or use an array of synonyms
+                //   updateable: true,
+                // },
               },
             },
           },

@@ -1,0 +1,179 @@
+scalar DateTime
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  RETURNED
+  REFUNDED
+  ON_HOLD
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  ON_HOLD
+  CANCELLED
+  AWAITING_CONFIRMATION
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  PROCESSING
+  CANCELLED
+  FAILED
+}
+
+# Assuming SyncStatus is also a simple string enum. If not, it needs to be defined accurately.
+# For now, it's used as String in the mutation updateOrderSyncStatus.
+# If it's a proper enum, it should be defined like the others:
+# enum SyncStatus {
+#   SYNCED
+#   PENDING_SYNC
+#   ERROR_SYNCING
+# }
+
+type ShippingAddress {
+  firstName: String!
+  lastName: String!
+  addressLine1: String!
+  addressLine2: String
+  city: String!
+  state: String!
+  postalCode: String!
+  country: String!
+  phoneNumber: String
+  email: String
+}
+
+type OrderFulfillment {
+  id: ID!
+  orderId: ID!
+  status: FulfillmentStatus!
+  trackingNumber: String
+  trackingUrl: String
+  carrierName: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type OrderItem {
+  id: ID!
+  orderId: ID!
+  productId: ID!
+  quantity: Int!
+  price: Float!
+  variantId: ID
+  options: [String!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PlatformActions {
+  canCancel: Boolean!
+  canRefund: Boolean!
+  canModify: Boolean!
+}
+
+type Order {
+  id: ID!
+  userId: ID!
+  status: OrderStatus!
+  paymentStatus: PaymentStatus!
+  shippingAddress: ShippingAddress!
+  items: [OrderItem!]!
+  fulfillments: [OrderFulfillment!]
+  notes: String
+  isPriority: Boolean!
+  platformActions: PlatformActions!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PaginatedOrders {
+  items: [Order!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+input ShippingAddressInput {
+  firstName: String!
+  lastName: String!
+  addressLine1: String!
+  addressLine2: String
+  city: String!
+  state: String!
+  postalCode: String!
+  country: String!
+  phoneNumber: String
+  email: String
+}
+
+input OrderItemInput {
+  productId: ID!
+  quantity: Int!
+  price: Float!
+  variantId: ID
+  options: [String!]
+}
+
+input CreateOrderInput {
+  userId: ID!
+  items: [OrderItemInput!]!
+  shippingAddress: ShippingAddressInput!
+  notes: String
+  isPriority: Boolean
+}
+
+input UpdateOrderInput {
+  userId: ID
+  status: OrderStatus
+  paymentStatus: PaymentStatus
+  trackingNumber: String
+  trackingUrl: String
+  notes: String
+  isPriority: Boolean
+  shippingAddress: ShippingAddressInput
+}
+
+# Extend Query type if it's defined elsewhere, or define it here if this is the first/main schema file for Query.
+# Assuming Query is extended from product.graphql or a base schema.
+# For standalone, it would be: type Query { ... }
+
+# Add the queries from OrdersResolver
+# Ensure the Query type is extended correctly if it's split across files.
+# If product.graphql already defines Query, this should be 'extend type Query'.
+# For now, creating a new Query type specific to orders for clarity, 
+# but this will likely need merging/extending with the main Query type.
+
+extend type Query {
+  orders(pagination: PaginationInput): PaginatedOrders!
+  order(id: ID!): Order!
+  customerOrders(customerId: ID!, pagination: PaginationInput): PaginatedOrders!
+  merchantOrders(merchantId: ID!, pagination: PaginationInput): PaginatedOrders!
+}
+
+extend type Mutation {
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrder(id: ID!, input: UpdateOrderInput!): Order!
+  updateOrderStatus(id: ID!, status: OrderStatus!): Order!
+  updatePaymentStatus(id: ID!, paymentStatus: PaymentStatus!): Order!
+  updateOrderFulfillmentStatus(id: ID!, status: FulfillmentStatus!): Order!
+  cancelOrder(id: ID!, reason: String): Order!
+  refundOrder(id: ID!, amount: Int, reason: String): Order!
+  syncOrder(id: ID!): Order!
+  updateOrderSyncStatus(id: ID!, syncStatus: String!): Order! # Using String for SyncStatus for now
+  removeOrder(id: ID!): Boolean!
+}

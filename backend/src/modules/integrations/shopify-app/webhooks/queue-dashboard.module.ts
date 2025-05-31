@@ -5,7 +5,7 @@ import { RouterModule } from '@nestjs/core';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
-import { ConfigModule } from '@nestjs/config';
+
 import { WebhookQueueModule } from './webhook-queue.module'; // Added import
 import { ShopifyScalabilityModule } from '../utils/scalability.module';
 
@@ -21,7 +21,8 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
 @Module({
   imports: [
     WebhookQueueModule, // Use BullModule config from WebhookQueueModule
-    BullModule.registerQueue({ // Register the specific queue for the dashboard
+    BullModule.registerQueue({
+      // Register the specific queue for the dashboard
       name: 'shopify-webhooks',
     }),
     RouterModule.register([

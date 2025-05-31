@@ -1,9 +1,12 @@
 import { Client, estypes } from "@elastic/elasticsearch"; // Import estypes for explicit typing
 import { inspect } from "util"; // For better console logging of objects
+import * as dotenv from 'dotenv';
+
+dotenv.config(); // Load environment variables from .env file, ensure .env is in the same directory or adjust path
 
 // --- Configuration ---
-const ELASTICSEARCH_NODE_URL = 'https://a81207e7dcc1427e913808856961ed8f.us-central1.gcp.cloud.es.io:443';
-const ELASTICSEARCH_API_KEY = "U2tvcUpKY0JIdVZORHZPMEp2WEE6cXh3OHdGaENwOEdJeVYwbUdYVUdqUQ=="; // Actual API key
+const ELASTICSEARCH_NODE_URL = process.env.ELASTICSEARCH_NODE_URL || 'http://localhost:9200'; // Fallback to localhost if not set
+const ELASTICSEARCH_API_KEY = process.env.ELASTICSEARCH_API_KEY || ''; // Fallback to empty string if not set
 const INDEX_NAME = "search-avnu";
 
 // --- Define your index mapping ---

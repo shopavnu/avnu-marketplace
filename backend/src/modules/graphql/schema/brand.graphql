@@ -9,7 +9,7 @@ type Brand {
 type Query {
   brands(skip: Int, take: Int, includeProducts: Boolean): [Brand!]!
   brand(id: ID!, includeProducts: Boolean): Brand
-  searchBrands(query: String!): [Brand!]!
+  searchBrandsSimpleList(query: String!): [Brand!]!
   brandWithProducts(id: ID!): Brand
 }
 

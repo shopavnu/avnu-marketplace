@@ -1,0 +1,63 @@
+type AdPerformanceMetric {
+  date: String!
+  impressions: Int!
+  clicks: Int!
+  clickThroughRate: Float!
+  conversions: Int!
+  conversionRate: Float!
+  revenue: Float!
+  cost: Float!
+  roi: Float!
+}
+
+type AdCampaign {
+  id: String!
+  name: String!
+  merchantId: String!
+  merchantName: String!
+  status: String!
+  startDate: String!
+  endDate: String
+  totalImpressions: Int!
+  totalClicks: Int!
+  clickThroughRate: Float!
+  totalConversions: Int!
+  conversionRate: Float!
+  totalRevenue: Float!
+  totalCost: Float!
+  roi: Float!
+  dailyMetrics: [AdPerformanceMetric!]!
+}
+
+type HistoricalMetricPoint {
+  date: String!
+  totalRevenue: Float!
+  totalCost: Float!
+  platformAdRevenue: Float!
+  productSalesFromAds: Float!
+  totalImpressions: Int!
+  totalClicks: Int!
+  totalConversions: Int!
+}
+
+type MerchantAdMetrics {
+  campaigns: [AdCampaign!]!
+  totalRevenue: Float!
+  totalCost: Float!
+  totalRoi: Float!
+  totalImpressions: Int!
+  totalClicks: Int!
+  averageClickThroughRate: Float!
+  totalConversions: Int!
+  averageConversionRate: Float!
+  platformAdRevenue: Float!
+  productSalesFromAds: Float!
+  returnOnAdSpend: Float!
+  averageConversionValue: Float!
+  costPerAcquisition: Float!
+  historicalMetrics: [HistoricalMetricPoint!]!
+}
+
+extend type Query {
+  merchantAdMetrics(period: Int, merchantId: String): MerchantAdMetrics!
+}
