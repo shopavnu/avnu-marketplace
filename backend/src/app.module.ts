@@ -73,7 +73,6 @@ registerEnumType(ExperimentStatus, {
         const nodeEnv = configService.get('NODE_ENV', 'development');
         // Only allow synchronize=true in development by default
         const defaultSyncValue = nodeEnv === 'development';
-        
         return {
           type: 'postgres',
           host: configService.get('DB_HOST', 'localhost'),
