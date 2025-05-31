@@ -1,0 +1,3 @@
+# Add your synonym rules here. For example:
+# ipod, i-pod, i pod => mp3 player
+# sea biscuit, sea biscit => seabiscuit

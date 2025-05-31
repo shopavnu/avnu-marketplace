@@ -5,7 +5,8 @@ import { RouterModule } from '@nestjs/core';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { WebhookQueueModule } from './webhook-queue.module'; // Added import
 import { ShopifyScalabilityModule } from '../utils/scalability.module';
 
 /**
@@ -19,33 +20,8 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
  */
 @Module({
   imports: [
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        // Debug log to verify Redis password is set (does not print actual password)
-        console.log('[BullMQ Dashboard Redis] REDIS_HOST:', configService.get('REDIS_HOST'));
-        console.log('[BullMQ Dashboard Redis] REDIS_PORT:', configService.get('REDIS_PORT'));
-        console.log(
-          '[BullMQ Dashboard Redis] REDIS_USERNAME:',
-          configService.get('REDIS_USERNAME'),
-        ); // Added log for username
-        console.log(
-          '[BullMQ Dashboard Redis] REDIS_PASSWORD is set:',
-          !!configService.get('REDIS_PASSWORD'),
-        );
-        return {
-          connection: {
-            host: configService.get('REDIS_HOST', 'localhost'),
-            port: configService.get('REDIS_PORT', 6379),
-            password: configService.get('REDIS_PASSWORD'), // do not default to empty string
-            username: configService.get('REDIS_USERNAME'), // Add username
-            db: configService.get('REDIS_QUEUE_DB', 0), // Default to DB 0
-          },
-        };
-      },
-    }),
-    BullModule.registerQueue({
+    WebhookQueueModule, // Use BullModule config from WebhookQueueModule
+    BullModule.registerQueue({ // Register the specific queue for the dashboard
       name: 'shopify-webhooks',
     }),
     RouterModule.register([
