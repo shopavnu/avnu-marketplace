@@ -99,6 +99,26 @@ Users can manage their profile, favorites, orders, and settings.
 
 Brands can apply to join the marketplace through a comprehensive application form.
 
+## Development Tools
+
+### Cart Testing
+
+The marketplace includes built-in tools for testing cart and checkout functionality during development, eliminating the need for actual product data.
+
+**Key Components:**
+- `CartTester.tsx`: A development-only component that provides buttons to add mock products to the cart
+- `mockData.ts`: Contains mock product data for testing the cart and checkout flow
+
+**Usage:**
+1. The CartTester component is automatically available on the checkout page in development mode (`process.env.NODE_ENV !== 'production'`).
+2. Use the buttons to add random products or specific mock products to test the cart functionality.
+3. Navigate through the checkout process to test the full flow with mock data.
+
+**Implementation Details:**
+- Mock products include all necessary fields to satisfy TypeScript requirements
+- The CartTester integrates with the real `useCart` hook, providing a realistic testing experience
+- Shipping calculations work with mock data just as they would with real products
+
 **Key Components:**
 - `for-brands.tsx`: Brand application page
 
