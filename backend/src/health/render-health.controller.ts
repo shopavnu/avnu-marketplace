@@ -1,5 +1,6 @@
 import { Controller, Get, Head } from '@nestjs/common';
 
+@Controller()
 export class RenderHealthController {
   @Get('render-health')
   check() {
