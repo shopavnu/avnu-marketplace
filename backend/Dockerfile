@@ -15,6 +15,9 @@ COPY . .
 # Explicitly install backend workspace dependencies to ensure links/stubs
 WORKDIR /app/backend
 RUN npm install --legacy-peer-deps
+
+# Explicitly install bullmq to ensure it's available
+RUN npm install bullmq@5.53.0 --save
 WORKDIR /app
 
 # Prisma generate (if needed, assuming schema is copied by 'COPY . .')
