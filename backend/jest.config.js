@@ -39,7 +39,6 @@ module.exports = {
     '^@config/(.*)$': '<rootDir>/src/config/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@common/(.*)$': '<rootDir>/src/common/$1',
-    '^@clerk/backend$': '<rootDir>/../node_modules/@clerk/backend',
-    '^@clerk/express$': '<rootDir>/../node_modules/@clerk/express'
+
   },
 };
