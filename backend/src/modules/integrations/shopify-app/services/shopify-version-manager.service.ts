@@ -130,7 +130,7 @@ export class ShopifyVersionManagerService implements OnModuleInit {
     try {
       // In a real implementation, this would call the Shopify API status endpoint
       const { data } = await firstValueFrom(
-        this.httpService.get('https://status.shopify.com/api/v2/versions.json').pipe(
+        this.httpService.get('https://www.shopifystatus.com/api/v2/versions.json').pipe(
           catchError((error: any) => {
             this.logger.error('Failed to fetch Shopify API versions', error);
             throw 'Failed to fetch available API versions';
