@@ -44,7 +44,8 @@ interface WebhookJobData {
  */
 @Injectable()
 @Processor('shopify-webhooks')
-export class DistributedWebhookProcessor extends WorkerHost { // Extended WorkerHost
+export class DistributedWebhookProcessor extends WorkerHost {
+  // Extended WorkerHost
   private readonly logger: ShopifyStructuredLogger;
 
   constructor(
