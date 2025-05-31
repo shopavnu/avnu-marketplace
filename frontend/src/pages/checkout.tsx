@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,6 +6,9 @@ import { motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { Product } from "@/types/products";
 import { brands as allBrands } from "@/data/brands";
+import useCart from "@/hooks/useCart";
+import type { ProductSummary } from "@/types/cart";
+import CartTester from "@/components/testing/CartTester";
 
 // Define complete types to avoid undefined errors
 interface ShippingInfo {
@@ -63,7 +66,7 @@ const getBrandIdFromName = (brandName: string): string => {
     return allBrands[index].id;
   }
 
-  return brandName.toLowerCase().replace(/\\s+/g, "-");
+  return brandName.toLowerCase().replace(/\s+/g, "-");
 };
 
 // Checkout steps
@@ -80,6 +83,9 @@ const CheckoutPage = () => {
     CheckoutStep.INFORMATION,
   );
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Get cart data from our cart store
+  const { items: cartItems, cartTotal, getShippingInfo } = useCart();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -110,104 +116,81 @@ const CheckoutPage = () => {
     billingAddressSame: true,
   });
 
-  // Mock cart data - in a real app, this would come from a cart context or state management
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      product: {
-        id: "product-1",
-        title: "Ceramic Vase",
-        description: "Handcrafted ceramic vase with natural glazes",
-        price: 45.99,
-        image:
-          "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800",
-        images: [
-          "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800",
-        ],
-        brand: "Terra & Clay",
-        category: "Home",
-        subCategory: "Decor",
-        attributes: { color: "Blue", material: "Ceramic" },
-        isNew: true,
-        rating: {
-          avnuRating: { average: 4.8, count: 24 },
-          shopifyRating: { average: 4.7, count: 15 },
-        },
-        vendor: {
-          id: "vendor-1",
-          name: "Terra & Clay",
-          causes: ["sustainable", "handmade"],
-          isLocal: true,
-          shippingInfo: {
-            isFree: false,
-            minimumForFree: 75,
-            baseRate: 5.99,
-          },
-        },
-        inStock: true,
-        tags: ["featured"],
-        createdAt: new Date().toISOString(),
-      },
-      quantity: 1,
-    },
-    {
-      product: {
-        id: "product-2",
-        title: "Organic Cotton Throw",
-        description: "Soft, organic cotton throw with hand-woven details",
-        price: 39.99,
-        image:
-          "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800",
-        images: [
-          "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800",
-        ],
-        brand: "Pure Living",
-        category: "Home",
-        subCategory: "Textiles",
-        attributes: { color: "Natural", material: "Cotton" },
-        isNew: false,
-        rating: {
-          avnuRating: { average: 4.5, count: 18 },
-        },
-        vendor: {
-          id: "vendor-2",
-          name: "Pure Living",
-          causes: ["organic", "sustainable"],
-          isLocal: false,
-          shippingInfo: {
-            isFree: false,
-            minimumForFree: 50,
-            baseRate: 4.99,
-          },
-        },
-        inStock: true,
-        tags: ["bestseller"],
-        createdAt: new Date().toISOString(),
-      },
-      quantity: 2,
-    },
-  ]);
+  // Convert cart items to ProductComplete format - in a real app, we'd have a consistent type
+  const [convertedCartItems, setConvertedCartItems] = useState<CartItem[]>([]);
 
-  // Calculate totals
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  );
-  const shipping = 8.99; // Standard shipping cost
-  const estimatedTax = subtotal * 0.08; // 8% tax rate
-  const total = subtotal + shipping + estimatedTax;
+  // Use useEffect to convert cart items to the format needed by the checkout page
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      // Convert the cart items from our cart store to the format needed by the checkout page
+      const converted = cartItems.map((item) => ({
+        product: {
+          id: item.product.id,
+          title: item.product.title,
+          description: "",
+          price: item.product.price,
+          image: item.product.image || "",
+          images: item.product.image ? [item.product.image] : [],
+          brand: item.product.brand || "",
+          category: "Uncategorized",
+          subCategory: "",
+          attributes: {},
+          isNew: false,
+          rating: {
+            avnuRating: { average: 4.5, count: 10 },
+            shopifyRating: { average: 4.5, count: 10 },
+          },
+          vendor: {
+            id: getBrandIdFromName(item.product.brand || ""),
+            name: item.product.brand || "",
+            causes: ["sustainable"],
+            isLocal: true,
+            shippingInfo: {
+              isFree: false,
+              minimumForFree: 75,
+              baseRate: 5.99,
+            },
+          },
+          inStock: true,
+          tags: [],
+          createdAt: new Date().toISOString(),
+        },
+        quantity: item.quantity,
+      }));
 
-  // Group items by brand
-  const itemsByBrand = cartItems.reduce(
+      setConvertedCartItems(converted);
+    }
+  }, [cartItems]);
+
+  // Calculate totals based on cart items
+  const subtotal = cartTotal;
+
+  // Group items by brand and calculate shipping costs
+  const itemsByBrand = cartItems.reduce<Record<string, typeof cartItems>>(
     (groups, item) => {
-      const brandName = item.product.brand;
+      const brandName = item.product.brand || "Unknown";
       if (!groups[brandName]) {
         groups[brandName] = [];
       }
       groups[brandName].push(item);
       return groups;
     },
-    {} as Record<string, CartItem[]>,
+    {}
   );
+
+  // Calculate shipping based on brand thresholds
+  let shipping = 0;
+
+  Object.entries(itemsByBrand).forEach(([brandName, items]) => {
+    const { freeShipping } = getShippingInfo(brandName);
+    if (!freeShipping) {
+      // Use a default shipping cost of $5.99 per brand if not free
+      shipping += 5.99;
+    }
+  });
+
+  const estimatedTax = subtotal * 0.08; // 8% tax rate
+  const total = subtotal + shipping + estimatedTax;
 
   // Form handling
   const handleInputChange = (
@@ -859,25 +842,36 @@ const CheckoutPage = () => {
 
               {/* Order items grouped by brand with shipping progress bars */}
               <div className="max-h-80 overflow-y-auto mb-4">
-                {Object.entries(itemsByBrand).map(
-                  ([brandName, items], brandIndex) => {
-                    // Calculate brand total for shipping progress
-                    const brandTotal = items.reduce(
-                      (sum, item) => sum + item.product.price * item.quantity,
-                      0,
-                    );
-                    const shippingThreshold =
-                      items[0].product.vendor.shippingInfo.minimumForFree || 0;
-                    const progress = Math.min(
-                      (brandTotal / shippingThreshold) * 100,
-                      100,
-                    );
-                    const amountNeeded = Math.max(
-                      0,
-                      shippingThreshold - brandTotal,
-                    );
+                {Object.entries(itemsByBrand).map(([brandName, items], brandIndex) => {
+                  // Get the first product to get shipping info
+                  const firstProduct = items[0].product as ProductSummary & {
+                    vendor?: {
+                      shippingInfo: {
+                        minimumForFree?: number;
+                      };
+                    };
+                  };
 
-                    return (
+                  // Calculate brand total for shipping progress
+                  const brandTotal = items.reduce(
+                    (sum: number, item) => sum + item.product.price * item.quantity,
+                    0
+                  );
+                  
+                  // Default shipping threshold or get from product if available
+                  const shippingThreshold = 75; // Default value
+                  
+                  const progress = Math.min(
+                    (brandTotal / shippingThreshold) * 100,
+                    100
+                  );
+                  
+                  const amountNeeded = Math.max(
+                    0,
+                    shippingThreshold - brandTotal
+                  );
+
+                  return (
                       <div
                         key={brandName}
                         className={`${brandIndex > 0 ? "pt-4 mt-4 border-t border-gray-100" : ""}`}
@@ -897,9 +891,9 @@ const CheckoutPage = () => {
                         </div>
 
                         {/* Brand Items */}
-                        {items.map((item) => (
+                        {items.map((item, itemIndex) => (
                           <div
-                            key={item.product.id}
+                            key={`${item.product.id}-${itemIndex}`}
                             className="flex py-3 border-b border-gray-100 last:border-b-0"
                           >
                             <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-gray-50">
