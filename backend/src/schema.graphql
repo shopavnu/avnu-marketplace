@@ -16,6 +16,7 @@ type Query {
   merchant(id: ID!): Merchant
   myMerchants: [Merchant!]!
   profile: User
+  cart: Cart
   merchantDashboardAnalytics(merchantId: ID!): MerchantDashboardAnalytics
 
   # Experiment queries
@@ -596,6 +597,29 @@ type DashboardAnalyticsDto {
   searchesToClickRate: Float!
   averageOrderValue: Float!
   revenue: Float!
+}
+
+type Cart {
+  id: ID!
+  userId: String!
+  items: [CartItem!]!
+  subtotal: Float!
+  tax: Float
+  total: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastActive: DateTime
+}
+
+type CartItem {
+  productId: ID!
+  variantId: ID
+  name: String!
+  description: String
+  price: Float!
+  quantity: Int!
+  image: String
+  total: Float!
 }
 
 type SearchAnalyticsSummaryDto {
