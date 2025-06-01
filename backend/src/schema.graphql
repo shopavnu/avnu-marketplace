@@ -346,6 +346,12 @@ type Mutation {
   login(loginInput: LoginInput!): AuthResponse!
   register(registerInput: RegisterInput!): AuthResponse!
   refreshToken: AuthResponse!
+  
+  # Cart mutations
+  addToCart(input: CartItemInput!): Cart!
+  updateCartItem(input: CartItemInput!): Cart!
+  removeCartItem(productId: ID!, variantId: ID): Cart!
+  clearCart: Cart!
   merchantRegister(merchantRegisterInput: MerchantRegisterInput!): AuthResponse!
   merchantLogin(loginInput: LoginInput!): AuthResponse!
   merchantRefreshToken: AuthResponse!
@@ -1217,6 +1223,12 @@ input UpdateUserPreferencesDto {
   brands: [String!]
   priceRange: [Float!]
   interests: [String!]
+}
+
+input CartItemInput {
+  productId: ID!
+  variantId: String
+  quantity: Int!
 }
 
 # Analytics input types
