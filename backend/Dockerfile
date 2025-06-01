@@ -16,9 +16,13 @@ COPY . .
 WORKDIR /app/backend
 RUN npm install --legacy-peer-deps
 
-# Explicitly install bullmq to ensure it's available
+# Explicitly install bullmq to ensure it's available at both the root and backend levels
 RUN npm install bullmq@5.53.0 --save
 WORKDIR /app
+RUN npm install bullmq@5.53.0 --save
+
+# Also install @bull-board dependencies at the root level to ensure compatibility
+RUN npm install @bull-board/api @bull-board/nestjs
 
 # Prisma generate (if needed, assuming schema is copied by 'COPY . .')
 # Ensure 'backend' is the correct name in your root package.json's workspaces array
