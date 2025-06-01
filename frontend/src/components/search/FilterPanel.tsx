@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SearchFilters } from "@/types/search";
-import { analyticsService } from "@/services/analytics.service";
+import { SearchFilters } from "../../types/search";
+import { analyticsService } from "../../services/analytics.service";
 import { useRouter } from "next/router";
 
 interface FilterPanelProps {
@@ -140,52 +140,72 @@ const categories: Category[] = [
 ];
 
 export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-  const [animatingCategories, setAnimatingCategories] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [prevFilters, setPrevFilters] = useState<SearchFilters>(filters);
   const router = useRouter();
   const { query } = router.query;
   const searchQuery = Array.isArray(query) ? query[0] : query;
 
-  const updateFilters = (updates: Partial<SearchFilters>) => {
-    onChange({ ...filters, ...updates });
-    setPrevFilters({ ...filters, ...updates });
+  // Define additional filter state properties not in SearchFilters
+  const [isNew, setIsNew] = useState(false);
+  const [isLocal, setIsLocal] = useState(false);
+  const [freeShipping, setFreeShipping] = useState(false);
+  const [selectedCauses, setSelectedCauses] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
 
-    // Track filter changes
-    Object.entries(updates).forEach(([filterType, value]) => {
-      // Skip tracking if the value is the same as before
-      const prevValue = prevFilters[filterType as keyof SearchFilters];
-      if (JSON.stringify(prevValue) !== JSON.stringify(value)) {
-        analyticsService.trackFilterApply(filterType, value, searchQuery);
+  // Initialize local state based on props
+  useEffect(() => {
+    if (filters.categories?.length) {
+      setSelectedCategory(filters.categories[0]);
+      if (filters.categories.length > 1) {
+        setSelectedSubCategory(filters.categories[1]);
       }
-    });
+    }
+    if (filters.values?.length) {
+      setSelectedCauses(filters.values);
+    }
+  }, [filters.categories, filters.values]);
+
+  // Custom filter functions
+  const updateFilters = (updates: Partial<SearchFilters>) => {
+    const newFilters = { ...filters, ...updates };
+    onChange(newFilters);
+    
+    // Track filter application
+    if (Object.keys(updates).length > 0) {
+      // Using the proper trackFilterApply method
+      Object.entries(updates).forEach(([filterType, filterValue]) => {
+        analyticsService.trackFilterApply(filterType, filterValue, searchQuery as string);
+      });
+    }
   };
 
   const toggleCategory = (categoryId: string) => {
-    // Track category click when selecting a category
-    analyticsService.trackCategoryClick(categoryId, searchQuery);
-
-    // Update the category filter
-    updateFilters({ category: categoryId });
-
-    // Prevent multiple clicks during animation
-    if (animatingCategories.includes(categoryId)) return;
-
-    // Mark this category as animating
-    setAnimatingCategories((prev) => [...prev, categoryId]);
-
-    setExpandedCategories((prev) => {
-      const isExpanded = prev.includes(categoryId);
-      return isExpanded
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId];
-    });
-
-    // Remove from animating list after animation completes
-    setTimeout(() => {
-      setAnimatingCategories((prev) => prev.filter((id) => id !== categoryId));
-    }, 300); // Match this with your animation duration
+    if (selectedCategory === categoryId) {
+      // If already selected, clear the category filter
+      setSelectedCategory(null);
+      setSelectedSubCategory(null);
+      
+      // Update categories in the actual filters
+      updateFilters({
+        categories: [],
+      });
+      
+      // Log analytics event for category deselection
+      analyticsService.trackCategoryClick(categoryId, searchQuery as string);
+    } else {
+      // Set the new category
+      setSelectedCategory(categoryId);
+      setSelectedSubCategory(null);
+      
+      // Update categories in the actual filters
+      updateFilters({
+        categories: [categoryId],
+      });
+      
+      // Log analytics event for category selection
+      analyticsService.trackCategoryClick(categoryId, searchQuery as string);
+    }
   };
 
   const FilterSection = ({
@@ -194,14 +214,16 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
   }: {
     title: string;
     children: React.ReactNode;
-  }) => (
-    <div className="mb-6">
-      <h3 className="text-lg font-montserrat font-medium text-charcoal mb-3">
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
+  }) => {
+    return (
+      <div className="mb-6">
+        <h3 className="text-lg font-montserrat font-bold text-charcoal mb-3">
+          {title}
+        </h3>
+        {children}
+      </div>
+    );
+  };
 
   const FilterButton = ({
     active,
@@ -211,141 +233,114 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
     active: boolean;
     onClick: () => void;
     children: React.ReactNode;
-  }) => (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 rounded-full border-2 transition-all duration-200 text-sm
-                ${active ? "border-sage bg-sage text-white" : "border-sage/20 hover:border-sage/40 text-charcoal"}`}
-    >
-      {children}
-    </button>
-  );
+  }) => {
+    return (
+      <button
+        onClick={onClick}
+        className={`px-3 py-2 rounded-lg transition-colors duration-200 text-sm ${active ? "bg-sage/10 text-sage" : "bg-white hover:bg-sage/5 text-charcoal"}`}
+      >
+        {children}
+      </button>
+    );
+  };
 
   const content = (
     <div className="space-y-6">
-      {/* Quick Filters */}
       <FilterSection title="Quick Filters">
         <div className="flex flex-wrap gap-2">
           <FilterButton
-            active={filters.isNew || false}
-            onClick={() => updateFilters({ isNew: !filters.isNew })}
+            active={isNew}
+            onClick={() => setIsNew(!isNew)}
           >
             New Arrivals
           </FilterButton>
           <FilterButton
-            active={filters.isLocal || false}
-            onClick={() => updateFilters({ isLocal: !filters.isLocal })}
+            active={isLocal}
+            onClick={() => setIsLocal(!isLocal)}
           >
-            Local Only
+            Local Shops
           </FilterButton>
           <FilterButton
-            active={filters.freeShipping || false}
-            onClick={() =>
-              updateFilters({ freeShipping: !filters.freeShipping })
-            }
+            active={freeShipping}
+            onClick={() => setFreeShipping(!freeShipping)}
           >
             Free Shipping
           </FilterButton>
         </div>
       </FilterSection>
 
-      {/* Causes */}
       <FilterSection title="Supported Causes">
         <div className="grid grid-cols-2 gap-2">
           {causes.map((cause) => (
-            <div
+            <FilterButton
               key={cause.id}
+              active={selectedCauses.includes(cause.id)}
               onClick={() => {
-                const currentCauses = filters.causes || [];
-                let newCauses;
-                const isAdding = !currentCauses.includes(cause.id);
-
-                if (!isAdding) {
-                  newCauses = currentCauses.filter((id) => id !== cause.id);
-                } else {
-                  newCauses = [...currentCauses, cause.id];
-
-                  // Track cause click
-                  analyticsService.trackCauseClick(cause.id, searchQuery);
-                }
-
-                updateFilters({ causes: newCauses });
+                // Toggle the cause in the local state
+                const newCauses = selectedCauses.includes(cause.id)
+                  ? selectedCauses.filter((id) => id !== cause.id)
+                  : [...selectedCauses, cause.id];
+                
+                setSelectedCauses(newCauses);
+                
+                // Update the values in SearchFilters
+                updateFilters({
+                  values: newCauses.length > 0 ? newCauses : undefined
+                });
+                
+                // Track cause click
+                analyticsService.trackCauseClick(cause.id, searchQuery as string);
               }}
-              className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 ${(filters.causes || []).includes(cause.id) ? "bg-sage/10 text-sage" : "hover:bg-sage/5 text-charcoal"}`}
             >
-              <div className="text-current">{cause.icon}</div>
-              <span className="text-sm">{cause.name}</span>
-            </div>
+              <div className="flex items-center gap-1.5">
+                {cause.icon}
+                <span>{cause.name}</span>
+              </div>
+            </FilterButton>
           ))}
         </div>
       </FilterSection>
 
-      {/* Categories */}
       <FilterSection title="Categories">
         <div className="space-y-2">
           {categories.map((category) => (
-            <div key={category.id}>
-              <button
+            <div key={category.id} className="space-y-1">
+              <FilterButton
+                active={selectedCategory === category.id}
                 onClick={() => toggleCategory(category.id)}
-                className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors duration-200 hover:bg-sage/5 ${filters.category === category.id ? "text-sage" : "text-charcoal"}`}
               >
-                <span>{category.name}</span>
-                <motion.svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  animate={{
-                    rotate: expandedCategories.includes(category.id) ? 180 : 0,
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </motion.svg>
-              </button>
-              <AnimatePresence initial={false}>
-                {expandedCategories.includes(category.id) && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden pl-6 pt-2 pb-1"
-                  >
-                    <div className="pl-4 py-2 space-y-1">
-                      {category.subCategories.map((sub: string) => (
-                        <button
-                          key={sub}
-                          onClick={() =>
-                            updateFilters({
-                              category: category.id,
-                              subCategory: sub,
-                            })
-                          }
-                          className={`w-full text-left p-2 rounded-lg text-sm transition-colors duration-200 hover:bg-sage/5 ${filters.subCategory === sub ? "text-sage" : "text-charcoal"}`}
-                        >
-                          {sub}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                {category.name}
+              </FilterButton>
+
+              {/* Show subcategories if this category is selected */}
+              {selectedCategory === category.id && (
+                <div className="pl-4 space-y-1">
+                  {category.subCategories.map((subCat) => (
+                    <FilterButton
+                      key={subCat}
+                      active={selectedSubCategory === subCat}
+                      onClick={() => {
+                        setSelectedSubCategory(subCat);
+                        
+                        // Update categories in the actual filters
+                        updateFilters({
+                          categories: [category.id, subCat],
+                        });
+                      }}
+                    >
+                      {subCat}
+                    </FilterButton>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
       </FilterSection>
 
-      {/* Price Range */}
       <FilterSection title="Price Range">
-        <div className="space-y-4">
-          <div className="flex gap-4">
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2">
             <input
               type="number"
               placeholder="Min"
@@ -355,7 +350,7 @@ export default function FilterPanel({ filters, onChange }: FilterPanelProps) {
                 updateFilters({
                   priceRange: {
                     min: min || 0,
-                    max: filters.priceRange?.max || 0,
+                    max: filters.priceRange?.max || undefined,
                   },
                 });
               }}

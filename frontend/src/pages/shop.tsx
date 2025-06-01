@@ -1,11 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Product } from "@/types/products";
+import Head from "next/head";
 import { SearchFilters, SearchResult } from "@/types/search";
+import { Product } from "@/types/products";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
 import ProductCard from "@/components/products/ProductCard";
 import { ConsistentProductCard } from "@/components/products";
+
+// Ensure we use the same SearchFilters interface throughout the component
+type ComponentSearchFilters = SearchFilters;
+
+// Define a custom interface for this page's search results structure
+interface PageSearchResult {
+  query: string;
+  filters: ComponentSearchFilters;
+  totalResults: number;
+  products: Product[];
+  suggestedFilters: string[];
+}
 
 // Product image URLs from Unsplash - exactly 20 verified images
 const productImages = [
@@ -96,8 +109,8 @@ export default function ShopPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<SearchFilters>({});
-  const [searchResults, setSearchResults] = useState<SearchResult>({
+  const [filters, setFilters] = useState<ComponentSearchFilters>({});
+  const [searchResults, setSearchResults] = useState<PageSearchResult>({
     query: "",
     filters: {},
     totalResults: mockProducts.length,
@@ -214,9 +227,9 @@ export default function ShopPage() {
           <div className="w-full md:w-64 shrink-0">
             <FilterPanel
               filters={filters}
-              onChange={(newFilters: SearchFilters) => {
-                setFilters(newFilters);
-                handleSearch(searchQuery, newFilters);
+              onChange={(newFilters) => {
+                setFilters(newFilters as ComponentSearchFilters);
+                handleSearch(searchQuery, newFilters as ComponentSearchFilters);
               }}
             />
           </div>

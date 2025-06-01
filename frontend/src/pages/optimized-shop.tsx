@@ -2,6 +2,26 @@ import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { Product } from "@/types/products";
 import { SearchFilters, SearchResult } from "@/types/search";
+
+// Use our enhanced filters interface that includes all the needed properties
+type ComponentSearchFilters = EnhancedComponentFilters;
+
+// Define a custom interface for this page's search results structure
+interface PageSearchResult {
+  query: string;
+  filters: ComponentSearchFilters;
+  totalResults: number;
+  products: Product[];
+  suggestedFilters: string[];
+}
+
+// Define an enhanced component-specific filters interface
+interface EnhancedComponentFilters extends SearchFilters {
+  // Add any additional filter properties used in this component
+  brandName?: string;
+  categories?: string[];
+}
+
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
 import { ConsistentProductCard } from "@/components/products";
@@ -101,9 +121,9 @@ export default function OptimizedShopPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [filters, setFilters] = useState<ComponentSearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchResults, setSearchResults] = useState<SearchResult>({
+  const [searchResults, setSearchResults] = useState<PageSearchResult>({
     query: "",
     filters: {},
     totalResults: mockProducts.length,
@@ -130,25 +150,29 @@ export default function OptimizedShopPage() {
       );
     }
 
-    // Apply filters if any
-    if (filters.brand && filters.brand.length > 0) {
+    // Use the ComponentSearchFilters type to access the correct properties
+    const typedFilters = filters as ComponentSearchFilters;
+
+    // Filter by brand if specified
+    if (typedFilters.brandName) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brand!.includes(product.brand),
+        typedFilters.brandName === product.brand
       );
     }
 
-    if (filters.category) {
-      const category = filters.category;
+    // Filter by category if specified
+    if (typedFilters.categories && typedFilters.categories.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        product.categories.includes(category),
+        typedFilters.categories!.some((category: string) => product.categories.includes(category))
       );
     }
 
-    if (filters.price?.min !== undefined || filters.price?.max !== undefined) {
+    // Apply price filter if min or max is specified
+    if (typedFilters.priceRange?.min !== undefined || typedFilters.priceRange?.max !== undefined) {
       filteredProducts = filteredProducts.filter((product) => {
         const price = product.price;
-        const min = filters.price?.min ?? 0;
-        const max = filters.price?.max ?? Infinity;
+        const min = typedFilters.priceRange?.min ?? 0;
+        const max = typedFilters.priceRange?.max ?? Infinity;
         return price >= min && price <= max;
       });
     }
@@ -193,7 +217,7 @@ export default function OptimizedShopPage() {
   }, []);
 
   // Simulated search function
-  const handleSearch = (query: string, newFilters: SearchFilters = {}) => {
+  const handleSearch = (query: string, newFilters: ComponentSearchFilters = {}) => {
     setSearchQuery(query);
     setFilters(newFilters);
 
@@ -364,9 +388,9 @@ export default function OptimizedShopPage() {
             <div className="w-full md:w-64 shrink-0">
               <FilterPanel
                 filters={filters}
-                onChange={(newFilters: SearchFilters) => {
-                  setFilters(newFilters);
-                  handleSearch(searchQuery, newFilters);
+                onChange={(newFilters) => {
+                  setFilters(newFilters as ComponentSearchFilters);
+                  handleSearch(searchQuery, newFilters as ComponentSearchFilters);
                 }}
               />
             </div>

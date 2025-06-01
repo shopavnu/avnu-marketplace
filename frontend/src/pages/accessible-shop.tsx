@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Product } from "@/types/products";
-import { SearchFilters, SearchResult } from "@/types/search";
+import { SearchFilters } from "@/types/search";
+
+// Ensure we use the same SearchFilters interface throughout the component
+type ComponentSearchFilters = SearchFilters;
+
+// Define a custom interface for this page's search results structure
+interface PageSearchResult {
+  query: string;
+  filters: ComponentSearchFilters;
+  totalResults: number;
+  products: Product[];
+  suggestedFilters: string[];
+}
 import { categories } from "@/data/categories";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
@@ -104,10 +116,10 @@ export default function AccessibleShopPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [filters, setFilters] = useState<ComponentSearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<SearchResult>({
+  const [searchResults, setSearchResults] = useState<PageSearchResult>({
     query: "",
     filters: {},
     totalResults: mockProducts.length,
@@ -147,23 +159,25 @@ export default function AccessibleShopPage() {
     }
 
     // Apply other filters if any
-    if (filters.brand && filters.brand.length > 0) {
+    // Use the ComponentSearchFilters type to access the correct properties
+    const typedFilters = filters as ComponentSearchFilters;
+    if (typedFilters.brandName) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brand!.includes(product.brand),
+        typedFilters.brandName === product.brand,
       );
     }
 
-    if (filters.price?.min !== undefined || filters.price?.max !== undefined) {
+    if (typedFilters.priceRange?.min !== undefined || typedFilters.priceRange?.max !== undefined) {
       filteredProducts = filteredProducts.filter((product) => {
         const price = product.price;
-        const min = filters.price?.min ?? 0;
-        const max = filters.price?.max ?? Infinity;
+        const min = typedFilters.priceRange?.min ?? 0;
+        const max = typedFilters.priceRange?.max ?? Infinity;
         return price >= min && price <= max;
       });
     }
 
     // Update total results
-    setSearchResults((prev) => ({
+    setSearchResults((prev: PageSearchResult) => ({
       ...prev,
       totalResults: filteredProducts.length,
     }));
@@ -190,7 +204,7 @@ export default function AccessibleShopPage() {
 
   // Update search results when products change
   useEffect(() => {
-    setSearchResults((prev) => ({
+    setSearchResults((prev: PageSearchResult) => ({
       ...prev,
       products,
     }));
@@ -202,11 +216,13 @@ export default function AccessibleShopPage() {
     setFilters(newFilters);
 
     // Reset progressive loading to start fresh with new search/filters
-    setSearchResults((prev) => ({
+    setSearchResults((prev: PageSearchResult) => ({
       ...prev,
       query,
-      filters: newFilters,
+      filters: newFilters as ComponentSearchFilters,
       products: [],
+      totalResults: 0,
+      suggestedFilters: [],
     }));
 
     if (query && !recentSearches.includes(query)) {
@@ -270,9 +286,9 @@ export default function AccessibleShopPage() {
             >
               <FilterPanel
                 filters={filters}
-                onChange={(newFilters: SearchFilters) => {
-                  setFilters(newFilters);
-                  handleSearch(searchQuery, newFilters);
+                onChange={(newFilters) => {
+                  setFilters(newFilters as ComponentSearchFilters);
+                  handleSearch(searchQuery, newFilters as ComponentSearchFilters);
                 }}
               />
             </SectionLandmark>
