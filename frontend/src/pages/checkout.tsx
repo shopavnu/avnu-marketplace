@@ -9,6 +9,7 @@ import { brands as allBrands } from "@/data/brands";
 import useCart from "@/hooks/useCart";
 import type { ProductSummary } from "@/types/cart";
 import CartTester from "@/components/testing/CartTester";
+import analytics, { EventType } from "@/services/analytics";
 
 // Define complete types to avoid undefined errors
 interface ShippingInfo {
@@ -77,12 +78,19 @@ enum CheckoutStep {
   REVIEW = "review",
 }
 
+// Map checkout steps to numeric values for analytics
+const checkoutStepToNumber = (step: CheckoutStep): number => {
+  const steps = Object.values(CheckoutStep);
+  return steps.indexOf(step) + 1;
+}
+
 const CheckoutPage = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<CheckoutStep>(
     CheckoutStep.INFORMATION,
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  const [formError, setFormError] = useState("");
 
   // Get cart data from our cart store
   const { items: cartItems, cartTotal, getShippingInfo } = useCart();
@@ -119,8 +127,52 @@ const CheckoutPage = () => {
   // Convert cart items to ProductComplete format - in a real app, we'd have a consistent type
   const [convertedCartItems, setConvertedCartItems] = useState<CartItem[]>([]);
 
+  // Reset form to initial state
+  const resetFormData = () => {
+    setFormData({
+      email: "",
+      phone: "",
+      firstName: "",
+      lastName: "",
+      address1: "",
+      address2: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "United States",
+      shippingMethod: "standard",
+      cardNumber: "",
+      cardName: "",
+      expiryDate: "",
+      cvv: "",
+      billingAddressSame: true,
+    });
+  };
+
   // Use useEffect to convert cart items to the format needed by the checkout page
   useEffect(() => {
+    // Reset form when component mounts
+    resetFormData();
+
+    // Track beginning of checkout process
+    analytics.trackBeginCheckout({
+      items: cartItems.map((item) => ({
+        id: item.product.id,
+        name: item.product.title,
+        brand: item.product.brand || "Unknown",
+        price: item.product.price,
+        quantity: item.quantity,
+      })),
+      value: cartTotal,
+      currency: "USD",
+    });
+
+    // Track page view
+    analytics.trackPageView({
+      path: window.location.pathname,
+      title: "Checkout",
+    });
+
     if (cartItems.length > 0) {
       // Convert the cart items from our cart store to the format needed by the checkout page
       const converted = cartItems.map((item) => ({
@@ -160,7 +212,7 @@ const CheckoutPage = () => {
 
       setConvertedCartItems(converted);
     }
-  }, [cartItems]);
+  }, [cartItems, cartTotal]);
 
   // Calculate totals based on cart items
   const subtotal = cartTotal;
@@ -206,46 +258,79 @@ const CheckoutPage = () => {
     }));
   };
 
-  // Navigation between steps
-  const goToNextStep = () => {
-    switch (currentStep) {
-      case CheckoutStep.INFORMATION:
-        setCurrentStep(CheckoutStep.SHIPPING);
-        break;
-      case CheckoutStep.SHIPPING:
-        setCurrentStep(CheckoutStep.PAYMENT);
-        break;
-      case CheckoutStep.PAYMENT:
-        setCurrentStep(CheckoutStep.REVIEW);
-        break;
-      case CheckoutStep.REVIEW:
-        handlePlaceOrder();
-        break;
+  // Handle navigation between steps
+  const handleStepChange = (step: CheckoutStep) => {
+    // Validate current step before moving to the next
+    if (step > currentStep && !validateCurrentStep()) {
+      return;
     }
+
+    // Track checkout step for analytics
+    if (step > currentStep) {
+      const stepNames = {
+        [CheckoutStep.INFORMATION]: "Information",
+        [CheckoutStep.SHIPPING]: "Shipping",
+        [CheckoutStep.PAYMENT]: "Payment",
+        [CheckoutStep.REVIEW]: "Review",
+      };
+
+      // Track the previous step completion
+      analytics.trackCheckoutStep(
+        // Convert enum to number for step tracking
+        checkoutStepToNumber(currentStep),
+        stepNames[currentStep],
+        {
+        items: cartItems.map((item) => ({
+          id: item.product.id,
+          name: item.product.title,
+          brand: item.product.brand || "Unknown",
+          price: item.product.price,
+          quantity: item.quantity,
+        })),
+        step: checkoutStepToNumber(currentStep),
+        option: stepNames[currentStep],
+        value: subtotal,
+      });
+    }
+
+    setCurrentStep(step);
+    setFormError("");
   };
 
-  const goToPreviousStep = () => {
-    switch (currentStep) {
-      case CheckoutStep.SHIPPING:
-        setCurrentStep(CheckoutStep.INFORMATION);
-        break;
-      case CheckoutStep.PAYMENT:
-        setCurrentStep(CheckoutStep.SHIPPING);
-        break;
-      case CheckoutStep.REVIEW:
-        setCurrentStep(CheckoutStep.PAYMENT);
-        break;
-    }
-  };
-
-  // Handle order placement
-  const handlePlaceOrder = async () => {
+  // Handle order submission
+  const handlePlaceOrder = () => {
     setIsProcessing(true);
 
-    // Simulate API call
+    // Simulate order processing delay
     setTimeout(() => {
       setIsProcessing(false);
-      // Redirect to order confirmation
+
+      // In a real app, we would send the order to the server here
+      // and get back an order number and other details
+
+      // For now, we'll just redirect to the order confirmation page
+      // The actual purchase event will be tracked on the order confirmation page
+      // when we have the order number generated
+
+      // Track final checkout step completion before redirecting
+      analytics.trackCheckoutStep(
+        // Convert enum to number for step tracking
+        checkoutStepToNumber(CheckoutStep.REVIEW),
+        "Review",
+        {
+        items: cartItems.map((item) => ({
+          id: item.product.id,
+          name: item.product.title,
+          brand: item.product.brand || "Unknown",
+          price: item.product.price,
+          quantity: item.quantity,
+        })),
+        step: checkoutStepToNumber(CheckoutStep.REVIEW),
+        option: "Review",
+        value: subtotal,
+      });
+
+      // Redirect to order confirmation page
       router.push("/order-confirmation");
     }, 2000);
   };
@@ -785,7 +870,14 @@ const CheckoutPage = () => {
               <div className="flex justify-between mt-8">
                 {currentStep !== CheckoutStep.INFORMATION ? (
                   <button
-                    onClick={goToPreviousStep}
+                    onClick={() => {
+                      // Find previous step
+                      const steps = Object.values(CheckoutStep);
+                      const currentIndex = steps.indexOf(currentStep);
+                      if (currentIndex > 0) {
+                        handleStepChange(steps[currentIndex - 1]);
+                      }
+                    }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Back
@@ -795,7 +887,18 @@ const CheckoutPage = () => {
                 )}
 
                 <button
-                  onClick={goToNextStep}
+                  onClick={() => {
+                    if (currentStep === CheckoutStep.REVIEW) {
+                      handlePlaceOrder();
+                    } else {
+                      // Find next step
+                      const steps = Object.values(CheckoutStep);
+                      const currentIndex = steps.indexOf(currentStep);
+                      if (currentIndex < steps.length - 1) {
+                        handleStepChange(steps[currentIndex + 1]);
+                      }
+                    }
+                  }}
                   disabled={!validateCurrentStep() || isProcessing}
                   className={`px-6 py-2 rounded-md text-white font-medium ${validateCurrentStep() && !isProcessing ? "bg-sage hover:bg-sage/90" : "bg-gray-400 cursor-not-allowed"} transition-colors`}
                 >
