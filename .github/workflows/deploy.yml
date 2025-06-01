@@ -28,6 +28,8 @@ jobs:
       - name: Install dependencies
         run: |
           cd backend
+          echo "better-sqlite3_binary=true" >> .npmrc
+          echo "sqlite3_binary=true" >> .npmrc
           npm ci
 
       - name: Run tests
