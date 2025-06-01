@@ -72,7 +72,6 @@
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.9.1",
-    "bull-board": "^1.2.0",
     "bullmq": "^5.53.0",
     "cache-manager": "^5.7.6",
     "cache-manager-redis-store": "^3.0.1",
