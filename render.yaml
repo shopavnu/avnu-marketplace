@@ -2,34 +2,77 @@ services:
   # Backend API Service
   - type: web
     name: avnu-marketplace-api
-    env: node
-    rootDir: backend
-    buildCommand: chmod +x ./render-build.sh && ./render-build.sh
-    startCommand: npm run start:prod
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: node dist/main
+    repo: https://github.com/shopavnu/avnu-marketplace.git
+    branch: main
     healthCheckPath: /health
+    numInstances: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 8080
-      # Add other environment variables as needed
-      # - key: DATABASE_URL
-      #   fromDatabase:
-      #     name: avnu-marketplace-db
-      #     property: connectionString
-      # - key: ELASTICSEARCH_NODE
-      #   value: https://your-elasticsearch-instance.com
+      - key: DATABASE_URL
+        sync: false # Set this to false for secrets
+      - key: CLERK_SECRET_KEY
+        sync: false
+      # Database and other service connections
+      - key: REDIS_HOST
+        value: avnu-marketplace-redis
+      - key: REDIS_PORT
+        value: 6379
+      - key: ELASTICSEARCH_NODE
+        value: http://avnu-marketplace-elasticsearch:9200
+    plan: standard
 
-  # Optional: Frontend Service (if you want to deploy frontend separately from Vercel)
-  # - type: web
-  #   name: avnu-marketplace-frontend
-  #   env: node
-  #   rootDir: frontend
-  #   buildCommand: npm install && npm run build
-  #   startCommand: npm run start
-  #   envVars:
-  #     - key: NEXT_PUBLIC_API_URL
-  #       value: https://avnu-marketplace-api.onrender.com
+  # Frontend Service
+  - type: web
+    name: avnu-marketplace-web
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    dockerCommand: npm start
+    repo: https://github.com/shopavnu/avnu-marketplace.git
+    branch: main
+    healthCheckPath: /api/healthz
+    numInstances: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://avnu-marketplace-api.onrender.com
+      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+        sync: false
+    plan: standard
+
+  # Worker Service
+  - type: worker
+    name: avnu-marketplace-worker
+    env: docker
+    dockerfilePath: ./backend/Dockerfile.worker
+    dockerContext: ./backend
+    dockerCommand: node dist/main --worker
+    repo: https://github.com/shopavnu/avnu-marketplace.git
+    branch: main
+    numInstances: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WORKER_ENABLED
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      # Database and other service connections
+      - key: REDIS_HOST
+        value: avnu-marketplace-redis
+      - key: REDIS_PORT
+        value: 6379
+    plan: standard
 
 # Optional: Database Service
 # databases:

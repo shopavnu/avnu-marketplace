@@ -22,15 +22,21 @@ const ScrollProgressBar: React.FC<ScrollProgressBarProps> = ({
   });
 
   return (
-    <motion.div
+    <div
       className={`fixed left-0 right-0 ${position === "top" ? "top-0" : "bottom-0"} z-50 ${color} origin-left`}
-      style={{
-        scaleX,
-        height,
-        opacity: showOnlyWhenScrolled ? scrollYProgress : 1,
-      }}
-    />
+    >
+      <motion.div
+        style={{
+          scaleX,
+          height,
+          opacity: showOnlyWhenScrolled ? scrollYProgress : 1,
+          width: '100%', // Ensure motion.div takes full width of parent
+          transformOrigin: 'left' // ensure origin-left is applied to the scaling element
+        }}
+      />
+    </div>
   );
 };
 
+// Force re-commit
 export default ScrollProgressBar;

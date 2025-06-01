@@ -39,11 +39,35 @@ import { ShopifyClientService as _ShopifyClientService } from '../services/shopi
     TypeOrmModule.forFeature([ShopifyBulkOperationJob]),
     RedisModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (_configService: ConfigService) => ({
-        type: 'single',
-        url: `redis://${process.env.REDIS_HOST || 'localhost'}:${parseInt(process.env.REDIS_PORT || '6379', 10)}`,
-      }),
       inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const host = configService.get<string>('REDIS_HOST');
+        const port = configService.get<number>('REDIS_PORT');
+        const username = configService.get<string>('REDIS_USERNAME');
+        const password = configService.get<string>('REDIS_PASSWORD');
+        const tlsEnabledStr = configService.get<string>('REDIS_TLS_ENABLED', 'false');
+        const enableTls = tlsEnabledStr?.toLowerCase().trim() === 'true';
+        const db = configService.get<number>('REDIS_CACHE_DB', 0); // Using a different DB for cache if needed, else 0
+
+        // Log the connection parameters (excluding password for security)
+        console.log(
+          `[@nestjs-modules/ioredis] Connecting to Redis: host=${host}, port=${port}, username=${username}, tls=${enableTls}, db=${db}`,
+        );
+
+        return {
+          type: 'single',
+          options: {
+            host: host,
+            port: port,
+            username: username, // Will be 'default'
+            password: password,
+            db: db,
+            tls: enableTls ? {} : undefined,
+            // Add any other ioredis options needed, e.g., commandTimeout
+            // commandTimeout: configService.get<number>('REDIS_COMMAND_TIMEOUT', 5000),
+          },
+        };
+      },
     }),
   ],
   providers: [

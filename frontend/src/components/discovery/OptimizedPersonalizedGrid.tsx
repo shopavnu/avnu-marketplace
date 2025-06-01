@@ -147,7 +147,7 @@ const OptimizedPersonalizedGrid: React.FC<OptimizedPersonalizedGridProps> = ({
       <h2 className="text-2xl font-semibold mb-6">{title}</h2>
 
       <div
-        ref={containerRef}
+        ref={containerRef as React.LegacyRef<HTMLDivElement> | undefined}
         className="overflow-auto"
         style={{
           height: Math.min(totalHeight + 100, containerHeight),

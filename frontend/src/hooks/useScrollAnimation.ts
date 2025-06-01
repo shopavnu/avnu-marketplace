@@ -19,7 +19,7 @@ interface ScrollPosition {
  * Hook to detect when an element is visible in the viewport
  */
 export function useInView(
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | null>,
   options: ScrollAnimationOptions = {},
 ) {
   const [isInView, setIsInView] = useState(false);
@@ -114,7 +114,7 @@ export function useScrollPosition(): ScrollPosition {
  * Hook to animate elements based on scroll position
  */
 export function useScrollAnimation(
-  ref: RefObject<HTMLElement>,
+  ref: RefObject<HTMLElement | null>,
   options: ScrollAnimationOptions = {},
 ) {
   const isInView = useInView(ref, options);

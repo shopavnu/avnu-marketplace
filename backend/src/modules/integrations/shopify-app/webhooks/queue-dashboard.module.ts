@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BullModule, getQueueToken } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { BullModule, getQueueToken } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { RouterModule } from '@nestjs/core';
 import { createBullBoard } from '@bull-board/api';
-import { BullAdapter } from '@bull-board/api/bullAdapter';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { WebhookQueueModule } from './webhook-queue.module'; // Added import
 import { ShopifyScalabilityModule } from '../utils/scalability.module';
 
 /**
@@ -19,20 +20,9 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
  */
 @Module({
   imports: [
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-          password: configService.get('REDIS_PASSWORD', ''),
-          db: configService.get('REDIS_QUEUE_DB', 1),
-        },
-        prefix: 'shopify:',
-      }),
-    }),
+    WebhookQueueModule, // Use BullModule config from WebhookQueueModule
     BullModule.registerQueue({
+      // Register the specific queue for the dashboard
       name: 'shopify-webhooks',
     }),
     RouterModule.register([
@@ -54,7 +44,7 @@ import { ShopifyScalabilityModule } from '../utils/scalability.module';
 
         // Create Bull Board with queues
         createBullBoard({
-          queues: [new BullAdapter(shopifyWebhooksQueue)],
+          queues: [new BullMQAdapter(shopifyWebhooksQueue)],
           serverAdapter,
         });
 

@@ -1,0 +1,185 @@
+scalar GraphQLISODateTime
+
+type UserPreferenceProfile {
+  id: ID!
+  userId: ID!
+  # user: User # If User type is defined in another .graphql file, it can be referenced here.
+  lastUpdated: GraphQLISODateTime!
+  totalPageViews: Int!
+  totalProductViews: Int!
+  averageScrollDepth: Float!
+  averageProductViewTimeSeconds: Float!
+  averageSessionDurationMinutes: Float!
+  productEngagementCount: Int!
+  topViewedCategories: [String!]
+  topViewedBrands: [String!]
+  recentlyViewedProducts: [String!]
+  categoryPreferences: String
+  brandPreferences: String
+  productPreferences: String
+  viewTimeByCategory: String
+  viewTimeByBrand: String
+  scrollDepthByPageType: String
+  priceRangePreferences: String
+  hasEnoughData: Boolean!
+  createdAt: GraphQLISODateTime!
+  updatedAt: GraphQLISODateTime!
+}
+
+type AnonymousUserOverviewDto {
+  totalAnonymousUsers: Int!
+  activeAnonymousUsers: Int!
+  conversionRate: Float!
+  avgSessionDuration: Float!
+  returningUserRate: Float!
+}
+
+type InteractionTypeMetricsDto {
+  type: String!
+  count: Int!
+  percentage: Float!
+}
+
+type CategoryPreferenceDto {
+  categoryId: String!
+  categoryName: String!
+  weight: Float!
+  interactionCount: Int!
+}
+
+type BrandPreferenceDto {
+  brandId: String!
+  brandName: String!
+  weight: Float!
+  interactionCount: Int!
+}
+
+type SearchTermDto {
+  query: String!
+  count: Int!
+  conversionRate: Float!
+}
+
+type TimeframeMetricsDto {
+  date: String! # Assuming date is a string like "YYYY-MM-DD"
+  anonymousUsers: Int!
+  newUsers: Int!
+  returningUsers: Int!
+  avgSessionDuration: Float!
+}
+
+type AnonymousUserMetricsDto {
+  overview: AnonymousUserOverviewDto!
+  interactionsByType: [InteractionTypeMetricsDto!]!
+  topCategoryPreferences: [CategoryPreferenceDto!]!
+  topBrandPreferences: [BrandPreferenceDto!]!
+  topSearchTerms: [SearchTermDto!]!
+  byTimeframe: [TimeframeMetricsDto!]!
+}
+
+type UserSegmentDto {
+  id: String!
+  name: String!
+  description: String!
+  count: Int!
+  percentage: Float!
+  color: String!
+  characteristics: [String!]!
+  topCategories: [String!]!
+  topBrands: [String!]!
+  avgSessionDuration: Float!
+  conversionRate: Float!
+}
+
+type PageHeatmapDataDto {
+  x: Int!
+  y: Int!
+  value: Int!
+}
+
+type FunnelStepDto {
+  name: String!
+  value: Int!
+  percentage: Float
+  conversionRate: Float
+}
+
+type UserSegmentationDataDto {
+  segments: [UserSegmentDto!]!
+  pageHeatmapData: [PageHeatmapDataDto!]!
+  funnelData: [FunnelStepDto!]!
+}
+
+type MetricComparisonDto {
+  personalized: Float!
+  nonPersonalized: Float!
+  improvement: Float!
+  trend: Float!
+}
+
+type HistoricalDataDto {
+  dates: [String!]!
+  personalized: [Float!]!
+  nonPersonalized: [Float!]!
+}
+
+type CategoryPercentageDto {
+  name: String!
+  percentage: Float!
+}
+
+type PersonalizationMetricsDto {
+  conversionRate: MetricComparisonDto!
+  clickThroughRate: MetricComparisonDto!
+  averageOrderValue: MetricComparisonDto!
+  timeOnSite: MetricComparisonDto!
+  recommendationAccuracy: Float!
+  userSatisfaction: Float!
+  historicalData: HistoricalDataDto!
+  topRecommendationCategories: [CategoryPercentageDto!]!
+}
+
+type ABTestVariantMetricDto {
+  id: String!
+  value: Float!
+  improvement: Float!
+}
+
+type ABTestMetricDto {
+  name: String!
+  control: Float!
+  variants: [ABTestVariantMetricDto!]!
+}
+
+type ABTestVariantDto {
+  id: String!
+  name: String!
+  description: String!
+  trafficPercentage: Float!
+  isControl: Boolean!
+}
+
+type ABTestResultDto {
+  id: String!
+  name: String!
+  description: String!
+  status: String!
+  startDate: String!
+  endDate: String
+  variants: [ABTestVariantDto!]!
+  metrics: [ABTestMetricDto!]!
+  winner: String
+  confidenceLevel: Float
+}
+
+extend type Query {
+  userPreferenceProfile: UserPreferenceProfile
+  anonymousUserMetrics(period: Int): AnonymousUserMetricsDto
+  userSegmentationData(period: Int): UserSegmentationDataDto
+  personalizationMetrics(period: Int): PersonalizationMetricsDto
+  abTestResults: [ABTestResultDto!]!
+}
+
+extend type Mutation {
+  updateUserPreferenceProfileFromSession(sessionId: ID!): UserPreferenceProfile!
+}

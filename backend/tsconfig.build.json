@@ -10,7 +10,29 @@
     "strictNullChecks": false,
     "noImplicitThis": false,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "baseUrl": "./src",
+    "outDir": "./dist/src",
+    "paths": {
+      "@app/*": ["*"],
+      "@config/*": ["config/*"],
+      "@modules/*": ["modules/*"],
+      "@common/*": ["common/*"],
+      "@common/common.module": ["common/common.module"]
+    }
   },
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "scripts", "__mocks__/**/*"]
+  "exclude": [
+    "node_modules",
+    "test",
+    "tests",
+    "dist",
+    "scripts",
+    "__mocks__",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/test/**",
+    "**/tests/**",
+    "**/__mocks__/**",
+    "jest-setup.ts"
+  ]
 }

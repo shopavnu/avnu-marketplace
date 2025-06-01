@@ -41,7 +41,7 @@ export class BrandsPrismaResolver {
     return this.brandsService.remove(id);
   }
 
-  @Query('searchBrands')
+  @Query('searchBrandsSimpleList')
   async searchBrands(@Args('query') query: string) {
     return this.brandsService.searchBrands(query);
   }

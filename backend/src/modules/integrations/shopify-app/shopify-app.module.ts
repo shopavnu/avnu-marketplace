@@ -12,8 +12,8 @@ import { ShopifyWebhookService } from './services/shopify-webhook.service';
 // New webhook registry system
 import { ShopifyWebhooksModule } from './webhooks/webhooks.module';
 import { ShopifyWebhookRegistryService } from './webhooks/shopify-webhook-registry.service';
-import { WebhookRegistry } from './webhooks/webhook-registry';
-import { WebhookValidator } from './webhooks/webhook-validator';
+import { WebhookRegistry as _WebhookRegistry } from './webhooks/webhook-registry';
+import { WebhookValidator as _WebhookValidator } from './webhooks/webhook-validator';
 
 // Controllers
 import { ShopifyControllersModule } from './controllers/controllers.module';

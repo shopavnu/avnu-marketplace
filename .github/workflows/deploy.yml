@@ -7,11 +7,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Ensure npm cache directory exists
+        run: mkdir -p ~/.npm
+
+      - name: Ensure npm cache directory exists
+        run: mkdir -p ~/.npm
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -28,7 +34,12 @@ jobs:
         run: |
           cd backend
           npm test
-
-      - name: Trigger Render deploy
-        run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          
+  deploy-render:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key:   ${{ secrets.RENDER_API_KEY }}

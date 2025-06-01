@@ -73,7 +73,9 @@ const ValueTag: React.FC<ValueTagProps> = ({
 
   return (
     <motion.span
-      className={`${bg} ${text} ${sizeClasses[size]} rounded-full font-medium inline-flex items-center justify-center ${interactive ? "cursor-pointer" : ""}`}
+      {...{
+        className: `${bg} ${text} ${sizeClasses[size]} rounded-full font-medium inline-flex items-center justify-center ${interactive ? "cursor-pointer" : ""}`
+      }}
       {...interactiveProps}
     >
       {value.charAt(0).toUpperCase() + value.slice(1)}

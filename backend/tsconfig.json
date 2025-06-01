@@ -10,7 +10,6 @@
     "target": "ES2020",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -20,12 +19,31 @@
     "noFallthroughCasesInSwitch": false,
     "useDefineForClassFields": false,
     "ignoreDeprecations": "5.0",
+    "moduleResolution": "node", // Explicitly set moduleResolution
+    "baseUrl": ".", // Needed for paths to work
+    "types": ["node", "jest", "geojson"], // Explicitly include type definitions
     "paths": {
-      "@app/*": ["src/*"],
-      "@config/*": ["src/config/*"],
-      "@modules/*": ["src/modules/*"],
-      "@common/*": ["src/common/*"]
+      "@clerk/backend": [
+        "node_modules/@clerk/backend/dist/index.d.ts",
+        "../node_modules/@clerk/backend/dist/index.d.ts"
+      ],
+      "@clerk/express": [
+        "node_modules/@clerk/express/dist/index.d.ts",
+        "../node_modules/@clerk/express/dist/index.d.ts"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ]
     }
   },
+  "include": [
+    "src",
+    "src/types",
+    "src/**/*",
+    "test/**/*"
+  ],
   "exclude": ["scripts/**/*", "node_modules", "dist", "__mocks__/**/*"]
 }

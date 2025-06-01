@@ -90,7 +90,7 @@ const ProgressiveDiscoveryFeed: React.FC<ProgressiveDiscoveryFeedProps> = ({
   useEffect(() => {
     const refs: Record<string, React.RefObject<HTMLDivElement>> = {};
     sections.forEach((section) => {
-      refs[section.id] = React.createRef<HTMLDivElement>();
+      refs[section.id] = React.createRef<HTMLDivElement>() as unknown as React.RefObject<HTMLDivElement>;
     });
     setSectionRefs(refs);
   }, [sections]);
@@ -142,7 +142,7 @@ const ProgressiveDiscoveryFeed: React.FC<ProgressiveDiscoveryFeedProps> = ({
         return;
 
       // Initialize loading state for this section
-      const loadMoreRef = React.createRef<HTMLDivElement>();
+      const loadMoreRef = React.createRef<HTMLDivElement>() as unknown as React.RefObject<HTMLDivElement>;
 
       // Function to load more products for this section
       const loadProductsForSection = async (page: number, pageSize: number) => {
@@ -158,6 +158,12 @@ const ProgressiveDiscoveryFeed: React.FC<ProgressiveDiscoveryFeedProps> = ({
           hasMore: true,
           loadMoreRef,
           isInitialLoading: true,
+        } as {
+          products: Product[];
+          isLoading: boolean;
+          hasMore: boolean;
+          loadMoreRef: React.RefObject<HTMLDivElement>;
+          isInitialLoading: boolean;
         },
       }));
 

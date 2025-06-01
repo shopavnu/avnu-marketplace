@@ -61,7 +61,9 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
             <div className="mb-6">
               {title && (
                 <motion.h2
-                  className="text-2xl font-montserrat font-medium text-charcoal"
+                  {...{ // Explicitly group HTML attributes
+                    className: "text-2xl font-montserrat font-medium text-charcoal"
+                  }}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
@@ -72,7 +74,9 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
               )}
               {description && (
                 <motion.p
-                  className="text-neutral-gray mt-2"
+                  {...{ // Explicitly group HTML attributes
+                    className: "text-neutral-gray mt-2"
+                  }}
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
@@ -91,7 +95,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           {displayCategories.map((category, index) => (
             <motion.div key={category.id} variants={itemVariants}>

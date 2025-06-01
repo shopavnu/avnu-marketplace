@@ -9,11 +9,11 @@ import {
   MerchantResultType,
   BrandResultType,
   PaginationType,
-  FacetType,
+  FacetType as _FacetType,
 } from '../graphql/search-response.type';
 import { Product } from '../../products/entities/product.entity';
 import { Merchant } from '../../merchants/entities/merchant.entity';
-import { Category } from '../../categories/entities/category.entity';
+import { Category as _Category } from '../../categories/entities/category.entity';
 
 /**
  * Search resolver for GraphQL with strict typing

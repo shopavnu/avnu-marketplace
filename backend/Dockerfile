@@ -3,14 +3,24 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package files and install dependencies
-COPY package*.json ./
-RUN npm ci
+# Copy root package.json and package-lock.json
+# These are essential for installing dependencies for the entire monorepo
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Explicitly install backend workspace dependencies to ensure links/stubs
+WORKDIR /app/backend
+RUN npm install --legacy-peer-deps
+WORKDIR /app
+
+# Prisma generate (if needed, assuming schema is copied by 'COPY . .')
+# Ensure 'backend' is the correct name in your root package.json's workspaces array
+# The build output will typically be in /app/backend/dist
+RUN npm run build --workspace=backend
 
 # Remove development dependencies
 RUN npm prune --production
@@ -24,9 +34,19 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+# Copy built application artifacts from the builder stage
+# Source paths are relative to /app in the builder stage (monorepo root)
+# Destination paths are relative to /app in this production stage
+COPY --from=builder /app/backend/dist ./dist
+
+# Copy the backend's package.json to be the main package.json for this image
+# This is important for context if npm scripts from backend/package.json were to be used
+COPY --from=builder /app/backend/package.json ./package.json
+
+# Copy the node_modules from the builder stage.
+# This includes all dependencies for the monorepo.
+# The 'npm prune --production' in the builder stage helps reduce its size.
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
 
 # Expose the application port
 EXPOSE 3000

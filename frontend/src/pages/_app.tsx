@@ -39,16 +39,16 @@ export default function App({ Component, pageProps }: AppProps) {
             <ApolloProvider>
               {useEnhancedLayout ? (
                 <EnhancedLayout>
-                  <ApiUrlDebug />
-                  <GraphQLErrorHandler />
+                  {/* <ApiUrlDebug /> */}
+                  {/* <GraphQLErrorHandler /> */}
                   <ErrorBoundary>
                     <Component {...pageProps} />
                   </ErrorBoundary>
                 </EnhancedLayout>
               ) : (
                 <Layout>
-                  <ApiUrlDebug />
-                  <GraphQLErrorHandler />
+                  {/* <ApiUrlDebug /> */}
+                  {/* <GraphQLErrorHandler /> */}
                   <ErrorBoundary>
                     <Component {...pageProps} />
                   </ErrorBoundary>

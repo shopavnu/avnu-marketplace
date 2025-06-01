@@ -6,7 +6,7 @@
  */
 import express from 'express';
 import cors from 'cors';
-import { graphqlHTTP } from 'express-graphql';
+import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql';
 import { MockSearchService as _MockSearchService } from './mock-search.service';
 
@@ -591,12 +591,46 @@ app.get('/health', (req, res) => {
 // GraphQL endpoint
 app.use(
   '/graphql',
-  graphqlHTTP({
+  createHandler({
     schema: schema,
     rootValue: root,
-    graphiql: true, // Enable GraphiQL for testing in browser
   }),
 );
+
+// GraphiQL endpoint (graphql-http doesn't include GraphiQL, so we need to add a separate endpoint for it)
+app.get('/graphiql', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>GraphiQL</title>
+        <link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />
+      </head>
+      <body style="margin: 0;">
+        <div id="graphiql" style="height: 100vh;"></div>
+        <script
+          crossorigin
+          src="https://unpkg.com/react/umd/react.production.min.js"
+        ></script>
+        <script
+          crossorigin
+          src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"
+        ></script>
+        <script
+          crossorigin
+          src="https://unpkg.com/graphiql/graphiql.min.js"
+        ></script>
+        <script>
+          const fetcher = GraphiQL.createFetcher({ url: '/graphql' });
+          ReactDOM.render(
+            React.createElement(GraphiQL, { fetcher }),
+            document.getElementById('graphiql'),
+          );
+        </script>
+      </body>
+    </html>
+  `);
+});
 
 // Start server
 app.listen(PORT, () => {

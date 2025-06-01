@@ -160,7 +160,7 @@ export class Order {
   })
   @ValidateNested({ each: true })
   @Type(() => OrderItem)
-  items: OrderItem[] = [];
+  items: OrderItem[];
 
   /**
    * Order fulfillments

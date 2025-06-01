@@ -1,7 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as IORedis from 'ioredis';
-import { Redis } from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
 /**
  * Redis factory provider for creating Redis clients
@@ -68,14 +67,16 @@ export class RedisModule {}
 /**
  * Create a Redis client with appropriate error handling and configuration
  */
-function createRedisClient(
-  configService: ConfigService,
-  options: IORedis.RedisOptions = {},
-): IORedis.Redis {
-  const redisOptions: IORedis.RedisOptions = {
+function createRedisClient(configService: ConfigService, options: RedisOptions = {}): Redis {
+  // Explicit debug log for REDIS_USERNAME
+  console.log('[ioredis DEBUG] REDIS_USERNAME:', configService.get('REDIS_USERNAME'));
+
+  const redisOptions: RedisOptions = {
     host: configService.get('REDIS_HOST', 'localhost'),
     port: configService.get<number>('REDIS_PORT', 6379),
-    password: configService.get('REDIS_PASSWORD', ''),
+    // Hardcoding username for Redis Cloud troubleshooting
+    username: 'default',
+    password: configService.get('REDIS_PASSWORD'), // do not default to empty string
     tls: configService.get('REDIS_TLS_ENABLED') === 'true' ? {} : undefined,
     reconnectOnError: err => {
       // Only reconnect on specific errors
@@ -91,6 +92,29 @@ function createRedisClient(
     enableOfflineQueue: true, // Queue commands when disconnected
     ...options,
   };
+
+  // Debug log for RedisModule config
+  console.log('[ioredis DEBUG] redis.module.ts loaded with options:', {
+    host: redisOptions.host,
+    port: redisOptions.port,
+    db: redisOptions.db,
+    keyPrefix: redisOptions.keyPrefix,
+    username: redisOptions.username,
+    passwordIsSet: !!redisOptions.password,
+    tls: !!redisOptions.tls,
+  });
+  // Log the entire redisOptions for troubleshooting
+  console.log('[ioredis DEBUG] Redis options:', redisOptions);
+
+  // Debug log to verify Redis config (do not print actual password)
+  console.log('[ioredis] Creating Redis client:', {
+    host: redisOptions.host,
+    port: redisOptions.port,
+    db: redisOptions.db,
+    keyPrefix: redisOptions.keyPrefix,
+    username: redisOptions.username,
+    passwordIsSet: !!redisOptions.password,
+  });
 
   const client = new Redis(redisOptions);
 

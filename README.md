@@ -93,21 +93,66 @@ Avnu Marketplace is a comprehensive e-commerce platform that connects merchants 
    - Created `hotfix/vercel-deployment` branch with all fixes
    - Ensured all builds pass with no errors for seamless deployment
 
+## CI/CD and Deployment Automation
+
+This project utilizes GitHub Actions for Continuous Integration and Continuous Deployment (CI/CD).
+
+- **Dockerization**: The frontend, backend, and worker services are containerized using Docker.
+- **Image Registry**: Docker images are built and pushed to GitHub Container Registry (ghcr.io).
+- **Backend/Worker Deployment**: The backend and worker services are deployed to Render, pulling their Docker images from ghcr.io. Deployments to Render are triggered automatically by the CI/CD pipeline upon pushes to the main branch.
+- **Frontend Deployment**: The frontend is deployed to Vercel (details in the Vercel deployment section if applicable, or manage via Vercel's GitHub integration).
+
+Key Workflows:
+- `.github/workflows/docker-build.yml`: Handles building Docker images for all services, pushing them to ghcr.io, and triggering deployments on Render for the backend and worker services.
+
 ## Development Setup
 
 ### Prerequisites
-- Node.js (v14+)
+- Node.js (v20+)
 - npm or yarn
-- Docker (for Elasticsearch)
+- Docker and Docker Compose
 
-### Frontend Setup
+### Quick Start with Docker
+
+The easiest way to set up the entire platform is using Docker Compose:
+
+```bash
+# Clone the repository
+git clone https://github.com/shopavnu/avnu-marketplace.git
+cd avnu-marketplace
+
+# Build the application
+npm run build # Builds both frontend and backend
+
+# Start the application with Docker Compose
+docker compose up
+```
+
+This will start all services:
+- Web application at http://localhost:3000
+- API at http://localhost:8080
+- Background worker
+- PostgreSQL database
+- Redis cache
+- Elasticsearch
+
+For development with hot-reloading:
+
+```bash
+# Use the development setup
+docker compose up web api worker
+```
+
+### Manual Setup (Alternative)
+
+#### Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Backend Setup
+#### Backend Setup
 ```bash
 cd backend
 npm install

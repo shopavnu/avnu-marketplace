@@ -123,7 +123,7 @@ const OptimizedDiscoveryFeed: React.FC<OptimizedDiscoveryFeedProps> = ({
   useEffect(() => {
     const refs: Record<string, React.RefObject<HTMLDivElement>> = {};
     sections.forEach((section) => {
-      refs[section.id] = React.createRef<HTMLDivElement>();
+      refs[section.id] = React.createRef<HTMLDivElement>() as React.RefObject<HTMLDivElement>;
     });
     setSectionRefs(refs);
   }, [sections]);

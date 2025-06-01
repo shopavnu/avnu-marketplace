@@ -2,7 +2,7 @@ import { Injectable, Logger, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigType } from '@nestjs/config';
-import _axios from 'axios';
+import axios from 'axios';
 import _fs from 'fs';
 import _readline from 'readline';
 import { v4 as _uuidv4 } from 'uuid';

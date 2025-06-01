@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -8,7 +8,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 // No need for type imports as we're using direct configuration
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const redisStore = require('cache-manager-redis-store').default;
-import { CommonModule } from '@common/common.module';
+import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma';
 import { ProductsPrismaModule } from '@modules/products/products-prisma.module';
@@ -33,6 +33,8 @@ import { AbTestingModule } from '@modules/ab-testing';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { AccessibilityModule } from './modules/accessibility/accessibility.module';
+import { RedisModule } from './modules/redis/redis.module';
+import { CartModule } from './modules/cart/cart.module';
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -52,9 +54,10 @@ registerEnumType(ExperimentStatus, {
 @Module({
   imports: [
     // Configuration
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: ['.env.local', `.env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
     CommonModule,
     HealthModule,
@@ -67,24 +70,40 @@ registerEnumType(ExperimentStatus, {
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_DATABASE', 'avnu_marketplace'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNC', true),
-        logging: configService.get<boolean>('DB_LOGGING', true),
-      }),
+      useFactory: (configService: ConfigService) => {
+        const nodeEnv = configService.get('NODE_ENV', 'development');
+        // Only allow synchronize=true in development by default
+        const defaultSyncValue = nodeEnv === 'development';
+        return {
+          type: 'postgres',
+          host: configService.get('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 5432),
+          username: configService.get('DB_USER') || 'avnu',
+          password: configService.get('DB_PASSWORD', 'postgres'),
+          database: configService.get('DB_NAME') || 'avnu_db',
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          // Only sync in development by default, always require explicit opt-in for production
+          synchronize: configService.get<boolean>('DB_SYNC', defaultSyncValue),
+          // Warn about synchronize being enabled in non-development environments
+          logging: configService.get<boolean>('DB_LOGGING', true),
+        };
+      },
     }),
 
     // GraphQL - temporarily disabled schema generation for debugging
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       // Using schema first approach temporarily to bypass schema generation issues
-      typePaths: ['./src/**/*.graphql'],
+      typePaths: [
+        './src/**/*.graphql',
+        './src/modules/graphql/schema/order.graphql',
+        './src/modules/graphql/schema/common.graphql',
+        './src/modules/graphql/schema/personalization.graphql',
+        './src/modules/graphql/schema/recommendations.graphql',
+        './src/modules/graphql/schema/advertising.graphql',
+        './src/modules/graphql/schema/accessibility.graphql',
+        './src/modules/graphql/schema/product-accessibility.graphql',
+      ],
       playground: true,
       debug: true,
     }),
@@ -94,15 +113,39 @@ registerEnumType(ExperimentStatus, {
       isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        // Redis client options
-        ttl: configService.get('REDIS_TTL', 60 * 60), // 1 hour default
-        url: `redis://${configService.get('REDIS_HOST', 'localhost')}:${configService.get('REDIS_PORT', 6379)}`,
-        password: configService.get('REDIS_PASSWORD', ''),
-        database: configService.get('REDIS_DB', 0),
-        max: configService.get('REDIS_MAX_ITEMS', 1000), // Maximum number of items in cache
-      }),
+      useFactory: (configService: ConfigService) => {
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
+        const port = configService.get<number>('REDIS_PORT', 6379);
+        const password = configService.get<string>('REDIS_PASSWORD');
+        const username = configService.get<string>('REDIS_USERNAME', 'default');
+        const tlsEnabled =
+          configService.get<string>('REDIS_TLS_ENABLED', 'false')?.toLowerCase() === 'true';
+
+        const redisOptions: any = {
+          store: redisStore,
+          host: host,
+          port: port,
+          ttl: configService.get('REDIS_TTL', 60 * 60),
+          password: password,
+          username: username,
+          db: configService.get<number>('REDIS_DB', 0),
+          max: configService.get<number>('REDIS_MAX_ITEMS', 1000),
+        };
+
+        if (tlsEnabled) {
+          redisOptions.tls = {}; // Enable TLS
+        }
+
+        const logger = new Logger('CacheModuleRedisConfig');
+        logger.log(`Using REDIS_HOST: ${host}`);
+        logger.log(`Using REDIS_PORT: ${port}`);
+        logger.log(`Using REDIS_USERNAME: ${username}`);
+        logger.log(`REDIS_PASSWORD is set: ${!!password}`);
+        logger.log(`Using REDIS_TLS_ENABLED: ${tlsEnabled}`);
+        logger.log(`Using REDIS_DB: ${redisOptions.db}`);
+
+        return redisOptions;
+      },
     }),
 
     // Feature modules
@@ -123,6 +166,7 @@ registerEnumType(ExperimentStatus, {
     RecommendationsModule,
     AdvertisingModule,
     AccessibilityModule,
+    CartModule,
   ],
   controllers: [],
   providers: [],

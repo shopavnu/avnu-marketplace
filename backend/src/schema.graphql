@@ -335,6 +335,10 @@ type Query {
   analyzeQuery(query: String!): ProcessedQueryResult!
   searchSuggestions(query: String!, limit: Int): [String!]!
   classifyQuery(query: String!): ClassificationResult!
+  getBudgetUtilizationReport(campaignId: ID!): BudgetUtilizationReport!
+  getCampaignForecast(campaignId: ID!): CampaignForecast!
+  getAdPlacements(options: AdPlacementOptionsInput!): [AdPlacement!]!
+  getProductAdRecommendations(productId: ID!): ProductAdRecommendation!
 }
 
 type Mutation {
@@ -1958,6 +1962,14 @@ type DashboardExperimentVariant {
   trafficPercentage: Float!
 }
 
+enum ExperimentStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
 type ExperimentType {
   id: ID!
   name: String!
@@ -2097,13 +2109,7 @@ type AllSearchResults {
   adPlacements: [AdPlacement!]!
 }
 
-enum ExperimentStatus {
-  DRAFT
-  RUNNING
-  PAUSED
-  COMPLETED
-  ARCHIVED
-}
+# Removed duplicate ExperimentStatus enum - already defined and used earlier in the schema
 
 enum BehaviorType {
   view
@@ -2111,12 +2117,4 @@ enum BehaviorType {
   favorite
   add_to_cart
   purchase
-}
-
-type Query {
-  # ... existing queries ...
-  getBudgetUtilizationReport(campaignId: ID!): BudgetUtilizationReport!
-  getCampaignForecast(campaignId: ID!): CampaignForecast!
-  getAdPlacements(options: AdPlacementOptionsInput!): [AdPlacement!]!
-  getProductAdRecommendations(productId: ID!): ProductAdRecommendation!
 }

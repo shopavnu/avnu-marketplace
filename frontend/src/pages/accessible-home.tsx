@@ -19,7 +19,7 @@ import SectionLandmark from "@/components/accessibility/SectionLandmark";
 export default function AccessibleHome() {
   // Refs for scroll animations
   const mainRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: mainRef });
+  const { scrollYProgress } = useScroll({ target: mainRef as React.RefObject<HTMLElement> });
   const [mounted, setMounted] = useState(false);
 
   // Set mounted state on client-side

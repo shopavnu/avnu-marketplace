@@ -19,11 +19,21 @@ type Variant {
   product: Product!
 }
 
-type Query {
-  products(skip: Int, take: Int): [Product!]!
+extend type Query {
+  productsList(skip: Int, take: Int): [Product!]!
   product(id: ID!): Product
-  searchProducts(query: String!): [Product!]!
+  searchProductsSimple(query: String!): [Product!]!
   productsByBrand(brandId: ID!): [Product!]!
+  suppressionMetrics(period: Int, merchantId: String): SuppressionMetricsResponse!
+  cachedProduct(id: String!): Product
+  cachedProducts(pagination: PaginationInput): [Product!]!
+  cachedProductsByCursor(pagination: CursorPaginationInput): [Product!]!
+  cachedProductsByMerchant(merchantId: String!, pagination: PaginationInput): [Product!]!
+  cachedRecommendedProducts(userId: String!, limit: Int): [Product!]!
+  cachedDiscoveryProducts(limit: Int): [Product!]!
+  cachedSearchProducts(query: String!, pagination: PaginationInput): [Product!]!
+  productAccessibility(productId: String!): ProductAccessibilityDto!
+  productAriaAttributes(productId: String!): AriaAttributesDto!
 }
 
 type Mutation {
@@ -48,8 +58,101 @@ type Mutation {
   deleteProduct(id: ID!): Product!
 }
 
+input CursorPaginationInput {
+  cursor: String
+  limit: Int
+  withCount: Boolean
+}
+
+type StructuredData {
+  type: String!
+  context: String!
+  name: String
+  description: String
+  brand: String
+  images: [String!]
+  imageAlts: [String!]
+}
+
+type AccessibilityMetadata {
+  altText: String
+  ariaLabel: String
+  role: String
+  longDescription: String
+  structuredData: StructuredData
+}
+
+type ImageAltText {
+  imageUrl: String!
+  altText: String!
+}
+
+type ProductAccessibilityDto {
+  productId: String!
+  accessibilityMetadata: AccessibilityMetadata!
+  imageAltTexts: [ImageAltText!]
+}
+
+type AriaAttribute {
+  name: String!
+  value: String!
+}
+
+type AriaAttributesDto {
+  productId: String!
+  attributes: [AriaAttribute!]!
+}
+
 input VariantInput {
   optionName: String!
   optionValue: String!
   stock: Int!
+}
+
+type SuppressionOverview {
+  totalSuppressedProducts: Int!
+  totalActiveSuppressedProducts: Int!
+  totalResolvedSuppressions: Int!
+  avgResolutionTimeHours: Float!
+  suppressionRate: Float!
+}
+
+type MerchantSuppressionMetrics {
+  merchantId: String!
+  merchantName: String!
+  suppressedCount: Int!
+  resolvedCount: Int!
+  avgResolutionTimeHours: Float!
+  suppressionRate: Float!
+}
+
+type CategorySuppressionMetrics {
+  categoryId: String!
+  categoryName: String!
+  suppressedCount: Int!
+  resolvedCount: Int!
+  avgResolutionTimeHours: Float!
+  suppressionRate: Float!
+}
+
+type TimeframeSuppressionMetrics {
+  date: String!
+  suppressedCount: Int!
+  resolvedCount: Int!
+  avgResolutionTimeHours: Float!
+  suppressionRate: Float!
+}
+
+type ResolutionTimeDistribution {
+  timeRange: String!
+  count: Int!
+  percentage: Float!
+}
+
+type SuppressionMetricsResponse {
+  overview: SuppressionOverview!
+  byMerchant: [MerchantSuppressionMetrics!]!
+  byCategory: [CategorySuppressionMetrics!]!
+  byTimeframe: [TimeframeSuppressionMetrics!]!
+  resolutionTimeDistribution: [ResolutionTimeDistribution!]!
 }

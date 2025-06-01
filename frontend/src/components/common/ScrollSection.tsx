@@ -25,10 +25,10 @@ const ScrollSection: React.FC<ScrollSectionProps> = ({
   threshold = 0.1,
   id,
 }) => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { threshold, triggerOnce: true });
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef as unknown as React.RefObject<HTMLElement>, { threshold, triggerOnce: true });
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
+    target: sectionRef as unknown as React.RefObject<HTMLElement>,
     offset: ["start end", "end start"],
   });
 
@@ -68,15 +68,16 @@ const ScrollSection: React.FC<ScrollSectionProps> = ({
       ref={sectionRef}
       className={`py-12 md:py-16 ${bgColor} ${className}`}
     >
-      <motion.div
-        className="max-w-7xl mx-auto px-4"
-        style={{ opacity, scale }}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        variants={sectionVariants}
-      >
-        {children}
-      </motion.div>
+      <div className="max-w-7xl mx-auto px-4">
+        <motion.div
+          style={{ opacity, scale }}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={sectionVariants}
+        >
+          {children}
+        </motion.div>
+      </div>
     </section>
   );
 };
@@ -104,13 +105,14 @@ export const ScrollItem: React.FC<{
   // If preserveHeight is true, we need to ensure the motion.div doesn't affect the height
   // This is crucial for consistent card heights in grids
   return (
-    <motion.div
-      className={`${className} ${preserveHeight ? "h-full" : ""}`}
-      variants={itemVariants}
-      style={preserveHeight ? { height: "100%", display: "block" } : undefined}
-    >
-      {children}
-    </motion.div>
+    <div className={`${className} ${preserveHeight ? "h-full" : ""}`}>
+      <motion.div
+        variants={itemVariants}
+        style={preserveHeight ? { height: "100%", display: "block" } : undefined}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 };
 

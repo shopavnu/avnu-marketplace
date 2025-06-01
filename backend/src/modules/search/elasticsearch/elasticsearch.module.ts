@@ -11,8 +11,7 @@ import { LoggerService } from '@common/services/logger.service';
       useFactory: async (configService: ConfigService) => ({
         node: configService.get<string>('ELASTICSEARCH_NODE') || 'http://localhost:9200',
         auth: {
-          username: configService.get<string>('ELASTICSEARCH_USERNAME') || '',
-          password: configService.get<string>('ELASTICSEARCH_PASSWORD') || '',
+          apiKey: configService.get<string>('ELASTICSEARCH_API_KEY') || '',
         },
         tls: {
           rejectUnauthorized: false,

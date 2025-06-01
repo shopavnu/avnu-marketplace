@@ -1,30 +1,47 @@
 version: '3.8'
 
 services:
-  frontend:
+  # Frontend Next.js web application
+  web:
+    env_file: .env.local
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: ${DOCKERFILE_FRONTEND:-Dockerfile.dev}
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app:delegated
       - /app/node_modules
+      - /app/.next
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NODE_ENV=${NODE_ENV:-development}
+      - NEXT_PUBLIC_API_URL=http://api:8080
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
-  backend:
+  # Backend NestJS API service
+  api:
+    env_file: .env.local
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: ${DOCKERFILE_BACKEND:-Dockerfile.dev}
     ports:
       - "8080:8080"
     volumes:
-      - ./backend:/app
+      - ./backend:/app:delegated
+      - /app/node_modules
+      - /app/dist
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV:-development}
       - PORT=8080
+      - DATABASE_URL=postgresql://avnu:avnu_password@postgres:5432/avnu_db
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=avnu
@@ -39,12 +56,44 @@ services:
       - SEARCH_CACHE_TTL=300
       - SEARCH_EXPERIMENTS_ENABLED=true
       - SEARCH_MONITORING_ENABLED=true
-      - LOG_LEVEL=debug
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
     depends_on:
       - postgres
       - redis
       - elasticsearch
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
+  # Worker service for background processing
+  worker:
+    env_file: .env.local
+    build:
+      context: ./backend
+      dockerfile: ${DOCKERFILE_WORKER:-Dockerfile.dev}
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=postgresql://avnu:avnu_password@postgres:5432/avnu_db
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=avnu
+      - DB_PASSWORD=avnu_password
+      - DB_NAME=avnu_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+      - WORKER_ENABLED=true
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+    depends_on:
+      - postgres
+      - redis
+    command: ${WORKER_COMMAND:-sh -c "npm run start:dev -- --worker"}
+      
+  # PostgreSQL database
   postgres:
     image: postgres:15-alpine
     ports:
@@ -55,14 +104,27 @@ services:
       - POSTGRES_DB=avnu_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avnu -d avnu_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
+  # Redis for caching and message queues
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
       
+  # Elasticsearch for search functionality
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
     environment:
@@ -78,6 +140,12 @@ services:
       memlock:
         soft: -1
         hard: -1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   postgres_data:

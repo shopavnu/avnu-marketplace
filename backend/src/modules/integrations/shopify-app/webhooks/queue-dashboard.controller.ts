@@ -1,6 +1,6 @@
 import { Controller, Get, Inject as _Inject, Param, Post, UseGuards } from '@nestjs/common';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { ShopifyStructuredLogger } from '../utils/structured-logger';
 

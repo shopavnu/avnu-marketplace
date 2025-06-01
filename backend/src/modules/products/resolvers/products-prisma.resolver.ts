@@ -5,7 +5,7 @@ import { ProductsPrismaService } from '../services/products-prisma.service';
 export class ProductsPrismaResolver {
   constructor(private readonly productsService: ProductsPrismaService) {}
 
-  @Query('products')
+  @Query('productsList')
   async getProducts(
     @Args('skip', { nullable: true, type: () => Int }) skip?: number,
     @Args('take', { nullable: true, type: () => Int }) take?: number,
@@ -65,7 +65,7 @@ export class ProductsPrismaResolver {
     return this.productsService.remove(id);
   }
 
-  @Query('searchProducts')
+  @Query('searchProductsSimple')
   async searchProducts(@Args('query') query: string) {
     return this.productsService.searchProducts(query);
   }

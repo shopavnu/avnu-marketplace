@@ -1,6 +1,6 @@
 import { Injectable, Logger as _Logger } from '@nestjs/common';
-import { InjectQueue, Process, Processor } from '@nestjs/bull';
-import { Queue, Job } from 'bull';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq'; // Added WorkerHost
+import { Queue, Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import { WebhookRegistry } from './webhook-registry';
 import { WebhookValidator } from './webhook-validator';
@@ -44,7 +44,8 @@ interface WebhookJobData {
  */
 @Injectable()
 @Processor('shopify-webhooks')
-export class DistributedWebhookProcessor {
+export class DistributedWebhookProcessor extends WorkerHost {
+  // Extended WorkerHost
   private readonly logger: ShopifyStructuredLogger;
 
   constructor(
@@ -55,6 +56,7 @@ export class DistributedWebhookProcessor {
     private readonly configService: ConfigService,
     logger: ShopifyStructuredLogger,
   ) {
+    super();
     this.logger = logger;
   }
 
@@ -140,8 +142,7 @@ export class DistributedWebhookProcessor {
    * This method is called automatically by Bull when a job is ready.
    * It handles validation, deduplication and delegates to the appropriate handler.
    */
-  @Process('process')
-  async processWebhook(job: Job<WebhookJobData>): Promise<void> {
+  async process(job: Job<WebhookJobData>): Promise<void> {
     const { shop, topic, payload, webhookId, metadata } = job.data;
 
     try {
