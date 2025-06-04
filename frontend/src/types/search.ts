@@ -2,44 +2,46 @@
  * Type definitions for search functionality
  */
 
-// Define the FacetType that components are looking for
+// Interface definitions for search facets
+export interface FacetValue {
+  value: string;      // From main branch definition
+  id?: string;        // From feature branch definition
+  name?: string;      // From feature branch definition
+  count: number;
+  min?: number;       // From main branch definition
+  max?: number;       // From main branch definition
+}
+
 export interface FacetType {
-  id: string;
   name: string;
+  displayName?: string; // From main branch definition
+  id?: string;         // From feature branch definition
   values: FacetValue[];
 }
 
-// Define the FacetValue interface
-export interface FacetValue {
-  id: string;
-  name: string;
-  count: number;
-}
-
-// Define PartialPriceRange for price filtering
-export interface PartialPriceRange {
-  min?: number;
-  max?: number;
-}
-
-// Define PriceRange (complete version)
+// Price range interfaces
 export interface PriceRange {
   min: number;
   max: number;
 }
 
+export interface PartialPriceRange {
+  min?: number;
+  max?: number;
+}
+
 // Define sort options
 export type SortOption = 'relevance' | 'price_low' | 'price_high' | 'price' | 'name' | 'newest' | 'rating';
 
-// Define the SearchFilters interface that matches how it's being used
+// Search filters interface - merged from both branches
 export interface SearchFilters {
-  // From the error messages, it seems there's confusion between 'category' and 'categories'
-  // We'll include both to support existing code
+  // From both branches
   category?: string;
   categories?: string[];
   
-  // Brand filtering
+  // Brand and merchant filtering
   brandName?: string;
+  merchantId?: string;
   
   // Price range filtering
   priceRange?: PartialPriceRange;
@@ -48,7 +50,7 @@ export interface SearchFilters {
   values?: string[];
   
   // Sorting
-  sortBy?: SortOption;
+  sortBy?: SortOption | string;
   sortDirection?: 'asc' | 'desc';
   
   // Pagination
@@ -57,23 +59,45 @@ export interface SearchFilters {
   
   // Search query
   query?: string;
+  
+  // Additional filters from main branch
+  inStock?: boolean;
 }
 
-// Export any other types that might be needed by the search components
+// Search result interfaces - merged from both branches
 export interface SearchResult {
   id: string;
   name: string;
+  type?: string;            // From main branch
   description?: string;
   price: number;
-  imageUrl?: string;
+  compareAtPrice?: number;  // From main branch
+  imageUrl?: string;        // From feature branch
+  images?: string[];        // From main branch
+  categories?: string[];    // From main branch
+  values?: string[];        // From main branch
   brandName?: string;
-  category?: string;
+  merchantId?: string;      // From main branch
+  score?: number;           // From main branch
+  isSponsored?: boolean;    // From main branch
+  inStock?: boolean;        // From main branch
+  category?: string;        // From feature branch
 }
 
+// Search response interface - merged from both branches
 export interface SearchResponse {
   results: SearchResult[];
-  total: number;
-  page: number;
-  limit: number;
+  query?: string;            // From main branch
+  total?: number;            // From feature branch
+  page?: number;             // From feature branch
+  limit?: number;            // From feature branch
   facets: FacetType[];
+  pagination?: {             // From main branch
+    total: number;
+    nextCursor: string | null;
+    hasMore: boolean;
+  };
+  isPersonalized?: boolean;  // From main branch
+  experimentId?: string;     // From main branch
+  appliedFilters?: string[]; // From main branch
 }
