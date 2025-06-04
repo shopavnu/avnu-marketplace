@@ -37,14 +37,22 @@ export type SortOption = 'relevance' | 'price_low' | 'price_high' | 'price' | 'n
 export interface SearchFilters {
   // From both branches
   category?: string;
+  subCategory?: string;
   categories?: string[];
   
   // Brand and merchant filtering
   brandName?: string;
+  brand?: string[];
   merchantId?: string;
   
   // Price range filtering
+  minPrice?: number;
+  maxPrice?: number;
   priceRange?: PartialPriceRange;
+  price?: {
+    min?: number;
+    max?: number;
+  };
   
   // General facet values filtering
   values?: string[];
@@ -62,6 +70,12 @@ export interface SearchFilters {
   
   // Additional filters from main branch
   inStock?: boolean;
+  
+  // Quick filter properties used in FilterPanel
+  isNew?: boolean;
+  isLocal?: boolean;
+  freeShipping?: boolean;
+  causes?: string[];
 }
 
 // Search result interfaces - merged from both branches

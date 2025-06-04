@@ -103,7 +103,17 @@ export default function OptimizedShopPage() {
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchResults, setSearchResults] = useState<SearchResult>({
+  
+  // Define a custom interface for local search results
+  interface ShopSearchResults {
+    query: string;
+    filters: Record<string, any>;
+    totalResults: number;
+    products: Product[];
+    suggestedFilters: string[];
+  }
+  
+  const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
     totalResults: mockProducts.length,

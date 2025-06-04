@@ -97,7 +97,17 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({});
-  const [searchResults, setSearchResults] = useState<SearchResult>({
+  
+  // Define a custom interface for local search results
+  interface ShopSearchResults {
+    query: string;
+    filters: Record<string, any>;
+    totalResults: number;
+    products: Product[];
+    suggestedFilters: string[];
+  }
+  
+  const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
     totalResults: mockProducts.length,

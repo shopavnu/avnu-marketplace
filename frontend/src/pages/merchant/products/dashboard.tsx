@@ -547,7 +547,7 @@ const ProductDashboard = () => {
                             <Link
                               href={`/merchant/products/${product.id}`}
                               className="text-gray-400 hover:text-gray-500"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             >
                               <EyeIcon className="h-5 w-5" aria-hidden="true" />
                               <span className="sr-only">View</span>
@@ -555,7 +555,7 @@ const ProductDashboard = () => {
                             <Link
                               href={`/merchant/products/${product.id}/edit`}
                               className="text-indigo-600 hover:text-indigo-900"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             >
                               <PencilIcon
                                 className="h-5 w-5"
