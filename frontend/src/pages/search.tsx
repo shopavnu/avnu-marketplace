@@ -20,10 +20,10 @@ export default function SearchPage() {
     }
   }, []);
 
-  // Redirect to infinite-search page
+  // Redirect to optimized-search page
   useEffect(() => {
     if (searchQuery) {
-      router.push(`/infinite-search?q=${encodeURIComponent(searchQuery)}`);
+      router.push(`/optimized-search?q=${encodeURIComponent(searchQuery)}`);
     }
   }, [searchQuery, router]);
 
@@ -41,8 +41,8 @@ export default function SearchPage() {
       return updated;
     });
 
-    // Redirect to infinite-search page
-    router.push(`/infinite-search?q=${encodeURIComponent(query)}`);
+    // Redirect to optimized-search page
+    router.push(`/optimized-search?q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -63,7 +63,7 @@ export default function SearchPage() {
       {/* Redirect message */}
       <div className="text-center py-8">
         <p className="text-gray-500">
-          Redirecting to enhanced search experience...
+          Redirecting to optimized search experience...
         </p>
       </div>
     </div>

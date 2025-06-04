@@ -449,6 +449,29 @@ class SessionService {
 
     return this.currentSession.lastActivityTime - this.currentSession.startTime;
   }
+  
+  /**
+   * Add a custom event to the session
+   * @param eventName Name of the custom event
+   * @param eventData Additional data for the event
+   */
+  addCustomEvent(eventName: string, eventData: Record<string, any> = {}): void {
+    if (!this.currentSession) return;
+    
+    // Track as a generic interaction with custom event type
+    this.trackInteraction(
+      InteractionType.CLICK, // Using CLICK as a generic type
+      { 
+        type: 'custom_event',
+        eventName,
+        ...eventData
+      }
+    );
+    
+    // Update session and save
+    this.updateLastActivity();
+    this.saveSession();
+  }
 }
 
 // Create singleton instance

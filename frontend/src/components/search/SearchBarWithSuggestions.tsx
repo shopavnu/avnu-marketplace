@@ -6,9 +6,9 @@ import {
   GetSearchSuggestionsData,
   GetSearchSuggestionsVars,
   SearchSuggestionType,
-} from "@/graphql/queries/searchSuggestions";
+} from "../../graphql/queries/searchSuggestions";
 import { debounce } from "lodash";
-import { analyticsService } from "@/services/analytics.service";
+import { analyticsService } from "../../services/analytics.service";
 
 interface SearchBarWithSuggestionsProps {
   value: string;
@@ -78,7 +78,7 @@ export default function SearchBarWithSuggestions({
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [setIsFocused]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

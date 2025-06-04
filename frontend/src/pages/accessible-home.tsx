@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-// @ts-ignore - Ignoring TypeScript errors for framer-motion imports
 import { useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { products } from "@/data/products";

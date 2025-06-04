@@ -1,4 +1,3 @@
-// @ts-ignore - Ignoring TypeScript errors for framer-motion imports
 import { motion, useScroll, useTransform } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";

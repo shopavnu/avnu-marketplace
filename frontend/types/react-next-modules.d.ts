@@ -39,7 +39,29 @@ declare module 'next/link' {
 
 // Framer Motion module declarations
 declare module 'framer-motion' {
+  // Core exports
   export const motion: any;
   export const AnimatePresence: any;
-  // Add other framer-motion exports as needed
+  export const MotionConfig: any;
+
+  // Animation hooks
+  export const useScroll: any;
+  export const useTransform: any;
+  export const useSpring: any;
+  export const useMotionValue: any;
+  export const useViewportScroll: any;
+  export const useAnimation: any;
+  export const useCycle: any;
+  export const useInView: any;
+  
+  // Utilities
+  export const animate: any;
+  export const transform: any;
+  export const useTime: any;
+  
+  // Types
+  export type MotionProps = any;
+  export type Variants = any;
+  export type Transition = any;
+  export type TargetAndTransition = any;
 }

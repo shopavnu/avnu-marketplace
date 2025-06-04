@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/types/products";
-import { SearchFilters, SearchResult } from "@/types/search";
+import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
 import ProductCard from "@/components/products/ProductCard";
@@ -98,15 +98,6 @@ export default function ShopPage() {
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({});
   
-  // Define a custom interface for local search results
-  interface ShopSearchResults {
-    query: string;
-    filters: Record<string, any>;
-    totalResults: number;
-    products: Product[];
-    suggestedFilters: string[];
-  }
-  
   const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
@@ -123,12 +114,12 @@ export default function ShopPage() {
     // Update with randomized data on client-side
     if (typeof window !== "undefined") {
       const randomizedProducts = generateMockProducts(Date.now());
-      setSearchResults((prev) => ({
+      setSearchResults((prev: ShopSearchResults) => ({
         ...prev,
         products: randomizedProducts,
       }));
     }
-  }, []);
+  }, [setMounted, setSearchResults]);
 
   // Generate search suggestions based on product titles and brands
   useEffect(() => {
@@ -161,7 +152,7 @@ export default function ShopPage() {
     } else {
       setSearchSuggestions([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, setSearchSuggestions]);
 
   // Simulated search function
   const handleSearch = async (
@@ -255,34 +246,19 @@ export default function ShopPage() {
               }}
               data-testid="product-grid"
             >
-              {searchResults.products.map((product, index) => (
+              {searchResults.products.map((product: Product, index: number) => (
                 <div
                   key={product.id}
                   style={{
                     height: "360px",
-                    width: "100%",
-                    contain: "strict",
+                    contain: "content", /* Apply CSS containment for stability */
                     position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
                   }}
-                  data-testid="product-cell"
+                  className="pb-2"
                 >
-                  <ConsistentProductCard
-                    product={product}
-                    badges={
-                      <>
-                        {product.isNew && (
-                          <span className="px-3 py-1 bg-sage text-white text-xs font-medium rounded-full">
-                            New
-                          </span>
-                        )}
-                        {product.vendor?.isLocal && (
-                          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-charcoal text-xs font-medium rounded-full">
-                            Local
-                          </span>
-                        )}
-                      </>
-                    }
-                  />
+                  <ConsistentProductCard product={product} />
                 </div>
               ))}
             </div>

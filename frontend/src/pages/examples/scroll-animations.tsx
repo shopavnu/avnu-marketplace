@@ -1,6 +1,5 @@
 import React from "react";
 import Head from "next/head";
-// @ts-ignore - Ignoring TypeScript errors for framer-motion imports
 import { motion, MotionProps } from "framer-motion";
 import {
   ScrollSection,
@@ -11,7 +10,6 @@ import { products } from "@/data/products";
 import MasonryProductCard from "@/components/products/MasonryProductCard";
 
 // Skip type checking for motion components
-// @ts-ignore - This is necessary due to framer-motion typing issues
 const MotionAnchor = motion.a;
 
 export default function ScrollAnimationsExample() {
@@ -235,7 +233,6 @@ export default function ScrollAnimationsExample() {
             Avnu Marketplace homepage
           </p>
           <ScrollItem>
-            {/* @ts-ignore - Ignoring TypeScript errors for framer-motion animation props */}
             <MotionAnchor
               href="/"
               className="inline-block px-8 py-3 bg-sage text-white rounded-full font-medium"

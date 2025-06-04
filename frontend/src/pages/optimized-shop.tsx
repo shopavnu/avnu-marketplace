@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { Product } from "@/types/products";
-import { SearchFilters, SearchResult } from "@/types/search";
+import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
 import { ConsistentProductCard } from "@/components/products";
@@ -104,15 +104,6 @@ export default function OptimizedShopPage() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   
-  // Define a custom interface for local search results
-  interface ShopSearchResults {
-    query: string;
-    filters: Record<string, any>;
-    totalResults: number;
-    products: Product[];
-    suggestedFilters: string[];
-  }
-  
   const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
@@ -163,13 +154,16 @@ export default function OptimizedShopPage() {
       });
     }
 
-    // Update total results
-    setSearchResults((prev) => ({
+    // Update search results state
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
+      query: searchQuery,
+      filters,
       totalResults: filteredProducts.length,
+      products: filteredProducts.slice(0, page * pageSize),
+      suggestedFilters: [],
     }));
 
-    // Return paginated results
     const startIndex = (page - 1) * pageSize;
     return filteredProducts.slice(startIndex, startIndex + pageSize);
   };
@@ -191,16 +185,16 @@ export default function OptimizedShopPage() {
 
   // Update search results when products change
   useEffect(() => {
-    setSearchResults((prev) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       products,
     }));
-  }, [products]);
+  }, [products, setSearchResults]);
 
   // Set mounted state on client-side
   useEffect(() => {
     setMounted(true);
-  }, []);
+  }, [setMounted]);
 
   // Simulated search function
   const handleSearch = (query: string, newFilters: SearchFilters = {}) => {
@@ -208,7 +202,7 @@ export default function OptimizedShopPage() {
     setFilters(newFilters);
 
     // Reset progressive loading to start fresh with new search/filters
-    setSearchResults((prev) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       query,
       filters: newFilters,

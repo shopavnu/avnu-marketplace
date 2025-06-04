@@ -131,18 +131,18 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node)
-    ) {
-      closeCart();
-      onClose();
-    }
-  };
-
   useEffect(() => {
+    // Define handleClickOutside inside useEffect to properly include all dependencies
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        closeCart();
+        onClose();
+      }
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -150,7 +150,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, closeCart]);
 
   // Calculate cart totals
   const subtotal = getCartTotal();

@@ -69,6 +69,24 @@ export interface SearchEventData {
 
 class AnalyticsService {
   /**
+   * Track a custom event
+   */
+  trackEvent({ event, properties = {} }: { event: string; properties?: Record<string, any> }) {
+    console.log(`Tracking event: ${event}`, properties);
+    
+    try {
+      // In a real implementation, this would send to a tracking service
+      // For now, we just log it and store it in the session
+      sessionService.addCustomEvent(event, properties);
+      
+      // You could integrate with services like Segment, Google Analytics, Amplitude, etc.
+      return true;
+    } catch (error) {
+      console.error(`Failed to track event ${event}:`, error);
+      return false;
+    }
+  }
+  /**
    * Track a search-related event
    */
   async trackSearchEvent(eventType: SearchEventType, data: SearchEventData) {

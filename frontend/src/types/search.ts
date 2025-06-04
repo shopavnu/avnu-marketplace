@@ -115,3 +115,16 @@ export interface SearchResponse {
   experimentId?: string;     // From main branch
   appliedFilters?: string[]; // From main branch
 }
+
+/**
+ * Standardized shop search results interface for use across all shop pages
+ * This provides a consistent type for useState hooks in shop pages
+ */
+export interface ShopSearchResults {
+  query: string;
+  filters: Record<string, any>;
+  totalResults: number;
+  products: import('@/types/products').Product[];
+  suggestedFilters: string[];
+  // Add any other common properties used across shop pages
+}
