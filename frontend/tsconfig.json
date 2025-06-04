@@ -31,7 +31,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "./types/framer-motion.d.ts"
+    "./types/framer-motion.d.ts",
+    "./types/react-next-modules.d.ts"
   ],
   "exclude": [
     "node_modules"
