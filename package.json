@@ -37,8 +37,7 @@
     "lint": "npm run lint:frontend",
     "lint:frontend": "cd frontend && npm run lint || true",
     "lint:backend": "cd backend && npm run lint || true",
-    "preinstall": "npx only-allow npm",
-    "postinstall": "npx npm-force-resolutions"
+    "preinstall": "npx only-allow npm"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
