@@ -107,7 +107,7 @@ export default function AccessibleShopPage() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  
+
   const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
@@ -148,17 +148,18 @@ export default function AccessibleShopPage() {
     }
 
     // Apply other filters if any
-    if (filters.brand && filters.brand.length > 0) {
+    const typedFilters = filters;
+    if (typedFilters.brand && typedFilters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brand!.includes(product.brand),
+        typedFilters.brand!.includes(product.brand),
       );
     }
 
-    if (filters.price?.min !== undefined || filters.price?.max !== undefined) {
+    if (typedFilters.price?.min !== undefined || typedFilters.price?.max !== undefined) {
       filteredProducts = filteredProducts.filter((product) => {
         const price = product.price;
-        const min = filters.price?.min ?? 0;
-        const max = filters.price?.max ?? Infinity;
+        const min = typedFilters.price?.min ?? 0;
+        const max = typedFilters.price?.max ?? Infinity;
         return price >= min && price <= max;
       });
     }
@@ -271,7 +272,7 @@ export default function AccessibleShopPage() {
             >
               <FilterPanel
                 filters={filters}
-                onChange={(newFilters: SearchFilters) => {
+                onChange={(newFilters) => {
                   setFilters(newFilters);
                   handleSearch(searchQuery, newFilters);
                 }}

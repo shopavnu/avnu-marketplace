@@ -107,7 +107,7 @@ export default function EnhancedShopPage() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  
+
   const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
@@ -433,7 +433,7 @@ export default function EnhancedShopPage() {
             <div className="w-full md:w-64 shrink-0">
               <FilterPanel
                 filters={filters}
-                onChange={(newFilters: SearchFilters) => {
+                onChange={(newFilters) => {
                   setFilters(newFilters);
                   handleSearch(searchQuery, newFilters);
                 }}
