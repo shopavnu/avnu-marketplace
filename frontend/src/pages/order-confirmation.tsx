@@ -4,11 +4,55 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRightIcon, EnvelopeIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import useCartStore from "@/stores/useCartStore";
-import { analyticsService, SearchEventType } from "@/services/analytics.service";
+import { trackOrderCompleted } from "@/analytics/tracking";
+import { OrderDetails } from "@/components/checkout/OrderDetails";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { RecommendedProducts } from "@/components/products/RecommendedProducts";
+import useCart from "@/hooks/useCart"; // Corrected to default import
+
+// Define types for the order and order items
+interface OrderItemProduct {
+  id: string;
+  title: string;
+  image?: string;
+}
+
+interface OrderItemType {
+  product: OrderItemProduct;
+  price: number;
+  quantity: number;
+  vendorName?: string;
+}
+
+interface ShippingAddressType {
+  name: string;
+  street: string;
+  apartment?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+interface OrderType {
+  id: string;
+  total: number;
+  currency: string;
+  items: OrderItemType[];
+  shippingAddress: ShippingAddressType;
+  shippingMethod: string;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  status?: string;
+  estimatedDelivery?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 const OrderConfirmation = () => {
   const router = useRouter();
+  const { items, cartTotal, clearCart, getCartForApi } = useCart();
   const [orderNumber, setOrderNumber] = useState("");
 
   // Generate a random order number on component mount
@@ -19,8 +63,59 @@ const OrderConfirmation = () => {
       return `${prefix}${randomNum}`;
     };
 
-    setOrderNumber(generateOrderNumber());
-  }, []);
+    const newOrderNumber = generateOrderNumber();
+    setOrderNumber(newOrderNumber);
+
+    // Define mockOrder here to use the generated orderNumber
+    const mockOrder: OrderType = {
+      id: newOrderNumber,
+      total: cartTotal || 145.04, // Use cart total if available, else fallback
+      currency: "USD",
+      items: items.length > 0 ? items.map(item => ({
+        product: { 
+          id: item.product.id, 
+          title: item.product.title, 
+          image: item.product.image 
+        },
+        price: item.product.price, 
+        quantity: item.quantity,
+        vendorName: item.product.brand
+      })) : [
+        { product: { id: "prod_1", title: "Ceramic Vase" }, price: 45.99, quantity: 1, vendorName: "Terra & Clay" },
+        { product: { id: "prod_2", title: "Organic Cotton Throw" }, price: 39.99, quantity: 2, vendorName: "Pure Living" },
+      ],
+      shippingAddress: {
+        name: "John Doe",
+        street: "123 Main Street",
+        apartment: "Apt 4B",
+        city: "New York",
+        state: "NY",
+        zip: "10001",
+        country: "United States",
+      },
+      shippingMethod: "Standard Shipping (3-5 business days)",
+      subtotal: items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0) || 125.97,
+      shippingCost: 8.99, // Example, adjust if dynamic
+      tax: (cartTotal || 145.04) * 0.08 || 10.08, // Example tax calculation
+    };
+
+    if (router.isReady && mockOrder) {
+      trackOrderCompleted({
+        orderId: mockOrder.id,
+        total: mockOrder.total,
+        currency: mockOrder.currency,
+        products: mockOrder.items.map((item) => ({
+          id: item.product.id,
+          name: item.product.title,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        cartTotal,
+        cartItems: getCartForApi().items,
+      });
+      clearCart(); // Clear the cart after order completion
+    }
+  }, [router.isReady, items, cartTotal, clearCart, getCartForApi]);
 
   return (
     <div className="bg-warm-white min-h-screen">
@@ -62,150 +157,69 @@ const OrderConfirmation = () => {
             </div>
           </div>
 
-          {/* Order Details */}
-          <div className="border-t border-gray-100 pt-6 mb-8">
-            <h2 className="text-lg font-medium text-charcoal mb-4">
-              Order Details
-            </h2>
+          {/* Order Details & Summary using components */}
+          {orderNumber && (
+            <>
+              <OrderDetails order={{
+                id: orderNumber,
+                total: cartTotal || 145.04,
+                currency: "USD",
+                items: items.length > 0 ? items.map(item => ({
+                  product: {
+                    id: item.product.id,
+                    title: item.product.title,
+                    image: item.product.image
+                  },
+                  price: item.product.price,
+                  quantity: item.quantity,
+                  vendorName: item.product.brand
+                })) : [
+                  { product: { id: "prod_1", title: "Ceramic Vase", image: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800" }, price: 45.99, quantity: 1, vendorName: "Terra & Clay" },
+                  { product: { id: "prod_2", title: "Organic Cotton Throw", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800" }, price: 39.99, quantity: 2, vendorName: "Pure Living" },
+                ],
+                shippingAddress: { name: "John Doe", street: "123 Main Street", apartment: "Apt 4B", city: "New York", state: "NY", zip: "10001", country: "United States" },
+                shippingMethod: "Standard Shipping (3-5 business days)",
+                subtotal: items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0) || 125.97,
+                shippingCost: 8.99,
+                tax: (cartTotal || 145.04) * 0.08 || 10.08,
+                status: "Processing",
+                estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              }} />
+              <OrderSummary order={{
+                id: orderNumber,
+                total: cartTotal || 145.04,
+                currency: "USD",
+                items: items.length > 0 ? items.map(item => ({
+                  product: {
+                    id: item.product.id,
+                    title: item.product.title,
+                    image: item.product.image
+                  },
+                  price: item.product.price,
+                  quantity: item.quantity,
+                  vendorName: item.product.brand
+                })) : [
+                  { product: { id: "prod_1", title: "Ceramic Vase", image: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800" }, price: 45.99, quantity: 1, vendorName: "Terra & Clay" },
+                  { product: { id: "prod_2", title: "Organic Cotton Throw", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800" }, price: 39.99, quantity: 2, vendorName: "Pure Living" },
+                ],
+                shippingAddress: { name: "John Doe", street: "123 Main Street", apartment: "Apt 4B", city: "New York", state: "NY", zip: "10001", country: "United States" },
+                shippingMethod: "Standard Shipping (3-5 business days)",
+                subtotal: items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0) || 125.97,
+                shippingCost: 8.99,
+                tax: (cartTotal || 145.04) * 0.08 || 10.08,
+                status: "Processing",
+                estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              }} />
+            </>
+          )}
 
-            <div className="space-y-4">
-              {/* Sample order items - in a real app, these would come from the order data */}
-              <div className="flex items-center py-3 border-b border-gray-100">
-                <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-gray-50">
-                  <Image
-                    src="https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800"
-                    alt="Ceramic Vase"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="ml-4 flex-1">
-                  <h4 className="text-sm font-medium text-charcoal">
-                    Ceramic Vase
-                  </h4>
-                  <p className="text-xs text-sage">Terra & Clay</p>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-sm text-gray-500">Qty: 1</span>
-                    <span className="text-sm font-medium">$45.99</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center py-3 border-b border-gray-100">
-                <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-gray-50">
-                  <Image
-                    src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800"
-                    alt="Organic Cotton Throw"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="ml-4 flex-1">
-                  <h4 className="text-sm font-medium text-charcoal">
-                    Organic Cotton Throw
-                  </h4>
-                  <p className="text-xs text-sage">Pure Living</p>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-sm text-gray-500">Qty: 2</span>
-                    <span className="text-sm font-medium">$79.98</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="mt-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">$125.97</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">$8.99</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Tax</span>
-                <span className="font-medium">$10.08</span>
-              </div>
-              <div className="flex justify-between font-medium text-lg pt-2 border-t border-gray-100 mt-2">
-                <span>Total</span>
-                <span>$145.04</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Shipping Information */}
-          <div className="border-t border-gray-100 pt-6 mb-8">
-            <h2 className="text-lg font-medium text-charcoal mb-4">
-              Shipping Information
-            </h2>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <p className="text-sm text-gray-700">John Doe</p>
-              <p className="text-sm text-gray-700">123 Main Street</p>
-              <p className="text-sm text-gray-700">Apt 4B</p>
-              <p className="text-sm text-gray-700">New York, NY 10001</p>
-              <p className="text-sm text-gray-700">United States</p>
-            </div>
-
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-charcoal mb-2">
-                Shipping Method
-              </h3>
-              <p className="text-sm text-gray-700">
-                Standard Shipping (3-5 business days)
-              </p>
-            </div>
-          </div>
-
-          {/* Next Steps */}
-          <div className="border-t border-gray-100 pt-6 mb-8">
-            <h2 className="text-lg font-medium text-charcoal mb-4">
-              What&apos;s Next?
-            </h2>
-            <div className="space-y-4">
-              <div className="flex">
-                <div className="flex-shrink-0 w-8 h-8 bg-sage/10 rounded-full flex items-center justify-center text-sage font-medium">
-                  1
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-charcoal">
-                    Order Processing
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    We&apos;re preparing your items for shipment.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex">
-                <div className="flex-shrink-0 w-8 h-8 bg-sage/10 rounded-full flex items-center justify-center text-sage font-medium">
-                  2
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-charcoal">
-                    Shipping
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Your order will be shipped within 1-2 business days.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex">
-                <div className="flex-shrink-0 w-8 h-8 bg-sage/10 rounded-full flex items-center justify-center text-sage font-medium">
-                  3
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-charcoal">
-                    Delivery
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    You&apos;ll receive tracking information via email once your
-                    order ships.
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Recommended Products */}
+          <div className="mt-12">
+            <RecommendedProducts />
           </div>
 
           {/* Action Buttons */}

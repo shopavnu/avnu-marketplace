@@ -122,7 +122,7 @@ export interface SearchResponse {
  */
 export interface ShopSearchResults {
   query: string;
-  filters: Record<string, any>;
+  filters: SearchFilters;
   totalResults: number;
   products: import('@/types/products').Product[];
   suggestedFilters: string[];

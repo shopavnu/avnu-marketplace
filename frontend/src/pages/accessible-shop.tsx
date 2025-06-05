@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Product } from "@/types/products";
-import { SearchFilters, SearchResult } from "@/types/search";
+import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
 import { categories } from "@/data/categories";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
@@ -108,15 +108,6 @@ export default function AccessibleShopPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   
-  // Define a custom interface for local search results
-  interface ShopSearchResults {
-    query: string;
-    filters: Record<string, any>;
-    totalResults: number;
-    products: Product[];
-    suggestedFilters: string[];
-  }
-  
   const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
@@ -200,7 +191,7 @@ export default function AccessibleShopPage() {
 
   // Update search results when products change
   useEffect(() => {
-    setSearchResults((prev) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       products,
     }));
@@ -212,7 +203,7 @@ export default function AccessibleShopPage() {
     setFilters(newFilters);
 
     // Reset progressive loading to start fresh with new search/filters
-    setSearchResults((prev) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       query,
       filters: newFilters,

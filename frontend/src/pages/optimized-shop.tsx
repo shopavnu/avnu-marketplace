@@ -108,7 +108,7 @@ export default function OptimizedShopPage() {
     query: "",
     filters: {},
     totalResults: mockProducts.length,
-    products: [],
+    products: mockProducts.slice(0, 20),
     suggestedFilters: [],
   });
 

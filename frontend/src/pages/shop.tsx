@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Head from "next/head";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/types/products";
 import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
