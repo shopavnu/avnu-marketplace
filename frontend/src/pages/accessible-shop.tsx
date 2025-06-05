@@ -147,19 +147,24 @@ export default function AccessibleShopPage() {
       );
     }
 
-    // Apply other filters if any
-    const typedFilters = filters;
-    if (typedFilters.brand && typedFilters.brand.length > 0) {
+    // Access filters directly using the standard SearchFilters interface
+    if (filters.brand && filters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        typedFilters.brand!.includes(product.brand),
+        filters.brand!.includes(product.brand),
+      );
+    } else if (filters.brandName) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.brandName === product.brand,
       );
     }
 
-    if (typedFilters.price?.min !== undefined || typedFilters.price?.max !== undefined) {
+    // Support both price formats from the SearchFilters interface
+    if ((filters.price?.min !== undefined || filters.price?.max !== undefined) ||
+        (filters.priceRange?.min !== undefined || filters.priceRange?.max !== undefined)) {
       filteredProducts = filteredProducts.filter((product) => {
         const price = product.price;
-        const min = typedFilters.price?.min ?? 0;
-        const max = typedFilters.price?.max ?? Infinity;
+        const min = filters.price?.min ?? filters.priceRange?.min ?? 0;
+        const max = filters.price?.max ?? filters.priceRange?.max ?? Infinity;
         return price >= min && price <= max;
       });
     }

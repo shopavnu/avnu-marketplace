@@ -152,18 +152,25 @@ export default function EnhancedShopPage() {
       );
     }
 
-    // Apply other filters if any
+    // Apply other filters if any - support both filter property formats
     if (filters.brand && filters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
         filters.brand!.includes(product.brand),
       );
+    } else if (filters.brandName) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.brandName === product.brand,
+      );
     }
 
-    if (filters.price?.min !== undefined || filters.price?.max !== undefined) {
+    // Support both price formats from the SearchFilters interface
+    if ((filters.price?.min !== undefined || filters.price?.max !== undefined) ||
+        (filters.priceRange?.min !== undefined || filters.priceRange?.max !== undefined)) {
+      
       filteredProducts = filteredProducts.filter((product) => {
         const price = product.price;
-        const min = filters.price?.min ?? 0;
-        const max = filters.price?.max ?? Infinity;
+        const min = filters.price?.min ?? filters.priceRange?.min ?? 0;
+        const max = filters.price?.max ?? filters.priceRange?.max ?? Infinity;
         return price >= min && price <= max;
       });
     }
