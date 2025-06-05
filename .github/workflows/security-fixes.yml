@@ -1,0 +1,22 @@
+name: Apply Security Fixes
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      run_after_install:
+        description: 'Run the security fixes after npm install'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  apply-security-fixes:
+    name: Apply Security Fixes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply Security Patches
+        run: |
+          cd backend
+          npm run fix-security
+        shell: bash

@@ -38,7 +38,8 @@
     "test:search": "jest --testPathPattern=src/modules/search",
     "test:search:cov": "jest --coverage --testPathPattern=src/modules/search",
     "test:search:e2e": "jest --config ./test/jest-e2e.json --testPathPattern=search",
-    "test:enhanced-nlp": "ts-node scripts/test-enhanced-nlp.ts"
+    "test:enhanced-nlp": "ts-node scripts/test-enhanced-nlp.ts",
+    "fix-security": "node scripts/fix-security-vulnerabilities.js"
   },
   "dependencies": {
     "@apollo/server": "^4.12.0",

@@ -26,7 +26,8 @@
     "lint": "npm run lint:frontend",
     "lint:frontend": "cd frontend && npm run lint || true",
     "lint:backend": "cd backend && npm run lint || true",
-    "preinstall": "npx only-allow npm"
+    "preinstall": "npx only-allow npm",
+    "postinstall": "cd backend && npm run fix-security || true"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -75,8 +76,8 @@
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^9.6.0",
     "bull": "^4.16.5",
-    "bull-board": "^1.2.0",
     "bullmq": "^5.53.0",
+    "multer": "^2.0.1",
     "cache-manager": "^5.7.6",
     "cache-manager-redis-store": "^3.0.1",
     "chart.js": "^4.4.9",
