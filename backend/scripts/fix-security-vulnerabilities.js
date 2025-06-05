@@ -17,7 +17,7 @@ const possibleNestPaths = [
 
 // Find the actual path that exists
 let nestPlatformExpressPath = null;
-for (const possiblePath of possiblePaths) {
+for (const possiblePath of possibleNestPaths) {
   if (fs.existsSync(possiblePath)) {
     nestPlatformExpressPath = possiblePath;
     console.log('Found @nestjs/platform-express at:', nestPlatformExpressPath);
