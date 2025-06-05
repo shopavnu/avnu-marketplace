@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElasticsearchService } from './elasticsearch.service';
-import { Product } from '../../products/entities/product.entity';
 
 @Injectable()
 export class OptimizedElasticsearchService {

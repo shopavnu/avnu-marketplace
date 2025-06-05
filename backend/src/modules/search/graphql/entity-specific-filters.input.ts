@@ -164,7 +164,7 @@ export class SearchFiltersInput {
 
   @Field(() => String, { nullable: true })
   sortBy?: string;
-  
+
   @Field(() => String, { nullable: true })
   sortDirection?: string;
 }
