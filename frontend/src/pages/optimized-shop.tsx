@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { Product } from "@/types/products";
 import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
@@ -217,7 +217,7 @@ export default function OptimizedShopPage() {
     }));
 
     if (query && !recentSearches.includes(query)) {
-      setRecentSearches((prev) => [query, ...prev].slice(0, 5));
+      setRecentSearches((prev: string[]) => [query, ...prev].slice(0, 5));
     }
   };
 

@@ -244,7 +244,7 @@ export default function EnhancedShopPage() {
     }));
 
     if (query && !recentSearches.includes(query)) {
-      setRecentSearches((prev) => [query, ...prev].slice(0, 5));
+      setRecentSearches((prev: string[]) => [query, ...prev].slice(0, 5));
     }
   };
 
@@ -340,7 +340,7 @@ export default function EnhancedShopPage() {
     <>
       {/* Netflix-style category rows */}
       {Object.entries(productsByCategory).map(
-        ([categoryId, categoryProducts]) => {
+        ([categoryId, categoryProducts]: [string, Product[]]) => {
           const category = categories.find((c) => c.id === categoryId);
           if (!category || categoryProducts.length < 4) return null;
 

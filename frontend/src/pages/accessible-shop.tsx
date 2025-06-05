@@ -220,7 +220,7 @@ export default function AccessibleShopPage() {
     }));
 
     if (query && !recentSearches.includes(query)) {
-      setRecentSearches((prev) => [query, ...prev].slice(0, 5));
+      setRecentSearches((prev: string[]) => [query, ...prev].slice(0, 5));
     }
   };
 
