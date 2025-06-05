@@ -97,17 +97,8 @@ const generateMockProducts = (seed = 1) =>
 // Initial products with deterministic values for SSR
 const mockProducts: Product[] = generateMockProducts();
 
-// Ensure we use the same SearchFilters interface throughout the component
-type ComponentSearchFilters = SearchFilters;
-
-// Define a custom interface for this page's search results structure
-interface PageSearchResult {
-  query: string;
-  filters: ComponentSearchFilters;
-  totalResults: number;
-  products: Product[];
-  suggestedFilters: string[];
-}
+// Use standardized ShopSearchResults and SearchFilters interfaces from @/types/search.ts
+// to ensure consistency across all shop page variants
 
 /**
  * Enhanced shop page with Netflix-inspired rows and Airbnb-inspired category pills
@@ -264,7 +255,7 @@ export default function EnhancedShopPage() {
 
   // Handle when more products are loaded
   const handleLoadMore = () => {
-    setSearchResults((prev: PageSearchResult) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       products,
     }));

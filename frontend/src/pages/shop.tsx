@@ -8,10 +8,8 @@ import FilterPanel from "@/components/search/FilterPanel";
 import ProductCard from "@/components/products/ProductCard";
 import { ConsistentProductCard } from "@/components/products";
 
-// Ensure we use the same SearchFilters interface throughout the component
-type ComponentSearchFilters = SearchFilters;
-
-// Using ShopSearchResults from @/types/search.ts rather than defining a local interface
+// Use standardized ShopSearchResults and SearchFilters interfaces from @/types/search.ts
+// for consistency across all shop page variants
 
 // Product image URLs from Unsplash - exactly 20 verified images
 const productImages = [

@@ -109,16 +109,18 @@ export interface SearchResult {
  */
 export interface SearchResponse {
   results: SearchResult[];
-  query: string;            
-  total?: number;           
-  page?: number;            
-  limit?: number;           
+  query: string;
+  // Use common pagination structure
+  page?: number;
+  limit?: number;
   facets: FacetType[];
+  // Combined pagination properties
   pagination: {
     total: number;
     nextCursor: string | null;
     hasMore: boolean;
   };
+  // Avoid duplicate total property
   isPersonalized?: boolean;
   experimentId?: string;
   appliedFilters?: string[];
