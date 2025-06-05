@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/types/products";
@@ -7,6 +7,11 @@ import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
 import ProductCard from "@/components/products/ProductCard";
 import { ConsistentProductCard } from "@/components/products";
+
+// Ensure we use the same SearchFilters interface throughout the component
+type ComponentSearchFilters = SearchFilters;
+
+// Using ShopSearchResults from @/types/search.ts rather than defining a local interface
 
 // Product image URLs from Unsplash - exactly 20 verified images
 const productImages = [
@@ -98,7 +103,6 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({});
-  
   const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
@@ -216,7 +220,7 @@ export default function ShopPage() {
           <div className="w-full md:w-64 shrink-0">
             <FilterPanel
               filters={filters}
-              onChange={(newFilters: SearchFilters) => {
+              onChange={(newFilters) => {
                 setFilters(newFilters);
                 handleSearch(searchQuery, newFilters);
               }}

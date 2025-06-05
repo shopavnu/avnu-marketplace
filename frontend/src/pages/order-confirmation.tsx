@@ -1,121 +1,181 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRightIcon, EnvelopeIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import { trackOrderCompleted } from "@/analytics/tracking";
-import { OrderDetails } from "@/components/checkout/OrderDetails";
-import { OrderSummary } from "@/components/checkout/OrderSummary";
-import { RecommendedProducts } from "@/components/products/RecommendedProducts";
-import useCart from "@/hooks/useCart"; // Corrected to default import
+import useCartStore from "@/stores/useCartStore";
+import analytics, { EventType } from "@/services/analytics";
+import {
+  OrderSummary,
+  ShippingDetails,
+  PaymentInformation,
+  OrderStatus
+} from "@/components/order";
 
-// Define types for the order and order items
-interface OrderItemProduct {
+// Define types for our order details
+interface OrderItem {
   id: string;
   title: string;
-  image?: string;
-}
-
-interface OrderItemType {
-  product: OrderItemProduct;
+  brand: string;
   price: number;
   quantity: number;
-  vendorName?: string;
+  image: string;
 }
 
-interface ShippingAddressType {
-  name: string;
-  street: string;
-  apartment?: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-}
-
-interface OrderType {
-  id: string;
-  total: number;
-  currency: string;
-  items: OrderItemType[];
-  shippingAddress: ShippingAddressType;
-  shippingMethod: string;
-  subtotal: number;
-  shippingCost: number;
-  tax: number;
-  status?: string;
-  estimatedDelivery?: string;
-  createdAt?: string;
-  updatedAt?: string;
+interface OrderDetails {
+  orderNumber: string;
+  date: string;
+  items: OrderItem[];
+  customer: {
+    name: string;
+    email: string;
+    address: {
+      line1: string;
+      line2?: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+    };
+  };
+  shipping: {
+    method: string;
+    cost: number;
+    estimatedDelivery: string;
+  };
+  payment: {
+    method: string;
+    last4: string;
+  };
+  totals: {
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+  };
 }
 
 const OrderConfirmation = () => {
   const router = useRouter();
-  const { items, cartTotal, clearCart, getCartForApi } = useCart();
-  const [orderNumber, setOrderNumber] = useState("");
+  const { clearCart, items } = useCartStore();
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [orderStatus, setOrderStatus] = useState<'processing' | 'shipped' | 'delivered' | 'complete'>('processing');
 
-  // Generate a random order number on component mount
+  // Generate order details on component mount
   useEffect(() => {
+    // In a real app, we would fetch the order details from the API
+    // based on the order ID from the URL or state management
+    // For this demo, we'll generate the order details based on the cart items
+    
+    // Generate a random order number
     const generateOrderNumber = () => {
       const prefix = "AV";
       const randomNum = Math.floor(100000 + Math.random() * 900000);
       return `${prefix}${randomNum}`;
     };
 
-    const newOrderNumber = generateOrderNumber();
-    setOrderNumber(newOrderNumber);
+    // Format date as Month Day, Year
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
 
-    // Define mockOrder here to use the generated orderNumber
-    const mockOrder: OrderType = {
-      id: newOrderNumber,
-      total: cartTotal || 145.04, // Use cart total if available, else fallback
-      currency: "USD",
-      items: items.length > 0 ? items.map(item => ({
-        product: { 
-          id: item.product.id, 
-          title: item.product.title, 
-          image: item.product.image 
-        },
-        price: item.product.price, 
+    // Estimate delivery date (7-10 days from now)
+    const deliveryDate = new Date(today);
+    deliveryDate.setDate(today.getDate() + 7);
+    const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    // Create order details
+    // For a real app, this would come from the API
+    const orderData: OrderDetails = {
+      orderNumber: generateOrderNumber(),
+      date: formattedDate,
+      items: items.map(item => ({
+        id: item.product.id,
+        title: item.product.title,
+        brand: item.product.brand || 'Unknown Brand',
+        price: item.product.price,
         quantity: item.quantity,
-        vendorName: item.product.brand
-      })) : [
-        { product: { id: "prod_1", title: "Ceramic Vase" }, price: 45.99, quantity: 1, vendorName: "Terra & Clay" },
-        { product: { id: "prod_2", title: "Organic Cotton Throw" }, price: 39.99, quantity: 2, vendorName: "Pure Living" },
-      ],
-      shippingAddress: {
-        name: "John Doe",
-        street: "123 Main Street",
-        apartment: "Apt 4B",
-        city: "New York",
-        state: "NY",
-        zip: "10001",
-        country: "United States",
+        image: item.product.image
+      })),
+      customer: {
+        name: 'John Doe', // In real app, from checkout form
+        email: 'john.doe@example.com',
+        address: {
+          line1: '123 Main Street',
+          line2: 'Apt 4B',
+          city: 'New York',
+          state: 'NY',
+          postalCode: '10001',
+          country: 'United States'
+        }
       },
-      shippingMethod: "Standard Shipping (3-5 business days)",
-      subtotal: items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0) || 125.97,
-      shippingCost: 8.99, // Example, adjust if dynamic
-      tax: (cartTotal || 145.04) * 0.08 || 10.08, // Example tax calculation
+      shipping: {
+        method: 'Standard Shipping (3-5 business days)',
+        cost: 8.99,
+        estimatedDelivery: formattedDeliveryDate
+      },
+      payment: {
+        method: 'Credit Card',
+        last4: '4242'
+      },
+      totals: {
+        subtotal: items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
+        shipping: 8.99,
+        tax: items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) * 0.08,
+        total: items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) + 8.99 + 
+               (items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) * 0.08)
+      }
     };
 
-    if (router.isReady && mockOrder) {
-      trackOrderCompleted({
-        orderId: mockOrder.id,
-        total: mockOrder.total,
-        currency: mockOrder.currency,
-        products: mockOrder.items.map((item) => ({
-          id: item.product.id,
-          name: item.product.title,
+    setOrderDetails(orderData);
+    
+    // Track purchase event for analytics
+    if (items.length > 0) {
+      analytics.trackPurchase({
+        transaction_id: orderData.orderNumber,
+        items: orderData.items.map(item => ({
+          id: item.id,
+          name: item.title,
+          brand: item.brand,
           price: item.price,
-          quantity: item.quantity,
+          quantity: item.quantity
         })),
-        cartTotal,
-        cartItems: getCartForApi().items,
+        value: orderData.totals.total,
+        currency: 'USD',
+        shipping: orderData.totals.shipping,
+        tax: orderData.totals.tax
       });
-      clearCart(); // Clear the cart after order completion
+      
+      // Clear the cart after purchase is complete
+      clearCart();
     }
-  }, [router.isReady, items, cartTotal, clearCart, getCartForApi]);
+  }, [items, clearCart]);
+  
+  // Track page view
+  useEffect(() => {
+    analytics.trackPageView({
+      path: window.location.pathname,
+      title: 'Order Confirmation'
+    });
+  }, []);
+
+  if (!orderDetails) {
+    return (
+      <div className="bg-warm-white min-h-screen flex items-center justify-center">
+        <div className="p-6 text-center">
+          <div className="animate-spin h-12 w-12 border-4 border-sage border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-charcoal">Loading your order details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-warm-white min-h-screen">
@@ -124,10 +184,10 @@ const OrderConfirmation = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-8"
+          className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-8"
         >
-          {/* Success Icon */}
-          <div className="flex justify-center mb-6">
+          {/* Success Icon & Confirmation Header */}
+          <div className="text-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -137,89 +197,80 @@ const OrderConfirmation = () => {
                 damping: 20,
                 delay: 0.3,
               }}
+              className="inline-flex"
             >
-              <CheckCircleIcon className="w-20 h-20 text-sage" />
+              <CheckCircleIcon className="w-20 h-20 text-sage" aria-hidden="true" />
             </motion.div>
-          </div>
-
-          {/* Order Confirmation Message */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-charcoal mb-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-charcoal mt-4 mb-2">
               Thank You for Your Order!
             </h1>
-            <p className="text-gray-600">
-              Your order has been received and is now being processed. You will
-              receive an email confirmation shortly.
+            <p className="text-gray-600 max-w-md mx-auto">
+              Your order has been received and is now being processed. We've sent a confirmation email to <span className="font-medium">{orderDetails.customer.email}</span>.
             </p>
-            <div className="mt-4 py-3 px-4 bg-gray-50 rounded-md inline-block">
-              <p className="text-sm text-gray-500">Order Number</p>
-              <p className="text-lg font-medium text-charcoal">{orderNumber}</p>
+            
+            {/* Order Number & Date */}
+            <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
+              <div className="py-3 px-4 bg-gray-50 rounded-md inline-block">
+                <p className="text-sm text-gray-500">Order Number</p>
+                <p className="text-lg font-medium text-charcoal">{orderDetails.orderNumber}</p>
+              </div>
+              <div className="py-3 px-4 bg-gray-50 rounded-md inline-block">
+                <p className="text-sm text-gray-500">Order Date</p>
+                <p className="text-lg font-medium text-charcoal">{orderDetails.date}</p>
+              </div>
             </div>
           </div>
 
-          {/* Order Details & Summary using components */}
-          {orderNumber && (
-            <>
-              <OrderDetails order={{
-                id: orderNumber,
-                total: cartTotal || 145.04,
-                currency: "USD",
-                items: items.length > 0 ? items.map(item => ({
-                  product: {
-                    id: item.product.id,
-                    title: item.product.title,
-                    image: item.product.image
-                  },
-                  price: item.product.price,
-                  quantity: item.quantity,
-                  vendorName: item.product.brand
-                })) : [
-                  { product: { id: "prod_1", title: "Ceramic Vase", image: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800" }, price: 45.99, quantity: 1, vendorName: "Terra & Clay" },
-                  { product: { id: "prod_2", title: "Organic Cotton Throw", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800" }, price: 39.99, quantity: 2, vendorName: "Pure Living" },
-                ],
-                shippingAddress: { name: "John Doe", street: "123 Main Street", apartment: "Apt 4B", city: "New York", state: "NY", zip: "10001", country: "United States" },
-                shippingMethod: "Standard Shipping (3-5 business days)",
-                subtotal: items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0) || 125.97,
-                shippingCost: 8.99,
-                tax: (cartTotal || 145.04) * 0.08 || 10.08,
-                status: "Processing",
-                estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              }} />
-              <OrderSummary order={{
-                id: orderNumber,
-                total: cartTotal || 145.04,
-                currency: "USD",
-                items: items.length > 0 ? items.map(item => ({
-                  product: {
-                    id: item.product.id,
-                    title: item.product.title,
-                    image: item.product.image
-                  },
-                  price: item.product.price,
-                  quantity: item.quantity,
-                  vendorName: item.product.brand
-                })) : [
-                  { product: { id: "prod_1", title: "Ceramic Vase", image: "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800" }, price: 45.99, quantity: 1, vendorName: "Terra & Clay" },
-                  { product: { id: "prod_2", title: "Organic Cotton Throw", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800" }, price: 39.99, quantity: 2, vendorName: "Pure Living" },
-                ],
-                shippingAddress: { name: "John Doe", street: "123 Main Street", apartment: "Apt 4B", city: "New York", state: "NY", zip: "10001", country: "United States" },
-                shippingMethod: "Standard Shipping (3-5 business days)",
-                subtotal: items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0) || 125.97,
-                shippingCost: 8.99,
-                tax: (cartTotal || 145.04) * 0.08 || 10.08,
-                status: "Processing",
-                estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              }} />
-            </>
-          )}
+          {/* Order Details Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="space-y-6">
+              {/* Order Summary Component */}
+              <OrderSummary 
+                items={orderDetails.items}
+                totals={orderDetails.totals}
+              />
+              
+              {/* Order Status Timeline */}
+              <OrderStatus
+                orderNumber={orderDetails.orderNumber}
+                date={orderDetails.date}
+                status={orderStatus}
+              />
+            </div>
+            
+            <div className="space-y-6">
+              {/* Shipping Details Component */}
+              <ShippingDetails
+                customer={orderDetails.customer}
+                shipping={orderDetails.shipping}
+              />
+              
+              {/* Payment Information Component */}
+              <PaymentInformation
+                payment={orderDetails.payment}
+                customer={orderDetails.customer}
+                totals={orderDetails.totals}
+              />
+            </div>
+          </div>
 
-          {/* Recommended Products */}
-          <div className="mt-12">
-            <RecommendedProducts />
+          {/* Email Confirmation */}
+          <div className="border-t border-gray-100 pt-6 mb-8">
+            <div className="bg-sage/5 p-6 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between">
+              <div className="flex items-start">
+                <EnvelopeIcon className="h-10 w-10 text-sage mr-4 flex-shrink-0" />
+                <div>
+                  <h2 className="text-lg font-medium text-charcoal">Order Confirmation Email Sent</h2>
+                  <p className="text-gray-600 mt-1">
+                    We've sent a confirmation email to <span className="font-medium">{orderDetails.customer.email}</span> with 
+                    all your order details and tracking information.
+                  </p>
+                </div>
+              </div>
+              <button className="mt-4 sm:mt-0 bg-white border border-gray-300 hover:bg-gray-50 text-sage font-medium py-2 px-4 rounded transition-colors flex-shrink-0">
+                Resend Email
+              </button>
+            </div>
           </div>
 
           {/* Action Buttons */}

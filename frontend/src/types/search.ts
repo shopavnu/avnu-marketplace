@@ -33,9 +33,12 @@ export interface PartialPriceRange {
 // Define sort options
 export type SortOption = 'relevance' | 'price_low' | 'price_high' | 'price' | 'name' | 'newest' | 'rating';
 
-// Search filters interface - merged from both branches
+/**
+ * Search filters interface - combines properties from both branches
+ * to ensure compatibility with all shop pages and components
+ */
 export interface SearchFilters {
-  // From both branches
+  // Category filtering
   category?: string;
   subCategory?: string;
   categories?: string[];
@@ -68,7 +71,7 @@ export interface SearchFilters {
   // Search query
   query?: string;
   
-  // Additional filters from main branch
+  // Product availability
   inStock?: boolean;
   
   // Quick filter properties used in FilterPanel
@@ -78,42 +81,47 @@ export interface SearchFilters {
   causes?: string[];
 }
 
-// Search result interfaces - merged from both branches
+/**
+ * Search result interface - combines properties from both branches
+ * to ensure compatibility with all shop pages and components
+ */
 export interface SearchResult {
   id: string;
   name: string;
-  type?: string;            // From main branch
+  type?: string;           
   description?: string;
   price: number;
-  compareAtPrice?: number;  // From main branch
-  imageUrl?: string;        // From feature branch
-  images?: string[];        // From main branch
-  categories?: string[];    // From main branch
-  values?: string[];        // From main branch
+  compareAtPrice?: number;
+  imageUrl?: string;       
+  images?: string[];       
+  categories?: string[];   
+  values?: string[];       
   brandName?: string;
-  merchantId?: string;      // From main branch
-  score?: number;           // From main branch
-  isSponsored?: boolean;    // From main branch
-  inStock?: boolean;        // From main branch
-  category?: string;        // From feature branch
+  merchantId?: string;     
+  score?: number;          
+  isSponsored?: boolean;   
+  inStock?: boolean;       
+  category?: string;       
 }
 
-// Search response interface - merged from both branches
+/**
+ * Search response interface - combines properties from both branches
+ */
 export interface SearchResponse {
   results: SearchResult[];
-  query?: string;            // From main branch
-  total?: number;            // From feature branch
-  page?: number;             // From feature branch
-  limit?: number;            // From feature branch
+  query: string;            
+  total?: number;           
+  page?: number;            
+  limit?: number;           
   facets: FacetType[];
-  pagination?: {             // From main branch
+  pagination: {
     total: number;
     nextCursor: string | null;
     hasMore: boolean;
   };
-  isPersonalized?: boolean;  // From main branch
-  experimentId?: string;     // From main branch
-  appliedFilters?: string[]; // From main branch
+  isPersonalized?: boolean;
+  experimentId?: string;
+  appliedFilters?: string[];
 }
 
 /**
@@ -126,5 +134,4 @@ export interface ShopSearchResults {
   totalResults: number;
   products: import('@/types/products').Product[];
   suggestedFilters: string[];
-  // Add any other common properties used across shop pages
 }

@@ -1,6 +1,6 @@
 # Dockerfile
 # Stage 1: Build the application
-FROM node:20-alpine AS builder
+FROM node:18.18.0-alpine AS builder
 
 # Set WORKDIR to represent the monorepo root in the container
 WORKDIR /app
@@ -37,7 +37,7 @@ WORKDIR /app/frontend
 RUN npm run build
 
 # Stage 2: Production image
-FROM node:20-alpine AS runtime
+FROM node:18.18.0-alpine AS runtime
 
 # Set WORKDIR for the running application
 WORKDIR /app

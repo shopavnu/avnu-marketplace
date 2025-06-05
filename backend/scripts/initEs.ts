@@ -5,7 +5,8 @@ import * as dotenv from 'dotenv';
 dotenv.config(); // Load environment variables from .env file, ensure .env is in the same directory or adjust path
 
 // --- Configuration ---
-const ELASTICSEARCH_NODE_URL = process.env.ELASTICSEARCH_NODE_URL || 'http://localhost:9200'; // Fallback to localhost if not set
+// Use the same environment variable names as the main application
+const ELASTICSEARCH_NODE_URL = process.env.ELASTICSEARCH_NODE || 'http://localhost:9200'; // Fallback to localhost if not set
 const ELASTICSEARCH_API_KEY = process.env.ELASTICSEARCH_API_KEY || ''; // Fallback to empty string if not set
 const INDEX_NAME = "search-avnu";
 

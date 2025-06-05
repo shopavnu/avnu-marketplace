@@ -97,6 +97,18 @@ const generateMockProducts = (seed = 1) =>
 // Initial products with deterministic values for SSR
 const mockProducts: Product[] = generateMockProducts();
 
+// Ensure we use the same SearchFilters interface throughout the component
+type ComponentSearchFilters = SearchFilters;
+
+// Define a custom interface for this page's search results structure
+interface PageSearchResult {
+  query: string;
+  filters: ComponentSearchFilters;
+  totalResults: number;
+  products: Product[];
+  suggestedFilters: string[];
+}
+
 /**
  * Enhanced shop page with Netflix-inspired rows and Airbnb-inspired category pills
  */
@@ -152,14 +164,14 @@ export default function EnhancedShopPage() {
       );
     }
 
-    // Apply other filters if any - support both filter property formats
+    // Apply brand filters - support both brand[] and brandName formats
     if (filters.brand && filters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brand!.includes(product.brand),
+        filters.brand?.includes(product.brand)
       );
     } else if (filters.brandName) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brandName === product.brand,
+        filters.brandName === product.brand
       );
     }
 
@@ -248,6 +260,14 @@ export default function EnhancedShopPage() {
   // Handle category selection
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
+  };
+
+  // Handle when more products are loaded
+  const handleLoadMore = () => {
+    setSearchResults((prev: PageSearchResult) => ({
+      ...prev,
+      products,
+    }));
   };
 
   // Priority content includes search bar, filters, category pills, and first batch of products

@@ -131,21 +131,21 @@ export default function OptimizedShopPage() {
       );
     }
 
-    // Apply filters if any - support both filter property formats
-    if (filters.brand && filters.brand.length > 0) {
+    // Filter by brand if specified - support both formats
+    if (filters.brandName) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brand!.includes(product.brand),
+        filters.brandName === product.brand
       );
-    } else if (filters.brandName) {
+    } else if (filters.brand && filters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brandName === product.brand,
+        filters.brand!.includes(product.brand)
       );
     }
 
-    if (filters.category) {
-      const category = filters.category;
+    // Filter by category if specified
+    if (filters.categories && filters.categories.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        product.categories.includes(category),
+        filters.categories!.some((category: string) => product.categories.includes(category))
       );
     }
 

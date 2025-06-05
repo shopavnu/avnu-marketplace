@@ -1,3 +1,5 @@
+// Import polyfills first to ensure global objects are available
+import './polyfills';
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';

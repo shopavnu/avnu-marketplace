@@ -54,7 +54,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile.worker
     dockerContext: ./backend
-    dockerCommand: node dist/main --worker
+    dockerCommand: node fix-worker-dependencies.js && node dist/main --worker
     repo: https://github.com/shopavnu/avnu-marketplace.git
     branch: main
     numInstances: 1

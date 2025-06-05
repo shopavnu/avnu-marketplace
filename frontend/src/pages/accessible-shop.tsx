@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Product } from "@/types/products";
 import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
+
 import { categories } from "@/data/categories";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
@@ -147,14 +148,14 @@ export default function AccessibleShopPage() {
       );
     }
 
-    // Access filters directly using the standard SearchFilters interface
+    // Apply brand filters - support both brand[] and brandName formats
     if (filters.brand && filters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brand!.includes(product.brand),
+        filters.brand?.includes(product.brand)
       );
     } else if (filters.brandName) {
       filteredProducts = filteredProducts.filter((product) =>
-        filters.brandName === product.brand,
+        filters.brandName === product.brand
       );
     }
 
@@ -170,7 +171,7 @@ export default function AccessibleShopPage() {
     }
 
     // Update total results
-    setSearchResults((prev) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       totalResults: filteredProducts.length,
     }));
@@ -214,6 +215,8 @@ export default function AccessibleShopPage() {
       query,
       filters: newFilters,
       products: [],
+      totalResults: 0,
+      suggestedFilters: [],
     }));
 
     if (query && !recentSearches.includes(query)) {

@@ -3,10 +3,11 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package files and install dependencies
-# Copy root package.json and package-lock.json
-# These are essential for installing dependencies for the entire monorepo
-COPY package.json ./
-COPY package-lock.json ./
+# First, copy root package files to handle workspace dependencies correctly
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+
+# Install all dependencies at the root level
 RUN npm ci --legacy-peer-deps
 
 # Copy the entire source code
