@@ -88,7 +88,6 @@
     "better-sqlite3": "^9.6.0",
     "bull": "^4.16.5",
     "bullmq": "^5.53.0",
-    "multer": "^2.0.1",
     "cache-manager": "^5.7.6",
     "cache-manager-redis-store": "^3.0.1",
     "chart.js": "^4.4.9",

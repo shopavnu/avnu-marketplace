@@ -1,9 +1,9 @@
-// This script manually patches vulnerable packages to secure versions
+// This script manually patches vulnerable packages to secure versions and fixes dependency conflicts
 const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
 
-console.log('Starting security vulnerability fixes...');
+console.log('Starting security vulnerability and dependency conflict fixes...');
 
 // Check both backend and root node_modules for @nestjs/platform-express
 const rootDir = path.join(__dirname, '..', '..');
@@ -188,4 +188,95 @@ if (fs.existsSync(rootPackageLockPath)) {
   }
 }
 
-console.log('\nSecurity vulnerability fixes completed');
+// Fix RxJS version conflicts
+// This is particularly important because NestJS depends heavily on RxJS and conflicting versions
+// can cause TypeScript build errors
+console.log('\nFixing RxJS version conflicts...');
+
+// Target RxJS version based on root package.json
+const targetRxJsVersion = '7.8.1';
+
+// Paths where RxJS might be installed
+const rxjsPaths = [
+  path.join(rootDir, 'node_modules', 'rxjs'),
+  path.join(backendDir, 'node_modules', 'rxjs')
+];
+
+// Find and patch RxJS package.json files to ensure consistent version
+rxjsPaths.forEach(rxjsPath => {
+  if (fs.existsSync(rxjsPath)) {
+    const rxjsPkgPath = path.join(rxjsPath, 'package.json');
+    if (fs.existsSync(rxjsPkgPath)) {
+      try {
+        const pkgJson = JSON.parse(fs.readFileSync(rxjsPkgPath, 'utf8'));
+        console.log(`Found RxJS at ${rxjsPath}, current version: ${pkgJson.version}`);
+        
+        if (pkgJson.version !== targetRxJsVersion) {
+          console.log(`Patching RxJS at ${rxjsPath} to version ${targetRxJsVersion}`);
+          pkgJson.version = targetRxJsVersion;
+          fs.writeFileSync(rxjsPkgPath, JSON.stringify(pkgJson, null, 2));
+        } else {
+          console.log(`RxJS at ${rxjsPath} already at version ${targetRxJsVersion}`);
+        }
+      } catch (error) {
+        console.error(`Error patching RxJS at ${rxjsPath}:`, error);
+      }
+    }
+  }
+});
+
+// Update package-lock.json for RxJS versions
+if (fs.existsSync(rootPackageLockPath)) {
+  console.log('Updating package-lock.json for RxJS versions...');
+  try {
+    const packageLock = JSON.parse(fs.readFileSync(rootPackageLockPath, 'utf8'));
+    let rxjsUpdated = false;
+    
+    // Function to recursively update RxJS version in dependencies
+    const updateRxJsRecursive = (deps) => {
+      if (!deps) return;
+      
+      Object.keys(deps).forEach(key => {
+        if (key === 'rxjs' && deps[key].version && deps[key].version !== targetRxJsVersion) {
+          console.log(`Found RxJS ${deps[key].version} in package-lock, updating to ${targetRxJsVersion}`);
+          deps[key].version = targetRxJsVersion;
+          rxjsUpdated = true;
+        }
+        
+        // Check nested dependencies
+        if (deps[key].dependencies) {
+          updateRxJsRecursive(deps[key].dependencies);
+        }
+      });
+    };
+    
+    // Update dependencies in package-lock
+    if (packageLock.dependencies) {
+      updateRxJsRecursive(packageLock.dependencies);
+    }
+    
+    // Update packages in package-lock
+    if (packageLock.packages) {
+      Object.keys(packageLock.packages).forEach(pkgPath => {
+        if (pkgPath.includes('/rxjs') && packageLock.packages[pkgPath].version && 
+            packageLock.packages[pkgPath].version !== targetRxJsVersion) {
+          console.log(`Found RxJS in packages at ${pkgPath}, updating to ${targetRxJsVersion}`);
+          packageLock.packages[pkgPath].version = targetRxJsVersion;
+          rxjsUpdated = true;
+        }
+      });
+    }
+    
+    if (rxjsUpdated) {
+      fs.writeFileSync(rootPackageLockPath, JSON.stringify(packageLock, null, 2));
+      console.log('Successfully updated package-lock.json with consistent RxJS versions');
+    } else {
+      console.log('No RxJS version conflicts found in package-lock.json');
+    }
+  } catch (error) {
+    console.error('Error updating package-lock.json for RxJS:', error);
+  }
+}
+
+console.log('\nSecurity vulnerability and dependency conflict fixes completed');
+
