@@ -38,7 +38,9 @@
     "lint:frontend": "cd frontend && npm run lint || true",
     "lint:backend": "cd backend && npm run lint || true",
     "preinstall": "npx only-allow npm",
-    "postinstall": "cd backend && npm run fix-security || true"
+    "postinstall": "cd backend && npm run fix-security || true",
+    "ci-setup": "bash ./ci-setup.sh",
+    "ci-install": "npm install --no-package-lock --legacy-peer-deps"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
