@@ -39,8 +39,8 @@
     "lint:backend": "cd backend && npm run lint || true",
     "preinstall": "npx only-allow npm",
     "postinstall": "cd backend && npm run fix-security || true",
-    "ci-setup": "bash ./ci-setup.sh",
-    "ci-install": "npm install --no-package-lock --legacy-peer-deps"
+    "pre-ci": "node ./pre-ci.js",
+    "ci": "npm run pre-ci && npm ci"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -108,7 +108,7 @@
     "ioredis": "^5.6.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
-    "multer": "^2.0.1",
+    "multer": "2.0.1",
     "natural": "^6.7.0",
     "next": "14.2.29",
     "node-cache": "^5.1.2",
