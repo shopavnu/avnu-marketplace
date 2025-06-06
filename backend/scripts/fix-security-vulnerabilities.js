@@ -31,6 +31,25 @@ if (!nestPlatformExpressPath) {
 }
 
 // Fix for multer vulnerability in @nestjs/platform-express
+// First, update the @nestjs/platform-express/package.json to reference multer 2.0.1 instead of 2.0.0
+const nestPlatformExpressPkgPath = path.join(nestPlatformExpressPath, 'package.json');
+if (fs.existsSync(nestPlatformExpressPkgPath)) {
+  console.log('Updating multer reference in @nestjs/platform-express/package.json...');
+  try {
+    const pkgJson = JSON.parse(fs.readFileSync(nestPlatformExpressPkgPath, 'utf8'));
+    if (pkgJson.dependencies && pkgJson.dependencies.multer === '2.0.0') {
+      console.log('Found multer@2.0.0 reference in @nestjs/platform-express/package.json, updating to 2.0.1');
+      pkgJson.dependencies.multer = '2.0.1';
+      fs.writeFileSync(nestPlatformExpressPkgPath, JSON.stringify(pkgJson, null, 2));
+      console.log('Successfully updated @nestjs/platform-express package.json');
+    } else {
+      console.log('@nestjs/platform-express package.json already references correct multer version');
+    }
+  } catch (error) {
+    console.error('Error updating @nestjs/platform-express/package.json:', error);
+  }
+}
+
 const multerPath = path.join(nestPlatformExpressPath, 'node_modules', 'multer');
 
 if (fs.existsSync(multerPath)) {
@@ -275,6 +294,129 @@ if (fs.existsSync(rootPackageLockPath)) {
     }
   } catch (error) {
     console.error('Error updating package-lock.json for RxJS:', error);
+  }
+}
+
+// Check for inconsistencies between package.json and package-lock.json for multer
+// This is crucial for npm ci in CI environments which is very strict about version matching
+console.log('\nChecking for package-lock.json inconsistencies...');
+
+// Check the main package-lock.json
+if (fs.existsSync(rootPackageLockPath)) {
+  try {
+    const packageLock = JSON.parse(fs.readFileSync(rootPackageLockPath, 'utf8'));
+    let foundInconsistency = false;
+    
+    // Function to search for multer@2.0.0 deeply in nested objects
+    const findAndFixMulter = (obj, path = '') => {
+      if (!obj || typeof obj !== 'object') return false;
+      
+      let foundInThisObj = false;
+      
+      // Check if this is a dependency object with a multer version
+      if (obj.dependencies && obj.dependencies.multer && 
+          obj.dependencies.multer.version === '2.0.0') {
+        console.log(`Found multer@2.0.0 at ${path ? path + '.' : ''}dependencies.multer`);
+        obj.dependencies.multer.version = '2.0.1';
+        foundInThisObj = true;
+        foundInconsistency = true;
+      }
+      
+      // Check if this is a packages object with a multer path
+      if (obj.packages) {
+        Object.keys(obj.packages).forEach(pkgPath => {
+          const pkg = obj.packages[pkgPath];
+          if (pkgPath.includes('multer') && pkg.version === '2.0.0') {
+            console.log(`Found multer@2.0.0 at packages.${pkgPath}`);
+            pkg.version = '2.0.1';
+            foundInThisObj = true;
+            foundInconsistency = true;
+          }
+        });
+      }
+      
+      // Recursively check all object properties
+      Object.keys(obj).forEach(key => {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          const childPath = path ? `${path}.${key}` : key;
+          foundInThisObj = findAndFixMulter(obj[key], childPath) || foundInThisObj;
+        }
+      });
+      
+      return foundInThisObj;
+    };
+    
+    // Start deep search from root
+    findAndFixMulter(packageLock);
+    
+    if (foundInconsistency) {
+      fs.writeFileSync(rootPackageLockPath, JSON.stringify(packageLock, null, 2));
+      console.log('Fixed multer version inconsistencies in root package-lock.json');
+    } else {
+      console.log('No multer inconsistencies found in root package-lock.json');
+    }
+  } catch (error) {
+    console.error('Error fixing package-lock.json inconsistencies:', error);
+  }
+}
+
+// Check backend package-lock.json if it exists
+const backendPackageLockPath = path.join(backendDir, 'package-lock.json');
+if (fs.existsSync(backendPackageLockPath)) {
+  try {
+    const packageLock = JSON.parse(fs.readFileSync(backendPackageLockPath, 'utf8'));
+    let foundInconsistency = false;
+    
+    // Function to search for multer@2.0.0 deeply in nested objects
+    const findAndFixMulter = (obj, path = '') => {
+      if (!obj || typeof obj !== 'object') return false;
+      
+      let foundInThisObj = false;
+      
+      // Check if this is a dependency object with a multer version
+      if (obj.dependencies && obj.dependencies.multer && 
+          obj.dependencies.multer.version === '2.0.0') {
+        console.log(`Found multer@2.0.0 at ${path ? path + '.' : ''}dependencies.multer in backend package-lock.json`);
+        obj.dependencies.multer.version = '2.0.1';
+        foundInThisObj = true;
+        foundInconsistency = true;
+      }
+      
+      // Check if this is a packages object with a multer path
+      if (obj.packages) {
+        Object.keys(obj.packages).forEach(pkgPath => {
+          const pkg = obj.packages[pkgPath];
+          if (pkgPath.includes('multer') && pkg.version === '2.0.0') {
+            console.log(`Found multer@2.0.0 at packages.${pkgPath} in backend package-lock.json`);
+            pkg.version = '2.0.1';
+            foundInThisObj = true;
+            foundInconsistency = true;
+          }
+        });
+      }
+      
+      // Recursively check all object properties
+      Object.keys(obj).forEach(key => {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          const childPath = path ? `${path}.${key}` : key;
+          foundInThisObj = findAndFixMulter(obj[key], childPath) || foundInThisObj;
+        }
+      });
+      
+      return foundInThisObj;
+    };
+    
+    // Start deep search from root
+    findAndFixMulter(packageLock);
+    
+    if (foundInconsistency) {
+      fs.writeFileSync(backendPackageLockPath, JSON.stringify(packageLock, null, 2));
+      console.log('Fixed multer version inconsistencies in backend package-lock.json');
+    } else {
+      console.log('No multer inconsistencies found in backend package-lock.json');
+    }
+  } catch (error) {
+    console.error('Error fixing backend package-lock.json inconsistencies:', error);
   }
 }
 
