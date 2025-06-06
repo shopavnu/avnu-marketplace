@@ -5,6 +5,7 @@
   "installCommand": "cat .better-sqlite3-npm-config >> .npmrc && npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
+  "nodeVersion": "20.x",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://avnu-marketplace-mock-api.onrender.com"
   },
