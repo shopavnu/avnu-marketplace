@@ -301,122 +301,70 @@ if (fs.existsSync(rootPackageLockPath)) {
 // This is crucial for npm ci in CI environments which is very strict about version matching
 console.log('\nChecking for package-lock.json inconsistencies...');
 
-// Check the main package-lock.json
+// Use a more targeted approach with simple string replacements
+console.log('Using direct file manipulation to fix package-lock.json inconsistencies');
+
+// Fix root package-lock.json
 if (fs.existsSync(rootPackageLockPath)) {
   try {
-    const packageLock = JSON.parse(fs.readFileSync(rootPackageLockPath, 'utf8'));
-    let foundInconsistency = false;
+    let content = fs.readFileSync(rootPackageLockPath, 'utf8');
+    const originalContent = content;
     
-    // Function to search for multer@2.0.0 deeply in nested objects
-    const findAndFixMulter = (obj, path = '') => {
-      if (!obj || typeof obj !== 'object') return false;
-      
-      let foundInThisObj = false;
-      
-      // Check if this is a dependency object with a multer version
-      if (obj.dependencies && obj.dependencies.multer && 
-          obj.dependencies.multer.version === '2.0.0') {
-        console.log(`Found multer@2.0.0 at ${path ? path + '.' : ''}dependencies.multer`);
-        obj.dependencies.multer.version = '2.0.1';
-        foundInThisObj = true;
-        foundInconsistency = true;
-      }
-      
-      // Check if this is a packages object with a multer path
-      if (obj.packages) {
-        Object.keys(obj.packages).forEach(pkgPath => {
-          const pkg = obj.packages[pkgPath];
-          if (pkgPath.includes('multer') && pkg.version === '2.0.0') {
-            console.log(`Found multer@2.0.0 at packages.${pkgPath}`);
-            pkg.version = '2.0.1';
-            foundInThisObj = true;
-            foundInconsistency = true;
-          }
-        });
-      }
-      
-      // Recursively check all object properties
-      Object.keys(obj).forEach(key => {
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          const childPath = path ? `${path}.${key}` : key;
-          foundInThisObj = findAndFixMulter(obj[key], childPath) || foundInThisObj;
-        }
-      });
-      
-      return foundInThisObj;
-    };
+    // Replace multer 2.0.0 with 2.0.1 using string replacement
+    // Looking for patterns like "multer": "2.0.0" or "version": "2.0.0" near multer
+    let count = 0;
+    content = content.replace(/"multer":\s*"2\.0\.0"/g, () => {
+      count++;
+      return '"multer": "2.0.1"';
+    });
     
-    // Start deep search from root
-    findAndFixMulter(packageLock);
+    // Handle cases where it might be in a different format
+    content = content.replace(/"multer":\s*\{[^\{\}]*"version":\s*"2\.0\.0"[^\{\}]*\}/g, (match) => {
+      count++;
+      return match.replace(/"version":\s*"2\.0\.0"/, '"version": "2.0.1"');
+    });
     
-    if (foundInconsistency) {
-      fs.writeFileSync(rootPackageLockPath, JSON.stringify(packageLock, null, 2));
-      console.log('Fixed multer version inconsistencies in root package-lock.json');
+    // If we made changes, write the file
+    if (content !== originalContent) {
+      fs.writeFileSync(rootPackageLockPath, content);
+      console.log(`Fixed ${count} multer version references in root package-lock.json`);
     } else {
-      console.log('No multer inconsistencies found in root package-lock.json');
+      console.log('No multer version inconsistencies found in root package-lock.json');
     }
   } catch (error) {
-    console.error('Error fixing package-lock.json inconsistencies:', error);
+    console.error('Error fixing root package-lock.json:', error.message);
   }
 }
 
-// Check backend package-lock.json if it exists
+// Fix backend package-lock.json if it exists
 const backendPackageLockPath = path.join(backendDir, 'package-lock.json');
 if (fs.existsSync(backendPackageLockPath)) {
   try {
-    const packageLock = JSON.parse(fs.readFileSync(backendPackageLockPath, 'utf8'));
-    let foundInconsistency = false;
+    let content = fs.readFileSync(backendPackageLockPath, 'utf8');
+    const originalContent = content;
     
-    // Function to search for multer@2.0.0 deeply in nested objects
-    const findAndFixMulter = (obj, path = '') => {
-      if (!obj || typeof obj !== 'object') return false;
-      
-      let foundInThisObj = false;
-      
-      // Check if this is a dependency object with a multer version
-      if (obj.dependencies && obj.dependencies.multer && 
-          obj.dependencies.multer.version === '2.0.0') {
-        console.log(`Found multer@2.0.0 at ${path ? path + '.' : ''}dependencies.multer in backend package-lock.json`);
-        obj.dependencies.multer.version = '2.0.1';
-        foundInThisObj = true;
-        foundInconsistency = true;
-      }
-      
-      // Check if this is a packages object with a multer path
-      if (obj.packages) {
-        Object.keys(obj.packages).forEach(pkgPath => {
-          const pkg = obj.packages[pkgPath];
-          if (pkgPath.includes('multer') && pkg.version === '2.0.0') {
-            console.log(`Found multer@2.0.0 at packages.${pkgPath} in backend package-lock.json`);
-            pkg.version = '2.0.1';
-            foundInThisObj = true;
-            foundInconsistency = true;
-          }
-        });
-      }
-      
-      // Recursively check all object properties
-      Object.keys(obj).forEach(key => {
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          const childPath = path ? `${path}.${key}` : key;
-          foundInThisObj = findAndFixMulter(obj[key], childPath) || foundInThisObj;
-        }
-      });
-      
-      return foundInThisObj;
-    };
+    // Replace multer 2.0.0 with 2.0.1 using string replacement
+    let count = 0;
+    content = content.replace(/"multer":\s*"2\.0\.0"/g, () => {
+      count++;
+      return '"multer": "2.0.1"';
+    });
     
-    // Start deep search from root
-    findAndFixMulter(packageLock);
+    // Handle cases where it might be in a different format
+    content = content.replace(/"multer":\s*\{[^\{\}]*"version":\s*"2\.0\.0"[^\{\}]*\}/g, (match) => {
+      count++;
+      return match.replace(/"version":\s*"2\.0\.0"/, '"version": "2.0.1"');
+    });
     
-    if (foundInconsistency) {
-      fs.writeFileSync(backendPackageLockPath, JSON.stringify(packageLock, null, 2));
-      console.log('Fixed multer version inconsistencies in backend package-lock.json');
+    // If we made changes, write the file
+    if (content !== originalContent) {
+      fs.writeFileSync(backendPackageLockPath, content);
+      console.log(`Fixed ${count} multer version references in backend package-lock.json`);
     } else {
-      console.log('No multer inconsistencies found in backend package-lock.json');
+      console.log('No multer version inconsistencies found in backend package-lock.json');
     }
   } catch (error) {
-    console.error('Error fixing backend package-lock.json inconsistencies:', error);
+    console.error('Error fixing backend package-lock.json:', error.message);
   }
 }
 
