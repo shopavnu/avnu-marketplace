@@ -1,7 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "nodeVersion": "20.x"
+  "builds": [
+    { "src": "frontend/package.json", "use": "@vercel/next" }
+  ],
+  "projectSettings": {
+    "framework": "nextjs"
+  }
 }
