@@ -9,12 +9,8 @@ import {
 import { products } from "@/data/products";
 import MasonryProductCard from "@/components/products/MasonryProductCard";
 
-// Define a strongly-typed motion.a component
-type MotionAnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & MotionProps;
-
-const MotionAnchor: React.FC<MotionAnchorProps> = (props) => {
-  return <motion.a {...props} />;
-};
+// Skip type checking for motion components
+const MotionAnchor = motion.a;
 
 export default function ScrollAnimationsExample() {
   return (

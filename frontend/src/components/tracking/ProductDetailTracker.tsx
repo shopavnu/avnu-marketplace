@@ -53,7 +53,7 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
     return () => {
       window.removeEventListener("scroll", trackScrollDepth);
     };
-  }, [maxScrollDepth]);
+  }, [maxScrollDepth, setMaxScrollDepth]);
 
   // Track engagement based on time spent on page
   useEffect(() => {
@@ -80,10 +80,9 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
         clearTimeout(engagementTimeoutRef.current);
       }
     };
-  }, [product, maxScrollDepth, hasTrackedEngagement, trackInteraction]);
+  }, [product, maxScrollDepth, hasTrackedEngagement, trackInteraction, setHasTrackedEngagement]);
 
   // Track view when component unmounts
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Store the current value of startTimeRef to use in cleanup
     const startTime = startTimeRef.current;
@@ -103,7 +102,7 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
         setHasTrackedView(true);
       }
     };
-  }, [product, maxScrollDepth, hasTrackedView, trackInteraction]);
+  }, [product, maxScrollDepth, hasTrackedView, trackInteraction, setHasTrackedView]);
 
   // Track when user leaves the page
   useEffect(() => {
@@ -131,7 +130,7 @@ const ProductDetailTracker: React.FC<ProductDetailTrackerProps> = ({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [product, maxScrollDepth, hasTrackedView, trackInteraction]);
+  }, [product, maxScrollDepth, hasTrackedView, trackInteraction, setHasTrackedView]);
 
   return <>{children}</>;
 };

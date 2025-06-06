@@ -46,7 +46,7 @@ const StickySearchBar: React.FC<StickySearchBarProps> = ({
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [setIsExpanded]);
 
   // Handle search submission
   const handleSearch = (query: string) => {

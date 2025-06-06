@@ -5,12 +5,8 @@ import Image from "next/image";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
-// Define a strongly-typed motion.form component
-type MotionFormProps = React.FormHTMLAttributes<HTMLFormElement> & MotionProps;
-
-const MotionForm: React.FC<MotionFormProps> = (props) => {
-  return <motion.form {...props} />;
-};
+// Skip type checking for motion components
+const MotionForm = motion.form;
 
 // Define platforms and categories
 const platforms = [

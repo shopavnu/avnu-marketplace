@@ -128,6 +128,48 @@ export class EntityBoostingInput {
 }
 
 /**
+ * Input type for price range filter
+ */
+@InputType()
+export class PriceRangeInput {
+  @Field(() => Float, { nullable: true })
+  min?: number;
+
+  @Field(() => Float, { nullable: true })
+  max?: number;
+}
+
+/**
+ * Input type for search filters used in optimized search
+ */
+@InputType()
+export class SearchFiltersInput {
+  @Field(() => [String], { nullable: true })
+  categories?: string[];
+
+  @Field(() => String, { nullable: true })
+  brandName?: string;
+
+  @Field(() => String, { nullable: true })
+  merchantId?: string;
+
+  @Field(() => PriceRangeInput, { nullable: true })
+  priceRange?: PriceRangeInput;
+
+  @Field(() => [String], { nullable: true })
+  values?: string[];
+
+  @Field(() => Boolean, { nullable: true })
+  inStock?: boolean;
+
+  @Field(() => String, { nullable: true })
+  sortBy?: string;
+
+  @Field(() => String, { nullable: true })
+  sortDirection?: string;
+}
+
+/**
  * Input type for enhanced search options
  */
 @InputType()

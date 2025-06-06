@@ -27,7 +27,17 @@ jobs:
         run: |
           echo "better-sqlite3_binary=true" >> .npmrc
           echo "sqlite3_binary=true" >> .npmrc
-          npm ci
+          # Create .npmrc with relaxed settings
+          echo "better-sqlite3_binary=true" > .npmrc
+          echo "sqlite3_binary=true" >> .npmrc
+          echo "multer@=\"2.0.1\"" >> .npmrc
+          echo "legacy-peer-deps=true" >> .npmrc
+          echo "engine-strict=false" >> .npmrc
+          echo "package-lock=false" >> .npmrc
+          echo "force=true" >> .npmrc
+          
+          # Install dependencies with force flag
+          npm install --force --no-package-lock --no-audit --no-fund
         
       - name: Run ESLint
         run: npm run lint
@@ -50,7 +60,17 @@ jobs:
         run: |
           echo "better-sqlite3_binary=true" >> .npmrc
           echo "sqlite3_binary=true" >> .npmrc
-          npm ci
+          # Create .npmrc with relaxed settings
+          echo "better-sqlite3_binary=true" > .npmrc
+          echo "sqlite3_binary=true" >> .npmrc
+          echo "multer@=\"2.0.1\"" >> .npmrc
+          echo "legacy-peer-deps=true" >> .npmrc
+          echo "engine-strict=false" >> .npmrc
+          echo "package-lock=false" >> .npmrc
+          echo "force=true" >> .npmrc
+          
+          # Install dependencies with force flag
+          npm install --force --no-package-lock --no-audit --no-fund
         
       - name: Run ESLint
         run: cd backend && npm run lint

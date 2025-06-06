@@ -1,3 +1,25 @@
+/**
+ * Type definitions for search functionality
+ */
+
+// Interface definitions for search facets
+export interface FacetValue {
+  value: string;      // From main branch definition
+  id?: string;        // From feature branch definition
+  name?: string;      // From feature branch definition
+  count: number;
+  min?: number;       // From main branch definition
+  max?: number;       // From main branch definition
+}
+
+export interface FacetType {
+  name: string;
+  displayName?: string; // From main branch definition
+  id?: string;         // From feature branch definition
+  values: FacetValue[];
+}
+
+// Price range interfaces
 export interface PriceRange {
   min: number;
   max: number;
@@ -8,58 +30,110 @@ export interface PartialPriceRange {
   max?: number;
 }
 
+// Define sort options
+export type SortOption = 'relevance' | 'price_low' | 'price_high' | 'price' | 'name' | 'newest' | 'rating';
+
+/**
+ * Search filters interface - combines properties from both branches
+ * to ensure compatibility with all shop pages and components
+ */
 export interface SearchFilters {
-  // Keep all property names consistent with what's used in components
+  // Category filtering
+  category?: string;
+  subCategory?: string;
   categories?: string[];
+  
+  // Brand and merchant filtering
   brandName?: string;
+  brand?: string[];
   merchantId?: string;
+  
+  // Price range filtering
+  minPrice?: number;
+  maxPrice?: number;
   priceRange?: PartialPriceRange;
+  price?: {
+    min?: number;
+    max?: number;
+  };
+  
+  // General facet values filtering
   values?: string[];
-  inStock?: boolean;
-  sortBy?: string;
+  
+  // Sorting
+  sortBy?: SortOption | string;
   sortDirection?: 'asc' | 'desc';
+  
+  // Pagination
+  page?: number;
+  limit?: number;
+  
+  // Search query
+  query?: string;
+  
+  // Product availability
+  inStock?: boolean;
+  
+  // Quick filter properties used in FilterPanel
+  isNew?: boolean;
+  isLocal?: boolean;
+  freeShipping?: boolean;
+  causes?: string[];
 }
 
+/**
+ * Search result interface - combines properties from both branches
+ * to ensure compatibility with all shop pages and components
+ */
+export interface SearchResult {
+  id: string;
+  name: string;
+  type?: string;           
+  description?: string;
+  price: number;
+  compareAtPrice?: number;
+  imageUrl?: string;       
+  images?: string[];       
+  categories?: string[];   
+  values?: string[];       
+  brandName?: string;
+  merchantId?: string;     
+  score?: number;          
+  isSponsored?: boolean;   
+  inStock?: boolean;       
+  category?: string;       
+}
+
+/**
+ * Search response interface - combines properties from both branches
+ */
 export interface SearchResponse {
+  results: SearchResult[];
   query: string;
+  // Use common pagination structure
+  page?: number;
+  limit?: number;
+  facets: FacetType[];
+  // Combined pagination properties
   pagination: {
     total: number;
     nextCursor: string | null;
     hasMore: boolean;
   };
-  results: SearchResult[];
-  facets: FacetType[];
-  isPersonalized: boolean;
+  // Avoid duplicate total property
+  isPersonalized?: boolean;
   experimentId?: string;
-  appliedFilters: string[];
+  appliedFilters?: string[];
 }
 
-export interface SearchResult {
-  id: string;
-  type: string;
-  name: string;
-  description: string;
-  price: number;
-  compareAtPrice?: number;
-  images: string[];
-  categories: string[];
-  values: string[];
-  brandName: string;
-  merchantId: string;
-  score: number;
-  isSponsored: boolean;
-  inStock: boolean;
-}
-
-export interface FacetValue {
-  value: string;
-  count: number;
-  min?: number;
-  max?: number;
-}
-
-export interface FacetType {
-  name: string;
-  displayName: string;
-  values: FacetValue[];
+/**
+ * Standardized shop search results interface for use across all shop pages
+ * This provides a consistent type for useState hooks in shop pages
+ */
+export interface ShopSearchResults {
+  query: string;
+  filters: SearchFilters;
+  totalResults: number;
+  products: import('@/types/products').Product[];
+  suggestedFilters: string[];
 }

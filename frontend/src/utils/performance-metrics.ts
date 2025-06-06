@@ -222,7 +222,6 @@ export class PerformanceMetricsCollector {
    * Collect Network Information
    */
   private collectNetworkInformation(): any {
-    // @ts-ignore - TypeScript doesn't know about the Network Information API
     // Use type assertion for deprecated browser API properties
     const connection =
       (navigator as any).connection ||

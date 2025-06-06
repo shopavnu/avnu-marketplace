@@ -25,13 +25,15 @@
       ]
     },
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "typeRoots": ["./node_modules/@types", "./types", "../../node_modules"],
+    "types": []
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "./types/framer-motion.d.ts"
+    "./types/framer-motion.d.ts",
+    "./types/react-next-modules.d.ts"
   ],
   "exclude": [
     "node_modules"

@@ -6,6 +6,17 @@
     "node": ">=18.18.0 <19.0.0",
     "npm": ">=9.0.0"
   },
+  "resolutions": {
+    "multer": "2.0.1",
+    "path-to-regexp": "0.1.12",
+    "qs": "6.11.0",
+    "send": "0.19.0",
+    "serve-static": "1.16.0",
+    "cookie": "0.7.0",
+    "ejs": "3.1.10",
+    "axios": "1.8.4",
+    "body-parser": "1.20.2"
+  },
   "workspaces": [
     "frontend",
     "backend"
@@ -26,7 +37,10 @@
     "lint": "npm run lint:frontend",
     "lint:frontend": "cd frontend && npm run lint || true",
     "lint:backend": "cd backend && npm run lint || true",
-    "preinstall": "npx only-allow npm"
+    "preinstall": "npx only-allow npm",
+    "postinstall": "cd backend && npm run fix-security || true",
+    "pre-ci": "node ./pre-ci.js",
+    "ci": "npm run pre-ci && npm ci"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -75,7 +89,6 @@
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^9.6.0",
     "bull": "^4.16.5",
-    "bull-board": "^1.2.0",
     "bullmq": "^5.53.0",
     "cache-manager": "^5.7.6",
     "cache-manager-redis-store": "^3.0.1",
@@ -95,6 +108,7 @@
     "ioredis": "^5.6.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
+    "multer": "2.0.1",
     "natural": "^6.7.0",
     "next": "14.2.29",
     "node-cache": "^5.1.2",
@@ -129,9 +143,6 @@
     "web-vitals": "^4.2.4",
     "winston": "^3.17.0"
   },
-  "overrides": {
-    "rxjs": "^7.8.1"
-  },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
     "@types/jest": "^29.5.14",
@@ -146,6 +157,9 @@
     "husky": "^9.1.7",
     "jest": "^30.0.0-beta.3",
     "lodash.memoize": "^4.1.2",
+    "npm-force-resolutions": "^0.0.10",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "typescript": "^5.3.3"
   }
 }

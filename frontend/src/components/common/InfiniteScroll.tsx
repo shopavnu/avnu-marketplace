@@ -97,7 +97,7 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         observer.unobserve(currentLoaderRef);
       }
     };
-  }, [loadMore, hasMore, isLoading, threshold, shouldCheckScroll]);
+  }, [loadMore, hasMore, isLoading, threshold, shouldCheckScroll, setShouldCheckScroll]);
 
   return (
     <div style={containerStyle} className="infinite-scroll-container">

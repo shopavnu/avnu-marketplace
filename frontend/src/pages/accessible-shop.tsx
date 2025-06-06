@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Product } from "@/types/products";
-import { SearchFilters } from "@/types/search";
+import { ShopSearchResults, SearchFilters, SearchResult } from "@/types/search";
 
-// Ensure we use the same SearchFilters interface throughout the component
-type ComponentSearchFilters = SearchFilters;
-
-// Define a custom interface for this page's search results structure
-interface PageSearchResult {
-  query: string;
-  filters: ComponentSearchFilters;
-  totalResults: number;
-  products: Product[];
-  suggestedFilters: string[];
-}
 import { categories } from "@/data/categories";
 import SearchBar from "@/components/search/SearchBar";
 import FilterPanel from "@/components/search/FilterPanel";
@@ -116,10 +105,11 @@ export default function AccessibleShopPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<ComponentSearchFilters>({});
+  const [filters, setFilters] = useState<SearchFilters>({});
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<PageSearchResult>({
+
+  const [searchResults, setSearchResults] = useState<ShopSearchResults>({
     query: "",
     filters: {},
     totalResults: mockProducts.length,
@@ -158,26 +148,30 @@ export default function AccessibleShopPage() {
       );
     }
 
-    // Apply other filters if any
-    // Use the ComponentSearchFilters type to access the correct properties
-    const typedFilters = filters as ComponentSearchFilters;
-    if (typedFilters.brandName) {
+    // Apply brand filters - support both brand[] and brandName formats
+    if (filters.brand && filters.brand.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>
-        typedFilters.brandName === product.brand,
+        filters.brand?.includes(product.brand)
+      );
+    } else if (filters.brandName) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.brandName === product.brand
       );
     }
 
-    if (typedFilters.priceRange?.min !== undefined || typedFilters.priceRange?.max !== undefined) {
+    // Support both price formats from the SearchFilters interface
+    if ((filters.price?.min !== undefined || filters.price?.max !== undefined) ||
+        (filters.priceRange?.min !== undefined || filters.priceRange?.max !== undefined)) {
       filteredProducts = filteredProducts.filter((product) => {
         const price = product.price;
-        const min = typedFilters.priceRange?.min ?? 0;
-        const max = typedFilters.priceRange?.max ?? Infinity;
+        const min = filters.price?.min ?? filters.priceRange?.min ?? 0;
+        const max = filters.price?.max ?? filters.priceRange?.max ?? Infinity;
         return price >= min && price <= max;
       });
     }
 
     // Update total results
-    setSearchResults((prev: PageSearchResult) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       totalResults: filteredProducts.length,
     }));
@@ -204,7 +198,7 @@ export default function AccessibleShopPage() {
 
   // Update search results when products change
   useEffect(() => {
-    setSearchResults((prev: PageSearchResult) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       products,
     }));
@@ -216,17 +210,17 @@ export default function AccessibleShopPage() {
     setFilters(newFilters);
 
     // Reset progressive loading to start fresh with new search/filters
-    setSearchResults((prev: PageSearchResult) => ({
+    setSearchResults((prev: ShopSearchResults) => ({
       ...prev,
       query,
-      filters: newFilters as ComponentSearchFilters,
+      filters: newFilters,
       products: [],
       totalResults: 0,
       suggestedFilters: [],
     }));
 
     if (query && !recentSearches.includes(query)) {
-      setRecentSearches((prev) => [query, ...prev].slice(0, 5));
+      setRecentSearches((prev: string[]) => [query, ...prev].slice(0, 5));
     }
   };
 
@@ -287,8 +281,8 @@ export default function AccessibleShopPage() {
               <FilterPanel
                 filters={filters}
                 onChange={(newFilters) => {
-                  setFilters(newFilters as ComponentSearchFilters);
-                  handleSearch(searchQuery, newFilters as ComponentSearchFilters);
+                  setFilters(newFilters);
+                  handleSearch(searchQuery, newFilters);
                 }}
               />
             </SectionLandmark>
