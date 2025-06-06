@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.11.0",
-    "npm": ">=10.0.0"
+    "node": "20.11.1",
+    "npm": "10.2.4"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "export NODE_OPTIONS='--max_old_space_size=4096' && next build",
     "start": "next start",
     "lint": "next lint || true",
     "typecheck": "tsc --noEmit",
