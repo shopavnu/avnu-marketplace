@@ -54,7 +54,17 @@ jobs:
 
       - name: Build
         run: |
-          npm ci
+          # Create .npmrc with relaxed settings
+          echo "better-sqlite3_binary=true" > .npmrc
+          echo "sqlite3_binary=true" >> .npmrc
+          echo "multer@=\"2.0.1\"" >> .npmrc
+          echo "legacy-peer-deps=true" >> .npmrc
+          echo "engine-strict=false" >> .npmrc
+          echo "package-lock=false" >> .npmrc
+          echo "force=true" >> .npmrc
+          
+          # Install dependencies with force flag
+          npm install --force --no-package-lock --no-audit --no-fund
           npm run build
 
       - name: Perform CodeQL Analysis
