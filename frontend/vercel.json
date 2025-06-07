@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run vercel-build",
   "devCommand": "npm run dev",
-  "installCommand": "cat .better-sqlite3-npm-config >> .npmrc && npm install",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {

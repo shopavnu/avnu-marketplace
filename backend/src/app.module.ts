@@ -90,10 +90,10 @@ registerEnumType(ExperimentStatus, {
       },
     }),
 
-    // GraphQL - temporarily disabled schema generation for debugging
+    // GraphQL configuration using Apollo Server v4 with graphql-ws for subscriptions
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      // Using schema first approach temporarily to bypass schema generation issues
+      // Using schema first approach with typePaths
       typePaths: [
         './src/**/*.graphql',
         './src/modules/graphql/schema/order.graphql',
@@ -104,8 +104,12 @@ registerEnumType(ExperimentStatus, {
         './src/modules/graphql/schema/accessibility.graphql',
         './src/modules/graphql/schema/product-accessibility.graphql',
       ],
-      playground: true,
+      playground: true, // Enable Apollo Sandbox
       debug: true,
+      subscriptions: {
+        'graphql-ws': true, // Enable GraphQL WebSocket subscriptions
+      },
+      // CORS is handled at the application level in main.ts
     }),
 
     // Redis Cache

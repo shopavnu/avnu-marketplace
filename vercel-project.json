@@ -1,0 +1,13 @@
+{
+  "projectSettings": {
+    "framework": "nextjs",
+    "devCommand": "npm run dev",
+    "installCommand": "npm install",
+    "buildCommand": "cd frontend && npm run build",
+    "outputDirectory": "frontend/.next",
+    "nodeVersion": "20.x"
+  },
+  "redirects": [
+    { "source": "/", "destination": "/frontend" }
+  ]
+}
