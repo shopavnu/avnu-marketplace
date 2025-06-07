@@ -11,7 +11,6 @@ console.log("Node Version:", process.version);
 
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   eslint: {
     // For Vercel deployment, temporarily allow ESLint errors during build
     ignoreDuringBuilds: true,
