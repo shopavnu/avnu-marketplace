@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "export NODE_OPTIONS='--max_old_space_size=4096' && next build",
+    "vercel-build": "next build",
     "start": "next start",
     "lint": "next lint || true",
     "typecheck": "tsc --noEmit",
