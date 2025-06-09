@@ -35,6 +35,7 @@ import { AdvertisingModule } from './modules/advertising/advertising.module';
 import { AccessibilityModule } from './modules/accessibility/accessibility.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { CartModule } from './modules/cart/cart.module';
+import { CheckoutModule } from './modules/checkout/checkout.module'; // Added CheckoutModule
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -171,6 +172,7 @@ registerEnumType(ExperimentStatus, {
     AdvertisingModule,
     AccessibilityModule,
     CartModule,
+    CheckoutModule, // Added CheckoutModule
   ],
   controllers: [],
   providers: [],

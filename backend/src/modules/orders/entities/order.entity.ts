@@ -247,6 +247,27 @@ export class Order {
   customerEmail: string = '';
 
   /**
+   * Stripe Payment Intent ID
+   * Identifier for the payment transaction in Stripe
+   */
+  @Field(() => String, { nullable: true, description: 'Stripe Payment Intent ID' })
+  @Column({ nullable: true, length: 255 })
+  @IsOptional()
+  @IsString()
+  stripePaymentIntentId?: string;
+
+  /**
+   * Stripe Receipt URL
+   * URL to the hosted Stripe receipt page for this order's payment
+   */
+  @Field(() => String, { nullable: true, description: 'URL to Stripe receipt' })
+  @Column({ nullable: true, type: 'text' }) // Receipt URLs can be long
+  @IsOptional()
+  @IsString()
+  // @IsUrl() // Consider adding IsUrl validation if needed
+  stripeReceiptUrl?: string;
+
+  /**
    * Creation timestamp
    * When the order was created
    */
