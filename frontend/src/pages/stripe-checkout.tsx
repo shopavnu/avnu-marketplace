@@ -1,8 +1,8 @@
 import React from 'react';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import StripePaymentForm from '../../components/checkout/StripePaymentForm';
-import { Box, Heading, Container, VStack, Text, Divider, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
+import StripePaymentForm from '@/components/checkout/StripePaymentForm';
+import { Box, Heading, Container, VStack, Text, Divider, Spinner, Alert } from '@chakra-ui/react';
 // import { useRouter } from 'next/router'; // Uncomment if you need router for redirection
 
 // Make sure to set this in your .env.local or similar environment file
@@ -32,7 +32,7 @@ const StripeCheckoutPage: React.FC = () => {
     return (
       <Container centerContent py={10} minH="100vh">
         <Alert status="error" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="200px">
-          <AlertIcon boxSize="40px" mr={0} />
+          {/* AlertIcon removed as it's not exported from Chakra UI */}
           <Heading size="md" mt={4}>Configuration Error</Heading>
           <Text mt={2}>Stripe publishable key is not configured. Please check your environment variables.</Text>
         </Alert>
@@ -66,8 +66,8 @@ const StripeCheckoutPage: React.FC = () => {
   };
 
   return (
-    <Container maxW="container.xl" py={{ base: 6, md: 10 }} bg="gray.50" minH="100vh">
-      <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+    <Container maxW="container.xl" py={6} bg="gray.50" minH="100vh">
+      <VStack spacing={6} align="stretch">
         <Heading as="h1" size={{ base: "lg", md: "xl" }} textAlign="center" color="gray.800">
           Secure Checkout
         </Heading>

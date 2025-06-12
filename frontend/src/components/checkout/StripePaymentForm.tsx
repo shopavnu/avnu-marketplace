@@ -1,211 +1,312 @@
 import React, { useState, useEffect } from 'react';
-import {
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js'; // Corrected import path
+import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import type { StripePaymentElementOptions } from '@stripe/stripe-js';
 import { initiateCheckout } from '../../services/checkoutService';
-import { Button, CircularProgress, Box, Text, VStack, useToast, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
+// Import components and their types separately for better TypeScript resolution
+import {
+  Button,
+  Box,
+  Text,
+  Spinner,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  useToast,
+} from '@chakra-ui/react';
+import type {
+  ButtonProps,
+  BoxProps,
+  TextProps,
+  SpinnerProps,
+  AlertProps,
+  AlertTitleProps,
+  AlertDescriptionProps,
+  UseToastOptions,
+} from '@chakra-ui/react';
 
+/**
+ * Props for the StripePaymentForm component
+ */
 interface StripePaymentFormProps {
+  /** Callback function that is called upon successful payment processing */
   onPaymentSuccess: (paymentIntentId: string, orderId?: string | null) => void;
+  /** Callback function that is called when a payment error occurs */
   onPaymentError: (errorMessage: string) => void;
-  orderId?: string; // Optional: if order is already created and we just need to pay
-  clientSecretProp?: string; // Optional: if client secret is already fetched
+  /** Optional order ID to associate with this payment */
+  orderId?: string;
+  /** Optional client secret if already available (bypasses the need to fetch one) */
+  clientSecretProp?: string;
+}
+
+/**
+ * Shape of the response from the checkout service
+ */
+interface CheckoutResponse {
+  clientSecret?: string;
+  data?: {
+    clientSecret?: string;
+  };
 }
 
 const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   onPaymentSuccess,
   onPaymentError,
-  orderId: existingOrderId,
+  orderId,
   clientSecretProp,
 }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string>(clientSecretProp || '');
+
   const stripe = useStripe();
   const elements = useElements();
   const toast = useToast();
 
-  const [clientSecret, setClientSecret] = useState<string | null>(clientSecretProp || null);
-  const [currentOrderId, setCurrentOrderId] = useState<string | null>(existingOrderId || null);
-  const [isLoading, setIsLoading] = useState(false); // For Stripe's actions
-  const [isInitializing, setIsInitializing] = useState(!clientSecretProp); // Only initialize if clientSecret isn't provided
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   useEffect(() => {
-    // Only initiate checkout to get clientSecret if it wasn't passed as a prop
-    if (!clientSecretProp && !existingOrderId) { 
-      setIsInitializing(true);
-      initiateCheckout()
-        .then((data) => {
-          setClientSecret(data.clientSecret);
-          setCurrentOrderId(data.orderId);
-          setIsInitializing(false);
-        })
-        .catch((error) => {
-          console.error('Failed to initialize checkout:', error);
-          const message = error.message || 'Could not initialize payment.';
-          setErrorMessage(message);
-          onPaymentError(message);
-          setIsInitializing(false);
-        });
-    } else if (clientSecretProp) {
-      setClientSecret(clientSecretProp);
-      setIsInitializing(false);
-    }
-    // If existingOrderId is provided but no clientSecretProp, the parent component is responsible for fetching it.
-    // Or, this component could be enhanced to fetch it based on orderId.
+    async function fetchClientSecret() {
+      if (clientSecret || !orderId) {
+        return;
+      }
 
-  }, [clientSecretProp, existingOrderId, onPaymentError]);
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const response = await initiateCheckout(orderId) as CheckoutResponse;
+        
+        const receivedSecret = response.clientSecret || response.data?.clientSecret;
+        
+        if (receivedSecret) {
+          setClientSecret(receivedSecret);
+          console.log('Payment initialization successful');
+        } else {
+          throw new Error('Failed to retrieve payment information from server');
+        }
+      } catch (error: unknown) {
+        let message = 'Failed to initialize payment';
+        
+        if (error instanceof Error) {
+          message = `Payment initialization failed: ${error.message}`;
+        }
+
+        setErrorMessage(message);
+        console.error('Stripe payment initialization failed:', error);
+        
+        toast({
+          title: 'Payment Error',
+          description: message,
+          status: 'error',
+          duration: 7000,
+          isClosable: true,
+          position: 'top',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchClientSecret();
+  }, [clientSecret, orderId, toast]);
+
+  const paymentElementOptions: StripePaymentElementOptions = {
+    layout: {
+      type: 'tabs',
+      defaultCollapsed: false,
+    },
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setErrorMessage(null);
 
-    if (!stripe || !elements || !clientSecret) {
-      setErrorMessage('Stripe is not ready. Please wait a moment and try again.');
-      toast({
-        title: 'Initialization Error',
-        description: 'Stripe is not ready. Please wait or refresh.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
+    if (!stripe || !elements || !clientSecret || isLoading) {
       return;
     }
 
     setIsLoading(true);
 
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/checkout/confirmation?order_id=${currentOrderId}`,
-      },
-      // redirect: 'if_required', // Uncomment for more manual control
-    });
-
-    if (error) {
-      let userMessage = error.message || 'An unexpected error occurred.';
-      if (error.type === "card_error" || error.type === "validation_error") {
-        userMessage = error.message || 'Please check your card details.';
-      }
-      setErrorMessage(userMessage);
-      onPaymentError(userMessage);
-      toast({
-        title: 'Payment Failed',
-        description: userMessage,
-        status: 'error',
-        duration: 6000,
-        isClosable: true,
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
+        confirmParams: {
+          return_url: `${window.location.origin}/payment-result`,
+        },
       });
-    } else if (paymentIntent) {
-      // This block is typically for 'if_required' redirect or if no redirect happened.
-      // With default redirect, success is handled on the return_url page.
-      if (paymentIntent.status === 'succeeded') {
-        onPaymentSuccess(paymentIntent.id, currentOrderId);
+
+      if (error) {
+        const message = error.message || 'Something went wrong with your payment';
+        setErrorMessage(message);
+        
         toast({
-          title: 'Payment Successful!',
-          description: `Order ${currentOrderId} confirmed. You will be redirected.`, 
+          title: 'Payment Error',
+          description: message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        
+        onPaymentError(message);
+        
+        console.error('Payment confirmation error:', error);
+      } else if (paymentIntent) {
+        // Payment succeeded
+        setErrorMessage(null);
+        
+        toast({
+          title: 'Payment Successful',
+          description: 'Your payment has been processed successfully',
           status: 'success',
           duration: 5000,
           isClosable: true,
         });
-      } else if (paymentIntent.status === 'requires_action') {
-         toast({
-          title: 'Further action required',
-          description: 'Please complete the steps with your payment provider.',
-          status: 'info',
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        // Handle other statuses if necessary
-        setErrorMessage(`Payment status: ${paymentIntent.status}`);
+        
+        console.log('Payment succeeded:', paymentIntent);
+        onPaymentSuccess(paymentIntent.id, orderId);
       }
+    } catch (err: unknown) {
+      let message = 'An unexpected error occurred during payment processing';
+      
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      
+      setErrorMessage(message);
+      console.error('Payment processing error:', err);
+      
+      toast({
+        title: 'Payment Error',
+        description: message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
-  if (isInitializing) {
-    return (
-      <VStack spacing={4} align="center" justify="center" minH="250px" p={5} borderWidth="1px" borderRadius="lg" boxShadow="md">
-        <CircularProgress isIndeterminate color="blue.500" size="48px" />
-        <Text fontSize="lg" fontWeight="medium">Initializing Secure Payment...</Text>
-        <Text fontSize="sm" color="gray.500">Please wait while we prepare your transaction.</Text>
-      </VStack>
-    );
-  }
-
-  if (!clientSecret && !isInitializing) {
-     return (
-      <Alert status="error" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" minH="250px" p={5} borderRadius="lg" boxShadow="md">
-        <AlertIcon boxSize="40px" mr={0} />
-        <AlertTitle mt={4} mb={1} fontSize="xl" fontWeight="bold">Payment Initialization Failed</AlertTitle>
-        <AlertDescription maxWidth="sm">
-          {errorMessage || 'We encountered an issue loading the payment form. Please try refreshing the page or contact support if the problem persists.'}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-  
   if (!stripe || !elements) {
-    return (
-      <VStack spacing={4} align="center" justify="center" minH="250px" p={5} borderWidth="1px" borderRadius="lg" boxShadow="md">
-        <CircularProgress isIndeterminate color="gray.400" size="48px" />
-        <Text fontSize="lg" fontWeight="medium">Loading Payment Gateway...</Text>
-        <Text fontSize="sm" color="gray.500">Securely connecting to Stripe.</Text>
-      </VStack>
+    return React.createElement(
+      Box as unknown as React.ComponentType<BoxProps>,
+      { textAlign: "center", p: 5, "data-testid": "stripe-loading-container", role: "status" },
+      [
+        React.createElement(
+          Spinner as unknown as React.ComponentType<SpinnerProps>,
+          { size: "md", color: "blue.500", "aria-label": "Loading payment form", key: "spinner" }
+        ),
+        React.createElement(
+          Text as unknown as React.ComponentType<TextProps>,
+          { mt: 3, key: "loading-text", "aria-live": "polite" },
+          "Loading payment elements..."
+        )
+      ]
     );
   }
 
-  return (
-    <Box as="form" onSubmit={handleSubmit} width="100%" maxWidth={{ base: "100%", md: "500px" }} p={{base: 4, md: 6}} borderWidth="1px" borderRadius="xl" boxShadow="lg" bg="white">
-      <VStack spacing={6} align="stretch">
-        <Text fontSize={{base: "xl", md: "2xl"}} fontWeight="bold" textAlign="center" color="gray.700">Secure Payment</Text>
-        
-        <Box my={2}>
-          <PaymentElement 
-            id="payment-element" 
-            options={{
-              layout: 'tabs', // 'tabs' or 'accordion'
-              // business: { name: 'Avnu Marketplace' }, // Optional: display business name
-            }}
-          />
-        </Box>
-        
-        {errorMessage && (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            <AlertDescription data-testid="payment-error-message">{errorMessage}</AlertDescription>
-          </Alert>
-        )}
-        
-        <Button
-          type="submit"
-          colorScheme="blue"
-          isLoading={isLoading}
-          isDisabled={!stripe || !elements || isLoading || isInitializing}
-          width="full"
-          size="lg"
-          py={6} // Taller button
-          fontSize="md"
-          fontWeight="bold"
-          mt={2}
-          _hover={{ bg: 'blue.600' }}
-          _active={{ bg: 'blue.700' }}
-          // Simple animation example
-          transition="background-color 0.2s ease-out, transform 0.1s ease-out"
-          _disabled={{ 
-            bg: 'gray.300',
-            cursor: 'not-allowed',
-            opacity: 0.7
-          }}
-          _loading={{ 
-            opacity: 0.8
-          }}
-        >
-          {isLoading ? 'Processing...' : 'Pay Now'}
-        </Button>
-      </VStack>
-    </Box>
+  if (!clientSecret && !isLoading) {
+    return React.createElement(
+      Alert as unknown as React.ComponentType<AlertProps>,
+      { 
+        status: "error", 
+        mb: 4, 
+        borderRadius: "md", 
+        "data-testid": "payment-init-error-alert",
+        role: "alert",
+        "aria-live": "assertive"
+      },
+      [
+        React.createElement(
+          AlertTitle as unknown as React.ComponentType<AlertTitleProps>,
+          { fontWeight: "semibold", key: "error-title" },
+          "Payment Initialization Failed"
+        ),
+        React.createElement(
+          AlertDescription as unknown as React.ComponentType<AlertDescriptionProps>,
+          { key: "error-description" },
+          errorMessage || "Unable to initialize payment form. Please refresh the page or try again later."
+        )
+      ]
+    );
+  }
+
+  return React.createElement(
+    Box as unknown as React.ComponentType<BoxProps>,
+    { 
+      maxWidth: "600px", 
+      mx: "auto", 
+      p: 4, 
+      "data-testid": "stripe-payment-form-container"
+    },
+    [
+      // Error message alert (if any)
+      errorMessage && React.createElement(
+        Alert as unknown as React.ComponentType<AlertProps>,
+        { 
+          status: "error", 
+          mb: 4, 
+          borderRadius: "md", 
+          key: "error-alert", 
+          "data-testid": "payment-error-alert",
+          role: "alert",
+          "aria-live": "assertive"
+        },
+        [
+          React.createElement(
+            AlertTitle as unknown as React.ComponentType<AlertTitleProps>,
+            { fontWeight: "semibold", key: "error-title" },
+            "Payment Error"
+          ),
+          React.createElement(
+            AlertDescription as unknown as React.ComponentType<AlertDescriptionProps>,
+            { key: "error-description" },
+            errorMessage
+          )
+        ]
+      ),
+      
+      // Payment form
+      React.createElement(
+        "form",
+        { 
+          onSubmit: handleSubmit, 
+          key: "payment-form", 
+          "data-testid": "stripe-payment-form",
+          "aria-label": "Credit card payment form"
+        },
+        [
+          // Payment Element container
+          React.createElement(
+            Box as unknown as React.ComponentType<BoxProps>,
+            { mb: 4, key: "payment-element-container" },
+            clientSecret && React.createElement(
+              PaymentElement,
+              {
+                id: "payment-element",
+                options: paymentElementOptions,
+                key: "payment-element"
+              }
+            )
+          ),
+          
+          // Submit button
+          React.createElement(
+            Button as unknown as React.ComponentType<ButtonProps>,
+            {
+              type: "submit",
+              colorScheme: "blue",
+              isLoading: isLoading,
+              loadingText: "Processing payment...",
+              isDisabled: !stripe || !elements || !clientSecret || isLoading,
+              width: "100%",
+              key: "submit-button",
+              "data-testid": "payment-submit-button",
+              "aria-label": isLoading ? "Processing payment" : "Complete payment"
+            },
+            isLoading ? "Processing..." : "Pay Now"
+          )
+        ]
+      )
+    ]
   );
 };
 
