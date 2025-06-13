@@ -5,7 +5,14 @@
  * and sends them to the backend API for analysis.
  */
 
-import * as webVitals from "web-vitals";
+import {
+  onCLS,
+  onFID,
+  onLCP,
+  onFCP,
+  onTTFB,
+  type Metric,
+} from "web-vitals";
 
 interface PerformanceMetricsOptions {
   apiEndpoint?: string;
@@ -75,11 +82,11 @@ export class PerformanceMetricsCollector {
    * Collect Web Vitals metrics
    */
   private collectWebVitals(): void {
-    webVitals.onCLS((metric) => this.handleWebVitalMetric("CLS", metric.value));
-    webVitals.onFID((metric) => this.handleWebVitalMetric("FID", metric.value));
-    webVitals.onLCP((metric) => this.handleWebVitalMetric("LCP", metric.value));
-    webVitals.onFCP((metric) => this.handleWebVitalMetric("FCP", metric.value));
-    webVitals.onTTFB((metric) =>
+    onCLS((metric: Metric) => this.handleWebVitalMetric("CLS", metric.value));
+    onFID((metric: Metric) => this.handleWebVitalMetric("FID", metric.value));
+    onLCP((metric: Metric) => this.handleWebVitalMetric("LCP", metric.value));
+    onFCP((metric: Metric) => this.handleWebVitalMetric("FCP", metric.value));
+    onTTFB((metric: Metric) =>
       this.handleWebVitalMetric("TTFB", metric.value),
     );
   }
