@@ -1,5 +1,14 @@
 // @ts-strict-mode: enabled
-import { Controller, Post, Body, UsePipes, ValidationPipe, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UsePipes,
+  ValidationPipe,
+  Logger,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { StripeService } from './stripe.service'; // Adjusted path
 import { CreatePaymentIntentDto } from './create-payment-intent.dto';
 import Stripe from 'stripe';

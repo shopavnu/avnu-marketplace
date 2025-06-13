@@ -1,5 +1,14 @@
 // @ts-strict-mode: enabled
-import { Controller, Post, Req, Headers, Logger, HttpException, HttpStatus, RawBodyRequest } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  Headers,
+  Logger,
+  HttpException,
+  HttpStatus,
+  RawBodyRequest,
+} from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { Request } from 'express'; // For RawBodyRequest type
 
@@ -27,8 +36,13 @@ export class StripeWebhookController {
     // We are assuming req.rawBody is populated.
     const rawBody = req.rawBody;
     if (!rawBody) {
-      this.logger.error('Raw body not available for Stripe webhook. Ensure rawBodyParser is enabled or body is not pre-parsed for this route.');
-      throw new HttpException('Raw body not available for signature verification.', HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(
+        'Raw body not available for Stripe webhook. Ensure rawBodyParser is enabled or body is not pre-parsed for this route.',
+      );
+      throw new HttpException(
+        'Raw body not available for signature verification.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     try {

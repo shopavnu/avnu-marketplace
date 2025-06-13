@@ -31,9 +31,7 @@ export class CheckoutController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request (e.g., empty cart, user issue)' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async initiateCheckout(
-    @Req() req: AuthenticatedRequest,
-  ): Promise<InitiateCheckoutResponseDto> {
+  async initiateCheckout(@Req() req: AuthenticatedRequest): Promise<InitiateCheckoutResponseDto> {
     const userId = req.user.userId; // Ensure this matches how your JWT strategy provides the user ID
     this.logger.log(`Received request to initiate checkout for user ${userId}`);
     return this.checkoutService.initiateCheckoutProcess(userId);

@@ -97,18 +97,29 @@ export class CheckoutService {
       );
       this.logger.log(`Created PaymentIntent ${paymentIntent.id} for order ${newOrder.id}`);
     } catch (error) {
-      this.logger.error(`Failed to create PaymentIntent for order ${newOrder.id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create PaymentIntent for order ${newOrder.id}: ${error.message}`,
+        error.stack,
+      );
       // Potentially roll back order creation or mark it as failed if PI creation fails critically
-      await this.ordersService.update(newOrder.id, { paymentStatus: PaymentStatus.FAILED, notes: 'PaymentIntent creation failed' });
+      await this.ordersService.update(newOrder.id, {
+        paymentStatus: PaymentStatus.FAILED,
+        notes: 'PaymentIntent creation failed',
+      });
       throw new BadRequestException('Could not initiate payment.');
     }
 
     // 3. Update order with PaymentIntent ID
     try {
       await this.ordersService.update(newOrder.id, { stripePaymentIntentId: paymentIntent.id });
-      this.logger.log(`Updated order ${newOrder.id} with Stripe PaymentIntent ID ${paymentIntent.id}`);
+      this.logger.log(
+        `Updated order ${newOrder.id} with Stripe PaymentIntent ID ${paymentIntent.id}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to update order ${newOrder.id} with PaymentIntent ID: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update order ${newOrder.id} with PaymentIntent ID: ${error.message}`,
+        error.stack,
+      );
       // This is tricky; PI is created, but order link failed. Stripe might still process payment.
       // Log for manual reconciliation. Consider a more robust retry/cleanup.
       throw new BadRequestException('Failed to link payment with order.');

@@ -18,4 +18,3 @@ import { StripeWebhookController } from './stripe.webhook.controller';
   exports: [StripeService], // Export StripeService if other modules need to create payment intents directly
 })
 export class PaymentsModule {}
-

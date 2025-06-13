@@ -11,11 +11,11 @@ import { ConfigModule } from '@nestjs/config'; // Import ConfigModule if not glo
 @Module({
   imports: [
     ConfigModule, // Make sure ConfigService is available
-    AuthModule,   // For user authentication and extracting userId
-    CartModule,   // For CartService
+    AuthModule, // For user authentication and extracting userId
+    CartModule, // For CartService
     OrdersModule, // For OrdersService
     PaymentsModule, // For StripeService
-    UsersModule,  // For UsersService (e.g., to get user's email)
+    UsersModule, // For UsersService (e.g., to get user's email)
   ],
   controllers: [CheckoutController],
   providers: [CheckoutService],
