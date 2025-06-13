@@ -2,7 +2,7 @@ import React from 'react';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from '@/components/checkout/StripePaymentForm';
-import { Box, Heading, Container, VStack, Text, Divider, Spinner, Alert } from '@chakra-ui/react';
+// Replaced Chakra UI imports with standard HTML/CSS
 // import { useRouter } from 'next/router'; // Uncomment if you need router for redirection
 
 // Make sure to set this in your .env.local or similar environment file
@@ -30,13 +30,12 @@ const StripeCheckoutPage: React.FC = () => {
   
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     return (
-      <Container centerContent py={10} minH="100vh">
-        <Alert status="error" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" height="200px">
-          {/* AlertIcon removed as it's not exported from Chakra UI */}
-          <Heading size="md" mt={4}>Configuration Error</Heading>
-          <Text mt={2}>Stripe publishable key is not configured. Please check your environment variables.</Text>
-        </Alert>
-      </Container>
+      <div style={{ padding: '2.5rem 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ backgroundColor: '#FED7D7', borderRadius: '0.375rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '200px', width: '100%', maxWidth: '500px' }}>
+          <h2 style={{ marginTop: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>Configuration Error</h2>
+          <p style={{ marginTop: '0.5rem' }}>Stripe publishable key is not configured. Please check your environment variables.</p>
+        </div>
+      </div>
     );
   }
   
@@ -66,42 +65,42 @@ const StripeCheckoutPage: React.FC = () => {
   };
 
   return (
-    <Container maxW="container.xl" py={6} bg="gray.50" minH="100vh">
-      <VStack spacing={6} align="stretch">
-        <Heading as="h1" size={{ base: "lg", md: "xl" }} textAlign="center" color="gray.800">
+    <div style={{ padding: '1.5rem', backgroundColor: '#F7FAFC', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1280px', margin: '0 auto' }}>
+        <h1 style={{ textAlign: 'center', fontSize: '2rem', color: '#2D3748', fontWeight: 'bold' }}>
           Secure Checkout
-        </Heading>
+        </h1>
 
         {/* Placeholder for Cart Summary */}
-        <Box p={{base: 4, md: 6}} borderWidth="1px" borderRadius="lg" boxShadow="lg" bg="white">
-          <Heading as="h2" size={{ base: "md", md: "lg" }} mb={4} color="gray.700">Order Summary</Heading>
-          <VStack spacing={3} align="stretch">
-            <Box display="flex" justifyContent="space-between">
-              <Text color="gray.600">Example Product 1 (x1)</Text>
-              <Text fontWeight="medium" color="gray.800">$25.00</Text>
-            </Box>
-            <Box display="flex" justifyContent="space-between">
-              <Text color="gray.600">Example Product 2 (x1)</Text>
-              <Text fontWeight="medium" color="gray.800">$25.00</Text>
-            </Box>
-            <Divider my={3}/>
-            <Box display="flex" justifyContent="space-between" fontWeight="bold">
-              <Text fontSize={{ base: "md", md: "lg" }} color="gray.800">Total</Text>
-              <Text fontSize={{ base: "md", md: "lg" }} color="gray.800">${placeholderTotalAmount.toFixed(2)}</Text>
-            </Box>
-          </VStack>
-        </Box>
+        <div style={{ padding: '1.5rem', border: '1px solid #E2E8F0', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: 'white' }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#4A5568', fontWeight: 'bold' }}>Order Summary</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <p style={{ color: '#718096' }}>Example Product 1 (x1)</p>
+              <p style={{ fontWeight: '500', color: '#2D3748' }}>$25.00</p>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <p style={{ color: '#718096' }}>Example Product 2 (x1)</p>
+              <p style={{ fontWeight: '500', color: '#2D3748' }}>$25.00</p>
+            </div>
+            <hr style={{ margin: '0.75rem 0', borderTop: '1px solid #E2E8F0' }}/>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+              <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>Total</p>
+              <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>${placeholderTotalAmount.toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
 
-        <Box w="full" maxW={{ base: "100%", md: "lg" }} mx="auto"> 
+        <div style={{ width: '100%', maxWidth: '32rem', margin: '0 auto' }}> 
           <Elements stripe={stripePromise} options={elementsOptions}>
             <StripePaymentForm
               onPaymentSuccess={handlePaymentSuccess}
               onPaymentError={handlePaymentError}
             />
           </Elements>
-        </Box>
-      </VStack>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 };
 

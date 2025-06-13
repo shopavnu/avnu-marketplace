@@ -9,6 +9,8 @@ import GraphQLErrorHandler from "../components/common/GraphQLErrorHandler";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "../context/ThemeContext";
 import { useEffect } from "react";
+// Removed ChakraProvider imports as they're causing SSR errors
+
 import { initializePersonalization } from "../utils/discovery-integration";
 import { ClerkProvider } from "@clerk/nextjs";
 import { geistSans, geistMono } from "../utils/fonts";
@@ -35,8 +37,8 @@ export default function App({ Component, pageProps }: AppProps) {
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <div className={`${geistSans.variable} ${geistMono.variable}`}>
         <ErrorBoundary>
-          <ThemeProvider>
-            <ApolloProvider>
+            <ThemeProvider>
+              <ApolloProvider>
               {useEnhancedLayout ? (
                 <EnhancedLayout>
                   {/* <ApiUrlDebug /> */}

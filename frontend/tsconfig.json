@@ -25,8 +25,13 @@
       ]
     },
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "./types"],
-    "types": []
+    "typeRoots": [
+      "./node_modules/@types",
+      "../node_modules/@types",
+      "./types"
+    ],
+    "types": ["react", "react-dom"],
+    "composite": true
   },
   "include": [
     "next-env.d.ts",
@@ -37,6 +42,7 @@
     "./types/chakra-ui.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/__tests__/**"
   ]
 }

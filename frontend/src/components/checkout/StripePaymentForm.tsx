@@ -2,27 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import type { StripePaymentElementOptions } from '@stripe/stripe-js';
 import { initiateCheckout } from '../../services/checkoutService';
-// Import components and their types separately for better TypeScript resolution
-import {
-  Button,
-  Box,
-  Text,
-  Spinner,
-  Alert,
-  AlertTitle,
-  AlertDescription,
-  useToast,
-} from '@chakra-ui/react';
-import type {
-  ButtonProps,
-  BoxProps,
-  TextProps,
-  SpinnerProps,
-  AlertProps,
-  AlertTitleProps,
-  AlertDescriptionProps,
-  UseToastOptions,
-} from '@chakra-ui/react';
 
 /**
  * Props for the StripePaymentForm component
@@ -48,6 +27,69 @@ interface CheckoutResponse {
   };
 }
 
+// Define CSS styles for components
+const styles = {
+  container: {
+    maxWidth: '600px',
+    margin: '0 auto',
+    padding: '1rem'
+  },
+  loadingContainer: {
+    textAlign: 'center' as const,
+    padding: '1.25rem'
+  },
+  spinner: {
+    display: 'inline-block',
+    width: '2rem',
+    height: '2rem',
+    border: '0.25rem solid rgba(66, 153, 225, 0.3)',
+    borderRadius: '50%',
+    borderTopColor: 'rgb(66, 153, 225)',
+    animation: 'spin 1s linear infinite'
+  },
+  loadingText: {
+    marginTop: '0.75rem'
+  },
+  alert: {
+    padding: '1rem',
+    marginBottom: '1rem',
+    borderRadius: '0.375rem',
+    backgroundColor: '#FED7D7',
+    color: '#822727'
+  },
+  alertTitle: {
+    fontWeight: 'bold',
+    marginBottom: '0.5rem'
+  },
+  button: {
+    backgroundColor: '#3182ce',
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '0.375rem',
+    width: '100%',
+    border: 'none',
+    cursor: 'pointer'
+  },
+  disabledButton: {
+    backgroundColor: '#CBD5E0',
+    cursor: 'not-allowed'
+  }
+};
+
+const spinAnimation = `
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
+// Define payment element options
+const paymentElementOptions: StripePaymentElementOptions = {
+  layout: {
+    type: 'tabs',
+    defaultCollapsed: false
+  }
+};
+
 const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   onPaymentSuccess,
   onPaymentError,
@@ -60,7 +102,22 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
 
   const stripe = useStripe();
   const elements = useElements();
-  const toast = useToast();
+  
+  // Custom toast function to replace Chakra UI's useToast
+  const toast = (options: { 
+    title: string; 
+    description: string; 
+    status: string; 
+    duration: number; 
+    isClosable: boolean; 
+    position?: string 
+  }) => {
+    console.log(`${options.title}: ${options.description}`);
+    // Display error in UI through errorMessage state instead
+    if (options.status === 'error') {
+      setErrorMessage(options.description);
+    }
+  };
 
   useEffect(() => {
     async function fetchClientSecret() {
@@ -106,14 +163,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
     }
 
     fetchClientSecret();
-  }, [clientSecret, orderId, toast]);
-
-  const paymentElementOptions: StripePaymentElementOptions = {
-    layout: {
-      type: 'tabs',
-      defaultCollapsed: false,
-    },
-  };
+  }, [clientSecret, orderId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -186,127 +236,90 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   };
 
   if (!stripe || !elements) {
-    return React.createElement(
-      Box as unknown as React.ComponentType<BoxProps>,
-      { textAlign: "center", p: 5, "data-testid": "stripe-loading-container", role: "status" },
-      [
-        React.createElement(
-          Spinner as unknown as React.ComponentType<SpinnerProps>,
-          { size: "md", color: "blue.500", "aria-label": "Loading payment form", key: "spinner" }
-        ),
-        React.createElement(
-          Text as unknown as React.ComponentType<TextProps>,
-          { mt: 3, key: "loading-text", "aria-live": "polite" },
-          "Loading payment elements..."
-        )
-      ]
+    return (
+      <div 
+        style={styles.loadingContainer}
+        data-testid="stripe-loading-container" 
+        role="status"
+      >
+        <div 
+          style={styles.spinner}
+          aria-label="Loading payment form"
+        />
+        <style>{spinAnimation}</style>
+        <p 
+          style={styles.loadingText}
+          aria-live="polite"
+        >
+          Loading payment elements...
+        </p>
+      </div>
     );
   }
 
   if (!clientSecret && !isLoading) {
-    return React.createElement(
-      Alert as unknown as React.ComponentType<AlertProps>,
-      { 
-        status: "error", 
-        mb: 4, 
-        borderRadius: "md", 
-        "data-testid": "payment-init-error-alert",
-        role: "alert",
-        "aria-live": "assertive"
-      },
-      [
-        React.createElement(
-          AlertTitle as unknown as React.ComponentType<AlertTitleProps>,
-          { fontWeight: "semibold", key: "error-title" },
-          "Payment Initialization Failed"
-        ),
-        React.createElement(
-          AlertDescription as unknown as React.ComponentType<AlertDescriptionProps>,
-          { key: "error-description" },
-          errorMessage || "Unable to initialize payment form. Please refresh the page or try again later."
-        )
-      ]
+    return (
+      <div 
+        style={styles.alert}
+        data-testid="payment-init-error-alert"
+        role="alert"
+        aria-live="assertive"
+      >
+        <h3 style={styles.alertTitle}>Payment Initialization Failed</h3>
+        <p>{errorMessage || "Unable to initialize payment form. Please refresh the page or try again later."}</p>
+      </div>
     );
   }
 
-  return React.createElement(
-    Box as unknown as React.ComponentType<BoxProps>,
-    { 
-      maxWidth: "600px", 
-      mx: "auto", 
-      p: 4, 
-      "data-testid": "stripe-payment-form-container"
-    },
-    [
-      // Error message alert (if any)
-      errorMessage && React.createElement(
-        Alert as unknown as React.ComponentType<AlertProps>,
-        { 
-          status: "error", 
-          mb: 4, 
-          borderRadius: "md", 
-          key: "error-alert", 
-          "data-testid": "payment-error-alert",
-          role: "alert",
-          "aria-live": "assertive"
-        },
-        [
-          React.createElement(
-            AlertTitle as unknown as React.ComponentType<AlertTitleProps>,
-            { fontWeight: "semibold", key: "error-title" },
-            "Payment Error"
-          ),
-          React.createElement(
-            AlertDescription as unknown as React.ComponentType<AlertDescriptionProps>,
-            { key: "error-description" },
-            errorMessage
-          )
-        ]
-      ),
+  return (
+    <div 
+      style={styles.container}
+      data-testid="stripe-payment-form-container"
+    >
+      {/* Error message alert (if any) */}
+      {errorMessage && (
+        <div 
+          style={styles.alert}
+          data-testid="payment-error-alert"
+          role="alert"
+          aria-live="assertive"
+        >
+          <h3 style={styles.alertTitle}>Payment Error</h3>
+          <p>{errorMessage}</p>
+        </div>
+      )}
       
-      // Payment form
-      React.createElement(
-        "form",
-        { 
-          onSubmit: handleSubmit, 
-          key: "payment-form", 
-          "data-testid": "stripe-payment-form",
-          "aria-label": "Credit card payment form"
-        },
-        [
-          // Payment Element container
-          React.createElement(
-            Box as unknown as React.ComponentType<BoxProps>,
-            { mb: 4, key: "payment-element-container" },
-            clientSecret && React.createElement(
-              PaymentElement,
-              {
-                id: "payment-element",
-                options: paymentElementOptions,
-                key: "payment-element"
-              }
-            )
-          ),
-          
-          // Submit button
-          React.createElement(
-            Button as unknown as React.ComponentType<ButtonProps>,
-            {
-              type: "submit",
-              colorScheme: "blue",
-              isLoading: isLoading,
-              loadingText: "Processing payment...",
-              isDisabled: !stripe || !elements || !clientSecret || isLoading,
-              width: "100%",
-              key: "submit-button",
-              "data-testid": "payment-submit-button",
-              "aria-label": isLoading ? "Processing payment" : "Complete payment"
-            },
-            isLoading ? "Processing..." : "Pay Now"
-          )
-        ]
-      )
-    ]
+      {/* Payment form */}
+      <form 
+        onSubmit={handleSubmit}
+        data-testid="stripe-payment-form"
+        aria-label="Credit card payment form"
+      >
+        {/* Payment Element container */}
+        <div style={{ marginBottom: '1rem' }}>
+          {clientSecret && (
+            <PaymentElement
+              id="payment-element"
+              options={paymentElementOptions}
+            />
+          )}
+        </div>
+        
+        {/* Submit button */}
+        <button
+          type="submit"
+          style={{
+            ...styles.button, 
+            ...((!stripe || !elements || !clientSecret || isLoading) ? styles.disabledButton : {})
+          }}
+          disabled={!stripe || !elements || !clientSecret || isLoading}
+          data-testid="payment-submit-button"
+          aria-label={isLoading ? "Processing payment" : "Complete payment"}
+        >
+          {isLoading ? "Processing..." : "Pay Now"}
+        </button>
+      </form>
+    </div>
   );
 };
 
