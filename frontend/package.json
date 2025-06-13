@@ -19,6 +19,8 @@
     "@apollo/client": "^3.13.8",
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^3.16.1",
+    "@chakra-ui/theme": "^3.4.0",
+    "@chakra-ui/theme-tools": "^2.2.6",
     "@clerk/nextjs": "^6.20.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -26,12 +28,13 @@
     "@heroicons/react": "^2.1.1",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
+    "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^2.4.0",
-    "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.17",
     "axios": "^1.9.0",
     "chart.js": "^4.4.9",
     "clsx": "^2.1.1",
+    "critters": "^0.0.25",
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^10.18.0",
@@ -48,8 +51,7 @@
     "tailwindcss": "^3.4.1",
     "uuid": "^11.1.0",
     "web-vitals": "^4.2.4",
-    "zustand": "^5.0.5",
-    "critters": "^0.0.25"
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -60,7 +62,8 @@
     "@types/lodash": "^4.17.16",
     "@types/next": "^8.0.7",
     "@types/node": "^20.11.16",
-    "@types/react": "^18.3.22",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "@types/testing-library__jest-dom": "^5.14.9",
     "@types/testing-library__react": "^10.0.1",
     "@types/uuid": "^10.0.0",
@@ -70,6 +73,6 @@
     "jest-environment-jsdom": "^29.7.0",
     "network-information-types": "^0.1.1",
     "ts-jest": "^29.3.4",
-    "typescript": "^5.3.3"
+    "typescript": "5.3.3"
   }
 }

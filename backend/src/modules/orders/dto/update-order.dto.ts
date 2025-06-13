@@ -50,4 +50,9 @@ export class UpdateOrderDto {
   @Type(() => ShippingAddressDto)
   @IsOptional()
   shippingAddress?: ShippingAddressDto;
+
+  @ApiPropertyOptional({ description: 'Stripe Payment Intent ID associated with the order' })
+  @IsString()
+  @IsOptional()
+  stripePaymentIntentId?: string;
 }

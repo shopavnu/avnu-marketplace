@@ -147,6 +147,9 @@ export class OrderType {
 
   @Field(() => Date)
   updatedAt: Date = new Date();
+
+  @Field(() => String, { nullable: true, description: 'URL to the Stripe payment receipt' })
+  stripeReceiptUrl?: string;
 }
 
 @ObjectType()

@@ -31,6 +31,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { OrderStatus, PaymentStatus, FulfillmentStatus, SyncStatus } from '../enums';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import { Order } from '../entities/order.entity';
+import { OrderType } from '../dto/order.types';
 
 /**
  * Extended Order interface to handle properties that exist at runtime but are not in TypeScript definition
@@ -66,6 +67,57 @@ interface ExtendedOrder {
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class OrdersController {
+  @Get('lookup')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lookup an order by ID and customer email' })
+  @ApiQuery({ name: 'orderId', type: String, description: 'The ID of the order', required: true })
+  @ApiQuery({
+    name: 'email',
+    type: String,
+    description: 'The email address of the customer',
+    required: true,
+  })
+  @ApiResponse({ status: 200, description: 'Order found successfully.', type: OrderType })
+  @ApiResponse({ status: 400, description: 'Bad Request: Order ID and email are required.' })
+  @ApiResponse({ status: 404, description: 'Not Found: Order not found or email does not match.' })
+  async lookupGuestOrder(
+    @Query('orderId') orderId: string,
+    @Query('email') email: string,
+  ): Promise<OrderType> {
+    // Using OrderType for response consistency
+    if (!orderId || !email) {
+      throw new BadRequestException('Order ID and email are required.');
+    }
+    // The service method already throws NotFoundException or BadRequestException appropriately.
+    const order = await this.ordersService.lookupGuestOrder(orderId, email);
+    // Map to DTO if necessary, or ensure Order entity is suitable for direct response
+    // Manually map Order entity to OrderType DTO to handle platformActions incompatibility
+    const orderDto: OrderType = {
+      ...order,
+      shippingAddress: order.shippingAddress, // Assuming direct compatibility or further mapping needed if not
+      items: order.items.map(item => ({
+        // Assuming OrderItem and OrderItemType are compatible or need mapping
+        ...item,
+        // Ensure all fields of OrderItemType are covered
+      })),
+      fulfillments: order.fulfillments?.map(fulfillment => ({
+        // Assuming OrderFulfillment and OrderFulfillmentType are compatible
+        ...fulfillment,
+        // Ensure all fields of OrderFulfillmentType are covered
+      })),
+      platformActions: {
+        canCancel: order.platformActions?.canCancel || false,
+        canRefund: order.platformActions?.canRefund || false, // Added canRefund
+        canModify: false, // OrderType.PlatformActionsType expects canModify, entity.PlatformActions doesn't have it. Default to false.
+      },
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      stripeReceiptUrl: order.stripeReceiptUrl, // Keep stripeReceiptUrl
+      // Ensure all other OrderType fields are mapped here if they exist on Order entity
+    };
+    return orderDto;
+  }
+
   private readonly logger = new Logger(OrdersController.name);
   constructor(private readonly ordersService: OrdersService) {}
 

@@ -14,6 +14,42 @@ import { PlatformActions } from '../entities/order.entity';
  */
 @Injectable()
 export class OrdersService {
+  /**
+   * Lookup an order by its ID and the customer's email address.
+   * Intended for guest users to find their orders.
+   *
+   * @param orderId The ID of the order.
+   * @param email The email address of the customer who placed the order.
+   * @returns The found Order entity.
+   * @throws NotFoundException if the order is not found or the email does not match.
+   */
+  async lookupGuestOrder(orderId: string, email: string): Promise<Order> {
+    this.logger.debug(`Attempting to lookup order by ID: ${orderId} and email: ${email}`);
+
+    if (!orderId || !email) {
+      throw new BadRequestException('Order ID and email are required for lookup.');
+    }
+
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+
+    if (!order) {
+      this.logger.warn(`Order lookup failed: No order found with ID ${orderId}`);
+      throw new NotFoundException('Order not found.');
+    }
+
+    // Case-insensitive email comparison
+    if (order.customerEmail.toLowerCase() !== email.toLowerCase()) {
+      this.logger.warn(
+        `Order lookup failed for ID ${orderId}: Provided email does not match stored customer email.`,
+      );
+      // For privacy, return the same error as if the order wasn't found
+      throw new NotFoundException('Order not found.');
+    }
+
+    this.logger.log(`Successfully looked up order ID ${orderId} for email ${email}`);
+    return order;
+  }
+
   private readonly logger = new Logger(OrdersService.name);
 
   constructor(
