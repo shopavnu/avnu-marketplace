@@ -27,6 +27,7 @@ const StripeCheckoutPage: React.FC = () => {
 
   // Get cart details from store
   const { items, cartTotal } = useCart();
+  const [summaryOpen, setSummaryOpen] = useState<boolean>(true);
 
   // Redirect to home if cart is empty
   useEffect(() => {
@@ -116,18 +117,19 @@ const StripeCheckoutPage: React.FC = () => {
     );
   }
   
+  // Stripe Elements appearance fine-tuned for brand look & feel
   const elementsOptions: StripeElementsOptions = {
     // clientSecret will be fetched by StripePaymentForm if not passed directly here
     appearance: {
-      theme: 'stripe', // or 'night', 'flat'
+      theme: 'flat',
       variables: {
-        colorPrimary: '#0570de', // Your brand's primary color
+        colorPrimary: '#38B2AC', // teal brand
         colorBackground: '#ffffff',
         colorText: '#30313d',
         colorDanger: '#df1b41',
         fontFamily: 'Ideal Sans, system-ui, sans-serif',
-        spacingUnit: '2px',
-        borderRadius: '4px',
+        spacingUnit: '4px',
+        borderRadius: '6px',
       },
       rules: {
         '.Tab': {
@@ -148,13 +150,31 @@ const StripeCheckoutPage: React.FC = () => {
           Secure Checkout
         </h1>
 
-        {/* Cart Summary */}
+        {/* Cart Summary (accordion on mobile) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           style={{ padding: '1.5rem', border: '1px solid #E2E8F0', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: 'white' }}
         >
+          {/* Mobile toggle button */}
+          <button
+            onClick={() => setSummaryOpen((prev: boolean) => !prev)}
+            style={{
+              display: 'block',
+              background: 'none',
+              border: 'none',
+              fontWeight: 600,
+              fontSize: '1rem',
+              marginBottom: '0.75rem',
+              cursor: 'pointer',
+            }}
+            className="summary-toggle"
+          >
+            {summaryOpen ? 'Hide' : 'Show'} order summary ▾
+          </button>
+          <div style={{ display: summaryOpen ? 'block' : 'none' }} className="summary-content">
+
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#4A5568', fontWeight: 'bold' }}>Order Summary</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {items.length === 0 ? (
@@ -193,6 +213,7 @@ const StripeCheckoutPage: React.FC = () => {
               <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>${cartTotal.toFixed(2)}</p>
             </div>
           </div>
+        </div>
         </motion.div>
 
         <motion.div
