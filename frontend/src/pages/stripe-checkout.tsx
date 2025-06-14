@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 import { useRouter } from 'next/router';
@@ -94,10 +95,23 @@ const StripeCheckoutPage: React.FC = () => {
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     return (
       <div style={{ padding: '2.5rem 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ backgroundColor: '#FED7D7', borderRadius: '0.375rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '200px', width: '100%', maxWidth: '500px' }}>
-          <h2 style={{ marginTop: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>Configuration Error</h2>
-          <p style={{ marginTop: '0.5rem' }}>Stripe publishable key is not configured. Please check your environment variables.</p>
-        </div>
+        <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                flex: '1 1 350px',
+                backgroundColor: '#F7FAFC',
+                padding: '1.5rem',
+                borderRadius: '0.375rem',
+                minWidth: '300px',
+              }}
+            >
+          <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '200px', width: '100%', maxWidth: '500px' }}>
+            <h2 style={{ marginTop: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>Configuration Error</h2>
+            <p style={{ marginTop: '0.5rem' }}>Stripe publishable key is not configured. Please check your environment variables.</p>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -135,7 +149,12 @@ const StripeCheckoutPage: React.FC = () => {
         </h1>
 
         {/* Cart Summary */}
-        <div style={{ padding: '1.5rem', border: '1px solid #E2E8F0', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: 'white' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{ padding: '1.5rem', border: '1px solid #E2E8F0', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: 'white' }}
+        >
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#4A5568', fontWeight: 'bold' }}>Order Summary</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {items.length === 0 ? (
@@ -147,7 +166,14 @@ const StripeCheckoutPage: React.FC = () => {
                     <p style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{brand}</p>
                     {brandItems.map((item) => (
                       <div key={item.product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '2rem',
+                            alignItems: 'flex-start',
+                            flexWrap: 'wrap',
+                          }}
+                        >
                           {item.product.image && (
                             <Image src={item.product.image} alt={item.product.title} width={40} height={40} style={{ borderRadius: '4px' }} />
                           )}
@@ -167,9 +193,14 @@ const StripeCheckoutPage: React.FC = () => {
               <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>${cartTotal.toFixed(2)}</p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div style={{ width: '100%', maxWidth: '32rem', margin: '0 auto' }}> 
+        <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              style={{ width: '100%', maxWidth: '32rem', margin: '0 auto' }}
+            > 
           {initError && (
             <div style={{background:'#FED7D7',borderLeft:'4px solid #F56565',padding:'1rem',marginBottom:'1rem',borderRadius:'0.375rem'}}>
               <p style={{fontWeight:600,color:'#C53030',marginBottom:'0.25rem'}}>Checkout unavailable</p>
@@ -195,7 +226,7 @@ const StripeCheckoutPage: React.FC = () => {
             </div>
           )}
 
-        </div>
+        </motion.div>
       </div>
     </div>
   );
