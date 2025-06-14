@@ -1,31 +1,94 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import Image from 'next/image';
+
+import { useRouter } from 'next/router';
+import useCart from '@/hooks/useCart';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from '@/components/checkout/StripePaymentForm';
+import { initiateCheckout, InitiateCheckoutResponse } from '@/services/checkoutService';
 // Replaced Chakra UI imports with standard HTML/CSS
-// import { useRouter } from 'next/router'; // Uncomment if you need router for redirection
 
 // Make sure to set this in your .env.local or similar environment file
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 const StripeCheckoutPage: React.FC = () => {
-  // const router = useRouter(); // Uncomment for programmatic navigation
+  const [orderId, setOrderId] = useState<string | undefined>(undefined);
+  const [clientSecret, setClientSecret] = useState<string | undefined>(undefined);
+  const [initError, setInitError] = useState<string | null>(null);
 
-  // Example: Get cart details from a hook or context
-  // const { cart, totalAmount } = useCart(); 
-  const placeholderTotalAmount = 50.00; // Example amount, replace with actual cart total
+  const router = useRouter();
+  const toast = (opts: any) => {
+    if (typeof window !== 'undefined') {
+      console.log(`${opts.title}: ${opts.description ?? ''}`);
+    }
+  };
+
+  // Get cart details from store
+  const { items, cartTotal } = useCart();
+
+  // Redirect to home if cart is empty
+  useEffect(() => {
+    if (items.length === 0) {
+      router.replace('/');
+      toast({ title: 'Your cart is empty', status: 'info', duration: 4000, isClosable: true });
+    }
+  }, [items, router, toast]);
+
+  // Group items by brand for display
+  const itemsByBrand = useMemo(() => {
+    const map: Record<string, typeof items> = {};
+    items.forEach((it) => {
+      const brand = it.product.brand ?? 'Other';
+      if (!map[brand]) map[brand] = [];
+      map[brand].push(it);
+    });
+    return map;
+  }, [items]);
+
+  // Pre-create order/payment intent on mount
+  useEffect(() => {
+    async function init() {
+      try {
+        const res: InitiateCheckoutResponse = await initiateCheckout();
+        setOrderId(res.orderId);
+        setClientSecret(res.clientSecret);
+      } catch (e) {
+        console.error('Checkout init failed', e);
+        const msg = (e as Error).message;
+        setInitError(msg);
+        toast({ title: 'Checkout unavailable', description: msg, status: 'error', duration: 6000, isClosable: true, position: 'top' });
+      }
+    }
+    init();
+  }, []);
+
 
   const handlePaymentSuccess = (paymentIntentId: string, orderId?: string | null) => {
     console.log('Payment Successful!', { paymentIntentId, orderId });
-    // Example: Redirect to an order confirmation page
-    // router.push(`/checkout/confirmation?payment_intent_id=${paymentIntentId}&order_id=${orderId}&status=success`);
-    alert(`Payment Successful! Order ID: ${orderId || 'N/A'}, PaymentIntent ID: ${paymentIntentId}. Redirecting (simulated)...`);
+    router.push(
+      {
+        pathname: '/checkout/confirmation',
+        query: {
+          payment_intent: paymentIntentId,
+          order_id: orderId ?? undefined,
+          redirect_status: 'succeeded',
+        },
+      },
+      undefined,
+      { shallow: false },
+    );
   };
 
   const handlePaymentError = (errorMessage: string) => {
     console.error('Payment Error:', errorMessage);
-    // Display error message to the user, perhaps using a toast or an alert on this page
-    alert(`Payment Failed: ${errorMessage}`);
+    router.push({
+      pathname: '/checkout/confirmation',
+      query: {
+        redirect_status: 'error',
+        message: errorMessage,
+      },
+    });
   };
   
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
@@ -71,33 +134,67 @@ const StripeCheckoutPage: React.FC = () => {
           Secure Checkout
         </h1>
 
-        {/* Placeholder for Cart Summary */}
+        {/* Cart Summary */}
         <div style={{ padding: '1.5rem', border: '1px solid #E2E8F0', borderRadius: '0.5rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: 'white' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#4A5568', fontWeight: 'bold' }}>Order Summary</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <p style={{ color: '#718096' }}>Example Product 1 (x1)</p>
-              <p style={{ fontWeight: '500', color: '#2D3748' }}>$25.00</p>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <p style={{ color: '#718096' }}>Example Product 2 (x1)</p>
-              <p style={{ fontWeight: '500', color: '#2D3748' }}>$25.00</p>
-            </div>
-            <hr style={{ margin: '0.75rem 0', borderTop: '1px solid #E2E8F0' }}/>
+            {items.length === 0 ? (
+              <p style={{ color: '#718096' }}>Your cart is empty.</p>
+            ) : (
+              <>
+                {Object.entries(itemsByBrand).map(([brand, brandItems]) => (
+                  <div key={brand} style={{ marginBottom: '0.75rem' }}>
+                    <p style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{brand}</p>
+                    {brandItems.map((item) => (
+                      <div key={item.product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {item.product.image && (
+                            <Image src={item.product.image} alt={item.product.title} width={40} height={40} style={{ borderRadius: '4px' }} />
+                          )}
+                          <p style={{ color: '#4A5568' }}>{item.quantity} × {item.product.title}</p>
+                        </div>
+                        <p style={{ fontWeight: '500', color: '#2D3748' }}>${(item.product.price * item.quantity).toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                <hr style={{ margin: '0.75rem 0', borderTop: '1px solid #E2E8F0' }}/>
+                <p style={{ fontSize: '0.875rem', color: '#718096', marginBottom: '0.5rem' }}>Tax calculated at payment.</p>
+              </>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
               <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>Total</p>
-              <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>${placeholderTotalAmount.toFixed(2)}</p>
+              <p style={{ fontSize: '1.125rem', color: '#2D3748' }}>${cartTotal.toFixed(2)}</p>
             </div>
           </div>
         </div>
 
         <div style={{ width: '100%', maxWidth: '32rem', margin: '0 auto' }}> 
-          <Elements stripe={stripePromise} options={elementsOptions}>
-            <StripePaymentForm
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-            />
-          </Elements>
+          {initError && (
+            <div style={{background:'#FED7D7',borderLeft:'4px solid #F56565',padding:'1rem',marginBottom:'1rem',borderRadius:'0.375rem'}}>
+              <p style={{fontWeight:600,color:'#C53030',marginBottom:'0.25rem'}}>Checkout unavailable</p>
+              <p style={{color:'#C53030'}}>{initError}</p>
+            </div>
+          )}
+          {clientSecret && (
+            <Elements
+              stripe={stripePromise}
+              options={{ ...elementsOptions, clientSecret } as StripeElementsOptions}
+            >
+              <StripePaymentForm
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+                orderId={orderId}
+                clientSecretProp={clientSecret}
+              />
+            </Elements>
+          )}
+          {!clientSecret && !initError && (
+            <div style={{padding:'2rem',textAlign:'center'}}>
+              <div style={{width:'2.5rem',height:'2.5rem',border:'4px solid #38B2AC',borderTopColor:'transparent',borderRadius:'50%',animation:'spin 0.7s linear infinite',margin:'0 auto'}} />
+            </div>
+          )}
+
         </div>
       </div>
     </div>
