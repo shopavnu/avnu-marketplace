@@ -1,0 +1,66 @@
+/* Checkout page specific styles */
+
+:root {
+  --brand-teal: #38B2AC;
+  --brand-teal-dark: #2c978f;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+}
+
+/* Buttons */
+button {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+button:hover,
+button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  outline: none;
+}
+
+/* Stripe PaymentElement focus ring */
+.StripeElement--focus {
+  box-shadow: 0 0 0 2px var(--brand-teal);
+  border-radius: 6px;
+}
+
+/* Order summary rows hover */
+.summary-content div:hover {
+  background: #f7fafc;
+}
+
+/* Recently updated item highlight */
+.recently-updated {
+  animation: pulse-bg 1.5s ease-in-out 0s 3;
+}
+@keyframes pulse-bg {
+  0% { background: #FFFBEA; }
+  50% { background: #FFF9C4; }
+  100% { background: #FFFBEA; }
+}
+
+/* Out-of-stock dimming and badge */
+.out-of-stock {
+  opacity: 0.45;
+  position: relative;
+}
+.out-of-stock-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #E53E3E;
+  color: #fff;
+  font-size: 0.625rem;
+  padding: 0 0.25rem;
+  border-radius: 0 0 0 4px;
+}
+
+/* Improve contrast for text on light backgrounds */
+.order-summary-label {
+  color: #2D3748;
+}
+.order-summary-value {
+  color: #1A202C;
+  font-weight: 600;
+}

@@ -1,7 +1,7 @@
 import { Args, Mutation, Resolver, ObjectType, Field } from '@nestjs/graphql';
 import { Logger } from '@nestjs/common';
 import { SearchAnalyticsService } from '../services/search-analytics.service';
-import { SearchEventInput } from '../graphql/search-event.input';
+import { SearchEventInput, SearchEventType } from '../graphql/search-event.input';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 
@@ -32,9 +32,10 @@ export class SearchAnalyticsResolver {
     @CurrentUser() user?: User,
   ): Promise<TrackSearchEventResponse> {
     try {
+      // TODO: infer proper event type; defaulting to SEARCH_QUERY for now
       const success = await this.searchAnalyticsService.trackEvent(
         event.eventType,
-        event.data || {},
+        { ...event },
         user,
       );
 

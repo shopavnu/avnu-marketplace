@@ -124,14 +124,37 @@ class AnalyticsService {
         sessionService.trackFilter(data.filterType, data.filterValue);
       }
 
+      // Backend SearchEventInput expects { eventType, timestamp, data }
+      // Prepare payload matching backend SearchEventInput (schema-first SDL)
+      // Remove potential duplicate sessionId from enrichedData before spreading
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { sessionId: __remove, ...enrichedSansSession } = enrichedData;
+
+      const { query, resultsCount, page, ...rest } = {
+        query: data.query ?? "N/A",
+        resultsCount: data.count ?? 1,
+        page: data.page,
+        ...enrichedSansSession,
+      } as any;
+
+      const searchEventPayload: Record<string, any> = {
+        eventType,
+        sessionId: sessionId || "anonymous",
+        query,
+        resultsCount: resultsCount ?? 0,
+        page,
+        deviceType:
+          typeof navigator !== "undefined" ? navigator.userAgent : "server",
+        platform:
+          typeof navigator !== "undefined" ? navigator.platform : "server",
+        filters: rest, // everything else goes into filters JSON
+      };
+
+
       const response = await apolloClient.mutate({
         mutation: TRACK_SEARCH_EVENT,
         variables: {
-          event: {
-            eventType,
-            timestamp: new Date().toISOString(),
-            data: enrichedData,
-          },
+          event: searchEventPayload,
         },
       });
 

@@ -6,6 +6,7 @@ import {
   ApolloLink,
 } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
+import { setContext } from "@apollo/client/link/context";
 
 // Error handling link with more tolerance for the mock API
 const errorLink = onError(
@@ -26,6 +27,29 @@ const errorLink = onError(
   },
 );
 
+// Auth link to attach Clerk JWT for protected endpoints
+const authLink = setContext(async (_, { headers = {} }) => {
+  if (typeof window !== 'undefined' && (window as any).Clerk) {
+    try {
+      const token: string | null | undefined = await (window as any).Clerk?.session?.getToken({
+        template: 'backend',
+      });
+      if (token) {
+        return {
+          headers: {
+            ...headers,
+            Authorization: `Bearer ${token}`,
+          },
+        };
+      }
+    } catch (err) {
+      console.warn('Unable to fetch Clerk JWT for GraphQL', err);
+      console.warn('Ensure the Clerk JWT template', process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE || 'backend', 'exists and is enabled.');
+    }
+  }
+  return { headers };
+});
+
 // Middleware to log requests for debugging
 const loggingMiddleware = new ApolloLink((operation, forward) => {
   console.log(`GraphQL Request: ${operation.operationName}`);
@@ -37,7 +61,9 @@ const loggingMiddleware = new ApolloLink((operation, forward) => {
 
 // HTTP link to the GraphQL API
 const httpLink = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/graphql",
+  uri:
+    process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+    `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/graphql`,
   credentials: "include",
 });
 
@@ -70,7 +96,7 @@ const cache = new InMemoryCache({
 
 // Create the Apollo Client instance
 const apolloClient = new ApolloClient({
-  link: from([errorLink, loggingMiddleware, httpLink]),
+  link: from([errorLink, authLink, loggingMiddleware, httpLink]),
   cache,
   defaultOptions: {
     watchQuery: {

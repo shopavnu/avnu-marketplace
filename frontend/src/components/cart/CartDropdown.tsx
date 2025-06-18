@@ -107,13 +107,15 @@ interface CartDropdownProps {
 
 const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
   // Get cart data from Zustand store
-  const { 
-    items, 
-    removeItem, 
-    updateQuantity, 
+  const {
+    items,
+    removeItem,
+    updateQuantity,
     getCartTotal,
     getItemsGroupedByBrand,
-    closeCart 
+    closeCart,
+    recentlyUpdatedIds,
+    outOfStockIds,
   } = useCartStore();
   
   // Add scrollbar styles to head
@@ -286,7 +288,17 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
                             {items.map((item) => (
                               <div
                                 key={item.product.id}
-                                className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-b-0"
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginBottom: '0.5rem',
+                                  backgroundColor: recentlyUpdatedIds.includes(item.product.id)
+                                    ? '#FEF9C3'
+                                    : 'transparent',
+                                  opacity: outOfStockIds.includes(item.product.id) ? 0.5 : 1,
+                                  transition: 'background-color 0.3s',
+                                }}
                               >
                                 <div style={{
                                   display: 'flex',
@@ -404,7 +416,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
 
                     {/* Checkout Button */}
                     <Link
-                      href="/checkout"
+                      href="/stripe-checkout"
                       className="block w-full text-center py-3 bg-sage text-white rounded-full font-medium hover:bg-sage/90 transition-colors"
                       onClick={onClose}
                     >

@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { useRouter } from 'next/router';
 import useCart from '@/hooks/useCart';
+import clsx from 'clsx';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from '@/components/checkout/StripePaymentForm';
@@ -26,7 +27,7 @@ const StripeCheckoutPage: React.FC = () => {
   };
 
   // Get cart details from store
-  const { items, cartTotal } = useCart();
+  const { items, cartTotal, recentlyUpdatedIds, outOfStockIds } = useCart();
   const [summaryOpen, setSummaryOpen] = useState<boolean>(true);
 
   // Redirect to home if cart is empty
@@ -184,9 +185,16 @@ const StripeCheckoutPage: React.FC = () => {
                 {Object.entries(itemsByBrand).map(([brand, brandItems]) => (
                   <div key={brand} style={{ marginBottom: '0.75rem' }}>
                     <p style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{brand}</p>
-                    {brandItems.map((item) => (
-                      <div key={item.product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    {brandItems.map((item) => {
+                      const isUpdated = recentlyUpdatedIds.includes(item.product.id);
+                      const isOos = outOfStockIds.includes(item.product.id);
+                      return (
                         <div
+                          key={item.product.id}
+                          className={clsx({ 'recently-updated': isUpdated, 'out-of-stock': isOos })}
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', position:'relative' }}
+                        >
+                          <div
                           style={{
                             display: 'flex',
                             gap: '2rem',
@@ -199,9 +207,11 @@ const StripeCheckoutPage: React.FC = () => {
                           )}
                           <p style={{ color: '#4A5568' }}>{item.quantity} × {item.product.title}</p>
                         </div>
-                        <p style={{ fontWeight: '500', color: '#2D3748' }}>${(item.product.price * item.quantity).toFixed(2)}</p>
-                      </div>
-                    ))}
+                          {isOos && <span className="out-of-stock-badge">OOS</span>}
+                          <p style={{ fontWeight: '500', color: '#2D3748' }}>${(item.product.price * item.quantity).toFixed(2)}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
                 <hr style={{ margin: '0.75rem 0', borderTop: '1px solid #E2E8F0' }}/>

@@ -1,4 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { CartGateway } from '../../../gateways/cart.gateway';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cart } from '../entities/cart.entity';
@@ -18,6 +19,7 @@ export class CartService {
   constructor(
     @InjectRepository(Cart)
     private readonly cartRepository: Repository<Cart>,
+    private readonly cartGateway: CartGateway,
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -49,8 +51,11 @@ export class CartService {
       });
     }
 
-    // Parse items and calculate totals
-    const items = JSON.parse(cart.items) as CartItemDto[];
+    // Parse items
+    let items = JSON.parse(cart.items) as CartItemDto[];
+    // Validate items against latest price/stock
+    items = await this.validateCartItems(userId, items);
+
     const subtotal = this.calculateSubtotal(items);
 
     const cartDto: CartDto = {
@@ -123,8 +128,9 @@ export class CartService {
     // Clear cache
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // Return updated cart
-    return this.getCart(userId);
+    const updated = await this.getCart(userId);
+    this.cartGateway.broadcastCartUpdated({ userId, items: updated.items });
+    return updated;
   }
 
   async updateCartItem(userId: string, cartItem: CartItemInput): Promise<CartDto> {
@@ -159,8 +165,9 @@ export class CartService {
     // Clear cache
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // Return updated cart
-    return this.getCart(userId);
+    const updated = await this.getCart(userId);
+    this.cartGateway.broadcastCartUpdated({ userId, items: updated.items });
+    return updated;
   }
 
   async removeCartItem(userId: string, productId: string, variantId?: string): Promise<CartDto> {
@@ -183,8 +190,9 @@ export class CartService {
     // Clear cache
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // Return updated cart
-    return this.getCart(userId);
+    const updated = await this.getCart(userId);
+    this.cartGateway.broadcastCartUpdated({ userId, items: updated.items });
+    return updated;
   }
 
   async clearCart(userId: string): Promise<CartDto> {
@@ -202,8 +210,49 @@ export class CartService {
     // Clear cache
     await this.cacheManager.del(this.getCacheKey(userId));
 
-    // Return empty cart
-    return this.getCart(userId);
+    const updated = await this.getCart(userId);
+    this.cartGateway.broadcastCartUpdated({ userId, items: updated.items });
+    return updated;
+  }
+
+  /**
+   * Validate items against latest DB price / stock and broadcast any changes.
+   * Returns potentially updated items array.
+   */
+  private async validateCartItems(userId: string, items: CartItemDto[]): Promise<CartItemDto[]> {
+    // Early exit if no items
+    if (!items.length) return items;
+
+    const productIds = items.map((it) => it.productId);
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, price: true, inStock: true },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    const changes: { productId: string; price?: number; inStock?: boolean }[] = [];
+    const updatedItems: CartItemDto[] = items.map((item) => {
+      const dbProd = productMap.get(item.productId) as { price: number; inStock: boolean } | undefined;
+      if (!dbProd) return item;
+
+      let changed = false;
+      let newPrice = item.price;
+      if (dbProd.price !== item.price) {
+        newPrice = dbProd.price;
+        changed = true;
+      }
+      const inStock = dbProd.inStock;
+      if (!inStock || changed) {
+        changes.push({ productId: item.productId, price: changed ? dbProd.price : undefined, inStock: inStock });
+      }
+      return { ...item, price: newPrice };
+    });
+
+    if (changes.length) {
+      this.cartGateway.broadcastPriceStockChanged({ items: changes });
+    }
+
+    return updatedItems;
   }
 
   private calculateSubtotal(items: CartItemDto[]): number {

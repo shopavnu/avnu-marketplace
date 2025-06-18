@@ -15,6 +15,8 @@ const trackCartEvent = (action: CartActionType, product?: ProductSummary, quanti
 };
 
 interface CartStore extends CartState {
+  recentlyUpdatedIds: string[];
+  outOfStockIds: string[];
   // Actions
   addItem: (product: ProductSummary, quantity: number) => void;
   removeItem: (productId: string) => void;
@@ -29,6 +31,7 @@ interface CartStore extends CartState {
   getCartTotal: () => number;
   getCartCount: () => number;
   getItemsGroupedByBrand: () => Record<string, CartItem[]>;
+  setCartFromServer: (items: CartItem[], updatedIds: string[], outOfStockIds: string[]) => void;
 }
 
 const useCartStore = create<CartStore>()(
@@ -37,6 +40,8 @@ const useCartStore = create<CartStore>()(
       // Initial state
       items: [],
       isOpen: false,
+      recentlyUpdatedIds: [],
+      outOfStockIds: [],
       
       // Actions
       addItem: (product, quantity) => {
@@ -112,7 +117,16 @@ const useCartStore = create<CartStore>()(
       
       clearCart: () => {
         trackCartEvent(CartActionType.CLEAR_CART);
-        set({ items: [] });
+        set({ items: [], outOfStockIds: [], recentlyUpdatedIds: [] });
+      },
+      
+      // Server push setter
+      setCartFromServer: (items, updatedIds, outIds) => {
+        set({ items, recentlyUpdatedIds: updatedIds, outOfStockIds: outIds });
+        if (updatedIds.length) {
+          // clear highlights after 3s
+          setTimeout(() => set({ recentlyUpdatedIds: [] }), 3000);
+        }
       },
       
       // UI state

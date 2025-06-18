@@ -17,6 +17,7 @@ const Navigation = dynamic(
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 bg-warm-white/80 backdrop-blur-lg border-b border-neutral-gray/10 safe-top">
@@ -112,7 +113,11 @@ export default function Header() {
               </SignedIn>
 
               {/* Mobile Menu Button - Visible only on mobile */}
-              <button className="p-2 text-charcoal hover:text-sage transition-colors duration-200 md:hidden">
+              <button
+                  className="p-2 text-charcoal hover:text-sage transition-colors duration-200 md:hidden"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-label="Toggle navigation menu"
+                >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -132,6 +137,19 @@ export default function Header() {
           </ClientOnly>
         </div>
       </div>
+    {isMobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+      {isMobileMenuOpen && (
+        <nav className="md:hidden fixed top-16 inset-x-0 z-50 bg-warm-white border-b border-neutral-gray/10 flex flex-col space-y-2 px-4 py-4 shadow-lg">
+          <Link href="/" className="py-2 text-charcoal hover:text-sage" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+          <Link href="/shop" className="py-2 text-charcoal hover:text-sage" onClick={() => setIsMobileMenuOpen(false)}>Shop</Link>
+          <Link href="/brand" className="py-2 text-charcoal hover:text-sage" onClick={() => setIsMobileMenuOpen(false)}>Brands</Link>
+          <Link href="/interests" className="py-2 text-charcoal hover:text-sage" onClick={() => setIsMobileMenuOpen(false)}>Interests</Link>
+          <Link href="/FreshRecommendations" className="py-2 text-charcoal hover:text-sage" onClick={() => setIsMobileMenuOpen(false)}>Discover</Link>
+          <Link href="/about" className="py-2 text-charcoal hover:text-sage" onClick={() => setIsMobileMenuOpen(false)}>About</Link>
+        </nav>
+      )}
     </header>
   );
 }

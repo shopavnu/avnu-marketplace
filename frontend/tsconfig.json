@@ -30,7 +30,11 @@
       "../node_modules/@types",
       "./types"
     ],
-    "types": ["react", "react-dom", "node"],
+    "types": [
+      "react",
+      "react-dom",
+      "node"
+    ],
     "composite": true
   },
   "include": [

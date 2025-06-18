@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { toast } from 'react-hot-toast';
 import type { StripePaymentElementOptions } from '@stripe/stripe-js';
+import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import useCartStore from '@/stores/useCartStore';
 import { initiateCheckout } from '../../services/checkoutService';
 
 /**
@@ -82,12 +84,15 @@ const spinAnimation = `
   }
 `;
 
-// Define payment element options
+// Payment Element options
 const paymentElementOptions: StripePaymentElementOptions = {
-  layout: {
-    type: 'tabs',
-    defaultCollapsed: false
-  }
+  layout: 'tabs',
+};
+
+// Toast helper mapping legacy options to react-hot-toast
+const toastHelper = ({ title, description, status }: { title: string; description?: string; status: 'error' | 'success' }) => {
+  const msg = description ?? title;
+  status === 'error' ? toast.error(msg) : toast.success(msg);
 };
 
 const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
@@ -99,26 +104,11 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string>(clientSecretProp || '');
+  const { outOfStockIds } = useCartStore();
 
   const stripe = useStripe();
   const elements = useElements();
   
-  // Custom toast function to replace Chakra UI's useToast
-  const toast = (options: { 
-    title: string; 
-    description: string; 
-    status: string; 
-    duration: number; 
-    isClosable: boolean; 
-    position?: string 
-  }) => {
-    console.log(`${options.title}: ${options.description}`);
-    // Display error in UI through errorMessage state instead
-    if (options.status === 'error') {
-      setErrorMessage(options.description);
-    }
-  };
-
   useEffect(() => {
     async function fetchClientSecret() {
       if (clientSecret || !orderId) {
@@ -149,13 +139,10 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
         setErrorMessage(message);
         console.error('Stripe payment initialization failed:', error);
         
-        toast({
+        toastHelper({
           title: 'Payment Error',
           description: message,
           status: 'error',
-          duration: 7000,
-          isClosable: true,
-          position: 'top',
         });
       } finally {
         setIsLoading(false);
@@ -179,7 +166,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
         elements,
         redirect: 'if_required',
         confirmParams: {
-          return_url: `${window.location.origin}/payment-result`,
+          return_url: `${window.location.origin}/checkout/confirmation${orderId ? `?order_id=${orderId}` : ''}`,
         },
       });
 
@@ -187,12 +174,10 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
         const message = error.message || 'Something went wrong with your payment';
         setErrorMessage(message);
         
-        toast({
+        toastHelper({
           title: 'Payment Error',
           description: message,
           status: 'error',
-          duration: 5000,
-          isClosable: true,
         });
         
         onPaymentError(message);
@@ -202,12 +187,10 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
         // Payment succeeded
         setErrorMessage(null);
         
-        toast({
+        toastHelper({
           title: 'Payment Successful',
           description: 'Your payment has been processed successfully',
           status: 'success',
-          duration: 5000,
-          isClosable: true,
         });
         
         console.log('Payment succeeded:', paymentIntent);
@@ -223,12 +206,10 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
       setErrorMessage(message);
       console.error('Payment processing error:', err);
       
-      toast({
+      toastHelper({
         title: 'Payment Error',
         description: message,
         status: 'error',
-        duration: 5000,
-        isClosable: true,
       });
     } finally {
       setIsLoading(false);
@@ -312,11 +293,11 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
             ...styles.button, 
             ...((!stripe || !elements || !clientSecret || isLoading) ? styles.disabledButton : {})
           }}
-          disabled={!stripe || !elements || !clientSecret || isLoading}
+          disabled={!stripe || !elements || !clientSecret || isLoading || outOfStockIds.length > 0}
           data-testid="payment-submit-button"
           aria-label={isLoading ? "Processing payment" : "Complete payment"}
         >
-          {isLoading ? "Processing..." : "Pay Now"}
+          {outOfStockIds.length > 0 ? "Update Cart" : (isLoading ? "Processing..." : "Pay Now")}
         </button>
       </form>
     </div>

@@ -33,6 +33,7 @@
     "**/test/**",
     "**/tests/**",
     "**/__mocks__/**",
-    "jest-setup.ts"
+    "jest-setup.ts",
+    "src/prisma/test-prisma.ts"
   ]
 }
