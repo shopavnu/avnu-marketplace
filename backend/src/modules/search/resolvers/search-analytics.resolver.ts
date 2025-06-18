@@ -32,9 +32,10 @@ export class SearchAnalyticsResolver {
     @CurrentUser() user?: User,
   ): Promise<TrackSearchEventResponse> {
     try {
+      // TODO: infer proper event type; defaulting to SEARCH_QUERY for now
       const success = await this.searchAnalyticsService.trackEvent(
         event.eventType,
-        event.data || {},
+        { ...event },
         user,
       );
 

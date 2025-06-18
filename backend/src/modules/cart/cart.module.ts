@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { CartGateway } from '../../gateways/cart.gateway';
 
 // Import Redis store at the top level as done in app.module.ts
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -58,8 +59,8 @@ const redisStore = require('cache-manager-redis-store').default;
       },
     }),
   ],
-  providers: [CartService, CartResolver],
+  providers: [CartService, CartResolver, CartGateway],
   controllers: [CartController],
-  exports: [CartService],
+  exports: [CartService, CartGateway],
 })
 export class CartModule {}

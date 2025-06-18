@@ -1,4 +1,7 @@
 import "../styles/globals.css";
+import "../styles/checkout.css";
+import "../styles/toast.css";
+
 import "../styles/product-card.css"; // Import product card consistent styling
 import type { AppProps } from "next/app";
 import ApolloProvider from "../providers/ApolloProvider";
@@ -9,14 +12,21 @@ import GraphQLErrorHandler from "../components/common/GraphQLErrorHandler";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "../context/ThemeContext";
 import { useEffect } from "react";
+import useCartSync from "@/hooks/useCartSync";
+import useCartSocket from "@/hooks/useCartSocket";
 // Removed ChakraProvider imports as they're causing SSR errors
 
 import { initializePersonalization } from "../utils/discovery-integration";
 import { ClerkProvider } from "@clerk/nextjs";
 import { geistSans, geistMono } from "../utils/fonts";
+import { Toaster } from "react-hot-toast";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
+  // Cross-tab cart synchronisation
+  useCartSync();
+  // Live, multi-device cart synchronisation via WebSocket
+  useCartSocket();
 
   // Initialize personalization service on client-side
   useEffect(() => {
@@ -35,7 +45,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-      <div className={`${geistSans.variable} ${geistMono.variable}`}>
+      <div className={`${geistSans.variable} ${geistMono.variable}`}> 
+        <Toaster position="top-center" />
         <ErrorBoundary>
             <ThemeProvider>
               <ApolloProvider>

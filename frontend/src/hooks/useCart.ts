@@ -9,6 +9,8 @@ import { ProductSummary } from '@/types/cart';
 const useCart = () => {
   const {
     items,
+    recentlyUpdatedIds,
+    outOfStockIds,
     addItem,
     removeItem,
     updateQuantity,
@@ -112,6 +114,8 @@ const useCart = () => {
     cartCount: getCartCount(),
     cartTotal: getCartTotal(),
     itemsByBrand: getItemsGroupedByBrand(),
+    recentlyUpdatedIds,
+    outOfStockIds,
     
     // Actions
     addToCart,

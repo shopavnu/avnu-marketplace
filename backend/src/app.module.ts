@@ -36,6 +36,7 @@ import { AccessibilityModule } from './modules/accessibility/accessibility.modul
 import { RedisModule } from './modules/redis/redis.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CheckoutModule } from './modules/checkout/checkout.module'; // Added CheckoutModule
+import { CartGateway } from './gateways/cart.gateway';
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -175,7 +176,7 @@ registerEnumType(ExperimentStatus, {
     CheckoutModule, // Added CheckoutModule
   ],
   controllers: [],
-  providers: [],
+  providers: [CartGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

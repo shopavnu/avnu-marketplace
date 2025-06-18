@@ -3,11 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider     = "postgresql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
+/// This existing table should be retained; Prisma will ignore it during migrations.
 model BusinessMetrics {
   id              String                                @id(map: "PK_0e0b099eef5add99fc9467bc5fe") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   metricType      business_metrics_metrictype_enum
@@ -21,13 +21,21 @@ model BusinessMetrics {
   periodStart     DateTime                              @db.Timestamp(6)
   periodEnd       DateTime                              @db.Timestamp(6)
 
+  @@index([dimension1], map: "IDX_095971a29c61a5a13260824703")
+  @@index([metricType], map: "IDX_8aaccea38e9b5b31e62f848583")
+  @@index([dimension3], map: "IDX_8c10b7c1f8d48635c7a89086e5")
+  @@index([timestamp], map: "IDX_9d7182b011c4c968a8d7231834")
+  @@index([dimension2], map: "IDX_a0dda41f926d84029b29a3e252")
+  @@index([periodStart], map: "IDX_b8e5ceaf38b592d53f81c0db3d")
   @@map("business_metrics")
   @@ignore
 }
 
 model alert_affected_segments {
-  alert_id   String @db.Uuid
-  segment_id String @db.Uuid
+  alert_id      String        @db.Uuid
+  segment_id    String        @db.Uuid
+  alerts        alerts        @relation(fields: [alert_id], references: [id], onDelete: Cascade, map: "FK_4f6b7ade7468ab52d07d2981be1")
+  user_segments user_segments @relation(fields: [segment_id], references: [id], onDelete: Cascade, map: "FK_e45e1c562059b9f9173db474447")
 
   @@id([alert_id, segment_id], map: "PK_b30a220d6952b688092e9ae2f47")
   @@index([alert_id], map: "IDX_4f6b7ade7468ab52d07d2981be")
@@ -42,17 +50,20 @@ model alert_metrics {
   changePercentage Float
   threshold        Float
   alert_id         String? @db.Uuid
+  alerts           alerts? @relation(fields: [alert_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_71cf95fcb9a6db5283668e02628")
 }
 
 model alerts {
-  id          String               @id(map: "PK_60f895662df096bfcdfab7f4b96") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  title       String               @db.VarChar(255)
-  description String
-  type        alerts_type_enum     @default(PERSONALIZATION_DROP)
-  severity    alerts_severity_enum @default(MEDIUM)
-  status      alerts_status_enum   @default(ACTIVE)
-  createdAt   DateTime             @default(now()) @db.Timestamp(6)
-  updatedAt   DateTime             @default(now()) @db.Timestamp(6)
+  id                      String                    @id(map: "PK_60f895662df096bfcdfab7f4b96") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title                   String                    @db.VarChar(255)
+  description             String
+  type                    alerts_type_enum          @default(PERSONALIZATION_DROP)
+  severity                alerts_severity_enum      @default(MEDIUM)
+  status                  alerts_status_enum        @default(ACTIVE)
+  createdAt               DateTime                  @default(now()) @db.Timestamp(6)
+  updatedAt               DateTime                  @default(now()) @db.Timestamp(6)
+  alert_affected_segments alert_affected_segments[]
+  alert_metrics           alert_metrics[]
 }
 
 model api_performance_metrics {
@@ -138,52 +149,56 @@ model client_performance_metrics {
 }
 
 model experiment_results {
-  id         String                             @id(map: "PK_626d1c95eebdb8ca02c2260f6a3") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  variantId  String                             @db.Uuid
-  userId     String?                            @db.VarChar
-  sessionId  String?                            @db.VarChar
-  resultType experiment_results_resulttype_enum
-  value      Float?
-  context    String?                            @db.VarChar
-  metadata   Json?                              @db.Json
-  timestamp  DateTime                           @default(now()) @db.Timestamp(6)
+  id                  String                             @id(map: "PK_626d1c95eebdb8ca02c2260f6a3") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  variantId           String                             @db.Uuid
+  userId              String?                            @db.VarChar
+  sessionId           String?                            @db.VarChar
+  resultType          experiment_results_resulttype_enum
+  value               Float?
+  context             String?                            @db.VarChar
+  metadata            Json?                              @db.Json
+  timestamp           DateTime                           @default(now()) @db.Timestamp(6)
+  experiment_variants experiment_variants                @relation(fields: [variantId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_11e4de52ffb285c6e44340bc3e5")
 }
 
 model experiment_variants {
-  id              String   @id(map: "PK_1ab87aafc77c9f29445722fcdd8") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name            String   @db.VarChar
-  description     String?  @db.VarChar
-  isControl       Boolean  @default(false)
-  experimentId    String   @db.Uuid
-  configuration   Json?    @db.Json
-  impressions     Int      @default(0)
-  conversions     Int      @default(0)
-  conversionRate  Float    @default(0)
-  improvementRate Float?
-  isWinner        Boolean  @default(false)
-  confidenceLevel Float?
-  createdAt       DateTime @default(now()) @db.Timestamp(6)
-  updatedAt       DateTime @default(now()) @db.Timestamp(6)
+  id                 String               @id(map: "PK_1ab87aafc77c9f29445722fcdd8") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String               @db.VarChar
+  description        String?              @db.VarChar
+  isControl          Boolean              @default(false)
+  experimentId       String               @db.Uuid
+  configuration      Json?                @db.Json
+  impressions        Int                  @default(0)
+  conversions        Int                  @default(0)
+  conversionRate     Float                @default(0)
+  improvementRate    Float?
+  isWinner           Boolean              @default(false)
+  confidenceLevel    Float?
+  createdAt          DateTime             @default(now()) @db.Timestamp(6)
+  updatedAt          DateTime             @default(now()) @db.Timestamp(6)
+  experiment_results experiment_results[]
+  experiments        experiments          @relation(fields: [experimentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_a5408d0f8f271922f7aadd01d24")
 }
 
 model experiments {
-  id                 String                  @id(map: "PK_aafe1321d916fac58ba06ad8178") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name               String                  @db.VarChar
-  description        String?                 @db.VarChar
-  status             experiments_status_enum @default(draft)
-  type               experiments_type_enum
-  targetAudience     String?                 @db.VarChar
-  audiencePercentage Int?
-  startDate          DateTime?               @db.Timestamp(6)
-  endDate            DateTime?               @db.Timestamp(6)
-  hypothesis         String?                 @db.VarChar
-  primaryMetric      String?                 @db.VarChar
-  secondaryMetrics   String?
-  hasWinner          Boolean                 @default(false)
-  winningVariantId   String?                 @db.VarChar
-  segmentation       Json?                   @db.Json
-  createdAt          DateTime                @default(now()) @db.Timestamp(6)
-  updatedAt          DateTime                @default(now()) @db.Timestamp(6)
+  id                  String                  @id(map: "PK_aafe1321d916fac58ba06ad8178") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String                  @db.VarChar
+  description         String?                 @db.VarChar
+  status              experiments_status_enum @default(draft)
+  type                experiments_type_enum
+  targetAudience      String?                 @db.VarChar
+  audiencePercentage  Int?
+  startDate           DateTime?               @db.Timestamp(6)
+  endDate             DateTime?               @db.Timestamp(6)
+  hypothesis          String?                 @db.VarChar
+  primaryMetric       String?                 @db.VarChar
+  secondaryMetrics    String?
+  hasWinner           Boolean                 @default(false)
+  winningVariantId    String?                 @db.VarChar
+  segmentation        Json?                   @db.Json
+  createdAt           DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt           DateTime                @default(now()) @db.Timestamp(6)
+  experiment_variants experiment_variants[]
 }
 
 model focus_states {
@@ -271,66 +286,71 @@ model merchant_ad_campaigns {
   createdAt               DateTime                                  @default(now()) @db.Timestamp(6)
   updatedAt               DateTime                                  @default(now()) @db.Timestamp(6)
   lastUpdatedByMerchantAt DateTime?                                 @db.Timestamp(6)
+  merchants               merchants                                 @relation(fields: [merchantId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_5e56bd68cb22033c41def9bf2b4")
 }
 
 model merchant_analytics {
-  id                 String   @id(map: "PK_bd19dd6d4ec4146ba124396c98f") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  merchantId         String   @db.Uuid
-  productId          String?  @db.VarChar
-  categoryId         String?  @db.VarChar
-  date               DateTime @db.Timestamp(6)
-  timeFrame          String   @db.VarChar
-  revenue            Decimal  @default(0) @db.Decimal(10, 2)
-  orders             Int      @default(0)
-  productViews       Int      @default(0)
-  organicImpressions Int      @default(0)
-  paidImpressions    Int      @default(0)
-  clicks             Int      @default(0)
-  addToCarts         Int      @default(0)
-  abandonedCarts     Int      @default(0)
-  conversionRate     Decimal  @default(0) @db.Decimal(5, 2)
-  clickThroughRate   Decimal  @default(0) @db.Decimal(5, 2)
+  id                 String    @id(map: "PK_bd19dd6d4ec4146ba124396c98f") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  merchantId         String    @db.Uuid
+  productId          String?   @db.VarChar
+  categoryId         String?   @db.VarChar
+  date               DateTime  @db.Timestamp(6)
+  timeFrame          String    @db.VarChar
+  revenue            Decimal   @default(0) @db.Decimal(10, 2)
+  orders             Int       @default(0)
+  productViews       Int       @default(0)
+  organicImpressions Int       @default(0)
+  paidImpressions    Int       @default(0)
+  clicks             Int       @default(0)
+  addToCarts         Int       @default(0)
+  abandonedCarts     Int       @default(0)
+  conversionRate     Decimal   @default(0) @db.Decimal(5, 2)
+  clickThroughRate   Decimal   @default(0) @db.Decimal(5, 2)
   demographics       String?
-  createdAt          DateTime @default(now()) @db.Timestamp(6)
-  updatedAt          DateTime @default(now()) @db.Timestamp(6)
+  createdAt          DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt          DateTime  @default(now()) @db.Timestamp(6)
+  merchants          merchants @relation(fields: [merchantId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_e22295a2d4b8fba97e8f45774ab")
 }
 
 model merchant_brands {
-  id               String   @id(map: "PK_df70cf0b490da7e619094735819") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  merchantId       String   @db.Uuid
-  name             String   @db.VarChar
+  id               String    @id(map: "PK_df70cf0b490da7e619094735819") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  merchantId       String    @db.Uuid
+  name             String    @db.VarChar
   description      String?
-  logo             String?  @db.VarChar
+  logo             String?   @db.VarChar
   colorPalette     String?
-  primaryColor     String?  @db.VarChar
-  secondaryColor   String?  @db.VarChar
-  accentColor      String?  @db.VarChar
+  primaryColor     String?   @db.VarChar
+  secondaryColor   String?   @db.VarChar
+  accentColor      String?   @db.VarChar
   brandStory       String?
   foundedYear      Int?
   socialMediaLinks String?
-  createdAt        DateTime @default(now()) @db.Timestamp(6)
-  updatedAt        DateTime @default(now()) @db.Timestamp(6)
-  isActive         Boolean  @default(true)
+  createdAt        DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime  @default(now()) @db.Timestamp(6)
+  isActive         Boolean   @default(true)
+  merchants        merchants @relation(fields: [merchantId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_890fc865ea6269dd67f40a61f8f")
 }
 
 model merchant_platform_connections {
-  id                  Int       @id(map: "PK_c60d2c722c9716557ff0715f92b") @default(autoincrement())
-  merchant_id         String    @db.Uuid
-  platform_type       String    @db.VarChar
-  platform_identifier String?   @db.VarChar
-  platform_store_name String    @db.VarChar
-  platform_store_url  String    @db.VarChar
-  access_token        String?   @db.VarChar
-  refresh_token       String?   @db.VarChar
-  token_expires_at    DateTime? @db.Timestamp(6)
-  is_active           Boolean   @default(true)
-  last_synced_at      DateTime? @db.Timestamp(6)
-  last_sync_status    String?   @db.VarChar
-  last_sync_error     String?
-  platform_config     Json?     @db.Json
-  metadata            Json?     @db.Json
-  created_at          DateTime  @default(now()) @db.Timestamp(6)
-  updated_at          DateTime  @default(now()) @db.Timestamp(6)
+  id                          Int                           @id(map: "PK_c60d2c722c9716557ff0715f92b") @default(autoincrement())
+  merchant_id                 String                        @db.Uuid
+  platform_type               String                        @db.VarChar
+  platform_identifier         String?                       @db.VarChar
+  platform_store_name         String                        @db.VarChar
+  platform_store_url          String                        @db.VarChar
+  access_token                String?                       @db.VarChar
+  refresh_token               String?                       @db.VarChar
+  token_expires_at            DateTime?                     @db.Timestamp(6)
+  is_active                   Boolean                       @default(true)
+  last_synced_at              DateTime?                     @db.Timestamp(6)
+  last_sync_status            String?                       @db.VarChar
+  last_sync_error             String?
+  platform_config             Json?                         @db.Json
+  metadata                    Json?                         @db.Json
+  created_at                  DateTime                      @default(now()) @db.Timestamp(6)
+  updated_at                  DateTime                      @default(now()) @db.Timestamp(6)
+  merchants                   merchants                     @relation(fields: [merchant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_2590ccc1e39fd0e75aeeda9ed74")
+  shopify_bulk_operation_jobs shopify_bulk_operation_jobs[]
 }
 
 model merchant_products {
@@ -352,40 +372,49 @@ model merchant_products {
   createdAt          DateTime  @default(now()) @db.Timestamp(6)
   updatedAt          DateTime  @default(now()) @db.Timestamp(6)
   lastPromotedAt     DateTime? @db.Timestamp(6)
+  merchants          merchants @relation(fields: [merchantId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_acbc0a5e79a1c5cde684995793f")
 }
 
 model merchant_shipping_settings {
-  id                    String   @id(map: "PK_3452954bcf7327ec3145901a318") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  merchantId            String   @db.Uuid
-  offersFreeShipping    Boolean  @default(false)
-  freeShippingThreshold Decimal? @db.Decimal(10, 2)
-  standardShippingRate  Decimal? @db.Decimal(10, 2)
-  expeditedShippingRate Decimal? @db.Decimal(10, 2)
+  id                    String    @id(map: "PK_3452954bcf7327ec3145901a318") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  merchantId            String    @db.Uuid
+  offersFreeShipping    Boolean   @default(false)
+  freeShippingThreshold Decimal?  @db.Decimal(10, 2)
+  standardShippingRate  Decimal?  @db.Decimal(10, 2)
+  expeditedShippingRate Decimal?  @db.Decimal(10, 2)
   shippingCountries     String?
   excludedRegions       String?
-  createdAt             DateTime @default(now()) @db.Timestamp(6)
-  updatedAt             DateTime @default(now()) @db.Timestamp(6)
+  createdAt             DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt             DateTime  @default(now()) @db.Timestamp(6)
+  merchants             merchants @relation(fields: [merchantId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_75ea9ce5a34bf0529592e6477b1")
 }
 
 model merchants {
-  id           String   @id(map: "PK_4fd312ef25f8e05ad47bfe7ed25") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name         String   @db.VarChar
-  description  String?
-  logo         String?  @db.VarChar
-  website      String?  @db.VarChar
-  email        String   @db.VarChar
-  values       String?
-  categories   String?
-  latitude     Decimal? @db.Decimal(10, 7)
-  longitude    Decimal? @db.Decimal(10, 7)
-  rating       Decimal  @default(0) @db.Decimal(3, 2)
-  reviewCount  Int      @default(0)
-  productCount Int      @default(0)
-  createdAt    DateTime @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime @default(now()) @db.Timestamp(6)
-  isActive     Boolean  @default(true)
-  popularity   Decimal  @default(0) @db.Decimal(10, 2)
-  userId       String?  @db.Uuid
+  id                            String                          @id(map: "PK_4fd312ef25f8e05ad47bfe7ed25") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                          String                          @db.VarChar
+  description                   String?
+  logo                          String?                         @db.VarChar
+  website                       String?                         @db.VarChar
+  email                         String                          @db.VarChar
+  values                        String?
+  categories                    String?
+  latitude                      Decimal?                        @db.Decimal(10, 7)
+  longitude                     Decimal?                        @db.Decimal(10, 7)
+  rating                        Decimal                         @default(0) @db.Decimal(3, 2)
+  reviewCount                   Int                             @default(0)
+  productCount                  Int                             @default(0)
+  createdAt                     DateTime                        @default(now()) @db.Timestamp(6)
+  updatedAt                     DateTime                        @default(now()) @db.Timestamp(6)
+  isActive                      Boolean                         @default(true)
+  popularity                    Decimal                         @default(0) @db.Decimal(10, 2)
+  userId                        String?                         @db.Uuid
+  merchant_ad_campaigns         merchant_ad_campaigns[]
+  merchant_analytics            merchant_analytics[]
+  merchant_brands               merchant_brands[]
+  merchant_platform_connections merchant_platform_connections[]
+  merchant_products             merchant_products[]
+  merchant_shipping_settings    merchant_shipping_settings[]
+  users                         users?                          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_c4199d0353747c821386791f813")
 }
 
 model navigation_sections {
@@ -420,6 +449,7 @@ model order_fulfillments {
   createdAt             DateTime                       @default(now()) @db.Timestamp(6)
   updatedAt             DateTime                       @default(now()) @db.Timestamp(6)
   deletedAt             DateTime?                      @db.Timestamp(6)
+  orders                orders                         @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_ce6c6485056e1e51b94843d123d")
 
   @@index([status], map: "IDX_331cb9a05a9d4cd3de09cc7b3c")
   @@index([orderId], map: "IDX_ce6c6485056e1e51b94843d123")
@@ -436,6 +466,7 @@ model order_items {
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @db.Timestamp(6)
   deletedAt DateTime? @db.Timestamp(6)
+  orders    orders    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_f1d359a55923bb45b057fbdab0d")
 
   @@index([productId], map: "IDX_cdb99c05982d5191ac8465ac01")
   @@index([orderId], map: "IDX_f1d359a55923bb45b057fbdab0")
@@ -458,6 +489,8 @@ model orders {
   deletedAt             DateTime?                 @db.Timestamp(6)
   stripePaymentIntentId String?                   @db.VarChar(255)
   stripeReceiptUrl      String?
+  order_fulfillments    order_fulfillments[]
+  order_items           order_items[]
 
   @@index([paymentStatus], map: "IDX_01b20118a3f640214e7a8a6b29")
   @@index([userId], map: "IDX_151b79a83ba240b0cb31b2302d")
@@ -646,56 +679,59 @@ model search_analytics {
 }
 
 model session_interactions {
-  id         String   @id(map: "PK_5b869418857736732b7e369aadc") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  type       String   @db.VarChar(50)
+  id         String    @id(map: "PK_5b869418857736732b7e369aadc") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  type       String    @db.VarChar(50)
   data       Json
   metadata   Json?
-  timestamp  DateTime @db.Timestamp(6)
+  timestamp  DateTime  @db.Timestamp(6)
   durationMs Int?
-  createdAt  DateTime @default(now()) @db.Timestamp(6)
-  session_id String?  @db.Uuid
+  createdAt  DateTime  @default(now()) @db.Timestamp(6)
+  session_id String?   @db.Uuid
+  sessions   sessions? @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_11267342392c36af31e5dfd7835")
 }
 
 model sessions {
-  id               String   @id(map: "PK_3238ef96f18b355b671619111bc") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  sessionId        String   @unique(map: "UQ_ba57f8421edf5e5c4e99b833811") @db.VarChar
-  startTime        DateTime @db.Timestamp(6)
-  lastActivityTime DateTime @db.Timestamp(6)
-  deviceInfo       Json?
-  referrer         String?  @db.VarChar
-  searchQueries    Json     @default("[]")
-  clickedResults   Json     @default("[]")
-  viewedCategories Json     @default("[]")
-  viewedBrands     Json     @default("[]")
-  filters          Json     @default("[]")
-  userId           String?  @db.VarChar
-  anonymousUserId  String?  @db.VarChar
-  duration         Int?
-  createdAt        DateTime @default(now()) @db.Timestamp(6)
-  updatedAt        DateTime @default(now()) @db.Timestamp(6)
+  id                   String                 @id(map: "PK_3238ef96f18b355b671619111bc") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sessionId            String                 @unique(map: "UQ_ba57f8421edf5e5c4e99b833811") @db.VarChar
+  startTime            DateTime               @db.Timestamp(6)
+  lastActivityTime     DateTime               @db.Timestamp(6)
+  deviceInfo           Json?
+  referrer             String?                @db.VarChar
+  searchQueries        Json                   @default("[]")
+  clickedResults       Json                   @default("[]")
+  viewedCategories     Json                   @default("[]")
+  viewedBrands         Json                   @default("[]")
+  filters              Json                   @default("[]")
+  userId               String?                @db.VarChar
+  anonymousUserId      String?                @db.VarChar
+  duration             Int?
+  createdAt            DateTime               @default(now()) @db.Timestamp(6)
+  updatedAt            DateTime               @default(now()) @db.Timestamp(6)
+  session_interactions session_interactions[]
 }
 
 model shopify_bulk_operation_jobs {
-  id                     String                                  @id(map: "PK_b68cfb8cb49cb1202808a8a2425") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  merchantId             String                                  @db.VarChar
-  shopifyBulkOperationId String                                  @db.VarChar
-  description            String                                  @db.VarChar
-  query                  String?
-  status                 shopify_bulk_operation_jobs_status_enum @default(CREATED)
-  statusMessage          String?                                 @db.VarChar
-  errorCode              String?                                 @db.VarChar
-  errorDetails           String?
-  resultUrl              String?                                 @db.VarChar
-  partialResultUrl       String?                                 @db.VarChar
-  objectCount            Int                                     @default(0)
-  fileSize               Int                                     @default(0)
-  completedAt            DateTime?                               @db.Timestamp(6)
-  retryCount             Int                                     @default(0)
-  progressPercentage     Int                                     @default(0)
-  metadata               Json?                                   @db.Json
-  connectionId           Int?
-  createdAt              DateTime                                @default(now()) @db.Timestamp(6)
-  updatedAt              DateTime                                @default(now()) @db.Timestamp(6)
+  id                            String                                  @id(map: "PK_b68cfb8cb49cb1202808a8a2425") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  merchantId                    String                                  @db.VarChar
+  shopifyBulkOperationId        String                                  @db.VarChar
+  description                   String                                  @db.VarChar
+  query                         String?
+  status                        shopify_bulk_operation_jobs_status_enum @default(CREATED)
+  statusMessage                 String?                                 @db.VarChar
+  errorCode                     String?                                 @db.VarChar
+  errorDetails                  String?
+  resultUrl                     String?                                 @db.VarChar
+  partialResultUrl              String?                                 @db.VarChar
+  objectCount                   Int                                     @default(0)
+  fileSize                      Int                                     @default(0)
+  completedAt                   DateTime?                               @db.Timestamp(6)
+  retryCount                    Int                                     @default(0)
+  progressPercentage            Int                                     @default(0)
+  metadata                      Json?                                   @db.Json
+  connectionId                  Int?
+  createdAt                     DateTime                                @default(now()) @db.Timestamp(6)
+  updatedAt                     DateTime                                @default(now()) @db.Timestamp(6)
+  merchant_platform_connections merchant_platform_connections?          @relation(fields: [connectionId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_8898e8d5b95f7fdf1381ce1faab")
 
   @@index([shopifyBulkOperationId], map: "IDX_5a0df9e0b89f69b6f620307cf2")
   @@index([merchantId], map: "IDX_74195d47974b20bdfbd2940f0c")
@@ -712,6 +748,7 @@ model user_behaviors {
   metadata          String?                          @db.VarChar
   createdAt         DateTime                         @default(now()) @db.Timestamp(6)
   lastInteractionAt DateTime                         @db.Timestamp(6)
+  users             users                            @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_2faa3a577b9bed8e5d849a47f00")
 
   @@unique([userId, entityId, entityType, behaviorType], map: "IDX_6ebf6f1026bee924f2313f6b91")
   @@index([userId], map: "IDX_2faa3a577b9bed8e5d849a47f0")
@@ -788,6 +825,7 @@ model user_preference_profiles {
   hasEnoughData                 Boolean  @default(false)
   createdAt                     DateTime @default(now()) @db.Timestamp(6)
   updatedAt                     DateTime @default(now()) @db.Timestamp(6)
+  users                         users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_62b98bd1e7c34d0d06074160658")
 }
 
 model user_preferences {
@@ -805,31 +843,39 @@ model user_preferences {
   preferredMaterials String?
   createdAt          DateTime @default(now()) @db.Timestamp(6)
   updatedAt          DateTime @default(now()) @db.Timestamp(6)
+  users              users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_b6202d1cacc63a0b9c8dac2abd4")
 }
 
 model user_segments {
-  id          String   @id(map: "PK_a6e2b9ccd13727fe23d00c4d99c") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name        String   @db.VarChar(255)
-  description String?
-  userCount   Int      @default(0)
-  createdAt   DateTime @default(now()) @db.Timestamp(6)
-  updatedAt   DateTime @default(now()) @db.Timestamp(6)
+  id                      String                    @id(map: "PK_a6e2b9ccd13727fe23d00c4d99c") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                    String                    @db.VarChar(255)
+  description             String?
+  userCount               Int                       @default(0)
+  createdAt               DateTime                  @default(now()) @db.Timestamp(6)
+  updatedAt               DateTime                  @default(now()) @db.Timestamp(6)
+  alert_affected_segments alert_affected_segments[]
+  users                   users[]
 }
 
 model users {
-  id              String          @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  email           String          @unique(map: "UQ_97672ac88f789774dd47f7c8be3") @db.VarChar
-  firstName       String          @db.VarChar
-  lastName        String          @db.VarChar
-  password        String          @db.VarChar
-  role            users_role_enum @default(USER)
-  profileImage    String?         @db.VarChar
-  interests       String?
-  isEmailVerified Boolean         @default(false)
-  isMerchant      Boolean         @default(false)
-  createdAt       DateTime        @default(now()) @db.Timestamp(6)
-  updatedAt       DateTime        @default(now()) @db.Timestamp(6)
-  segment_id      String?         @db.Uuid
+  id                       String                    @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                    String                    @unique(map: "UQ_97672ac88f789774dd47f7c8be3") @db.VarChar
+  firstName                String                    @db.VarChar
+  lastName                 String                    @db.VarChar
+  password                 String                    @db.VarChar
+  role                     users_role_enum           @default(USER)
+  profileImage             String?                   @db.VarChar
+  interests                String?
+  isEmailVerified          Boolean                   @default(false)
+  isMerchant               Boolean                   @default(false)
+  createdAt                DateTime                  @default(now()) @db.Timestamp(6)
+  updatedAt                DateTime                  @default(now()) @db.Timestamp(6)
+  segment_id               String?                   @db.Uuid
+  merchants                merchants[]
+  user_behaviors           user_behaviors[]
+  user_preference_profiles user_preference_profiles?
+  user_preferences         user_preferences?
+  user_segments            user_segments?            @relation(fields: [segment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_41093f6e4ec7762e5d3f81994a3")
 }
 
 model vendor_addresses {
@@ -848,6 +894,7 @@ model vendor_addresses {
   created_at   DateTime                          @default(now()) @db.Timestamp(6)
   updated_at   DateTime                          @default(now()) @db.Timestamp(6)
   vendor_id    String?                           @db.Uuid
+  vendors      vendors?                          @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_0e41c0cf6acfee2cc420df8e183")
 }
 
 model vendor_applications {
@@ -867,6 +914,8 @@ model vendor_applications {
   created_at         DateTime                             @default(now()) @db.Timestamp(6)
   updated_at         DateTime                             @default(now()) @db.Timestamp(6)
   vendor_id          String?                              @unique(map: "REL_158448879d9f874af184e43cab") @db.Uuid
+  vendors            vendors?                             @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_158448879d9f874af184e43cabf")
+  vendor_documents   vendor_documents[]
 }
 
 model vendor_banking_details {
@@ -883,80 +932,58 @@ model vendor_banking_details {
   created_at        DateTime  @default(now()) @db.Timestamp(6)
   updated_at        DateTime  @default(now()) @db.Timestamp(6)
   vendor_id         String?   @unique(map: "REL_59524db07f798e623509ca94e1") @db.Uuid
+  vendors           vendors?  @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_59524db07f798e623509ca94e10")
 }
 
 model vendor_documents {
-  id               String                             @id(map: "PK_b6aa864f4d6f4a283445266a4dc") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  vendorId         String                             @db.VarChar
-  documentType     vendor_documents_documenttype_enum @default(other)
-  status           vendor_documents_status_enum       @default(pending)
-  name             String                             @db.VarChar(255)
-  filePath         String
-  fileSize         Int?
-  mimeType         String                             @db.VarChar(100)
-  originalFilename String                             @db.VarChar(255)
-  checksum         String?                            @db.VarChar
-  verifiedBy       String?                            @db.VarChar
-  verifiedAt       DateTime?                          @db.Timestamp(6)
-  autoVerifiedAt   DateTime?                          @db.Timestamp(6)
-  notes            String?
-  rejectionReason  String?                            @db.VarChar
-  applicationId    String?                            @db.VarChar
-  created_at       DateTime                           @default(now()) @db.Timestamp(6)
-  updated_at       DateTime                           @default(now()) @db.Timestamp(6)
-  vendor_id        String?                            @db.Uuid
-  application_id   String?                            @db.Uuid
+  id                  String                             @id(map: "PK_b6aa864f4d6f4a283445266a4dc") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vendorId            String                             @db.VarChar
+  documentType        vendor_documents_documenttype_enum @default(other)
+  status              vendor_documents_status_enum       @default(pending)
+  name                String                             @db.VarChar(255)
+  filePath            String
+  fileSize            Int?
+  mimeType            String                             @db.VarChar(100)
+  originalFilename    String                             @db.VarChar(255)
+  checksum            String?                            @db.VarChar
+  verifiedBy          String?                            @db.VarChar
+  verifiedAt          DateTime?                          @db.Timestamp(6)
+  autoVerifiedAt      DateTime?                          @db.Timestamp(6)
+  notes               String?
+  rejectionReason     String?                            @db.VarChar
+  applicationId       String?                            @db.VarChar
+  created_at          DateTime                           @default(now()) @db.Timestamp(6)
+  updated_at          DateTime                           @default(now()) @db.Timestamp(6)
+  vendor_id           String?                            @db.Uuid
+  application_id      String?                            @db.Uuid
+  vendors             vendors?                           @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_218ad2aece37d1c3bf7cfe6c72f")
+  vendor_applications vendor_applications?               @relation(fields: [application_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e80141e48f8cbcc8d9e0889084f")
 }
 
 model vendors {
-  id                 String                    @id(map: "PK_9c956c9797edfae5c6ddacc4e6e") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  businessName       String                    @db.VarChar(255)
-  businessEmail      String                    @unique(map: "IDX_b6ab7752a3938c1089e2c2156e") @db.VarChar(255)
-  phone              String                    @db.VarChar(50)
-  businessType       vendors_businesstype_enum @default(individual)
-  website            String?                   @db.VarChar(255)
-  description        String?
-  status             vendors_status_enum       @default(pending)
-  businessId         String?                   @db.VarChar(255)
-  productCategories  String?
-  isVerified         Boolean                   @default(false)
-  verifiedAt         DateTime?                 @db.Timestamp(6)
-  verifiedBy         String?                   @db.VarChar
-  rejectionReason    String?                   @db.VarChar
-  commissionRate     Decimal                   @default(0) @db.Decimal(10, 2)
-  canListNewProducts Boolean                   @default(true)
-  productsCount      Int                       @default(0)
-  created_at         DateTime                  @default(now()) @db.Timestamp(6)
-  updated_at         DateTime                  @default(now()) @db.Timestamp(6)
-}
-
-enum business_metrics_metrictype_enum {
-  revenue
-  orders
-  average_order_value
-  conversion_rate
-  product_views
-  cart_adds
-  checkout_starts
-  checkout_completions
-  cart_abandonment
-  new_users
-  returning_users
-  search_count
-  search_conversion
-  merchant_revenue
-  platform_revenue
-
-  @@map("business_metrics_metrictype_enum")
-}
-
-enum business_metrics_timegranularity_enum {
-  hourly
-  daily
-  weekly
-  monthly
-
-  @@map("business_metrics_timegranularity_enum")
+  id                     String                    @id(map: "PK_9c956c9797edfae5c6ddacc4e6e") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  businessName           String                    @db.VarChar(255)
+  businessEmail          String                    @unique(map: "IDX_b6ab7752a3938c1089e2c2156e") @db.VarChar(255)
+  phone                  String                    @db.VarChar(50)
+  businessType           vendors_businesstype_enum @default(individual)
+  website                String?                   @db.VarChar(255)
+  description            String?
+  status                 vendors_status_enum       @default(pending)
+  businessId             String?                   @db.VarChar(255)
+  productCategories      String?
+  isVerified             Boolean                   @default(false)
+  verifiedAt             DateTime?                 @db.Timestamp(6)
+  verifiedBy             String?                   @db.VarChar
+  rejectionReason        String?                   @db.VarChar
+  commissionRate         Decimal                   @default(0) @db.Decimal(10, 2)
+  canListNewProducts     Boolean                   @default(true)
+  productsCount          Int                       @default(0)
+  created_at             DateTime                  @default(now()) @db.Timestamp(6)
+  updated_at             DateTime                  @default(now()) @db.Timestamp(6)
+  vendor_addresses       vendor_addresses[]
+  vendor_applications    vendor_applications?
+  vendor_banking_details vendor_banking_details?
+  vendor_documents       vendor_documents[]
 }
 
 enum alerts_severity_enum {
@@ -975,6 +1002,31 @@ enum alerts_type_enum {
   PERSONALIZATION_DROP
   UNUSUAL_PATTERN
   AB_TEST_RESULT
+}
+
+enum business_metrics_metrictype_enum {
+  revenue
+  orders
+  average_order_value
+  conversion_rate
+  product_views
+  cart_adds
+  checkout_starts
+  checkout_completions
+  cart_abandonment
+  new_users
+  returning_users
+  search_count
+  search_conversion
+  merchant_revenue
+  platform_revenue
+}
+
+enum business_metrics_timegranularity_enum {
+  hourly
+  daily
+  weekly
+  monthly
 }
 
 enum experiment_results_resulttype_enum {
@@ -1214,3 +1266,5 @@ enum vendors_status_enum {
   rejected
   suspended
 }
+
+

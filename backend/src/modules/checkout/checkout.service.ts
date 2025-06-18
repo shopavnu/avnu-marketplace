@@ -6,7 +6,6 @@ import { StripeService } from '../payments/stripe.service';
 import { UsersService } from '../users/users.service';
 import { PaymentStatus } from '../orders/enums/payment-status.enum'; // Corrected path
 import { CreateOrderDto, ShippingAddressDto } from '../orders/dto/create-order.dto'; // Added ShippingAddressDto import
-import { Cart } from '../cart/entities/cart.entity';
 import { User } from '../users/entities/user.entity';
 // Removed CartItemForCheckout interface as it's not strictly needed and was causing issues with 'name'
 import { InitiateCheckoutResponseDto } from './dto/initiate-checkout-response.dto';
