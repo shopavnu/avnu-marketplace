@@ -11,13 +11,7 @@ export enum SearchEventType {
   SORT_APPLY = 'SORT_APPLY',
 }
 import GraphQLJSON from 'graphql-type-json';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsInt,
-  IsObject,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsInt, IsObject } from 'class-validator';
 
 /**
  * Input type for tracking search events (flat payload aligned with SDL)

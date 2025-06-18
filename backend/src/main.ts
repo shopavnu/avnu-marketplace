@@ -13,9 +13,11 @@ async function bootstrap() {
 
   // Enable CORS with explicit origin and credentials for cookies/JWT
   // Support multiple dev front-end origins (e.g. Next.js default 3000 or custom 3001)
-  const allowedOrigins = (process.env.FRONTEND_ORIGIN || 'http://localhost:3001,http://localhost:3000')
+  const allowedOrigins = (
+    process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001,http://localhost:3000'
+  )
     .split(',')
-    .map((o) => o.trim());
+    .map(o => o.trim());
 
   app.enableCors({
     origin: allowedOrigins,

@@ -1,7 +1,7 @@
 import { Args, Mutation, Resolver, ObjectType, Field } from '@nestjs/graphql';
 import { Logger } from '@nestjs/common';
 import { SearchAnalyticsService } from '../services/search-analytics.service';
-import { SearchEventInput, SearchEventType } from '../graphql/search-event.input';
+import { SearchEventInput } from '../graphql/search-event.input';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 

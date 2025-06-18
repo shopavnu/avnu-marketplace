@@ -223,16 +223,18 @@ export class CartService {
     // Early exit if no items
     if (!items.length) return items;
 
-    const productIds = items.map((it) => it.productId);
+    const productIds = items.map(it => it.productId);
     const products = await this.prisma.product.findMany({
       where: { id: { in: productIds } },
       select: { id: true, price: true, inStock: true },
     });
-    const productMap = new Map(products.map((p) => [p.id, p]));
+    const productMap = new Map(products.map(p => [p.id, p]));
 
     const changes: { productId: string; price?: number; inStock?: boolean }[] = [];
-    const updatedItems: CartItemDto[] = items.map((item) => {
-      const dbProd = productMap.get(item.productId) as { price: number; inStock: boolean } | undefined;
+    const updatedItems: CartItemDto[] = items.map(item => {
+      const dbProd = productMap.get(item.productId) as
+        | { price: number; inStock: boolean }
+        | undefined;
       if (!dbProd) return item;
 
       let changed = false;
@@ -243,7 +245,11 @@ export class CartService {
       }
       const inStock = dbProd.inStock;
       if (!inStock || changed) {
-        changes.push({ productId: item.productId, price: changed ? dbProd.price : undefined, inStock: inStock });
+        changes.push({
+          productId: item.productId,
+          price: changed ? dbProd.price : undefined,
+          inStock,
+        });
       }
       return { ...item, price: newPrice };
     });

@@ -22,11 +22,11 @@ export class CartGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   public server!: Server;
 
-  handleConnection(socket: any) {
+  handleConnection(_socket: any) {
     // console.log('Client connected to cart namespace', socket.id);
   }
 
-  handleDisconnect(socket: any) {
+  handleDisconnect(_socket: any) {
     // console.log('Client disconnected from cart namespace', socket.id);
   }
 

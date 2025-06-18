@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 
 // This is a simple script to test Prisma connection
@@ -15,9 +14,9 @@ async function main() {
     console.log('Database version:', result);
 
     // Count existing records
-    const brandCount = await prisma.brand.count();
-    const productCount = await prisma.product.count();
-    const userCount = await prisma.user.count();
+    const brandCount = await prisma.brands.count();
+    const productCount = await prisma.products.count();
+    const userCount = await prisma.users.count();
 
     console.log('Current database statistics:');
     console.log(`- Brands: ${brandCount}`);
