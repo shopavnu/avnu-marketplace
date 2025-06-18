@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 import { useRouter } from 'next/router';
@@ -184,37 +184,43 @@ const StripeCheckoutPage: React.FC = () => {
               <>
                 {Object.entries(itemsByBrand).map(([brand, brandItems]) => (
                   <div key={brand} style={{ marginBottom: '0.75rem' }}>
-                    <p style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{brand}</p>
-                    {brandItems.map((item) => {
-                      const isUpdated = recentlyUpdatedIds.includes(item.product.id);
-                      const isOos = outOfStockIds.includes(item.product.id);
-                      return (
-                        <div
-                          key={item.product.id}
-                          className={clsx({ 'recently-updated': isUpdated, 'out-of-stock': isOos })}
-                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', position:'relative' }}
-                        >
-                          <div
-                          style={{
-                            display: 'flex',
-                            gap: '2rem',
-                            alignItems: 'flex-start',
-                            flexWrap: 'wrap',
-                          }}
-                        >
-                          {item.product.image && (
-                            <Image src={item.product.image} alt={item.product.title} width={40} height={40} style={{ borderRadius: '4px' }} />
-                          )}
-                          <p style={{ color: '#4A5568' }}>{item.quantity} × {item.product.title}</p>
-                        </div>
-                          {isOos && <span className="out-of-stock-badge">OOS</span>}
-                          <p style={{ fontWeight: '500', color: '#2D3748' }}>${(item.product.price * item.quantity).toFixed(2)}</p>
-                        </div>
-                      );
-                    })}
+                     <p style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{brand}</p>
+                     <AnimatePresence initial={false}>
+                       {brandItems.map((item) => {
+                         const isUpdated = recentlyUpdatedIds.includes(item.product.id);
+                         const isOos = outOfStockIds.includes(item.product.id);
+                         return (
+                           <motion.div
+                             initial={{ opacity: 0, y: 8 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             exit={{ opacity: 0, y: -8 }}
+                             transition={{ duration: 0.25, ease: 'easeInOut' }}
+                             key={item.product.id}
+                             className={clsx({ 'recently-updated': isUpdated, 'out-of-stock': isOos })}
+                             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', position:'relative' }}
+                           >
+                             <div
+                               style={{
+                                 display: 'flex',
+                                 gap: '2rem',
+                                 alignItems: 'flex-start',
+                                 flexWrap: 'wrap',
+                               }}
+                             >
+                               {item.product.image && (
+                                 <Image src={item.product.image} alt={item.product.title} width={40} height={40} style={{ borderRadius: '4px' }} />
+                               )}
+                             </div>
+                             <p style={{ color: '#4A5568' }}>{item.quantity} × {item.product.title}</p>
+                             {isOos && <span className="out-of-stock-badge">OOS</span>}
+                             <p style={{ fontWeight: '500', color: '#2D3748' }}>${(item.product.price * item.quantity).toFixed(2)}</p>
+                           </motion.div>
+                         );
+                       })}
+                     </AnimatePresence>
                   </div>
                 ))}
-                <hr style={{ margin: '0.75rem 0', borderTop: '1px solid #E2E8F0' }}/>
+                <hr style={{ margin: '0.75rem 0', borderTop: '1px solid #E2E8F0' }} />
                 <p style={{ fontSize: '0.875rem', color: '#718096', marginBottom: '0.5rem' }}>Tax calculated at payment.</p>
               </>
             )}
