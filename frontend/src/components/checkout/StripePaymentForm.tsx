@@ -105,6 +105,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string>(clientSecretProp || '');
   const { outOfStockIds } = useCartStore();
+  const hasOutOfStock = outOfStockIds.length > 0;
 
   const stripe = useStripe();
   const elements = useElements();
@@ -155,7 +156,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!stripe || !elements || !clientSecret || isLoading) {
+    if (!stripe || !elements || !clientSecret || isLoading || hasOutOfStock) {
       return;
     }
 
@@ -258,6 +259,12 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
       data-testid="stripe-payment-form-container"
     >
       {/* Error message alert (if any) */}
+      {hasOutOfStock && (
+        <div style={styles.alert} role="alert" aria-live="assertive">
+          <h3 style={styles.alertTitle}>Cart needs update</h3>
+          <p>Some items are out of stock. Please review your cart before paying.</p>
+        </div>
+      )}
       {errorMessage && (
         <div 
           style={styles.alert}
@@ -293,11 +300,11 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
             ...styles.button, 
             ...((!stripe || !elements || !clientSecret || isLoading) ? styles.disabledButton : {})
           }}
-          disabled={!stripe || !elements || !clientSecret || isLoading || outOfStockIds.length > 0}
+          disabled={isLoading || !stripe || hasOutOfStock}
           data-testid="payment-submit-button"
           aria-label={isLoading ? "Processing payment" : "Complete payment"}
         >
-          {outOfStockIds.length > 0 ? "Update Cart" : (isLoading ? "Processing..." : "Pay Now")}
+          {outOfStockIds.length > 0 ? "Update Cart" : (hasOutOfStock ? "Update Cart" : isLoading ? "Processing..." : "Pay Now")}
         </button>
       </form>
     </div>
