@@ -40,7 +40,8 @@
     "preinstall": "npx only-allow npm",
     "postinstall": "cd backend && npm run fix-security || true",
     "pre-ci": "node ./pre-ci.js",
-    "ci": "npm run pre-ci && npm ci"
+    "ci": "npm run pre-ci && npm ci",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -163,6 +164,7 @@
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "resolve.exports": "^2.0.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@playwright/test": "^1.44.0"
   }
 }
