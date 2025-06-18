@@ -9,6 +9,7 @@ interface CartUpdatedPayload {
 }
 
 interface PriceStockChangedPayload {
+  userId?: string;
   items: Array<{
     productId: string;
     price?: number;
@@ -42,7 +43,7 @@ export default function useCartSocket(userId?: string) {
       console.error('Cart socket connect error', err);
     });
 
-    const { setCartFromServer, items: current } = useCartStore.getState();
+    const { setCartFromServer } = useCartStore.getState();
 
     socket.on('cartUpdated', (payload: CartUpdatedPayload) => {
       if (userId && payload.userId && payload.userId !== userId) return;
@@ -51,6 +52,7 @@ export default function useCartSocket(userId?: string) {
     });
 
     socket.on('priceStockChanged', (payload: PriceStockChangedPayload) => {
+      if (userId && payload.userId && payload.userId !== userId) return;
       const outIds:string[] = [];
       const priceChangeIds:string[] = [];
       payload.items.forEach(change => {

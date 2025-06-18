@@ -255,7 +255,7 @@ export class CartService {
     });
 
     if (changes.length) {
-      this.cartGateway.broadcastPriceStockChanged({ items: changes });
+      this.cartGateway.broadcastPriceStockChanged({ userId, items: changes });
     }
 
     return updatedItems;
