@@ -24,8 +24,8 @@ test.describe('Checkout flow', () => {
     await page.getByTestId('product-card').first().getByRole('button', { name: /add to cart/i }).click();
 
     // 2. Open cart dropdown & go to checkout
-    await page.locator('[data-testid="cart-toggle"]').click();
-    await page.locator('[data-testid="checkout-button"]').click();
+    await page.getByRole('button', { name: /shopping cart/i }).click();
+    await page.locator('a[href="/stripe-checkout"]').click();
 
     // 3. Wait for stripe-checkout page to initialise
     await expect(page).toHaveURL(/stripe-checkout/);
