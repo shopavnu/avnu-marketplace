@@ -17,8 +17,11 @@ test.describe('Checkout flow', () => {
   });
 
   test('guest can complete checkout', async ({ page }) => {
-    // 1. Add first product to cart
-    await page.locator('[data-testid="product-card"]').first().locator('[data-testid="add-to-cart"]').click();
+    // extend timeout to allow dev servers warm-up
+    test.setTimeout(60_000);
+    // 1. Wait for product list then add first product to cart
+    await page.waitForSelector('[data-testid="product-card"]');
+    await page.getByTestId('product-card').first().getByRole('button', { name: /add to cart/i }).click();
 
     // 2. Open cart dropdown & go to checkout
     await page.locator('[data-testid="cart-toggle"]').click();
