@@ -185,9 +185,7 @@ registerEnumType(ExperimentStatus, {
   controllers: [],
   providers: [
     CartGateway,
-    ...(DISABLE_EXT_SERVICES
-      ? [{ provide: ElasticsearchService, useValue: {} }]
-      : []),
+    ...(DISABLE_EXT_SERVICES ? [{ provide: ElasticsearchService, useValue: {} }] : []),
   ],
 })
 export class AppModule implements NestModule {

@@ -13,8 +13,7 @@ import { LoggerService } from '@common/services/logger.service';
         ElasticsearchModule.registerAsync({
           imports: [ConfigModule],
           useFactory: async (configService: ConfigService) => ({
-            node:
-              configService.get<string>('ELASTICSEARCH_NODE') || 'http://localhost:9200',
+            node: configService.get<string>('ELASTICSEARCH_NODE') || 'http://localhost:9200',
             auth: {
               apiKey: configService.get<string>('ELASTICSEARCH_API_KEY') || '',
             },
