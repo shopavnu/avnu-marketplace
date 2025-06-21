@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import "../styles/checkout.css";
 import "../styles/toast.css";
+import "../styles/accessibility.css";
 
 import "../styles/product-card.css"; // Import product card consistent styling
 import type { AppProps } from "next/app";

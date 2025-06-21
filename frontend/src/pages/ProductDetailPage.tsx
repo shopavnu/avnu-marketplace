@@ -9,6 +9,7 @@ import SimilarProducts from "../components/recommendations/SimilarProducts";
 import PersonalizedRecommendations from "../components/recommendations/PersonalizedRecommendations";
 import RecentlyViewedProducts from "../components/recommendations/RecentlyViewedProducts";
 import useCartStore from "../stores/useCartStore";
+import { createProductSummary } from "../utils/cart";
 
 /**
  * Product detail page with personalization tracking
@@ -133,40 +134,20 @@ const ProductDetailPage: React.FC = () => {
   const handleAddToCart = () => {
     if (!product) return;
 
-    // Create a ProductSummary object that matches the expected interface
-    const productSummary = {
-      id: product.id,
-      title: product.title,
-      price: selectedVariant?.price || product.price,
-      image: product.images?.[0] || '', // First image or empty string if no images
-      brand: product.brandName || 'Unknown',
-      slug: product.slug || product.id,
-      inStock: selectedVariant ? (selectedVariant.inventoryQuantity > 0) : (product.quantity !== undefined ? product.quantity > 0 : product.inStock || false),
-      // Optional variant information
-      variant: selectedVariant ? {
-        id: selectedVariant.id,
-        name: Object.keys(selectedOptions)[0] || '',
-        value: Object.values(selectedOptions)[0] || '',
-        price: selectedVariant.price
-      } : undefined,
-      // Optional attributes for any additional product data
-      attributes: {
-        ...selectedOptions
-      }
-    };
+    // Create standardized summary via shared helper
+    const productSummary = createProductSummary(product, selectedVariant, selectedOptions);
 
-    // Add to cart using Zustand store (with product and quantity as separate arguments)
+    // Add to cart
     addItem(productSummary, quantity);
 
     // Track add to cart event
     trackInteraction("add_to_cart", {
-      productId: product.id,
+      productId: productSummary.id,
       variantId: selectedVariant?.id,
-      categoryId:
-        product.categoryId || product.categories?.[0] || "",
+      categoryId: product.categoryId || product.categories?.[0] || "",
       brandId: product.brandId || product.brandName,
-      price: selectedVariant?.price || product.price,
-      quantity: quantity,
+      price: productSummary.price,
+      quantity,
       timestamp: new Date().toISOString(),
     });
   };

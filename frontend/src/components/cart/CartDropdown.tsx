@@ -219,6 +219,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <div 
+          data-testid="cart-dropdown"
           ref={dropdownRef}
           className="absolute top-full right-0 mt-2 w-[380px] max-h-[80vh] bg-white rounded-lg shadow-xl z-50 overflow-hidden"
         >
@@ -416,6 +417,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
 
                     {/* Checkout Button */}
                     <Link
+                      data-testid="checkout-link"
                       href="/stripe-checkout"
                       className="block w-full text-center py-3 bg-sage text-white rounded-full font-medium hover:bg-sage/90 transition-colors"
                       onClick={onClose}
@@ -423,6 +425,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ isOpen, onClose }) => {
                       Proceed to Checkout
                     </Link>
 
+                    {/* Continue Shopping */}
                     {/* Continue Shopping */}
                     <button
                       onClick={() => {

@@ -1,0 +1,26 @@
+/* Global accessibility styles */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid #3182ce; /* Avnu primary accent */
+  outline-offset: 2px;
+}
+
+/* Prevent Next.js dev error overlay from intercepting pointer events */
+nextjs-portal {
+  pointer-events: none !important;
+}
+
+/* High-contrast focus ring for dark backgrounds */
+@media (prefers-color-scheme: dark) {
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    outline-color: #63b3ed; /* lighter blue for dark mode */
+  }
+}
