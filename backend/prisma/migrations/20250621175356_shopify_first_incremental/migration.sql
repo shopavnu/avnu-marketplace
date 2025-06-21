@@ -12,13 +12,19 @@ BEGIN
   END IF;
 END $$;
 
--- 2. Columns on merchants --------------------------------------------------------
-ALTER TABLE IF EXISTS "public"."merchants"
+-- 2. Ensure merchants table exists and add Shopify columns -----------------------
+CREATE TABLE IF NOT EXISTS "public"."merchants" (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "name" VARCHAR,
+  "createdAt" TIMESTAMP(6) NOT NULL DEFAULT now()
+);
+
+ALTER TABLE "public"."merchants"
   ADD COLUMN IF NOT EXISTS "shopifyShopId" BIGINT,
   ADD COLUMN IF NOT EXISTS "myshopifyDomain" VARCHAR;
 
--- 3. Columns on products ---------------------------------------------------------
-ALTER TABLE IF EXISTS "public"."products"
+-- 3. Columns on Product ---------------------------------------------------------
+ALTER TABLE "public"."Product"
   ADD COLUMN IF NOT EXISTS "shopifyProductId" BIGINT,
   ADD COLUMN IF NOT EXISTS "shopifyStatus" "shopify_product_status_enum";
 
