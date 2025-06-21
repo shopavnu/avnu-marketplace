@@ -18,17 +18,9 @@ test.describe('Checkout flow – out-of-stock item', () => {
       inStock: false,
     };
 
-    // Stub product list and detail endpoints
-    await page.route('**/products**', route => {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([product]) });
-    });
-    await page.route('**/products/*', route => {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(product) });
-    });
-
-    // GraphQL & checkout endpoints – empty responses
-    await page.route('**/graphql', route => {
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: {} }) });
+    // Stub checkout initiate endpoint only — rest of network requests can proceed normally
+    await page.route('**/api/checkout/initiate', route => {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ orderId: 'order-2', clientSecret: 'cs_test_456' }) });
     });
     await page.route('**/api/checkout/initiate', route => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ orderId: 'order-2', clientSecret: 'cs_test_456' }) });
@@ -58,10 +50,10 @@ test.describe('Checkout flow – out-of-stock item', () => {
     await expect(page).toHaveURL(/stripe-checkout/);
 
     // Wait for form container first to ensure hydration
-    await page.locator('[data-testid="stripe-payment-form-container"]').waitFor({ state: 'attached', timeout: 20_000 });
+    await page.locator('[data-testid="stripe-payment-form-container"]').waitFor({ state: 'attached', timeout: 5_000 });
     // Then grab the Pay Now button
     const payBtn = page.locator('[data-testid="pay-button"]');
-    await expect(payBtn).toBeVisible({ timeout: 10_000 });
+    await expect(payBtn).toBeVisible({ timeout: 5_000 });
     await expect(payBtn).toBeDisabled();
   });
 });
