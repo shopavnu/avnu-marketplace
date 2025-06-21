@@ -316,12 +316,13 @@ model merchant_brands {
 model merchant_platform_connections {
   id                  Int       @id(map: "PK_c60d2c722c9716557ff0715f92b") @default(autoincrement())
   merchant_id         String    @db.Uuid
-  platform_type       String    @db.VarChar
+  platform_type       platform_type_enum
   platform_identifier String?   @db.VarChar
   platform_store_name String    @db.VarChar
   platform_store_url  String    @db.VarChar
   access_token        String?   @db.VarChar
   refresh_token       String?   @db.VarChar
+  shopifyScope        String?   @db.VarChar
   token_expires_at    DateTime? @db.Timestamp(6)
   is_active           Boolean   @default(true)
   last_synced_at      DateTime? @db.Timestamp(6)
@@ -385,6 +386,8 @@ model merchants {
   updatedAt    DateTime @default(now()) @db.Timestamp(6)
   isActive     Boolean  @default(true)
   popularity   Decimal  @default(0) @db.Decimal(10, 2)
+  shopifyShopId   BigInt?  @db.BigInt
+  myshopifyDomain String?  @db.VarChar
   userId       String?  @db.Uuid
 }
 
@@ -430,6 +433,7 @@ model order_items {
   orderId   String    @db.Uuid
   productId String    @db.VarChar
   variantId String?   @db.VarChar
+  shopifyVariantId BigInt?   @db.BigInt
   quantity  Int
   price     Decimal   @db.Decimal(10, 2)
   options   String?
@@ -458,6 +462,9 @@ model orders {
   deletedAt             DateTime?                 @db.Timestamp(6)
   stripePaymentIntentId String?                   @db.VarChar(255)
   stripeReceiptUrl      String?
+  shopifyOrderId           BigInt?   @db.BigInt
+  shopifyFinancialStatus   String?   @db.VarChar
+  shopifyFulfillmentStatus String?   @db.VarChar
 
   @@index([paymentStatus], map: "IDX_01b20118a3f640214e7a8a6b29")
   @@index([userId], map: "IDX_151b79a83ba240b0cb31b2302d")
@@ -529,6 +536,8 @@ model products {
   attributes            Json?     @db.Json
   externalId            String    @db.VarChar
   externalSource        String    @db.VarChar
+  shopifyProductId     BigInt?   @db.BigInt
+  shopifyStatus        shopify_product_status_enum?
   slug                  String?   @db.VarChar
   createdAt             DateTime  @default(now()) @db.Timestamp(6)
   updatedAt             DateTime  @default(now()) @db.Timestamp(6)
@@ -1207,10 +1216,77 @@ enum vendors_businesstype_enum {
   other
 }
 
+enum platform_type_enum {
+  SHOPIFY
+}
+
+enum shopify_product_status_enum {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+}
+
 enum vendors_status_enum {
   pending
   under_review
   approved
   rejected
   suspended
+}
+
+model shopify_webhooks {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  merchantId  String   @db.Uuid
+  topic       String   @db.VarChar
+  receivedAt  DateTime @default(now()) @db.Timestamp(6)
+  payload     Json     @db.Json
+
+  @@index([merchantId], map: "IDX_shopify_webhooks_merchant")
+}
+
+model shopify_products {
+  id             BigInt   @id @db.BigInt
+  merchantId     String   @db.Uuid
+  title          String   @db.VarChar
+  status         shopify_product_status_enum
+  bodyHtml       String?
+  vendor         String?
+  productType    String?
+  tags           String?
+  variants       Json?
+  images         Json?
+  options        Json?
+  createdAt      DateTime @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([merchantId], map: "IDX_shopify_products_merchant")
+}
+
+model shopify_product_variants {
+  id              BigInt   @id @db.BigInt
+  productId       BigInt   @db.BigInt
+  merchantId      String   @db.Uuid
+  title           String?
+  price           Decimal? @db.Decimal(10, 2)
+  sku             String?
+  barcode         String?
+  inventoryItemId BigInt?
+  weight          Float?
+  option1         String?
+  option2         String?
+  option3         String?
+  createdAt       DateTime @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([productId], map: "IDX_shopify_variants_product")
+}
+
+model shopify_inventory_levels {
+  id              BigInt   @id @db.BigInt
+  inventoryItemId BigInt   @db.BigInt
+  locationId      BigInt   @db.BigInt
+  available       Int
+  updatedAt       DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([inventoryItemId], map: "IDX_shopify_inventory_item")
 }

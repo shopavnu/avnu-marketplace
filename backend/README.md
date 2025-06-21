@@ -169,6 +169,39 @@ SEARCH_PERFORMANCE_WARNING_THRESHOLD=500
 SEARCH_PERFORMANCE_CRITICAL_THRESHOLD=1000
 ```
 
+## Database Migrations
+
+This service uses **Prisma Migrate** as the single source of truth for schema evolution.
+
+### Applying migrations locally
+
+```bash
+# Apply the latest migrations to your local dev database
+npx prisma migrate deploy
+```
+
+### Creating a new migration
+
+```bash
+# Create a migration after editing schema.prisma
+npx prisma migrate dev --name <description>
+```
+
+### Shopify-first migration sanity tests
+
+Automated Jest tests live in `test/migrations/shopify-first.spec.ts` and run in CI to verify that the Shopify-specific tables & columns exist after migrations are applied.
+
+### Backup / restore & rollback
+
+The Makefile exposes helpers that are also wired into the CI pipeline:
+
+```bash
+make db-backup   # pg_dump compressed + streamed to S3
+make db-restore  # restore from latest backup or S3 path
+```
+
+For rollbacks follow `rollback.md`, which documents the `prisma migrate resolve --rolled-back` flow and restoration from the most recent S3 backup.
+
 ## Testing
 
 Run tests:

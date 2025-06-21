@@ -1,4 +1,5 @@
 module.exports = {
+  globalSetup: '<rootDir>/jest-prisma-generate.js',
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testEnvironment: 'node',
