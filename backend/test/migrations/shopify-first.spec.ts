@@ -9,13 +9,7 @@ describe('Shopify-first migration sanity', () => {
 
   it('creates shopify_webhooks table', async () => {
     const [{ exists }] = (await prisma.$queryRawUnsafe(
-      `SELECT EXISTS (
-        SELECT 1
-        FROM pg_catalog.pg_class c
-        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relname = 'shopify_webhooks'
-          AND n.nspname = current_schema()
-      );`,
+      "SELECT to_regclass('public.shopify_webhooks') IS NOT NULL AS exists;",
     )) as Array<{ exists: boolean }>;
 
     expect(exists).toBe(true);
@@ -23,7 +17,7 @@ describe('Shopify-first migration sanity', () => {
 
   it('adds shopifyShopId to merchants', async () => {
     const cols = (await prisma.$queryRawUnsafe(
-      "SELECT column_name FROM information_schema.columns WHERE table_name = 'merchants' AND column_name = 'shopifyShopId';",
+      "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'merchants' AND column_name = 'shopifyShopId';",
     )) as Array<{ column_name: string }>;
 
     expect(cols).toHaveLength(1);
@@ -31,7 +25,7 @@ describe('Shopify-first migration sanity', () => {
 
   it('adds shopifyProductId to products', async () => {
     const cols = (await prisma.$queryRawUnsafe(
-      "SELECT column_name FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'shopifyProductId';",
+      "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'shopifyProductId';",
     )) as Array<{ column_name: string }>;
 
     expect(cols).toHaveLength(1);
