@@ -26,6 +26,7 @@ const FlexProductCard: React.FC<FlexProductCardProps> = ({
 
   return (
     <div
+      data-testid="product-card"
       className="w-full h-[360px] rounded-xl shadow-sm overflow-hidden"
       style={{
         display: "flex",

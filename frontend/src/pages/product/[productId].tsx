@@ -21,6 +21,8 @@ import ProductCard from "@/components/products/ProductCard";
 import { causes } from "@/components/search/FilterPanel";
 import { brands as allBrands } from "@/data/brands";
 import { analyticsService } from "@/services/analytics.service";
+import useCartStore from "@/stores/useCartStore";
+import { createProductSummary } from "@/utils/cart";
 import useDwellTimeTracking from "@/hooks/useDwellTimeTracking";
 import personalizationService from "@/services/personalization";
 import { ConsistentProductCard } from "@/components/products";
@@ -245,6 +247,7 @@ export default function ProductPage({
   brandProducts,
 }: ProductPageProps) {
   const router = useRouter();
+  const { addItem } = useCartStore();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedAttributes, setSelectedAttributes] = useState<{
     [key: string]: string;
@@ -343,12 +346,10 @@ export default function ProductPage({
 
   // Handle add to cart
   const handleAddToCart = () => {
-    // In a real app, this would add the product to the cart
-    console.log("Adding to cart:", {
-      product,
-      quantity,
-      selectedAttributes,
-    });
+    if (!product) return;
+
+    const productSummary = createProductSummary(product, null, selectedAttributes);
+    addItem(productSummary, quantity);
 
     // Track add to cart event
     analyticsService.trackAddToCart(product, quantity, selectedAttributes);

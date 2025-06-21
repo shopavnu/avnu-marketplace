@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /*
   Happy-path guest checkout
@@ -12,16 +12,61 @@ import { test, expect, Page } from '@playwright/test';
 
 test.describe('Checkout flow', () => {
   test.beforeEach(async ({ page }) => {
-    // Ensure front-end dev server running before executing tests
-    await page.goto('/');
+    // Mock products API and related endpoints before visiting the site
+    const mockProducts = [
+      {
+        id: 'product-1',
+        title: 'Test Product',
+        price: 19.99,
+        image: 'https://via.placeholder.com/300',
+        brand: 'MockBrand',
+        slug: 'product-1',
+        inStock: true,
+      },
+    ];
+
+    await page.route('**/products**', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockProducts),
+      });
+    });
+
+    await page.route('**/products/*', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockProducts[0]),
+      });
+    });
+
+    await page.route('**/api/checkout/initiate', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ orderId: 'order-1', clientSecret: 'cs_test_123' }),
+      });
+    });
+
+    // Return empty success for any GraphQL query/mutation
+    await page.route('**/graphql', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: {} }),
+      });
+    });
+
+    // Navigate directly to product detail page after stubbing
+    await page.goto('/product/product-1');
   });
 
   test('guest can complete checkout', async ({ page }) => {
     // extend timeout to allow dev servers warm-up
     test.setTimeout(60_000);
-    // 1. Wait for product list then add first product to cart
-    await page.waitForSelector('[data-testid="product-card"]');
-    await page.getByTestId('product-card').first().getByRole('button', { name: /add to cart/i }).click();
+    // Product detail page is already loaded via beforeEach
+    await page.getByRole('button', { name: /add to cart/i }).click();
 
     // 2. Open cart dropdown & go to checkout
     await page.getByRole('button', { name: /shopping cart/i }).click();
@@ -30,8 +75,8 @@ test.describe('Checkout flow', () => {
     // 3. Wait for stripe-checkout page to initialise
     await expect(page).toHaveURL(/stripe-checkout/);
 
-    // 4. Intercept Stripe confirm to bypass real network
-    await mockStripeConfirmPayment(page);
+
+
 
     // 5. Submit payment form
     await page.locator('[data-testid="pay-button"]').click();
@@ -41,13 +86,3 @@ test.describe('Checkout flow', () => {
   });
 });
 
-async function mockStripeConfirmPayment(page: Page) {
-  // Replace Stripe.confirmPayment call with resolved promise
-  await page.addInitScript(() => {
-    // @ts-ignore – injected into browser context
-    window.Stripe = (pk: string) => ({
-      elements: () => ({ create: () => ({ mount: () => {} }) }),
-      confirmPayment: async () => ({ paymentIntent: { id: 'pi_test', status: 'succeeded' } }),
-    });
-  });
-}

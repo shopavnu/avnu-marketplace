@@ -1,7 +1,7 @@
 {
   "root": true,
   "extends": ["next/core-web-vitals"],
-  "plugins": ["@next/next"],
+  "plugins": ["@next/next", "@typescript-eslint"],
   "rules": {
     "react/no-unescaped-entities": "off",
     "@next/next/no-img-element": "off",

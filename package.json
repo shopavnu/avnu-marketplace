@@ -146,6 +146,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.44.0",
     "@types/geojson": "^7946.0.16",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.16",
@@ -164,7 +165,6 @@
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "resolve.exports": "^2.0.3",
-    "typescript": "^5.3.3",
-    "@playwright/test": "^1.44.0"
+    "typescript": "^5.3.3"
   }
 }

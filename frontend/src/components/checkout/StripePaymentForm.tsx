@@ -104,6 +104,13 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string>(clientSecretProp || '');
+
+  // Keep local clientSecret in sync with prop updates
+  useEffect(() => {
+    if (clientSecretProp && clientSecretProp !== clientSecret) {
+      setClientSecret(clientSecretProp);
+    }
+  }, [clientSecretProp, clientSecret]);
   const { outOfStockIds } = useCartStore();
   const hasOutOfStock = outOfStockIds.length > 0;
 
@@ -301,7 +308,7 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
             ...((!stripe || !elements || !clientSecret || isLoading) ? styles.disabledButton : {})
           }}
           disabled={isLoading || !stripe || hasOutOfStock}
-          data-testid="payment-submit-button"
+          data-testid="pay-button"
           aria-label={isLoading ? "Processing payment" : "Complete payment"}
         >
           {outOfStockIds.length > 0 ? "Update Cart" : (hasOutOfStock ? "Update Cart" : isLoading ? "Processing..." : "Pay Now")}

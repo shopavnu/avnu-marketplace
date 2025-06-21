@@ -23,6 +23,8 @@ import { MerchantsModule } from '@modules/merchants';
 import { CategoriesModule } from '@modules/categories/categories.module';
 import { OrdersModule } from '@modules/orders';
 import { IntegrationsModule } from '@modules/integrations';
+// Flag to disable external integrations (Shopify, Elasticsearch) during e2e / CI runs
+const DISABLE_EXT_SERVICES = process.env.DISABLE_EXT_SERVICES === '1';
 import { SearchModule } from '@modules/search';
 import { PaymentsModule } from '@modules/payments';
 import { ShippingModule } from '@modules/shipping';
@@ -37,6 +39,8 @@ import { RedisModule } from './modules/redis/redis.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CheckoutModule } from './modules/checkout/checkout.module'; // Added CheckoutModule
 import { CartGateway } from './gateways/cart.gateway';
+import { ExternalMocksModule } from './modules/external-mocks/external-mocks.module';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 // Enum registration for GraphQL
 import { registerEnumType } from '@nestjs/graphql';
@@ -161,8 +165,10 @@ registerEnumType(ExperimentStatus, {
     MerchantsModule,
     CategoriesModule,
     OrdersModule,
-    IntegrationsModule,
-    SearchModule,
+    /* eslint-disable prettier/prettier */
+    ...(!DISABLE_EXT_SERVICES ? [IntegrationsModule] : []),
+    /* eslint-enable prettier/prettier */
+    ...(!DISABLE_EXT_SERVICES ? [SearchModule] : []),
     PaymentsModule,
     ShippingModule,
     NlpModule,
@@ -174,9 +180,15 @@ registerEnumType(ExperimentStatus, {
     AccessibilityModule,
     CartModule,
     CheckoutModule, // Added CheckoutModule
+    ...(DISABLE_EXT_SERVICES ? [ExternalMocksModule] : []),
   ],
   controllers: [],
-  providers: [CartGateway],
+  providers: [
+    CartGateway,
+    ...(DISABLE_EXT_SERVICES
+      ? [{ provide: ElasticsearchService, useValue: {} }]
+      : []),
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

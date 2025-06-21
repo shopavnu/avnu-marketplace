@@ -21,6 +21,7 @@
     "start": "node fix-dependencies.js && node dist/src/main.js",
     "prestart:dev": "node scripts/kill-port.js",
     "start:dev": "npm run prestart:dev && npx nest start --watch --exit-child",
+    "start:e2e": "node scripts/kill-port.js && npm run prisma:generate && npm run build && node dist/src/main.js",
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
     "start:debug": "npx nest start --debug --watch",
     "start:prod": "node start-prod.js",
