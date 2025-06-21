@@ -1,8 +1,8 @@
 -- Incremental Shopify-first migration generated manually to avoid re-creating existing tables
 -- Adds Shopify-specific tables and columns that were missing from the original baseline.
 
--- Ensure uuid extension ---------------------------------------------------------
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Ensure pgcrypto extension for gen_random_uuid() ------------------------------
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 1. Enum used by products table -------------------------------------------------
 DO $$
@@ -24,7 +24,7 @@ ALTER TABLE IF EXISTS "public"."products"
 
 -- 4. Shopify webhooks table ------------------------------------------------------
 CREATE TABLE IF NOT EXISTS "public"."shopify_webhooks" (
-  "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "merchantId" UUID NOT NULL,
   "topic"       VARCHAR NOT NULL,
   "receivedAt"  TIMESTAMP(6) NOT NULL DEFAULT now(),
