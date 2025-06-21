@@ -20,7 +20,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['images.unsplash.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+    ],
     unoptimized: isVercel, // Use unoptimized images on Vercel which has its own optimizer
   },
   // Vercel-specific optimizations
