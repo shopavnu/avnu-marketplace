@@ -23,7 +23,12 @@ ALTER TABLE "public"."merchants"
   ADD COLUMN IF NOT EXISTS "shopifyShopId" BIGINT,
   ADD COLUMN IF NOT EXISTS "myshopifyDomain" VARCHAR;
 
--- 3. Columns on Product ---------------------------------------------------------
+-- 3. Ensure Product table exists and add columns ---------------------------------
+CREATE TABLE IF NOT EXISTS "public"."Product" (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "createdAt" TIMESTAMP(6) NOT NULL DEFAULT now()
+);
+
 ALTER TABLE "public"."Product"
   ADD COLUMN IF NOT EXISTS "shopifyProductId" BIGINT,
   ADD COLUMN IF NOT EXISTS "shopifyStatus" "shopify_product_status_enum";
